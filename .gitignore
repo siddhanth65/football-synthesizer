@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+
+# Data & artifacts (large / external)
+data/raw/
+data/processed/
+data/video/
+results/checkpoints/
+# generated CV artifacts (frames, overlays, diagnostics, benchmark images)
+outputs/
+*.parquet
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.pt
+*.pth
+*.onnx
+*.log
+
+# Notebooks / OS / IDE
+.ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/
+
+# Keep small sample assets explicitly with: git add -f

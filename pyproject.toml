@@ -1,0 +1,65 @@
+[project]
+name = "football-synthesizer"
+version = "0.1.0"
+description = "Broadcast video -> freeze-frames -> relational reads -> auto-generated FIFA-style team report with opponent-conditioned tactical prediction."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "scikit-learn",
+    "matplotlib",
+    "mplsoccer>=1.2",
+    "tqdm",
+    "pyyaml",
+    # modelling (shared with football-state-of-play)
+    "torch>=2.2",
+    "torch-geometric>=2.5",
+    # tactical / data
+    "statsbombpy>=1.13",
+    "socceraction>=1.5",
+    "kloppy>=3.16",
+    # ingest
+    "pdfplumber",      # parse FIFA EFI PDFs
+    "yt-dlp",          # fetch broadcast footage
+    # report
+    "jinja2",
+]
+
+[project.optional-dependencies]
+# Heavy CV stack for the generator (needs a GPU + a Roboflow key for some models).
+cv = [
+    "opencv-python",
+    "ultralytics",     # YOLO
+    "supervision",     # ByteTrack / detections
+    "sports @ git+https://github.com/roboflow/sports.git",  # SigLIP TeamClassifier
+    "shapely",         # PnLCalib pitch-line geometry
+    "lsq-ellipse",     # PnLCalib centre-circle ellipse fit
+    "munkres",         # PnLCalib keypoint assignment
+    # "inference",     # Roboflow hosted models (pitch keypoints, football detector)
+]
+dev = ["pytest", "ruff", "ipykernel"]
+
+# Pitch calibration uses PnLCalib (SOTA, arXiv:2404.08401). It is NOT pip-installable: clone
+# https://github.com/mguti97/PnLCalib (default lookup: ~/PnLCalib or $FOOTBALL_PNLCALIB_PATH) and put
+# its SV_kp / SV_lines release weights under <repo>/weights. The deps above are what its inference
+# path needs; torch/torchvision/opencv are already present.
+
+# NOTE: torch + torch-geometric are core deps above, so a single env (`pip install -e ".[cv,dev]"`)
+# runs the WHOLE pipeline -- the CV generator AND the trained GAT -- in one interpreter. The GAT
+# checkpoint is loaded with map_location="cpu", so a CPU-only torch is fine.
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ingest", "generator", "attacker", "fingerprint", "synthesizer", "report", "eval"]

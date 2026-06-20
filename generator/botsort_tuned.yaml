@@ -1,0 +1,20 @@
+# Tuned BoT-SORT for broadcast football (overrides Ultralytics' permissive defaults, which spawned
+# many short spurious tracks here). Key changes vs stock botsort.yaml:
+#   * new_track_thresh 0.25 -> 0.60  : only start a track from a confident detection (kills the
+#                                      short-lived spurious IDs that fragmented persistence).
+#   * track_buffer     30 -> 90      : keep a lost track alive longer to re-link after occlusion/pan.
+#   * with_reid        False -> True : appearance embeddings (from the detector) to re-associate
+#                                      across gaps -- the piece plain ByteTrack lacks.
+#   * gmc_method sparseOptFlow        : global motion compensation for camera pan/zoom (kept on).
+tracker_type: botsort
+track_high_thresh: 0.5
+track_low_thresh: 0.1
+new_track_thresh: 0.6
+track_buffer: 90
+match_thresh: 0.8
+fuse_score: true
+gmc_method: sparseOptFlow
+proximity_thresh: 0.5
+appearance_thresh: 0.25
+with_reid: true
+model: auto

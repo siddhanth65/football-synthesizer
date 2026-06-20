@@ -1,0 +1,20 @@
+# Core (pip fallback for pyproject). Install the project with `pip install -e .` instead when possible.
+numpy
+pandas
+pyarrow
+scikit-learn
+matplotlib
+mplsoccer>=1.2
+tqdm
+pyyaml
+torch>=2.2
+torch-geometric>=2.5
+statsbombpy>=1.13
+socceraction>=1.5
+kloppy>=3.16
+pdfplumber
+yt-dlp
+jinja2
+
+# Heavy CV stack (generator) — install when you have a GPU:
+#   pip install opencv-python ultralytics supervision inference
