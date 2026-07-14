@@ -2,6 +2,26 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-15 — LIVE-PLAY FILTER SHIPPED; the pre-registered 50%-gate question is answered: NO
+
+Phase-B B1.2 done (deep-worker requested: opus; `generator/live_play.py`, `tools/live_play_probe.py`,
+`tests/test_live_play.py` 17/17 green, `results/live_play_probe.md` + audit montages). Rule-based,
+CPU-only, thresholds pre-committed BEFORE measurement, flag-gated, no shipped metric touched.
+Brighton full grid (30,011 frames): live_wide 32.1% / close_up 24.1% / replay 16.6% /
+zero-detection 27.1% — reconciles with the known ~41%-of-detected-frames live fraction and the
+~37% geometry yield (measured 36.1%). **Live-play-conditional: geometry yield 80.5%, post-link
+ball coverage 71.2%** (vs 37.3% whole-grid) — the honest denominators for every report.
+**Pre-registered question answered NO: pass-recall stays 47.8/48.6% — the 50% event gate cannot
+be cleared by denominator conditioning** (two conditioning variants computed and explicitly
+rejected as over-corrections; per-pass timestamps would be needed). Consistent with the re-pricing:
+filter = honesty + compute win (~61% of ball frames land on live_wide), NOT a recall lever; the
+remaining recall lever is the learned event/identity layer (plan B2+). Classifier honesty:
+live_wide ~100% visual precision (10/10, the class that matters); the non-live sub-classes are
+really "detector under-populated" buckets — treat the split as binary. Queued: box-height signal
+(not persisted in dense parquets today) if a semantic 4-way shot classifier is ever needed.
+**Consequence for the prof decision:** the relative-claims bar (symmetric ~48% capture) is now the
+ONLY path to PL ball-family claims — the decision cannot be deferred behind "the filter will fix it".
+
 ## 2026-07-14 — AUDIT VERIFIED (2 corrections shipped), REPO PUSHED, GSR POSITIONING, DECEMBER PLAN
 
 **External-LLM audit adjudicated** (deep-worker requested: opus, read-only; every claim checked
