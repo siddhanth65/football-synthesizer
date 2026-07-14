@@ -44,6 +44,59 @@ def test_receiver_labels_from_carrier_transitions():
     assert list(zip(ev["carrier"], ev["receiver"])) == [(1, 2), (2, 3)]
 
 
+def test_chunk_local_ids_do_not_merge_across_chunks():
+    # ByteTrack resets ids per chunk, so track_id 1 recurs in both chunks at the SAME frames but is a
+    # DIFFERENT player. Grouping by track_id alone would interleave the two y-positions (spurious
+    # teleport velocity) and let carrier transitions cross the chunk boundary. The fix keys a track on
+    # (chunk, track_id) and compares carriers within a chunk.
+    fr = np.arange(7) * 5
+    a = pd.DataFrame({"chunk": "h1_chunk_000", "frame": fr, "track_id": 1, "role": "player",
+                      "team": 0, "pitch_x": (fr / 50.0) * 2.0, "pitch_y": 10.0, "is_actor": False})
+    b = pd.DataFrame({"chunk": "h1_chunk_001", "frame": fr, "track_id": 1, "role": "player",
+                      "team": 0, "pitch_x": 40.0, "pitch_y": 60.0, "is_actor": False})
+    tr = build_tracks(pd.concat([a, b], ignore_index=True), fps=50.0)
+
+    # two distinct physical tracks, not one merged blob
+    assert tr.groupby(["chunk", "track_id"]).ngroups == 2
+    # chunk A: clean vx=+2, vy=0 -- interleaving with chunk B (y jumps 10<->60) would blow vy up
+    ga = tr[tr["chunk"] == "h1_chunk_000"].sort_values("frame")
+    assert np.allclose(ga["vx"].to_numpy()[2:-2], 2.0, atol=1e-6)
+    assert np.allclose(ga["vy"].dropna().to_numpy(), 0.0, atol=1e-6)
+    gb = tr[tr["chunk"] == "h1_chunk_001"].sort_values("frame")
+    assert np.allclose(gb["vy"].dropna().to_numpy(), 0.0, atol=1e-6)
+
+    # receiver labels: each chunk has its own carrier->receiver pass; no cross-chunk contamination
+    acts = pd.DataFrame([
+        {"chunk": "h1_chunk_000", "frame": 0, "track_id": 1, "team": 0, "is_actor": True},
+        {"chunk": "h1_chunk_000", "frame": 10, "track_id": 7, "team": 0, "is_actor": True},
+        {"chunk": "h1_chunk_001", "frame": 0, "track_id": 1, "team": 0, "is_actor": True},
+        {"chunk": "h1_chunk_001", "frame": 10, "track_id": 9, "team": 0, "is_actor": True},
+    ])
+    ev = receiver_labels(acts, fps=50.0)
+    got = set(zip(ev["carrier"], ev["receiver"], ev["chunk"]))
+    assert got == {(1, 7, "h1_chunk_000"), (1, 9, "h1_chunk_001")}
+
+
+def test_receiver_candidates_resolve_pass_frame_within_chunk():
+    # Same (frame, carrier track_id) exists in two chunks with DIFFERENT team-mate geometry. The
+    # candidate builder must read positions from the event's own chunk, not merge both frames.
+    def _chunk(name, mate_x):
+        return pd.DataFrame({
+            "chunk": name, "frame": [0, 0], "track_id": [1, 2], "team": [0, 0],
+            "x_s": [50.0, mate_x], "y_s": [34.0, 34.0], "is_actor": [True, False],
+        })
+    tracks = pd.concat([_chunk("h1_chunk_000", 55.0), _chunk("h1_chunk_001", 90.0)],
+                       ignore_index=True)
+    recv = pd.DataFrame([
+        {"chunk": "h1_chunk_000", "frame": 0, "carrier": 1, "receiver": 2, "team": 0, "dt_s": 0.2},
+        {"chunk": "h1_chunk_001", "frame": 0, "carrier": 1, "receiver": 2, "team": 0, "dt_s": 0.2},
+    ])
+    cand = receiver_candidates(tracks, recv, {0: 1})
+    # one candidate per event, each with exactly one on-pitch team-mate from its own chunk (dist 5, 40)
+    assert cand["event"].nunique() == 2 and len(cand) == 2
+    assert sorted(round(d, 3) for d in cand["dist_carrier"]) == [5.0, 40.0]
+
+
 def test_run_examples_normalises_attack_direction():
     # team 1 attacks -x; normalisation must flip x, vx and dx so it reads as attacking +x
     run_df = pd.DataFrame({

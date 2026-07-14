@@ -68,6 +68,8 @@ def run_examples(run_df: pd.DataFrame, attack_dirs: dict[int, int]) -> pd.DataFr
     })
     if "frame" in df.columns:  # passthrough for per-frame inspection/visualisation
         out["frame"] = df["frame"].to_numpy()
+    if "chunk" in df.columns:  # keep the chunk key so the by-track split can stay chunk-local
+        out["chunk"] = df["chunk"].to_numpy()
     return out
 
 
@@ -152,7 +154,11 @@ def train_run_head(positions: pd.DataFrame | None = None, *, run_df: pd.DataFram
     if len(ex) < 10:
         raise ValueError(f"too few run examples ({len(ex)}) to train/evaluate")
     feats, target = ex[list(RUN_FEATURES)].to_numpy(), ex[["dx", "dy"]].to_numpy()
-    tr, te = _group_split(ex["track_id"].to_numpy(), seed=seed)
+    if "chunk" in ex.columns:  # a physical track is (chunk, track_id) -- split on that, not the id
+        split_groups = (ex["chunk"].astype(str) + ":" + ex["track_id"].astype(str)).to_numpy()
+    else:
+        split_groups = ex["track_id"].to_numpy()
+    tr, te = _group_split(split_groups, seed=seed)
     model = Ridge(alpha=alpha).fit(feats[tr], target[tr])
     head, speed = _fit_speed_heading(feats[tr], target[tr], alpha)
     preds = {
@@ -180,11 +186,17 @@ def receiver_candidates(tracks: pd.DataFrame, recv_df: pd.DataFrame,
 
     Candidates are the carrier's same-team team-mates on the pitch at the pass frame (carrier excluded).
     Features are attack-normalised relative to the carrier (forward = toward the attacking goal).
+
+    When both ``tracks`` and ``recv_df`` carry a ``chunk`` column the pass frame is resolved *within its
+    chunk* -- otherwise the chunk-local frame index would collide across chunks and pull team-mate
+    positions from the wrong moment (and a chunk-local carrier ``track_id`` from the wrong player).
     """
     rows = []
-    by_frame = {f: g for f, g in tracks.groupby("frame")}
+    has_chunk = "chunk" in tracks.columns and "chunk" in recv_df.columns
+    gkey = ["chunk", "frame"] if has_chunk else "frame"
+    by_frame = {k: g for k, g in tracks.groupby(gkey)}
     for ev_id, ev in enumerate(recv_df.itertuples(index=False)):
-        g = by_frame.get(ev.frame)
+        g = by_frame.get((ev.chunk, ev.frame) if has_chunk else ev.frame)
         if g is None:
             continue
         s = attack_dirs.get(int(ev.team))

@@ -36,11 +36,15 @@ LINE_PCTL = 20   # the deep-line quantile, matching structural_metrics.DEF_LINE_
 # The line = mean of the deepest N outfielders (GK excluded) — the back line itself, not a percentile
 # over all bodies (which sits ~12 m too shallow by definition). The censoring bias is then removed with
 # ONE global slope: as fewer back-line defenders are visible the estimate reads higher, so we correct
-# each frame to its "full back line visible" (n_back = BACK_REF) equivalent. The slope is fit on the
-# whole pooled corpus (tools/fit_line_debias.py), not the 3 FIFA matches — the minimal-overfit property.
+# each frame to its "full back line visible" (n_back = BACK_REF) equivalent. The slope is fit
+# (tools/fit_line_debias.py) over ALL processed matches — which INCLUDES the 3 FIFA France matches that
+# tools/line_c6 validates against, so that FIFA validation is in-sample, not held-out (contamination note
+# 2026-07-14). Measured: a clean refit on only the 2 non-FIFA matches gives -6.31 and raises the France
+# per-phase mean |line - FIFA| from ~5.5 m (in-sample) to ~7.2 m (held-out). The scalar is stable
+# (leave-one-match-out -5.95..-5.01, median -5.62); the constant is kept pending a METRICS_VERSION call.
 DEEP_N = 4
 BACK_REF = 4        # n_back_visible at which the line needs no correction (full back line seen)
-LINE_DEBIAS_SLOPE = -5.62   # m per back-line defender seen (fit on 153k pooled frames; nback predictor)
+LINE_DEBIAS_SLOPE = -5.62   # m per back-line defender seen (fit on ~168k pooled frames; nback predictor)
 
 
 def _outfield(g: pd.DataFrame) -> pd.DataFrame:

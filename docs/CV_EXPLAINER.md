@@ -77,8 +77,9 @@ being killed (survives brief occlusions).
 **Two facts to internalize:** (a) IDs are **chunk-local and camera-shot-local** — a camera cut kills
 essentially every track (we later *exploit* this as a free camera-cut detector); (b) a `track_id`
 is *not* a person. It's "the same jersey blob the tracker managed to follow for a while". Cross-referencing
-IDs across chunks without also keying on the chunk is a bug (an external audit claims exactly this
-bug exists in the attacker/C3 code — under verification).
+IDs across chunks without also keying on the chunk is a bug — exactly this bug lived in the
+attacker/C3 code until 2026-07-15 (found by an external audit, confirmed, fixed with chunk-aware
+grouping; the fix restored the receiver head from near-random to top3 ~0.9).
 
 ### 4. Team assignment (`generator/teams.py`, `generator/team_anchor.py`)
 
@@ -195,7 +196,8 @@ ball-xT, pressing intensity, counterpress curve, line breaks, verticality, phase
 inherit ball coverage and are proxies, not events. The single most validated number in the project:
 the **visibility-de-biased defensive line height** — broadcast cameras crop out deep defenders, so
 the naive line reads ~16 m too high; a global correction slope (fit on pooled frames, per
-back-line-player visible) brings pooled error vs FIFA's ground truth from **16.4 m to 5.5 m** while
+back-line-player visible) brings pooled error vs FIFA's ground truth from **16.4 m to ~7.2 m
+held-out** (5.5 m if measured in-sample — restated 2026-07-14 after a contamination check) while
 preserving phase-to-phase shape.
 
 ### 12. Fact store, report, guardrail (`report/facts.py`, `report/report_v2.py`, `report/guardrail.py`)
@@ -264,7 +266,7 @@ Weights: player YOLO auto-downloads from HuggingFace; PnLCalib HRNets live in `~
 | ~37% | detection-frames yielding trusted player geometry ≈ live-wide-play fraction of a broadcast |
 | 91.8% / 0.21 m | homography solve rate / median keypoint reprojection error |
 | 51.9% | best post-link ball coverage (Brighton, full match, carry-over ON) |
-| 16.4 → 5.5 m | defensive-line error vs FIFA, raw → de-biased (the headline validated result) |
+| 16.4 → ~7.2 m | defensive-line error vs FIFA, raw → de-biased, held-out (5.5 m in-sample; the headline validated result) |
 | ~48% | pass-recall proxy on PL (symmetric between teams → relative claims OK, absolute not) |
 | 87% | v6 ball detector held-out recall on PL frames |
 | 100% | guardrail precision on shipped report bodies |

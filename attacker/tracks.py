@@ -18,6 +18,23 @@ MAX_GAP_STEPS = 3  # velocity across a gap longer than this many sample-steps is
 SPEED_CAP_MS = 10.0  # no footballer sustains >10 m/s; faster = tracking jitter / ID switch -> clip
 
 
+def track_keys(df: pd.DataFrame) -> list[str]:
+    """Group-by keys that isolate one physical track (never spanning a chunk boundary).
+
+    ByteTrack resets ``track_id`` per chunk, so in a whole-match table the same id recurs in every
+    chunk: grouping by ``track_id`` alone merges different players into one "track". When a ``chunk``
+    column is present a track is ``(chunk, track_id)``; without one the table is a single segment and
+    this reduces to ``["track_id"]`` (byte-identical to the old single-key grouping).
+
+    Args:
+        df: A positions/tracks table that may carry a ``chunk`` column.
+
+    Returns:
+        ``["chunk", "track_id"]`` when a ``chunk`` column exists, else ``["track_id"]``.
+    """
+    return ["chunk", "track_id"] if "chunk" in df.columns else ["track_id"]
+
+
 def _savgol(a: np.ndarray, window: int, poly: int = 2) -> np.ndarray:
     """Savitzky-Golay smooth; gracefully shrinks the window (or no-ops) for short tracks."""
     a = np.asarray(a, float)
@@ -44,6 +61,8 @@ def build_tracks(positions: pd.DataFrame, *, fps: float = DEFAULT_FPS,
     Returns:
         The input player rows (sorted by track then frame) plus smoothed position/velocity columns.
         Velocity is NaN at the start of each track and across gaps longer than ``MAX_GAP_STEPS``.
+        A track is keyed by :func:`track_keys` (``(chunk, track_id)`` when a ``chunk`` column is
+        present), so per-chunk ByteTrack id resets never merge different players.
     """
     pl = positions[positions["role"].isin(PLAYER_ROLES)].dropna(subset=["pitch_x", "pitch_y"]).copy()
     if pl.empty:
@@ -52,7 +71,7 @@ def build_tracks(positions: pd.DataFrame, *, fps: float = DEFAULT_FPS,
         return pl
     step = int(np.median(np.diff(np.sort(pl["frame"].unique())))) or 1
     out = []
-    for _, g in pl.sort_values("frame").groupby("track_id", sort=False):
+    for _, g in pl.sort_values("frame").groupby(track_keys(pl), sort=False):
         g = g.copy()
         fr = g["frame"].to_numpy()
         xs, ys = _savgol(g["pitch_x"].to_numpy(), smooth_window), _savgol(g["pitch_y"].to_numpy(),

@@ -1,6 +1,75 @@
 # STATUS
 
-**Last updated:** 2026-07-11 (jersey probe: Layer 2 VIABLE)
+**Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
+
+## 2026-07-14 — AUDIT VERIFIED (2 corrections shipped), REPO PUSHED, GSR POSITIONING, DECEMBER PLAN
+
+**External-LLM audit adjudicated** (deep-worker requested: opus, read-only; every claim checked
+against code/artifacts — its structural findings were real, its magnitudes were not):
+
+1. **LINE-HEIGHT HEADLINE RESTATED (the big one).** The de-bias slope was fit on all 5 processed
+   matches INCLUDING the 3 FIFA validation matches (docstrings claimed the opposite — now fixed in
+   `tools/fit_line_debias.py` + `generator/impute.py`). Held-out refit (club matches only): slope
+   -6.31 vs shipped -5.62; clean validation on the France matches: **raw 16.4 m → 5.5 m in-sample
+   → ~7.2 m held-out (contamination cost +1.7 m)**. LOMO slope stable (-5.9..-5.0); the club-only
+   slope sits outside that envelope (broadcast-domain difference, not noise). DECISION: keep the
+   shipped constant (swapping to the domain-mismatched club slope ships a *worse* number), quote
+   **7.2 m held-out** everywhere or label 5.5 m explicitly in-sample. Ledger + CV explainer updated.
+   Real fix queued: one more non-FIFA WC-broadcast match for a domain-matched clean fit.
+2. **C3 CROSS-CHUNK TRACK BUG CONFIRMED + FIXED.** `attacker/tracks.py`/`labels.py` grouped by
+   `track_id` only, but ids are chunk-local → different players merged across chunks in EVERY
+   multi-chunk artifact (brighton 7,428 dup (track_id,frame) rows; senegal 46,193; audit's exact
+   counts didn't reproduce but the defect is real). Affected: C3 attacker path only
+   (`eval/attacker_eval.py`, `heads.py train_run_head`); fingerprint paths were already safe
+   (pre-grouped or `globalize_chunk_ids`). **Pre-fix C3 run/receiver numbers are WITHDRAWN.**
+   Fix: new `attacker.tracks.track_keys` helper — `(chunk, track_id)` grouping when a chunk column
+   exists — through `build_tracks`/`run_targets`/`receiver_labels`/`receiver_candidates`/the
+   run-head split; single-chunk callers byte-identical; 2 regression tests (9/9 green, ruff clean).
+   **2026-07-15 EVAL (attack_dirs held identical, only chunk-awareness differs): the fix RESTORES
+   the C3 headline rather than shrinking it.** Run head RMSE 6.15→4.35 m / hit@3m 0.365→0.571
+   (brighton), 4.43→3.83 m / 0.594→0.671 (senegal) — the bug had been fabricating teleport
+   velocities (outlier drop 26.2→3.2%). Receiver head: pre-fix was near-random (top3 0.156/0.140,
+   with fake cross-chunk "passes" inflating event counts); fixed = **top1 0.600/0.391, top3
+   0.933/0.812** — clearing the old-360 baselines (run 6.33 m/0.244; receiver 0.41/0.78). Honest
+   caveats: receiver test sets are small (48/182 events, wide error bars); a pre-existing
+   half-time direction confound in `attack_dirs` (global sign per team, teams swap ends) affects
+   dir_cos interpretability — orthogonal to this bug, queued. No cached models/labels existed on
+   disk (heads are in-memory sklearn fits at eval time) — nothing to delete; older STATUS entries
+   quoting pre-fix C3 numbers stay as history, superseded by this entry.
+3. **C5 honestly reframed**: explanatory post-match regression (feature = opponent's REALIZED line
+   from the same match; `predict.py` Tier-B still raises NotImplementedError; cache stale at 8 obs
+   vs 5 matches). Upgrade path (predict opponent line from THEIR prior matches → true pre-match
+   forecast) is now B1.3 in `docs/BTP_DECEMBER_PLAN.md`.
+   Also confirmed: `complete.py`/`gsr_score.py`/`fifa_validate.py` stubs; SoccerNet jersey-2023
+   local (2,638 tracklets) + consumed by nothing; README stale (rewrite queued).
+
+**REPO ON GITHUB.** Checkpoint commit `bf150f7` (195 files, author Sid, no AI attribution) pushed
+to **private** `siddhanth65/football-synthesizer`. Excluded: outputs/, SoccerNet zips (2.2 GB),
+FIFA PMSR PDFs (copyright), user-local files — .gitignore hardened first (fast-worker requested:
+sonnet). gh CLI installed; user authed as siddhanth65.
+
+**RESEARCH SWEEP (partial — quota-interrupted, resume queued): the project's task has a name.**
+SoccerNet **Game State Reconstruction** (CVPRW'24) is exactly our problem; **GS-HOTA** is the
+field's metric; challenge SOTA 63.8-63.9 vs baselines 23-29 [verified 3-0 votes, arXiv 2404.11335,
+2409.10587, 2508.19182]. The winning 2025 GSR pipeline mirrors our architecture AND reads jerseys
+with a VLM on crops — independently validating the Layer-2 plan. Published GSR SOTA handles
+off-screen players by linear interpolation only, and a FIFA-co-authored study measures the
+off-screen cliff (0.44-1.14 m detected → 4.6-12.2 m off-screen vs ~1 m industry bar) — so
+**validated off-screen imputation is a real novelty axis** [captured, verification pending].
+Data routes: SoccerNet-GSR is free/no-NDA (external benchmark for us); StatsBomb 360 freeze-frames
+= VISIBLE players only (like-for-like validation of our freeze frames, not full-pitch truth);
+SkillCorner opendata now 10 A-League 24/25 broadcast-tracking matches.
+
+**NEW DOCS:** `docs/CV_EXPLAINER.md` (stage-by-stage pipeline teaching doc for Sid — incl. two
+corrections to our own folklore: calibration gate is >=4 keypoints, the >=6 gate is the
+ball-projection path; production ball net is TrackNetV2, not WASB) and `docs/BTP_DECEMBER_PLAN.md`
+(fine-grained plan to Review 1: B0 integrity closeout → B1 GS-HOTA external benchmark + live-play
+filter + C5 forecast v0 → B2 jersey identity → B3 season scale → B4 validated imputation →
+B5 thesis assembly; pivot table pre-decided; venue targets CVSports/MLSA/Sloan).
+
+**IN FLIGHT (2026-07-15):** research workflow verification+synthesis resume; SoccerNet-GSR valid
+split download (external GS-HOTA benchmark, plan B1.1); live-play filter build + measurement
+(plan B1.2, pre-registered 50%-recall question); README rewritten (GSR framing, honest numbers).
 
 ## JERSEY-NUMBER FEASIBILITY — LAYER 2 IS VIABLE; close-ups are the identity goldmine
 
