@@ -61,6 +61,15 @@ def test_smooth_tracks_medians_per_track_and_ignores_ball():
     assert out[out["role"] == "ball"]["pitch_x"].iloc[0] == 99.0
 
 
+def test_smooth_does_not_fill_rejected_gaps():
+    """A NaN (gate-rejected) frame must stay NaN after smoothing -- no resurrection from neighbours."""
+    rows = [{"frame": f, "track_id": 1, "role": "player", "team": 0,
+             "pitch_x": x, "pitch_y": 30.0}
+            for f, x in enumerate([10.0, 11.0, float("nan"), 13.0, 14.0])]
+    out = smooth_tracks(pd.DataFrame(rows), window=3).sort_values("frame")
+    assert np.isnan(out["pitch_x"].iloc[2])  # the rejected middle frame is not filled in
+
+
 def test_derive_actor_tags_nearest_player_within_threshold():
     df = pd.DataFrame([
         {"frame": 0, "track_id": 1, "role": "player", "team": 0, "pitch_x": 50.0, "pitch_y": 34.0},

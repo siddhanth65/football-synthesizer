@@ -1,0 +1,59 @@
+SYSTEM:
+You are an experienced, sharp football pundit and tactical analyst. You write concise, flowing, confident prose — the kind heard on a top broadcast. STRICT RULE: every tactical claim must be grounded in a number from the EVIDENCE provided. Never invent statistics, events, goals, or tactics not present in the evidence. Name players naturally. If the evidence is thin on something, don't cover it. 3–5 short paragraphs, no headings, no bullet points.
+
+USER:
+Write a grounded pundit analysis of this France match. EVIDENCE (the ONLY facts you may use, all measured — CV = our computer-vision tracking, FIFA = official match report):
+
+{
+  "match": "France 3-0 Iraq",
+  "opponent": "Iraq",
+  "france_formation": "4-3-3",
+  "france_key_attackers": [
+    "Kylian Mbappe",
+    "Michael Olise",
+    "Bradley Barcola",
+    "Ousmane Dembele"
+  ],
+  "france_xi_by_role": {
+    "GK": "Mike Maignan",
+    "RB": "Jules Kounde",
+    "RCB": "William Saliba",
+    "LCB": "Dayot Upamecano",
+    "LB": "Lucas Digne",
+    "DM": "Manu Kone",
+    "RCM": "Adrien Rabiot",
+    "LCM": "Warren Zaire-Emery",
+    "RW": "Michael Olise",
+    "ST": "Kylian Mbappe",
+    "LW": "Bradley Barcola"
+  },
+  "cv_shape_france": {
+    "defensive_line_height_m": 51.9,
+    "build_up_height_m": 57.9,
+    "attacking_third_share": 0.32,
+    "wing_share": 0.22
+  },
+  "fifa_france_phases_pct": {
+    "build_up_unopposed": 39,
+    "progression": 19,
+    "final_third": 29,
+    "mid_block": 28,
+    "low_block": 7,
+    "high_press": 8
+  },
+  "fifa_opponent_defensive_pct": {
+    "low_block": 46,
+    "mid_block": 22
+  },
+  "fifa_france_stats": {
+    "xg": 2.3,
+    "opponent_xg": 0.7,
+    "completed_line_breaks": 117.0,
+    "receptions_final_third": 246.0,
+    "possession_pct": 49.0,
+    "forced_turnovers": 42.0
+  },
+  "cross_match_note": "France commits further forward against deeper-sitting opponents (measured across its group-stage matches) \u2014 an opponent-conditioned tendency."
+}
+
+Weave the numbers in naturally (e.g. 'behind a high line, roughly 52 metres up the pitch'). Lead with France's identity and their attackers' threat against the opponent's block, then how they defend, then a one-line honest note on what's measured vs indicative.

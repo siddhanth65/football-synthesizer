@@ -23,8 +23,8 @@ from enum import Enum
 import numpy as np
 import pandas as pd
 
-PITCH_LENGTH = 120.0  # StatsBomb convention (matches football-state-of-play)
-PITCH_WIDTH = 80.0
+# StatsBomb convention (matches football-state-of-play)
+from core.pitch import CONTRACT_LEN as PITCH_LENGTH, CONTRACT_WID as PITCH_WIDTH
 _PITCH_DIAG = math.hypot(PITCH_LENGTH, PITCH_WIDTH)
 _VELOCITY_NORM = 10.0  # m/s, for feature scaling
 

@@ -1,0 +1,47 @@
+# Central match registry (P0 audit item #1). Adding a match = one entry here; NOTHING else.
+# Consumed via core.registry — do not hand-copy these paths into scripts.
+#
+# Fields per match:
+#   teams:    [team0, team1] in kit-anchor order (team 0 = dark/anchored kit in the aligned parquet)
+#   aligned:  the anchored per-frame positions parquet (chunk, frame, team, track_id, pitch_x/y, ...)
+#   ball_dir: directory of per-chunk linked ball parquets (ball_<half>_chunk<NNN>.parquet), or null
+#   pmsr:     parsed FIFA PMSR ground-truth JSON (tools/parse_pmsr.py), or null
+#   roster:   true if data/france_roster.json carries this match's XI (France matches only)
+version: 1
+matches:
+  france_iraq:
+    teams: [France, Iraq]
+    aligned: outputs/france_iraq/final/match_aligned.parquet
+    ball_dir: outputs/france_iraq/final/ball
+    pmsr: outputs/pmsr/france_iraq.json
+    roster: true
+  france_senegal:
+    teams: [France, Senegal]
+    aligned: outputs/france_senegal/final/match_aligned.parquet
+    ball_dir: outputs/france_senegal/final/ball
+    pmsr: outputs/pmsr/france_senegal.json
+    roster: true
+  france_norway:
+    teams: [France, Norway]
+    aligned: outputs/france_norway/final/match_aligned.parquet
+    ball_dir: outputs/france_norway/final/ball
+    pmsr: outputs/pmsr/france_norway.json
+    roster: true
+  mun_mci:
+    teams: [Man Utd, Man City]
+    aligned: outputs/match_anchored_dense.parquet
+    ball_dir: null
+    pmsr: null
+    roster: false
+  # PL Archive 24/25 pilot (Phase B first brick). Club fixture: no France roster, no FIFA PMSR.
+  # teams[0] = dark-kit anchor (align_teams_by_color dark_is_team0). Man Utd wore red (home),
+  # Brighton blue/white stripes; anchor id verified empirically post-align (see fbref_gate.md).
+  brighton_manutd:
+    teams: [Man Utd, Brighton]
+    aligned: outputs/brighton_manutd/final/match_aligned.parquet
+    ball_dir: outputs/brighton_manutd/final/ball
+    pmsr: null
+    roster: false
+    competition: ENG-Premier League 2024-2025 (MW2)
+    home_team: Brighton
+    away_team: Man Utd

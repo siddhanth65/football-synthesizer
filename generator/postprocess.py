@@ -20,7 +20,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-SRC_LEN, SRC_WID = 105.0, 68.0
+from core.pitch import PITCH_LEN as SRC_LEN, PITCH_WID as SRC_WID
 SMOOTH_WINDOW = 5  # frames; rolling-median smooth of pitch coords per track (kills homography jitter)
 ACTOR_MAX_DIST_M = 3.0  # a player within this of the ball is tagged the carrier (actor)
 # Metres a ground point may sit past a line (foot-point + calibration noise) before it is OFF the
@@ -82,10 +82,13 @@ def smooth_tracks(df: pd.DataFrame, *, window: int = SMOOTH_WINDOW) -> pd.DataFr
     players = out["role"] != "ball"
     sub = out[players].sort_values(["track_id", "frame"])
     for col in ("pitch_x", "pitch_y"):
-        out.loc[sub.index, col] = (
+        smoothed = (
             sub.groupby("track_id")[col]
             .transform(lambda s: s.rolling(window, center=True, min_periods=1).median())
         )
+        # Only smooth where a value already exists: never fill a NaN (a gate-rejected frame) from its
+        # neighbours -- smoothing must not resurrect a rejected coordinate into an accepted one.
+        out.loc[sub.index, col] = smoothed.where(sub[col].notna())
     return out
 
 

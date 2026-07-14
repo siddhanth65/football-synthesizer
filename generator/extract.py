@@ -466,33 +466,39 @@ def _safe_crop(frame_rgb, box):
 
 
 def _collect_team_crops(cv2, source, detector, n_max: int = 1024) -> list:
-    """Grab player crops from a few early-clip windows to fit the team classifier."""
+    """Grab player crops spread across the WHOLE clip to fit the team classifier.
+
+    Fitting on a single early window collapses the 2-team KMeans when one team is off-screen / defending
+    deep there (a follow-play broadcast often shows mostly one team for a stretch), which mislabels the
+    entire chunk. Sampling short windows spread from 15%-90% of the clip lets both kits appear across
+    varied phases, so the colour split is balanced. Outfield PLAYERS only (GK/referee kits would pull the
+    KMeans onto extra colours).
+    """
     cap = cv2.VideoCapture(str(source))
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     cap.release()
     crops: list = []
-    # Sample from gameplay windows (broadcasts open with a pre-roll where no players are visible,
-    # which would otherwise collapse the team classifier onto non-player crops).
-    for frac in (0.3, 0.5, 0.7):
+    fracs = (0.15, 0.3, 0.45, 0.6, 0.75, 0.9)
+    per_window = max(n_max // len(fracs), 1)
+    for frac in fracs:
         cap = cv2.VideoCapture(str(source))
-        for i in range(int(total * frac), int(total * frac) + 160, 2):
+        got = 0
+        for i in range(int(total * frac), min(int(total * frac) + 240, total), 2):
             cap.set(cv2.CAP_PROP_POS_FRAMES, i)
             ret, frame = cap.read()
             if not ret:
                 break
             boxes, _, role_ids, _ = detector.detect(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            # Fit the 2-team jersey classifier on outfield PLAYERS only; GK/referee kits would pull
-            # the KMeans onto a third/fourth colour. (COCO emits all ROLE_PLAYER, so this is a no-op
-            # there.)
             keep = role_ids == ROLE_PLAYER if len(role_ids) else np.ones(len(boxes), bool)
             for b in boxes[keep].astype(int):
                 crop = frame[max(b[1], 0):b[3], max(b[0], 0):b[2]]
                 if crop.size > 0:
                     crops.append(crop)
-            if len(crops) >= n_max:
-                break
+                    got += 1
+            if got >= per_window:
+                break       # move to the next window so the fit isn't dominated by one phase
         cap.release()
-        if len(crops) >= 2:
+        if len(crops) >= n_max:
             break
     return crops
 

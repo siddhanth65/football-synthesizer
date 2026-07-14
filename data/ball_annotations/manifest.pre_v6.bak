@@ -1,0 +1,16 @@
+match,chunk,annotations,video,positions
+mun_mci,chunk_000,data/ball_annotations/mun_mci/chunk_000.csv,C:/Users/siddh_ygv5bws/OneDrive/Desktop/cv-football/chunks/chunk_000.mp4,outputs/chunk000_dense.parquet
+mun_mci,chunk_001,data/ball_annotations/mun_mci/chunk_001.csv,C:/Users/siddh_ygv5bws/OneDrive/Desktop/cv-football/chunks/chunk_001.mp4,outputs/chunk001_dense.parquet
+mun_mci,chunk_006,data/ball_annotations/mun_mci/chunk_006.csv,C:/Users/siddh_ygv5bws/OneDrive/Desktop/cv-football/chunks/chunk_006.mp4,outputs/chunk006_dense.parquet
+fra_sen,chunk_004,data/ball_annotations/fra_sen/chunk_004.csv,matches/fra_sen/play/chunk_004.mp4,outputs/fra_sen/match/chunk_004_dense.parquet
+fra_sen,chunk_005,data/ball_annotations/fra_sen/chunk_005.csv,matches/fra_sen/play/chunk_005.mp4,outputs/fra_sen/match/chunk_005_dense.parquet
+france_iraq,h1_chunk_002,data/ball_annotations/france_iraq/h1_chunk_002.csv,matches/france_iraq/h1/chunk_002.mp4,outputs/france_iraq/h1/match/chunk_002_dense.parquet
+france_iraq,h1_chunk_004,data/ball_annotations/france_iraq/h1_chunk_004.csv,matches/france_iraq/h1/chunk_004.mp4,outputs/france_iraq/h1/match/chunk_004_dense.parquet
+france_iraq,h2_chunk_002,data/ball_annotations/france_iraq/h2_chunk_002.csv,matches/france_iraq/h2/chunk_002.mp4,outputs/france_iraq/h2/match/chunk_002_dense.parquet
+france_iraq,h2_chunk_003,data/ball_annotations/france_iraq/h2_chunk_003.csv,matches/france_iraq/h2/chunk_003.mp4,outputs/france_iraq/h2/match/chunk_003_dense.parquet
+france_senegal,h1_chunk_001,data/ball_annotations/france_senegal/h1_chunk_001.csv,matches/france_senegal/h1/chunk_001.mp4,outputs/france_senegal/h1/match/chunk_001_dense.parquet
+france_senegal,h1_chunk_004,data/ball_annotations/france_senegal/h1_chunk_004.csv,matches/france_senegal/h1/chunk_004.mp4,outputs/france_senegal/h1/match/chunk_004_dense.parquet
+france_senegal,h2_chunk_002,data/ball_annotations/france_senegal/h2_chunk_002.csv,matches/france_senegal/h2/chunk_002.mp4,outputs/france_senegal/h2/match/chunk_002_dense.parquet
+france_norway,h1_chunk_001,data/ball_annotations/france_norway/h1_chunk_001.csv,matches/france_norway/h1/chunk_001.mp4,outputs/france_norway/h1/match/chunk_001_dense.parquet
+france_norway,h1_chunk_004,data/ball_annotations/france_norway/h1_chunk_004.csv,matches/france_norway/h1/chunk_004.mp4,outputs/france_norway/h1/match/chunk_004_dense.parquet
+france_norway,h2_chunk_003,data/ball_annotations/france_norway/h2_chunk_003.csv,matches/france_norway/h2/chunk_003.mp4,outputs/france_norway/h2/match/chunk_003_dense.parquet

@@ -1,0 +1,310 @@
+{
+ "match": "brighton_manutd",
+ "teams": [
+  "Man Utd",
+  "Brighton"
+ ],
+ "metrics_version": "2026.07.3",
+ "generated": "2026-07-12T03:10:12+00:00",
+ "sources": {
+  "cv": "results\\pose_carry_probe_scratch\\brighton_manutd_enriched.parquet",
+  "fifa": null
+ },
+ "cv": {
+  "tendencies": {
+   "Man Utd": {
+    "def_line_height": {
+     "mean": 50.84884004824711,
+     "std": 8.310095020587907,
+     "lo": 40.885890064420664,
+     "hi": 59.16844684507829,
+     "n": 10
+    },
+    "buildup_height": {
+     "mean": 56.255355910896036,
+     "std": 8.269031248189398,
+     "lo": 46.28771920041629,
+     "hi": 64.67801835175321,
+     "n": 10
+    },
+    "width": {
+     "mean": 30.458106457491713,
+     "std": 2.5519901443348965,
+     "lo": 27.36686938690853,
+     "hi": 33.28862794183573,
+     "n": 11
+    },
+    "length": {
+     "mean": 18.5622962618209,
+     "std": 1.5637567794536467,
+     "lo": 16.65984462418714,
+     "hi": 20.485741386514515,
+     "n": 11
+    },
+    "compactness": {
+     "mean": 11.403921054593933,
+     "std": 0.971434215077396,
+     "lo": 10.174307313749452,
+     "hi": 12.327337033192368,
+     "n": 11
+    },
+    "attacking_third_share": {
+     "mean": 0.3316998417745545,
+     "std": 0.12307544703687218,
+     "lo": 0.2361792134966113,
+     "hi": 0.4630829721303965,
+     "n": 10
+    },
+    "wing_share": {
+     "mean": 0.2012505308711283,
+     "std": 0.09419182444628137,
+     "lo": 0.1360145627607297,
+     "hi": 0.2441808795069665,
+     "n": 11
+    }
+   },
+   "Brighton": {
+    "def_line_height": {
+     "mean": 42.38298370634814,
+     "std": 7.334253616465841,
+     "lo": 30.61880996466793,
+     "hi": 48.7511583603577,
+     "n": 11
+    },
+    "buildup_height": {
+     "mean": 47.70236822446603,
+     "std": 7.5520823204649306,
+     "lo": 35.47444853201397,
+     "hi": 54.55417759825491,
+     "n": 11
+    },
+    "width": {
+     "mean": 32.99034491922752,
+     "std": 2.5698393507000907,
+     "lo": 29.462214831039056,
+     "hi": 35.04060735608342,
+     "n": 11
+    },
+    "length": {
+     "mean": 21.49711007679709,
+     "std": 2.132312839751347,
+     "lo": 19.67216258574729,
+     "hi": 22.755701330139342,
+     "n": 11
+    },
+    "compactness": {
+     "mean": 12.726742429100291,
+     "std": 0.8860400775374339,
+     "lo": 11.502301497745842,
+     "hi": 13.556647564163296,
+     "n": 11
+    },
+    "attacking_third_share": {
+     "mean": 0.21570890959142908,
+     "std": 0.11437007167660414,
+     "lo": 0.11187974314068881,
+     "hi": 0.32507689544464646,
+     "n": 11
+    },
+    "wing_share": {
+     "mean": 0.21944676855860992,
+     "std": 0.09401111667467685,
+     "lo": 0.14079551907490578,
+     "hi": 0.2511508299679441,
+     "n": 11
+    }
+   }
+  },
+  "style": {
+   "velocity_synchrony": {
+    "Man Utd": 0.7169243617096166,
+    "Brighton": 0.7026733546121036
+   },
+   "style_distance_m": 7.887951708418661
+  },
+  "space": {
+   "Man Utd": {
+    "space_control": 0.427808582933601,
+    "att_third_control": 0.42445427659266316
+   },
+   "Brighton": {
+    "space_control": 0.5721914170663991,
+    "att_third_control": 0.5705142638959301
+   }
+  },
+  "formation": {
+   "Man Utd": {
+    "formation": "3-5-2",
+    "mean_fit_cost_m": 22.48,
+    "chunks_agreeing": 5,
+    "chunks_total": 11
+   },
+   "Brighton": {
+    "formation": "4-3-3",
+    "mean_fit_cost_m": 19.684000000000005,
+    "chunks_agreeing": 5,
+    "chunks_total": 11
+   }
+  },
+  "line_height": {
+   "Man Utd": {
+    "def_line_debiased_m": 32.9,
+    "def_line_raw_m": 53.5,
+    "n_back_visible_mean": 0.33
+   },
+   "Brighton": {
+    "def_line_debiased_m": 25.3,
+    "def_line_raw_m": 46.0,
+    "n_back_visible_mean": 0.31
+   }
+  },
+  "phases_pct": {
+   "Man Utd": {
+    "build_up": 33.95922746781116,
+    "progression": 27.3068669527897,
+    "final_third": 38.73390557939914,
+    "high_press": 35.89630931458699,
+    "mid_block": 23.418277680140598,
+    "low_block": 40.68541300527241
+   },
+   "Brighton": {
+    "build_up": 49.32773109243698,
+    "progression": 22.394957983193276,
+    "final_third": 28.277310924369747,
+    "high_press": 22.016806722689076,
+    "mid_block": 23.361344537815125,
+    "low_block": 54.621848739495796
+   }
+  },
+  "transitions": {
+   "Man Utd": {
+    "turnovers_won": 269,
+    "turnovers_lost": 268,
+    "counterpress_rate": 0.7126865671641791,
+    "mean_recovery_s": 1.3048176842574462,
+    "counter_xt": 0.015560394033316079,
+    "high_regains": 89
+   },
+   "Brighton": {
+    "turnovers_won": 268,
+    "turnovers_lost": 269,
+    "counterpress_rate": 0.7881040892193308,
+    "mean_recovery_s": 1.232544227459673,
+    "counter_xt": 0.02057619251713159,
+    "high_regains": 86
+   }
+  },
+  "passing": {
+   "Man Utd": {
+    "n_passes": 218,
+    "mean_pass_m": 8.692197913181843,
+    "ppda": 1.216,
+    "pressures": 125
+   },
+   "Brighton": {
+    "n_passes": 203,
+    "mean_pass_m": 8.588108042766429,
+    "ppda": 1.0692307692307692,
+    "pressures": 130
+   }
+  },
+  "ball_xt": {
+   "Man Utd": {
+    "xt_created": 2.831041950897126,
+    "n_moves": 561
+   },
+   "Brighton": {
+    "xt_created": 3.1361458715027757,
+    "n_moves": 851
+   }
+  },
+  "theory": {
+   "Man Utd": {
+    "pressing_intensity": 0.36373847455987185,
+    "press_frames": 2380,
+    "line_breaks": 35,
+    "line_break_in_poss_frames": 1849,
+    "mean_overload": 0.7002107481559536,
+    "overload_share": 0.5811380400421496,
+    "verticality": 0.16647072546061611,
+    "halfspace_share": 0.4870550847457627,
+    "wing_share": 0.1820550847457627,
+    "centre_share": 0.3308898305084746,
+    "final_third_lane_share": 0.3035593220338983,
+    "counterpress_losses": 268,
+    "counterpress_regain_curve": {
+     "3s": 0.4291044776119403,
+     "4s": 0.47761194029850745,
+     "5s": 0.5373134328358209,
+     "6s": 0.585820895522388,
+     "8s": 0.6716417910447762
+    },
+    "lane_matrix": {
+     "left_wing_def": 0.02167372881355932,
+     "left_wing_mid": 0.033834745762711865,
+     "left_wing_att": 0.025402542372881354,
+     "left_halfspace_def": 0.05480932203389831,
+     "left_halfspace_mid": 0.10033898305084746,
+     "left_halfspace_att": 0.06866525423728814,
+     "centre_def": 0.095,
+     "centre_mid": 0.12555084745762712,
+     "centre_att": 0.11033898305084745,
+     "right_halfspace_def": 0.05794491525423729,
+     "right_halfspace_mid": 0.1310593220338983,
+     "right_halfspace_att": 0.07423728813559322,
+     "right_wing_def": 0.018834745762711866,
+     "right_wing_mid": 0.05739406779661017,
+     "right_wing_att": 0.024915254237288135
+    }
+   },
+   "Brighton": {
+    "pressing_intensity": 0.4429457223417161,
+    "press_frames": 1898,
+    "line_breaks": 50,
+    "line_break_in_poss_frames": 2325,
+    "mean_overload": 0.5995798319327731,
+    "overload_share": 0.5315126050420168,
+    "verticality": 0.18718998407776194,
+    "halfspace_share": 0.45171246727261116,
+    "wing_share": 0.1964920496392005,
+    "centre_share": 0.35179548308818837,
+    "final_third_lane_share": 0.27484620788011666,
+    "counterpress_losses": 269,
+    "counterpress_regain_curve": {
+     "3s": 0.48698884758364314,
+     "4s": 0.5464684014869888,
+     "5s": 0.6133828996282528,
+     "6s": 0.6654275092936803,
+     "8s": 0.7137546468401487
+    },
+    "lane_matrix": {
+     "left_wing_def": 0.02320185614849188,
+     "left_wing_mid": 0.06451818897805403,
+     "left_wing_att": 0.021882117541880415,
+     "left_halfspace_def": 0.060388684305753636,
+     "left_halfspace_mid": 0.10879329061921283,
+     "left_halfspace_att": 0.06424146959279678,
+     "centre_def": 0.12605632303795314,
+     "centre_mid": 0.1118372038570425,
+     "centre_att": 0.1139019561931927,
+     "right_halfspace_def": 0.0598991038549139,
+     "right_halfspace_mid": 0.10215202537303902,
+     "right_halfspace_att": 0.056237893526895,
+     "right_wing_def": 0.022243981353370655,
+     "right_wing_mid": 0.04606313459205177,
+     "right_wing_att": 0.018582771025351753
+    }
+   }
+  },
+  "set_pieces": {
+   "free_kick": 194,
+   "goal_kick": 7,
+   "throw_in": 7,
+   "reliable": 14,
+   "candidate": 194,
+   "total": 208
+  },
+  "n_ball_chunks": 11
+ },
+ "fifa": null
+}

@@ -226,6 +226,109 @@ def run_clip(
     return pd.DataFrame(rows)
 
 
+def receiver_probs(model, frame: FreezeFrame) -> "np.ndarray":  # noqa: F821
+    """Per-player next-receiver probability from the GAT (aligned to ``frame.players``).
+
+    The receiver head is a softmax over feasible receivers (attacking team-mates minus the carrier), so
+    a player's value here is *how likely they are to receive the next pass* given the configuration —
+    the player-specific signal the graph-level xT lacks. Returns NaNs if the model omits the head.
+    """
+    _inject_sop_path()
+    import numpy as np  # noqa: PLC0415
+    import torch  # noqa: PLC0415
+
+    from data.graphs import build_data  # noqa: PLC0415
+
+    data = build_data(to_statsbomb_dataframe(frame), _row_for(frame))
+    with torch.no_grad():
+        rp = model(data).get("receiver_probs")
+    if rp is None:
+        return np.full(frame.n_players, np.nan, dtype=float)
+    return rp.detach().cpu().numpy().reshape(-1)[: frame.n_players]
+
+
+def full_reads(model, frame: FreezeFrame) -> dict[str, float]:
+    """All team-style head read-outs for one frame (mirrors ``football-state-of-play/eval/team_metrics``).
+
+    Attacking-side: ``success``, ``dxt``, ``option_richness`` (receiver-distribution entropy).
+    Defending-side: ``p_defstop``, ``press_decisiveness`` (top presser prob), ``lane_suppression``
+    (1 - mean xPass over feasible lanes).
+    """
+    _inject_sop_path()
+    import numpy as np  # noqa: PLC0415
+    import torch  # noqa: PLC0415
+
+    from data.graphs import build_data  # noqa: PLC0415
+
+    n = frame.n_players
+    with torch.no_grad():
+        out = model(build_data(to_statsbomb_dataframe(frame), _row_for(frame)))
+    rp = out["receiver_probs"].detach().cpu().numpy().reshape(-1)[:n]
+    rp = rp[rp > 1e-9]
+    pp = out["presser_probs"].detach().cpu().numpy().reshape(-1)[:n] if "presser_probs" in out else np.array([])
+    xp = out["xpass_dense"].detach().cpu().numpy().reshape(-1)[:n] if "xpass_dense" in out else np.array([])
+    xp = xp[xp > 0]
+    return {
+        "success": float(torch.sigmoid(out["success"])),
+        "dxt": float(out["dxt"]),
+        "p_defstop": float(torch.sigmoid(out["defsuccess"])) if "defsuccess" in out else float("nan"),
+        "option_richness": float(-(rp * np.log(rp)).sum()) if len(rp) else float("nan"),
+        "press_decisiveness": float(pp.max()) if len(pp) else float("nan"),
+        "lane_suppression": float(1.0 - xp.mean()) if len(xp) else float("nan"),
+    }
+
+
+def per_team_relational(positions: pd.DataFrame, *, ckpt: Path | None = None,
+                        substrate: Substrate = Substrate.BROADCAST_CV) -> pd.DataFrame:
+    """Per-team attacking + defending GAT fingerprint, attributed via the ball-carrier.
+
+    For each quality-gated **ball-carrier (``is_actor``) frame**, the carrier's team is attacking
+    (``att_xt``/``att_success``/``att_option_richness``) and the **other** team is defending
+    (``def_recovery``/``def_press``/``def_lane_suppression``). Runs the GAT per chunk and aggregates per
+    anchored ``{0, 1}`` team.
+    """
+    import numpy as np  # noqa: PLC0415
+
+    if "is_actor" not in positions.columns:
+        return pd.DataFrame()
+    model = load_model(ckpt)
+    groups = positions.groupby("chunk") if "chunk" in positions.columns else [(None, positions)]
+    att: dict[int, list] = {}
+    dfn: dict[int, list] = {}
+    for _, g in groups:
+        team_by_frame = g[g["is_actor"] == True].groupby("frame")["team"].first()  # noqa: E712
+        if team_by_frame.empty:
+            continue
+        sub = g[g["frame"].isin(team_by_frame.index)]
+        for fr, frame in frames_from_positions(sub, substrate=substrate):
+            at = int(team_by_frame.get(fr, -1))
+            if at < 0:
+                continue
+            try:
+                r = full_reads(model, frame)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("frame %s: %s", fr, exc)
+                continue
+            att.setdefault(at, []).append((r["success"], r["dxt"], r["option_richness"]))
+            dfn.setdefault(1 - at, []).append((r["p_defstop"], r["press_decisiveness"], r["lane_suppression"]))
+    rows = []
+    for team in sorted(set(att) | set(dfn)):
+        a = np.array(att.get(team, [])).reshape(-1, 3)
+        d = np.array(dfn.get(team, [])).reshape(-1, 3)
+        rows.append({
+            "team": team,
+            "att_xt": float(np.nanmean(a[:, 1])) if len(a) else float("nan"),
+            "att_success": float(np.nanmean(a[:, 0])) if len(a) else float("nan"),
+            "att_option_richness": float(np.nanmean(a[:, 2])) if len(a) else float("nan"),
+            "att_frames": int(len(a)),
+            "def_recovery": float(np.nanmean(d[:, 0])) if len(d) else float("nan"),
+            "def_press": float(np.nanmean(d[:, 1])) if len(d) else float("nan"),
+            "def_lane_suppression": float(np.nanmean(d[:, 2])) if len(d) else float("nan"),
+            "def_frames": int(len(d)),
+        })
+    return pd.DataFrame(rows)
+
+
 def clip_readout(df: pd.DataFrame) -> dict[str, float]:
     """Aggregate a :func:`run_clip` frame table to clip-level means."""
     return {

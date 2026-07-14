@@ -1,0 +1,71 @@
+{
+  "match": "brighton_manutd",
+  "resolution": "1920x1080",
+  "content_proxy": {
+    "wide": ">=8 people",
+    "medium": "4-7",
+    "close": "<=3"
+  },
+  "overall_content_mix_of_match": {
+    "wide": 0.45371428571428574,
+    "medium": 0.28521142857142856,
+    "close": 0.2610742857142857
+  },
+  "total_frame_instances": 21875,
+  "torso_frac_of_box": 0.4,
+  "number_height_px_estimate": "~0.35 x torso height",
+  "legible_number_floor_px": 12.0,
+  "per_type": {
+    "wide": {
+      "frames_sampled": 160,
+      "n_player_crops": 2839,
+      "torso_h_px_p10": 28.0,
+      "torso_h_px_p50": 38.8,
+      "torso_h_px_p90": 51.6,
+      "box_h_px_p50": 97.0,
+      "frac_torso_ge_32px": 0.799,
+      "frac_torso_ge_64px": 0.012,
+      "frac_number_ge_12px_est": 0.706,
+      "est_number_h_px_p50": 13.6,
+      "frame_max_torso_p50": 56.4,
+      "frame_max_torso_p90": 65.2,
+      "frac_frames_with_torso_ge_64px": 0.144,
+      "frac_frames_with_torso_ge_100px": 0.019,
+      "montage": "results\\jersey_probe\\montage_wide.png"
+    },
+    "medium": {
+      "frames_sampled": 160,
+      "n_player_crops": 2614,
+      "torso_h_px_p10": 27.2,
+      "torso_h_px_p50": 38.0,
+      "torso_h_px_p90": 51.2,
+      "box_h_px_p50": 95.0,
+      "frac_torso_ge_32px": 0.77,
+      "frac_torso_ge_64px": 0.01,
+      "frac_number_ge_12px_est": 0.678,
+      "est_number_h_px_p50": 13.3,
+      "frame_max_torso_p50": 55.6,
+      "frame_max_torso_p90": 64.0,
+      "frac_frames_with_torso_ge_64px": 0.106,
+      "frac_frames_with_torso_ge_100px": 0.025,
+      "montage": "results\\jersey_probe\\montage_medium.png"
+    },
+    "close": {
+      "frames_sampled": 160,
+      "n_player_crops": 2026,
+      "torso_h_px_p10": 27.6,
+      "torso_h_px_p50": 39.2,
+      "torso_h_px_p90": 68.8,
+      "box_h_px_p50": 98.0,
+      "frac_torso_ge_32px": 0.791,
+      "frac_torso_ge_64px": 0.113,
+      "frac_number_ge_12px_est": 0.707,
+      "est_number_h_px_p50": 13.7,
+      "frame_max_torso_p50": 61.0,
+      "frame_max_torso_p90": 360.4,
+      "frac_frames_with_torso_ge_64px": 0.381,
+      "frac_frames_with_torso_ge_100px": 0.3,
+      "montage": "results\\jersey_probe\\montage_close.png"
+    }
+  }
+}

@@ -26,7 +26,8 @@ from generator.contract import (
     orient_left_to_right,
 )
 
-SRC_LEN, SRC_WID = 105.0, 68.0  # cv-football / kloppy pitch convention
+# cv-football / kloppy pitch convention
+from core.pitch import PITCH_LEN as SRC_LEN, PITCH_WID as SRC_WID
 MIN_PLAYERS = 10  # mirror StatsBomb 360's >=10-visible wide-shot filter
 
 

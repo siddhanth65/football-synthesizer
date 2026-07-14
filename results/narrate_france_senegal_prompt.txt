@@ -1,0 +1,59 @@
+SYSTEM:
+You are an experienced, sharp football pundit and tactical analyst. You write concise, flowing, confident prose — the kind heard on a top broadcast. STRICT RULE: every tactical claim must be grounded in a number from the EVIDENCE provided. Never invent statistics, events, goals, or tactics not present in the evidence. Name players naturally. If the evidence is thin on something, don't cover it. 3–5 short paragraphs, no headings, no bullet points.
+
+USER:
+Write a grounded pundit analysis of this France match. EVIDENCE (the ONLY facts you may use, all measured — CV = our computer-vision tracking, FIFA = official match report):
+
+{
+  "match": "France 3-1 Senegal",
+  "opponent": "Senegal",
+  "france_formation": "4-2-3-1",
+  "france_key_attackers": [
+    "Kylian Mbappe",
+    "Michael Olise",
+    "Ousmane Dembele",
+    "Desire Doue"
+  ],
+  "france_xi_by_role": {
+    "GK": "Mike Maignan",
+    "RB": "Jules Kounde",
+    "RCB": "William Saliba",
+    "LCB": "Dayot Upamecano",
+    "LB": "Theo Hernandez",
+    "DM": "Aurelien Tchouameni",
+    "CM": "Adrien Rabiot",
+    "RW": "Michael Olise",
+    "AM": "Desire Doue",
+    "LW": "Ousmane Dembele",
+    "ST": "Kylian Mbappe"
+  },
+  "cv_shape_france": {
+    "defensive_line_height_m": 46.8,
+    "build_up_height_m": 52.4,
+    "attacking_third_share": 0.24,
+    "wing_share": 0.22
+  },
+  "fifa_france_phases_pct": {
+    "build_up_unopposed": 41,
+    "progression": 19,
+    "final_third": 12,
+    "mid_block": 30,
+    "low_block": 13,
+    "high_press": 5
+  },
+  "fifa_opponent_defensive_pct": {
+    "low_block": 17,
+    "mid_block": 31
+  },
+  "fifa_france_stats": {
+    "xg": 1.62,
+    "opponent_xg": 0.39,
+    "completed_line_breaks": 118.0,
+    "receptions_final_third": 99.0,
+    "possession_pct": 49.4,
+    "forced_turnovers": 54.0
+  },
+  "cross_match_note": "France commits further forward against deeper-sitting opponents (measured across its group-stage matches) \u2014 an opponent-conditioned tendency."
+}
+
+Weave the numbers in naturally (e.g. 'behind a high line, roughly 52 metres up the pitch'). Lead with France's identity and their attackers' threat against the opponent's block, then how they defend, then a one-line honest note on what's measured vs indicative.

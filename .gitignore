@@ -25,11 +25,26 @@ outputs/
 *.pth
 *.onnx
 *.log
+# SoccerNet downloads (4.4 GB incl. two ~1 GB zips — never commit; licensing + size)
+data/soccernet/
+# FIFA PMSR match reports (copyrighted ground truth — keep local, never commit)
+PMSR-*.pdf
+# archive safety net
+*.zip
+*.tar.gz
+# user-local scratch file at repo root
+.nutmeg.user.md
+# user-local Claude settings
+.claude/settings.local.json
 
 # Notebooks / OS / IDE
 .ipynb_checkpoints/
 .DS_Store
 .vscode/
 .idea/
+
+# Permanent ball-annotation corpus is intentionally TRACKED (tiny CSVs = ground truth).
+# (data/raw|processed|video are ignored above; data/ball_annotations is not — keep it that way.)
+!data/ball_annotations/
 
 # Keep small sample assets explicitly with: git add -f

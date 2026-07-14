@@ -21,7 +21,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root -> import generator.*
 
-PITCH_LEN, PITCH_WID = 105.0, 68.0
+from core.pitch import PITCH_LEN, PITCH_WID  # noqa: E402
 _TEAM_COLORS = {0: "#e6194B", 1: "#4363d8", -1: "#aaaaaa"}  # team0 red, team1 blue, ball/other grey
 
 
@@ -58,12 +58,16 @@ def _plot_pitch_lines_on_video(axv, homography) -> None:
 
 
 def render_overlays(
-    positions: pd.DataFrame, video: str, out_dir: Path, n_frames: int = 4, calibrator=None
+    positions: pd.DataFrame, video: str, out_dir: Path, n_frames: int = 4, calibrator=None,
+    frames: list[int] | None = None,
 ) -> list[Path]:
-    """Render side-by-side (video | pitch) overlays for ``n_frames`` evenly spaced frames.
+    """Render side-by-side (video | pitch) overlays.
 
-    If ``calibrator`` is given, the reconstructed pitch lines are drawn on the video panel (yellow) so
-    each frame self-verifies: the lines should sit on the real painted markings.
+    Renders the explicit ``frames`` if given, else ``n_frames`` evenly spaced ones. If ``calibrator``
+    is given, the reconstructed pitch lines are drawn on the video panel (yellow) so each frame
+    self-verifies: the lines should sit on the real painted markings. Colour key: team0 = red,
+    team1 = blue, officials = grey ``x``, goalkeeper = black ring, ball-carrier = yellow ring (video),
+    ball = white star.
     """
     import cv2
     import matplotlib
@@ -72,8 +76,11 @@ def render_overlays(
     import matplotlib.pyplot as plt
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    frames = sorted(positions["frame"].unique())
-    picks = frames[:: max(len(frames) // n_frames, 1)][:n_frames]
+    if frames is not None:
+        picks = list(frames)
+    else:
+        allf = sorted(positions["frame"].unique())
+        picks = allf[:: max(len(allf) // n_frames, 1)][:n_frames]
     cap = cv2.VideoCapture(video)
     written: list[Path] = []
     for fr in picks:
@@ -98,9 +105,14 @@ def render_overlays(
                 axv.set_ylim(rgb.shape[0], 0)
         for _, p in players.iterrows():
             c = _TEAM_COLORS.get(int(p["team"]), "#aaaaaa")
-            axv.scatter(p["image_x"], p["image_y"], s=90, c=c, edgecolors="white", lw=1.2, zorder=3)
-            if bool(p.get("is_actor", False)):
-                axv.scatter(p["image_x"], p["image_y"], s=320, facecolors="none",
+            is_ref = str(p.get("role", "")) == "referee"
+            axv.scatter(p["image_x"], p["image_y"], s=90, c=c, marker=("X" if is_ref else "o"),
+                        edgecolors="white", lw=1.2, zorder=3)
+            if bool(p.get("is_keeper", False)):  # goalkeeper -> black ring
+                axv.scatter(p["image_x"], p["image_y"], s=300, facecolors="none",
+                            edgecolors="black", lw=1.8, zorder=4)
+            if bool(p.get("is_actor", False)):  # ball-carrier -> yellow ring
+                axv.scatter(p["image_x"], p["image_y"], s=360, facecolors="none",
                             edgecolors="yellow", lw=2.2, zorder=4)
             axv.text(p["image_x"] + 6, p["image_y"], str(int(p["track_id"])), color="white",
                      fontsize=8, zorder=5)

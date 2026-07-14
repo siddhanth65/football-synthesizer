@@ -139,8 +139,8 @@ def calibrate_correspondences(
     return CalibrationResult(homography=h, error_m=err, n_points=n, ok=err <= max_error_m)
 
 
-PITCH_LENGTH_M = 105.0  # source pitch long axis (uncentred [0, 105]); the contract rescales to 120
-PITCH_WIDTH_M = 68.0  # source pitch short axis (uncentred [0, 68]); the contract rescales to 80
+# source pitch axes (uncentred [0,105]x[0,68]); the contract rescales to 120x80
+from core.pitch import PITCH_LEN as PITCH_LENGTH_M, PITCH_WID as PITCH_WIDTH_M
 
 
 def ground_homography_from_cam_params(cam_params: dict) -> np.ndarray | None:

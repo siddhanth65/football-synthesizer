@@ -1,0 +1,51 @@
+{
+  "_note": "France WC2026 group-stage squad + per-match starting XI by role, from the FIFA PMSR lineup pages. Used to attach player names to the CV-inferred role clusters for the pundit report. Roles approximate (broadcast can't read numbers); the front-line creative threats are the report's focus.",
+  "squad": {
+    "16": {"name": "Mike Maignan", "pos": "GK"},
+    "4": {"name": "Dayot Upamecano", "pos": "CB"},
+    "5": {"name": "Jules Kounde", "pos": "RB"},
+    "17": {"name": "William Saliba", "pos": "CB"},
+    "19": {"name": "Theo Hernandez", "pos": "LB"},
+    "3": {"name": "Lucas Digne", "pos": "LB"},
+    "21": {"name": "Lucas Hernandez", "pos": "LB"},
+    "8": {"name": "Aurelien Tchouameni", "pos": "DM"},
+    "14": {"name": "Adrien Rabiot", "pos": "CM"},
+    "6": {"name": "Manu Kone", "pos": "CM"},
+    "13": {"name": "Ngolo Kante", "pos": "CM"},
+    "18": {"name": "Warren Zaire-Emery", "pos": "CM"},
+    "24": {"name": "Rayan Cherki", "pos": "AM"},
+    "10": {"name": "Kylian Mbappe", "pos": "FW"},
+    "11": {"name": "Michael Olise", "pos": "FW"},
+    "7": {"name": "Ousmane Dembele", "pos": "FW"},
+    "26": {"name": "Desire Doue", "pos": "FW"},
+    "12": {"name": "Bradley Barcola", "pos": "FW"},
+    "9": {"name": "Marcus Thuram", "pos": "FW"},
+    "22": {"name": "Jean-Philippe Mateta", "pos": "FW"}
+  },
+  "matches": {
+    "france_iraq": {
+      "opponent": "Iraq", "score": [3, 0], "formation": "4-3-3", "france_is_home": true,
+      "xi": {"GK": "Mike Maignan", "RB": "Jules Kounde", "RCB": "William Saliba",
+             "LCB": "Dayot Upamecano", "LB": "Lucas Digne", "DM": "Manu Kone",
+             "RCM": "Adrien Rabiot", "LCM": "Warren Zaire-Emery", "RW": "Michael Olise",
+             "ST": "Kylian Mbappe", "LW": "Bradley Barcola"},
+      "key_attackers": ["Kylian Mbappe", "Michael Olise", "Bradley Barcola", "Ousmane Dembele"]
+    },
+    "france_senegal": {
+      "opponent": "Senegal", "score": [3, 1], "formation": "4-2-3-1", "france_is_home": true,
+      "xi": {"GK": "Mike Maignan", "RB": "Jules Kounde", "RCB": "William Saliba",
+             "LCB": "Dayot Upamecano", "LB": "Theo Hernandez", "DM": "Aurelien Tchouameni",
+             "CM": "Adrien Rabiot", "RW": "Michael Olise", "AM": "Desire Doue",
+             "LW": "Ousmane Dembele", "ST": "Kylian Mbappe"},
+      "key_attackers": ["Kylian Mbappe", "Michael Olise", "Ousmane Dembele", "Desire Doue"]
+    },
+    "france_norway": {
+      "opponent": "Norway", "score": [4, 1], "formation": "4-3-3", "france_is_home": false,
+      "xi": {"GK": "Mike Maignan", "RB": "Jules Kounde", "RCB": "William Saliba",
+             "LCB": "Dayot Upamecano", "LB": "Theo Hernandez", "DM": "Aurelien Tchouameni",
+             "RCM": "Adrien Rabiot", "LCM": "Ngolo Kante", "RW": "Michael Olise",
+             "ST": "Marcus Thuram", "LW": "Kylian Mbappe"},
+      "key_attackers": ["Kylian Mbappe", "Michael Olise", "Marcus Thuram", "Rayan Cherki"]
+    }
+  }
+}
