@@ -32,7 +32,7 @@ This is a gift, not a threat. It gives us:
   [verified: arXiv 2508.19182].
 - **A defensible novelty direction** — published GSR winners handle off-screen/occluded players
   with **plain linear interpolation**; a *validated* off-screen imputation/uncertainty module goes
-  beyond the published SOTA [captured: arXiv 2504.06357]. Industry (FIFA-co-authored validation
+  beyond the published SOTA [verified 3-0: arXiv 2504.06357]. Industry (FIFA-co-authored validation
   study) independently names off-screen estimation as *the* open problem: commercial broadcast
   trackers hit 0.44–1.14 m RMSE on detected players but degrade to **4.6–12.2 m when the player is
   off-screen**, against an industry bar of ~1 m [captured: arXiv 2508.19477]. FIFA runs a formal

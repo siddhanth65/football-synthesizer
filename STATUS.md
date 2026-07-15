@@ -73,9 +73,11 @@ SoccerNet **Game State Reconstruction** (CVPRW'24) is exactly our problem; **GS-
 field's metric; challenge SOTA 63.8-63.9 vs baselines 23-29 [verified 3-0 votes, arXiv 2404.11335,
 2409.10587, 2508.19182]. The winning 2025 GSR pipeline mirrors our architecture AND reads jerseys
 with a VLM on crops — independently validating the Layer-2 plan. Published GSR SOTA handles
-off-screen players by linear interpolation only, and a FIFA-co-authored study measures the
-off-screen cliff (0.44-1.14 m detected → 4.6-12.2 m off-screen vs ~1 m industry bar) — so
-**validated off-screen imputation is a real novelty axis** [captured, verification pending].
+off-screen players by linear interpolation only [VERIFIED 3-0, 2026-07-15], and a FIFA-co-authored
+study measures the off-screen cliff (0.44-1.14 m detected → 4.6-12.2 m off-screen vs ~1 m industry
+bar) [captured] — so **validated off-screen imputation is a real novelty axis**. Research total:
+13 claims verified 3-0, 12 captured-unverified (FIFA/commercial quotes); synthesis folded into
+`docs/BTP_DECEMBER_PLAN.md`; research loop CLOSED (no further resumes — diminishing returns).
 Data routes: SoccerNet-GSR is free/no-NDA (external benchmark for us); StatsBomb 360 freeze-frames
 = VISIBLE players only (like-for-like validation of our freeze frames, not full-pitch truth);
 SkillCorner opendata now 10 A-League 24/25 broadcast-tracking matches.
