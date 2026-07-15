@@ -117,7 +117,13 @@ of this claim, not an embarrassment.
    player stats on our corpus.
 
 ### B3 — Season scale (Sep 1 → Oct 31, overlaps B2)
-- Batch ingestion of 10–15 Utd matches (resumable runner exists); one fine-tune amortizes.
+- **Demo shape decided (user, 2026-07-16): the December demo is an OPPOSITION SCOUTING PACK** —
+  pick a Utd fixture, process the opponent's prior matches, generate the pre-match pack (shape,
+  press profile, seams, C5 forecast), then score it against the actual match. Match selection for
+  B3 therefore prioritizes: (1) the chosen demo fixture's opponent's prior matches, (2) the demo
+  fixture itself (held out for scoring), (3) remaining Utd matches for corpus size.
+- Batch ingestion of 10–15 matches (resumable runner exists); one fine-tune amortizes. Front-gate
+  extraction with the live-play filter (~2-3× throughput on non-live frame skip — measure first).
 - Every match: fact store + oracle gate + report v2. Error bars across N matches; home/away
   repeat-measurement consistency (validation axis needing zero external data).
 - 4 GB laptop: one match ≈ overnight; cluster shifts this to days-not-weeks. Risk hedge: 10 is
@@ -143,6 +149,11 @@ interpolation off-screen; FIFA study names it the open problem]:
   possession reclassification, line restatement — the *discipline* is the story), PL season
   results with error bars, GS-HOTA external benchmark table, Layer-2 named-player demo, C5
   forecast v0 backtest, demo video (tooling exists).
+- **Centerpiece demo = the opposition scouting pack** (see B3): the real club-analyst workflow
+  run end-to-end on our stack — pre-match pack generated from opponent's prior matches, scored
+  post-match. Commercial framing: "a scouting pack from any tape you own, every number graded";
+  the coverage wedge (uncovered leagues/archives where clubs hold footage rights) is the
+  commercial story, accuracy parity with vendors is NOT claimed.
 - Venue targets [captured]: **CVSports @ CVPR 2026** (exact topical match: tracking, calibration,
   position estimation, tactics), **MLSA @ ECML-PKDD 2026**, MIT Sloan abstract (long shot,
   worth one evening). Also the StatsBomb conference. A workshop paper draft doubles as the thesis
