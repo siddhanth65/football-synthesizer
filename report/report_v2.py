@@ -44,11 +44,19 @@ from core.registry import Match, get
 from report import guardrail
 from report.facts import load_facts
 
-# --- Pre-declared evidence gate -------------------------------------------------------------------
-# Ball-derived metric families render only when BOTH thresholds are met. These are policy constants,
-# fixed before looking at any match, so gating cannot be tuned per result.
-GATE_COVERAGE_MIN_PCT = 40.0   # post-link_ball usable-track coverage
-GATE_RECALL_MIN_PCT = 50.0     # pass-recall proxy vs annotated volume
+# --- Pre-declared evidence gate (three tiers) -----------------------------------------------------
+# Ball-derived metric families render in one of three tiers. These are policy constants, fixed before
+# looking at any match, so gating cannot be tuned per result:
+#   * ABSOLUTE     -- coverage >= 40 % AND recall >= 50 %: totals/counts allowed (the original gate).
+#   * COMPARATIVE  -- coverage >= 40 % AND team-symmetric capture (recall-proxy spread <= 0.05), even
+#                     if absolute recall < 50 %: RELATIVE claims only (team shares, ratios,
+#                     team-vs-team differences, per-team rankings) -- never absolute ball volumes.
+#   * ABSTAIN      -- otherwise: ball families are withheld with an explicit line.
+# The comparative tier rests on the pre-committed observation (STATUS.md 2026-07-15) that symmetric
+# partial capture keeps RELATIVE pass features unbiased even when absolute recall misses the 50 % bar.
+GATE_COVERAGE_MIN_PCT = 40.0     # post-link_ball usable-track coverage
+GATE_RECALL_MIN_PCT = 50.0       # pass-recall proxy vs annotated volume (absolute-claim bar)
+GATE_SYMMETRY_MAX_SPREAD = 0.05  # max between-team pass-recall-proxy spread for comparative claims
 
 # --- Declared validation inputs (provenance, NOT re-derivable from the fact store) ----------------
 # The ball-evidence gate (coverage + pass-recall proxy) is now read PER MATCH from a persisted eval
@@ -158,19 +166,49 @@ def _one(x: float) -> str:
 # ==================================================================================================
 @dataclass(frozen=True)
 class GateResult:
-    """Outcome of the pre-declared ball-evidence gate for one match."""
+    """Outcome of the pre-declared three-tier ball-evidence gate for one match.
+
+    ``tier`` (``"absolute"`` | ``"comparative"`` | ``"abstain"``) is derived in ``__post_init__`` from
+    coverage, recall and the between-team recall-proxy ``symmetry_spread``; ``passed`` stays a synonym
+    for the absolute tier so existing callers keep working. ``symmetry_spread`` is ``None`` for matches
+    that never persisted a per-team split (all FIFA-oracle matches today), which is exactly why they can
+    never enter the comparative tier -- only matches carrying BOTH gate inputs qualify.
+    """
 
     passed: bool
     coverage_pct: float
     recall_pct: float
     oracle_source: str = ""
-    provenance: str = "artifact"    # "artifact" | "constant" (fallback)
+    provenance: str = "artifact"        # "artifact" | "constant" (fallback)
+    symmetry_spread: float | None = None
+    tier: str = field(init=False, default="abstain")
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "tier",
+                           gate_tier(self.coverage_pct, self.recall_pct, self.symmetry_spread))
+
+    @property
+    def renders_ball(self) -> bool:
+        """True when ball families render at all (absolute totals OR comparative-only)."""
+        return self.tier in ("absolute", "comparative")
+
+    @property
+    def comparative_only(self) -> bool:
+        """True when ball families render but only as shares/ratios/differences (no absolute volumes)."""
+        return self.tier == "comparative"
 
     @property
     def abstention(self) -> str:
         """The explicit withheld-evidence line shown in place of a gated family."""
         return (f"insufficient ball-track evidence (coverage {self.coverage_pct:.0f}%, "
                 f"recall proxy {self.recall_pct:.1f}%) -- withheld.")
+
+    @property
+    def comparative_label(self) -> str:
+        """The explicit relative-claims caveat prefixed to every comparative ball section."""
+        spread = 0.0 if self.symmetry_spread is None else self.symmetry_spread
+        return (f"**Relative claims only** -- capture ~{self.recall_pct:.0f}%, team-symmetric "
+                f"(spread {spread:.3f}); absolute volumes withheld.")
 
     @property
     def coverage_clear_recall_short(self) -> bool:
@@ -180,8 +218,24 @@ class GateResult:
 
 
 def gate_decision(coverage_pct: float, recall_pct: float) -> bool:
-    """Pure gate rule: ball families render iff coverage AND recall clear the pre-declared minima."""
+    """Pure gate rule: absolute ball families render iff coverage AND recall clear the minima."""
     return coverage_pct >= GATE_COVERAGE_MIN_PCT and recall_pct >= GATE_RECALL_MIN_PCT
+
+
+def gate_tier(coverage_pct: float, recall_pct: float, symmetry_spread: float | None) -> str:
+    """Pure three-tier gate rule -> ``"absolute"`` | ``"comparative"`` | ``"abstain"``.
+
+    Absolute wins when both the coverage and recall bars clear. Failing that, a match with enough
+    coverage AND team-symmetric capture (a persisted recall-proxy spread within the pre-declared band)
+    earns the comparative tier. Everything else abstains. A match with no persisted ``symmetry_spread``
+    can never reach the comparative tier, so partial-coverage FIFA matches are not forced into it.
+    """
+    if gate_decision(coverage_pct, recall_pct):
+        return "absolute"
+    if (coverage_pct >= GATE_COVERAGE_MIN_PCT and symmetry_spread is not None
+            and symmetry_spread <= GATE_SYMMETRY_MAX_SPREAD):
+        return "comparative"
+    return "abstain"
 
 
 def load_ball_eval(match_id: str, *, eval_dir: Path = BALL_EVAL_DIR) -> dict | None:
@@ -203,14 +257,17 @@ def evaluate_gate(match_id: str, *, eval_dir: Path = BALL_EVAL_DIR) -> GateResul
     if art is not None:
         cov = float(art["post_link_coverage"]) * 100.0
         rec = float(art["pass_recall_proxy"]) * 100.0
+        spread = art.get("pass_recall_spread")
+        spread = float(spread) if spread is not None else None
         return GateResult(passed=gate_decision(cov, rec), coverage_pct=cov, recall_pct=rec,
-                          oracle_source=str(art.get("oracle_source", "")), provenance="artifact")
+                          oracle_source=str(art.get("oracle_source", "")), provenance="artifact",
+                          symmetry_spread=spread)
     gi = GATE_INPUTS[match_id]
     cov, rec = gi["post_link_coverage_pct"], gi["pass_recall_pct"]
     print(f"[report_v2] WARNING: no ball-eval artifact for {match_id}; "
           f"falling back to declared GATE_INPUTS constant.")
     return GateResult(passed=gate_decision(cov, rec), coverage_pct=cov, recall_pct=rec,
-                      oracle_source="", provenance="constant")
+                      oracle_source="", provenance="constant", symmetry_spread=None)
 
 
 # ==================================================================================================
@@ -231,6 +288,17 @@ def _audit_facts(facts: dict, match_id: str) -> dict:
     # 0-1 "share" labels auto-expand to a percentage form inside guardrail.flatten_facts.
     cv["_gate"] = {"coverage_share": gate.coverage_pct / 100.0,
                    "recall_share": gate.recall_pct / 100.0}
+    if gate.symmetry_spread is not None:
+        cv["_gate"]["symmetry_spread"] = gate.symmetry_spread
+    # Comparative tier: the shares/ratios cited in the relative-claims body are deterministic functions
+    # of >=2 CV leaves (focus + opponent), not new measurements. Expose them so the guardrail treats
+    # them as grounded-by-derivation; the rendered prose cites exactly these numbers (fabrications still
+    # match nothing). Only injected for the comparative tier -- absolute/abstain audit sets are unchanged.
+    if gate.comparative_only:
+        m: Match = get(match_id)
+        comp = _comparative_metrics(cv, m.teams[0], m.teams[1])
+        if comp:
+            cv["_comparative"] = comp
     # FIFA-only validation constants are cited in the body ONLY for national-team matches; expose them
     # to the guardrail only when they exist (club matches have no FIFA per-phase line / C5 model).
     if val is not None:
@@ -272,6 +340,47 @@ def _fr(cv: dict, *path: str, default=None):
             return default
         node = node[p]
     return node
+
+
+def _pair_share(cv: dict, focus: str, opp: str, *path: str) -> dict | None:
+    """Focus/opponent share of a summable leaf: ``{focus: a/(a+b), opp: b/(a+b)}`` or ``None``.
+
+    Used to turn an absolute ball total (passes, xT, line breaks) into a team share -- the comparative
+    tier's core move. Returns ``None`` unless BOTH teams carry a finite, non-degenerate total.
+    """
+    a, b = _fr(cv, path[0], focus, *path[1:]), _fr(cv, path[0], opp, *path[1:])
+    if a is None or b is None or (a + b) <= 0:
+        return None
+    return {focus: a / (a + b), opp: b / (a + b)}
+
+
+def _comparative_metrics(cv: dict, focus: str, opp: str) -> dict:
+    """Derived team-vs-team comparative values for the ball families that are otherwise absolute counts.
+
+    Every value is a deterministic ratio of two grounded CV leaves (focus vs opponent), so it is
+    grounded-by-derivation rather than a new measurement. Returned both for rendering (comparative
+    sections/seams) and for injection into the guardrail's grounded set. Keys are omitted when either
+    team's inputs are missing, so a partially-populated fact store degrades cleanly.
+    """
+    out: dict = {}
+    pass_share = _pair_share(cv, focus, opp, "passing", "n_passes")
+    if pass_share is not None:
+        out["pass_share"] = pass_share
+    xt_share = _pair_share(cv, focus, opp, "ball_xt", "xt_created")
+    if xt_share is not None:
+        out["xt_share"] = xt_share
+    lb_share = _pair_share(cv, focus, opp, "theory", "line_breaks")
+    if lb_share is not None:
+        out["linebreak_share"] = lb_share
+    conv = {}
+    for t in (focus, opp):
+        hi = _fr(cv, "transitions", t, "high_regains")
+        lost = _fr(cv, "transitions", t, "turnovers_lost")
+        if hi is not None and lost:
+            conv[t] = hi / lost
+    if len(conv) == 2:
+        out["high_regain_conv_rate"] = conv
+    return out
 
 
 def _setup_section(cv: dict, ctx: Ctx) -> Section:
@@ -321,14 +430,63 @@ def _setup_section(cv: dict, ctx: Ctx) -> Section:
     return sec
 
 
+def _possession_comparative(cv: dict, ctx: Ctx, gate: GateResult, sec: Section) -> None:
+    """Append the comparative-only (relative-claims) possession block: shares/ratios vs the opponent."""
+    f, o = ctx.focus, ctx.opponent
+    sec.blocks.append(Block("cmpnote", text=gate.comparative_label))
+    phf = _fr(cv, "phases_pct", f) or {}
+    pho = _fr(cv, "phases_pct", o) or {}
+    if phf and pho:
+        sec.blocks.append(Block("p", text=(
+            f"By our phase classifier the two sides split their in-possession time differently: {f} "
+            f"spend **{_pctv(phf['final_third'])}** of it in the final third against {o}'s "
+            f"**{_pctv(pho['final_third'])}**, and **{_pctv(phf['build_up'])}** in build-up against "
+            f"**{_pctv(pho['build_up'])}** -- a team-vs-team tilt, not an absolute volume.")))
+    comp = _comparative_metrics(cv, f, o)
+    bits = []
+    ps = comp.get("pass_share")
+    if ps is not None:
+        mpf, mpo = _fr(cv, "passing", f, "mean_pass_m"), _fr(cv, "passing", o, "mean_pass_m")
+        tail = (f" at a similar mean length (**{_one(mpf)} m** vs **{_one(mpo)} m**)"
+                if mpf is not None and mpo is not None else "")
+        bits.append(f"{f} account for **{_pct(ps[f])}** of the two sides' tracked passing volume "
+                    f"(**{_pct(ps[o])}** {o}){tail}")
+    xs = comp.get("xt_share")
+    if xs is not None:
+        bits.append(f"ball-progression threat (xT) splits **{_pct(xs[f])}**/**{_pct(xs[o])}** in "
+                    f"{f}'s favour")
+    vf, vo = _fr(cv, "theory", f, "verticality"), _fr(cv, "theory", o, "verticality")
+    if vf is not None and vo is not None:
+        bits.append(f"goalward directness (verticality) runs **{_pct(vf)}** for {f} vs **{_pct(vo)}** "
+                    f"for {o}")
+    lb = comp.get("linebreak_share")
+    if lb is not None:
+        bits.append(f"{f} produced **{_pct(lb[f])}** of the defensive-line breaks between the sides")
+    if bits:
+        sec.blocks.append(Block("p", text="With the ball, " + "; ".join(bits) + "."))
+    ppf, ppo = _fr(cv, "passing", f, "ppda"), _fr(cv, "passing", o, "ppda")
+    if ppf is not None and ppo is not None:
+        sec.blocks.append(Block("p", text=(
+            f"Relative pressing tempo (PPDA proxy, lower is more aggressive): {f} **{_one(ppf)}** vs "
+            f"{o} **{_one(ppo)}** -- a ratio of {f} build-up passes allowed per defensive action, "
+            f"reported team-vs-team.")))
+
+
 def _possession_section(cv: dict, ctx: Ctx, gate: GateResult) -> Section:
-    """(b) In possession -- verticality, ball-xT, tempo/PPDA, phases, style. Mostly gated."""
+    """(b) In possession -- verticality, ball-xT, tempo/PPDA, phases, style. Mostly gated.
+
+    Renders absolute totals only in the absolute tier; team shares/ratios in the comparative tier;
+    an explicit abstention otherwise. The position-only synchrony line always renders.
+    """
     sec = Section("In possession", "CV")
     sync = _fr(cv, "style", "velocity_synchrony", ctx.focus)
     if sync is not None:
         sec.blocks.append(Block("p", text=(
             f"{ctx.focus} move as a unit -- velocity synchrony **{_pct(sync)}** on a 0-1 scale (this "
             f"is a position-only measure and always renders).")))
+    if gate.comparative_only:
+        _possession_comparative(cv, ctx, gate, sec)
+        return sec
     if not gate.passed:
         sec.blocks.append(Block("abstain", text=(
             "Ball-dependent possession detail (tempo, PPDA, ball-xT, phase split, verticality): "
@@ -365,14 +523,54 @@ def _possession_section(cv: dict, ctx: Ctx, gate: GateResult) -> Section:
     return sec
 
 
+def _defence_comparative(cv: dict, ctx: Ctx, gate: GateResult, sec: Section) -> None:
+    """Append the comparative-only (relative-claims) out-of-possession block: rates/shares vs opponent."""
+    f, o = ctx.focus, ctx.opponent
+    sec.blocks.append(Block("cmpnote", text=gate.comparative_label))
+    pif, pio = _fr(cv, "theory", f, "pressing_intensity"), _fr(cv, "theory", o, "pressing_intensity")
+    if pif is not None and pio is not None:
+        sec.blocks.append(Block("p", text=(
+            f"Pressing intensity (a 0-1 time-to-intercept index) runs **{_pct(pif)}** for {f} against "
+            f"**{_pct(pio)}** for {o} -- an intensity comparison, not a count of actions.")))
+    cf = _fr(cv, "theory", f, "counterpress_regain_curve") or {}
+    co = _fr(cv, "theory", o, "counterpress_regain_curve") or {}
+    if cf and co:
+        sec.blocks.append(Block("p", text=(
+            f"Counterpress decay, side by side: within 5 s of a loss {f} regain the ball "
+            f"**{_pctv(cf['5s'] * 100)}** of the time against {o}'s **{_pctv(co['5s'] * 100)}**, and "
+            f"by 8 s **{_pctv(cf['8s'] * 100)}** vs **{_pctv(co['8s'] * 100)}** -- both curves are "
+            f"per-team regain shares.")))
+    crf = _fr(cv, "transitions", f, "counterpress_rate")
+    cro = _fr(cv, "transitions", o, "counterpress_rate")
+    conv = _comparative_metrics(cv, f, o).get("high_regain_conv_rate")
+    bits = []
+    if crf is not None and cro is not None:
+        bits.append(f"{f} commit to the counterpress on **{_pct(crf)}** of losses vs {o}'s "
+                    f"**{_pct(cro)}**")
+    if conv is not None:
+        bits.append(f"but convert **{_pct(conv[f])}** of their losses into high regains against "
+                    f"{o}'s **{_pct(conv[o])}**")
+    if bits:
+        sec.blocks.append(Block("p", text=(bits[0][0].upper() + bits[0][1:]
+                                           + ("; " + "; ".join(bits[1:]) if len(bits) > 1 else "")
+                                           + " -- relative conversion, not absolute regains.")))
+
+
 def _defence_section(cv: dict, ctx: Ctx, gate: GateResult) -> Section:
-    """(c) Out of possession -- pressing, counterpress decay, regains, line height. Mostly gated."""
+    """(c) Out of possession -- pressing, counterpress decay, regains, line height. Mostly gated.
+
+    Absolute intensities/counts render only in the absolute tier; team rates/shares in the comparative
+    tier; an explicit abstention otherwise. The position-only line-height line always renders.
+    """
     sec = Section("Out of possession", "CV")
     line = _fr(cv, "line_height", ctx.focus, "def_line_debiased_m")
     if line is not None:
         sec.blocks.append(Block("p", text=(
             f"{ctx.focus} defend from a high starting point -- the visibility-corrected line at "
             f"**{_m(line)}** is a front-foot posture (position-only, always rendered).")))
+    if gate.comparative_only:
+        _defence_comparative(cv, ctx, gate, sec)
+        return sec
     if not gate.passed:
         sec.blocks.append(Block("abstain", text=(
             "Ball-dependent pressing detail (pressing intensity, counterpress decay curve, regains): "
@@ -404,21 +602,42 @@ def _defence_section(cv: dict, ctx: Ctx, gate: GateResult) -> Section:
 def _seam(title: str, claim: str, backing: str, falsifies: str, family: str,
           gate: GateResult) -> Block:
     """Build one counter-structure seam, fully withholding it if it rests on a gated ball family."""
-    if family in BALL_FAMILIES and not gate.passed:
+    if family in BALL_FAMILIES and not gate.renders_ball:
+        return Block("abstain", text=f"Seam withheld ({title}, ball-derived): {gate.abstention}")
+    return Block("seam", claim=claim, backing=backing, falsifies=falsifies)
+
+
+def _ball_seam(gate: GateResult, title: str,
+               absolute: tuple[str, str, str], comparative: tuple[str, str, str]) -> Block:
+    """A ball-derived seam that swaps in comparative (relative-claims) wording for the comparative tier.
+
+    ``absolute`` and ``comparative`` are each ``(claim, backing, falsifies)``. Abstains entirely when the
+    match clears no ball tier. Non-ball (position-only) seams keep using ``_seam`` and never abstain.
+    """
+    if gate.tier == "absolute":
+        claim, backing, falsifies = absolute
+    elif gate.tier == "comparative":
+        claim, backing, falsifies = comparative
+    else:
         return Block("abstain", text=f"Seam withheld ({title}, ball-derived): {gate.abstention}")
     return Block("seam", claim=claim, backing=backing, falsifies=falsifies)
 
 
 def _seams_section(cv: dict, ctx: Ctx, gate: GateResult) -> Section:
     """(d) Counter-structure seams -- how to play against the focus team, grounded + falsifiable."""
-    f = ctx.focus
+    f, o = ctx.focus, ctx.opponent
     sec = Section(f"Counter-structure seams -- how to play against {f}", "CV")
     sec.blocks.append(Block("p", text=(
         "Each seam pairs a concrete idea with the exact CV number behind it and a one-line condition "
         "that would close it. Seams resting on ball-tracked families abstain when the match fails the "
         "evidence gate.")))
+    if gate.comparative_only:
+        sec.blocks.append(Block("cmpnote", text=gate.comparative_label))
     curve = _fr(cv, "theory", f, "counterpress_regain_curve") or {}
+    curve_o = _fr(cv, "theory", o, "counterpress_regain_curve") or {}
     tr = _fr(cv, "transitions", f) or {}
+    tr_o = _fr(cv, "transitions", o) or {}
+    conv = _comparative_metrics(cv, f, o).get("high_regain_conv_rate") or {}
     hs = _fr(cv, "theory", f, "halfspace_share")
     ce = _fr(cv, "theory", f, "centre_share")
     wg = _fr(cv, "theory", f, "wing_share")
@@ -428,18 +647,31 @@ def _seams_section(cv: dict, ctx: Ctx, gate: GateResult) -> Section:
     a3 = _fr(ten, "attacking_third_share", "mean")
 
     if curve:
-        sec.blocks.append(_seam(
-            title="counterpress-timing window",
-            claim=(f"Retain through the first press and play forward within about 5 s. {f} recover "
-                   f"**{_pctv(curve['5s'] * 100)}** of their losses inside 5 s but the curve flattens "
-                   f"to **{_pctv(curve['8s'] * 100)}** by 8 s -- beating the initial counterpress buys "
-                   "a clean progression window."),
-            backing=(f"counterpress regain curve {_pctv(curve['3s'] * 100)} (3 s) -> "
-                     f"{_pctv(curve['5s'] * 100)} (5 s) -> {_pctv(curve['8s'] * 100)} (8 s), over "
-                     f"{tr.get('counterpress_losses', tr.get('turnovers_lost', 0))} tracked losses."),
-            falsifies=(f"{f}'s 5 s regain rate rises well above {_pctv(curve['5s'] * 100)} "
-                       "-- a counterpress that no longer plateaus."),
-            family="counterpress", gate=gate))
+        absolute = (
+            (f"Retain through the first press and play forward within about 5 s. {f} recover "
+             f"**{_pctv(curve['5s'] * 100)}** of their losses inside 5 s but the curve flattens "
+             f"to **{_pctv(curve['8s'] * 100)}** by 8 s -- beating the initial counterpress buys "
+             "a clean progression window."),
+            (f"counterpress regain curve {_pctv(curve['3s'] * 100)} (3 s) -> "
+             f"{_pctv(curve['5s'] * 100)} (5 s) -> {_pctv(curve['8s'] * 100)} (8 s), over "
+             f"{tr.get('counterpress_losses', tr.get('turnovers_lost', 0))} tracked losses."),
+            (f"{f}'s 5 s regain rate rises well above {_pctv(curve['5s'] * 100)} "
+             "-- a counterpress that no longer plateaus."))
+        if curve_o:
+            comparative = (
+                (f"Retain through the first press and play forward within about 5 s. Side by side, "
+                 f"{f} recover **{_pctv(curve['5s'] * 100)}** of losses inside 5 s vs {o}'s "
+                 f"**{_pctv(curve_o['5s'] * 100)}**, and by 8 s **{_pctv(curve['8s'] * 100)}** vs "
+                 f"**{_pctv(curve_o['8s'] * 100)}** -- the earlier-flattening side is the one to "
+                 "play through."),
+                (f"regain-curve comparison, {f} vs {o}: 5 s {_pctv(curve['5s'] * 100)} vs "
+                 f"{_pctv(curve_o['5s'] * 100)}, 8 s {_pctv(curve['8s'] * 100)} vs "
+                 f"{_pctv(curve_o['8s'] * 100)} (per-team regain shares; relative claim only)."),
+                (f"{f}'s 5 s regain rate pulls clear of {o}'s {_pctv(curve_o['5s'] * 100)} "
+                 "-- the relative edge closes."))
+        else:
+            comparative = absolute
+        sec.blocks.append(_ball_seam(gate, "counterpress-timing window", absolute, comparative))
     if None not in (hs, ce, wg):
         sec.blocks.append(_seam(
             title="wide-lane underload",
@@ -465,19 +697,33 @@ def _seams_section(cv: dict, ctx: Ctx, gate: GateResult) -> Section:
             falsifies=(f"{f} drop the line well below {_m(line)} toward their own half."),
             family="line", gate=gate))
     if tr.get("counterpress_rate") is not None:
-        sec.blocks.append(_seam(
-            title="transition after beating the press",
-            claim=(f"Commit to the counter the instant you win it back. {f} pour into the "
-                   f"counterpress (**{_pct(tr['counterpress_rate'])}** rate, "
-                   f"**{_one(tr['mean_recovery_s'])} s** mean re-engagement) yet convert only "
-                   f"**{tr['high_regains']}** of **{tr['turnovers_lost']}** losses into high regains -- "
-                   "survive first contact and the pitch opens."),
-            backing=(f"counterpress rate {_pct(tr['counterpress_rate'])}, mean recovery "
-                     f"{_one(tr['mean_recovery_s'])} s, {tr['high_regains']} high regains vs "
-                     f"{tr['turnovers_lost']} losses."),
-            falsifies=(f"{f}'s high regains rise toward a third of their losses -- a "
-                       "counterpress that wins the ball high rather than just delaying."),
-            family="transitions", gate=gate))
+        absolute = (
+            (f"Commit to the counter the instant you win it back. {f} pour into the "
+             f"counterpress (**{_pct(tr['counterpress_rate'])}** rate, "
+             f"**{_one(tr['mean_recovery_s'])} s** mean re-engagement) yet convert only "
+             f"**{tr['high_regains']}** of **{tr['turnovers_lost']}** losses into high regains -- "
+             "survive first contact and the pitch opens."),
+            (f"counterpress rate {_pct(tr['counterpress_rate'])}, mean recovery "
+             f"{_one(tr['mean_recovery_s'])} s, {tr['high_regains']} high regains vs "
+             f"{tr['turnovers_lost']} losses."),
+            (f"{f}'s high regains rise toward a third of their losses -- a "
+             "counterpress that wins the ball high rather than just delaying."))
+        if conv and o in conv and f in conv and tr_o.get("counterpress_rate") is not None:
+            comparative = (
+                (f"Commit to the counter the instant you win it back. {f} pour into the counterpress "
+                 f"on **{_pct(tr['counterpress_rate'])}** of losses vs {o}'s "
+                 f"**{_pct(tr_o['counterpress_rate'])}**, yet convert only **{_pct(conv[f])}** of "
+                 f"their losses into high regains against {o}'s **{_pct(conv[o])}** -- survive first "
+                 "contact and the pitch opens."),
+                (f"counterpress rate {_pct(tr['counterpress_rate'])} vs {o} "
+                 f"{_pct(tr_o['counterpress_rate'])}; high-regain conversion {_pct(conv[f])} vs "
+                 f"{_pct(conv[o])} (relative rates, no absolute regain counts)."),
+                (f"{f}'s high-regain conversion pulls clear of {o}'s {_pct(conv[o])} -- a "
+                 "counterpress that wins the ball high rather than just delaying."))
+        else:
+            comparative = absolute
+        sec.blocks.append(_ball_seam(gate, "transition after beating the press", absolute,
+                                     comparative))
     # Fifth seam: the C5 opponent-model territory idea is WC-pooled and applies ONLY to the national
     # team; club matches get a position-only compactness/width seam in its place (no C5 claim).
     if ctx.has_fifa and a3 is not None:
@@ -745,6 +991,12 @@ def _oracle_meta(match_id: str, gate: GateResult) -> tuple[str, str, bool]:
     return m.teams[0], m.teams[1], is_fifa
 
 
+# Header verdict word + CSS class per gate tier.
+_TIER_WORD = {"absolute": "PASS", "comparative": "COMPARATIVE (relative claims only)",
+              "abstain": "ABSTAIN on ball families"}
+_TIER_CLS = {"absolute": "pass", "comparative": "cmp", "abstain": "abstain"}
+
+
 def render_markdown(sections: list[Section], match_id: str, gate: GateResult, audit: dict) -> str:
     """Render the document to Markdown."""
     focus, opp, is_fifa = _oracle_meta(match_id, gate)
@@ -762,14 +1014,24 @@ def render_markdown(sections: list[Section], match_id: str, gate: GateResult, au
     lines.append(f"**Ball-evidence gate:** post-link coverage {gate.coverage_pct:.0f}% "
                  f"(>= {GATE_COVERAGE_MIN_PCT:.0f}%), pass-recall proxy {gate.recall_pct:.1f}% "
                  f"(>= {GATE_RECALL_MIN_PCT:.0f}%) -> "
-                 f"**{'PASS' if gate.passed else 'ABSTAIN on ball families'}**.  "
+                 f"**{_TIER_WORD[gate.tier]}**.  "
                  f"Body guardrail precision: {audit['precision'] * 100:.0f}% "
                  f"({audit['n_backed']}/{audit['n_numbers']} numbers CV-backed).")
     lines.append("")
     lines.append(f"*Gate inputs read from `outputs/eval/{match_id}_ball_eval.json` "
                  f"(oracle: {oracle_name}).*")
     lines.append("")
-    if gate.coverage_clear_recall_short:
+    if gate.comparative_only:
+        spread = 0.0 if gate.symmetry_spread is None else gate.symmetry_spread
+        lines.append(f"*Gate readout: coverage clears the {GATE_COVERAGE_MIN_PCT:.0f}% bar by "
+                     f"{gate.coverage_pct - GATE_COVERAGE_MIN_PCT:.1f} pp; the pass-recall proxy is "
+                     f"{gate.recall_pct:.1f}% -- below the {GATE_RECALL_MIN_PCT:.0f}% absolute bar, but "
+                     f"team-symmetric (spread {spread:.3f} <= {GATE_SYMMETRY_MAX_SPREAD:.2f}). Ball "
+                     f"families therefore render in COMPARATIVE form only -- team shares, ratios and "
+                     f"team-vs-team differences; absolute ball volumes are withheld. Position-only "
+                     f"structural sections render in full.*")
+        lines.append("")
+    elif gate.coverage_clear_recall_short:
         lines.append(f"*Gate readout: coverage clears the {GATE_COVERAGE_MIN_PCT:.0f}% bar by "
                      f"{gate.coverage_pct - GATE_COVERAGE_MIN_PCT:.1f} pp, but the pass-recall proxy "
                      f"falls {GATE_RECALL_MIN_PCT - gate.recall_pct:.1f} pp short of the "
@@ -789,6 +1051,8 @@ def render_markdown(sections: list[Section], match_id: str, gate: GateResult, au
                 lines.append("")
             elif b.kind == "abstain":
                 lines += [f"> **Withheld.** {b.text}", ""]
+            elif b.kind == "cmpnote":
+                lines += [f"> {b.text}", ""]
             elif b.kind == "seam":
                 lines += _md_seam(b)
                 lines.append("")
@@ -829,8 +1093,8 @@ def render_html(sections: list[Section], match_id: str, gate: GateResult, audit:
     """Render a self-contained, print-friendly HTML document (embedded CSS, no CDN)."""
     focus, opp, is_fifa = _oracle_meta(match_id, gate)
     oracle_name = gate.oracle_source or "FIFA PMSR"
-    gate_cls = "pass" if gate.passed else "abstain"
-    gate_word = "PASS" if gate.passed else "ABSTAIN on ball families"
+    gate_cls = _TIER_CLS[gate.tier]
+    gate_word = _TIER_WORD[gate.tier]
     body_html: list[str] = []
     for s in sections:
         tag = s.provenance
@@ -844,7 +1108,15 @@ def render_html(sections: list[Section], match_id: str, gate: GateResult, audit:
                  f'<code>outputs/eval/{_html.escape(match_id)}_ball_eval.json</code> '
                  f'(oracle: {_html.escape(oracle_name)}).</p>')
     readout = ""
-    if gate.coverage_clear_recall_short:
+    if gate.comparative_only:
+        spread = 0.0 if gate.symmetry_spread is None else gate.symmetry_spread
+        readout = (f'<p class="legend">Gate readout: coverage clears the {GATE_COVERAGE_MIN_PCT:.0f}% '
+                   f'bar by {gate.coverage_pct - GATE_COVERAGE_MIN_PCT:.1f} pp; pass-recall '
+                   f'{gate.recall_pct:.1f}% is below the {GATE_RECALL_MIN_PCT:.0f}% absolute bar but '
+                   f'team-symmetric (spread {spread:.3f} &le; {GATE_SYMMETRY_MAX_SPREAD:.2f}) &mdash; '
+                   f'ball families render in COMPARATIVE form only (shares/ratios/differences), '
+                   f'absolute volumes withheld; structural sections render in full.</p>')
+    elif gate.coverage_clear_recall_short:
         readout = (f'<p class="legend">Gate readout: coverage clears the {GATE_COVERAGE_MIN_PCT:.0f}% '
                    f'bar by {gate.coverage_pct - GATE_COVERAGE_MIN_PCT:.1f} pp, but pass-recall falls '
                    f'{GATE_RECALL_MIN_PCT - gate.recall_pct:.1f} pp short of the '
@@ -880,6 +1152,8 @@ def _html_block(b: Block) -> str:
         return f"<p>{_inline_html(b.text)}</p><ul>{items}</ul>"
     if b.kind == "abstain":
         return f'<div class="abstain-box"><strong>Withheld.</strong> {_inline_html(b.text)}</div>'
+    if b.kind == "cmpnote":
+        return f'<div class="cmp-box">{_inline_html(b.text)}</div>'
     if b.kind == "seam":
         parts = [f'<div class="seam"><p class="seam-claim">{_inline_html(b.claim)}</p>']
         if b.backing:
@@ -899,7 +1173,8 @@ def _html_block(b: Block) -> str:
 
 
 _CSS = """
-:root{--ink:#1a1a1a;--muted:#5a5a5a;--cv:#0b6b3a;--fifa:#8a5a00;--line:#e2e2e2;--abst:#b03030;}
+:root{--ink:#1a1a1a;--muted:#5a5a5a;--cv:#0b6b3a;--fifa:#8a5a00;--line:#e2e2e2;--abst:#b03030;
+ --cmp:#0a5a8a;}
 *{box-sizing:border-box;}
 body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:var(--ink);max-width:820px;
  margin:0 auto;padding:40px 28px;line-height:1.55;font-size:16px;}
@@ -910,6 +1185,7 @@ h2{font-size:19px;margin:34px 0 10px;padding-bottom:6px;border-bottom:1px solid 
  background:#fafafa;font-size:14.5px;}
 .gate .pass{color:var(--cv);font-weight:700;}
 .gate .abstain{color:var(--abst);font-weight:700;}
+.gate .cmp{color:var(--cmp);font-weight:700;}
 .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;padding:2px 7px;
  border-radius:4px;vertical-align:middle;margin-right:6px;}
 .tag-cv{background:#e6f4ec;color:var(--cv);}
@@ -923,6 +1199,8 @@ ul{margin:6px 0 14px;padding-left:22px;}
 li{margin:3px 0;}
 .abstain-box{border-left:4px solid var(--abst);background:#fdf3f3;padding:10px 14px;margin:12px 0;
  color:#7a2020;border-radius:0 6px 6px 0;font-size:14.5px;}
+.cmp-box{border-left:4px solid var(--cmp);background:#eef6fb;padding:10px 14px;margin:12px 0;
+ color:#0a4a70;border-radius:0 6px 6px 0;font-size:14.5px;}
 .seam{border:1px solid var(--line);border-left:4px solid var(--cv);border-radius:0 8px 8px 0;
  padding:12px 16px;margin:12px 0;background:#fbfdfb;}
 .seam-claim{margin:0 0 6px;font-weight:600;}
@@ -982,7 +1260,8 @@ def generate(match_id: str, out: Path | None = None) -> dict:
 def _print_summary(res: dict) -> None:
     gate: GateResult = res["gate"]
     audit = res["audit"]
-    verdict = "PASS" if gate.passed else "ABSTAIN(ball families)"
+    verdict = {"absolute": "PASS", "comparative": "COMPARATIVE(relative-only)",
+               "abstain": "ABSTAIN(ball families)"}[gate.tier]
     print(f"[{res['match']}] gate={verdict} coverage={gate.coverage_pct:.0f}% "
           f"recall={gate.recall_pct:.1f}%  guardrail={audit['precision'] * 100:.0f}% "
           f"({audit['n_backed']}/{audit['n_numbers']})")

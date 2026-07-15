@@ -18,6 +18,7 @@ from report.report_v2 import (
     build_document,
     evaluate_gate,
     gate_decision,
+    gate_tier,
     load_ball_eval,
     render_html,
     render_markdown,
@@ -104,6 +105,33 @@ def test_gate_matches_declared_expectations():
     assert rv2.evaluate_gate("france_senegal").passed is True
     assert rv2.evaluate_gate("france_iraq").passed is False
     assert rv2.evaluate_gate("france_norway").passed is False
+
+
+def test_gate_tier_three_way_selection():
+    # ABSOLUTE: both bars clear (spread irrelevant).
+    assert gate_tier(46.0, 55.0, None) == "absolute"
+    assert gate_tier(40.0, 50.0, 0.30) == "absolute"
+    # COMPARATIVE: coverage clears, recall misses, but capture is team-symmetric.
+    assert gate_tier(51.9, 48.2, 0.009) == "comparative"
+    assert gate_tier(40.0, 10.0, 0.05) == "comparative"     # spread exactly at the band
+    # ABSTAIN: coverage clears + symmetric but... coverage below bar.
+    assert gate_tier(39.9, 48.0, 0.009) == "abstain"
+    # ABSTAIN: coverage clears, symmetric-but-too-wide spread.
+    assert gate_tier(52.0, 48.0, 0.051) == "abstain"
+    # ABSTAIN: coverage clears, recall short, but NO symmetry input persisted (FIFA matches).
+    assert gate_tier(52.0, 48.0, None) == "abstain"
+    # ABSTAIN: everything short.
+    assert gate_tier(10.0, 10.0, 0.001) == "abstain"
+
+
+def test_brighton_gate_is_comparative_tier():
+    g = evaluate_gate("brighton_manutd")
+    assert g.tier == "comparative" and g.comparative_only is True and g.renders_ball is True
+    assert g.symmetry_spread == pytest.approx(0.009)
+    assert g.passed is False   # not the absolute tier
+    # the declared FIFA-oracle matches never carry a symmetry spread -> never comparative
+    for mid in MATCHES:
+        assert evaluate_gate(mid).comparative_only is False
 
 
 # --------------------------------------------------------------------------------------------------
@@ -231,15 +259,30 @@ def test_evaluate_gate_falls_back_to_constant(tmp_path):
 # --------------------------------------------------------------------------------------------------
 # 7. Club (PL) match: brighton_manutd renders structural sections, withholds ball families, no C5.
 # --------------------------------------------------------------------------------------------------
-def test_brighton_body_guardrail_clean_and_gated():
+def test_brighton_body_guardrail_clean_and_comparative():
     sections, gate, facts, audit = build_document("brighton_manutd")
     assert audit["n_unbacked"] == 0, audit["unbacked"]
     assert audit["precision"] == pytest.approx(1.0)
     assert audit["n_numbers"] > 0
-    assert gate.passed is False and gate.coverage_clear_recall_short is True
+    assert gate.comparative_only is True
     kinds = [b.kind for s in sections for b in s.blocks]
-    assert "abstain" in kinds          # ball families withheld
-    assert "seam" in kinds             # position-only seams still render
+    # comparative tier: ball families now render (with a label), so no abstention remains in the body
+    assert "abstain" not in kinds
+    assert "cmpnote" in kinds           # each comparative ball section carries the relative-claims label
+    assert "seam" in kinds              # position-only + comparative ball seams render
+
+
+def test_brighton_comparative_body_has_no_absolute_ball_counts():
+    # The comparative body must never quote an absolute ball total/count of the focus team. The exact
+    # fact-store leaves that are absolute counts must not surface in the audited (body=True) sections.
+    sections, _, _, _ = build_document("brighton_manutd")
+    body = body_text([s for s in sections if s.body])
+    for leak in ("213 passes", "213 ", "546", "797", "39 defensive-line breaks",
+                 "90 high", "264 losses", "high regains from", "129 pressures"):
+        assert leak not in body, f"absolute ball count leaked into comparative body: {leak!r}"
+    # but the comparative shares/labels ARE present
+    assert "of the two sides' tracked passing volume" in body
+    assert "team-symmetric" in body and "absolute volumes withheld" in body
 
 
 def test_brighton_no_fifa_and_no_c5_claim():
@@ -265,10 +308,15 @@ def test_brighton_oracle_appendix_and_no_none():
     assert "recall proxy" in md                 # pass-volume validation
     # roster-free degradation: no Python-None repr leaks into the CV body prose
     assert "None" not in body_text(sections)
-    assert "<!doctype html>" in htm and "ABSTAIN on ball families" in htm
+    assert "<!doctype html>" in htm and "COMPARATIVE (relative claims only)" in htm
 
 
-def test_brighton_gate_readout_shows_margin():
+def test_brighton_gate_readout_shows_comparative():
     sections, gate, facts, audit = build_document("brighton_manutd")
     md = render_markdown(sections, "brighton_manutd", gate, audit)
-    assert "narrow miss" in md and "1.8 pp short" in md
+    htm = render_html(sections, "brighton_manutd", gate, audit)
+    # the readout explains the comparative decision, not a plain withhold
+    assert "COMPARATIVE form only" in md and "team-symmetric" in md and "0.009" in md
+    assert "spread 0.009" in htm and "COMPARATIVE form only" in htm
+    # verdict word in the header
+    assert "COMPARATIVE (relative claims only)" in md

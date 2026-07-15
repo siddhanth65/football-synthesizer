@@ -21,6 +21,10 @@ really "detector under-populated" buckets — treat the split as binary. Queued:
 (not persisted in dense parquets today) if a semantic 4-way shot classifier is ever needed.
 **Consequence for the prof decision:** the relative-claims bar (symmetric ~48% capture) is now the
 ONLY path to PL ball-family claims — the decision cannot be deferred behind "the filter will fix it".
+**DECIDED (user, 2026-07-15): adopt the relative-claims regime.** Pre-committed bar: ball families
+may render in COMPARATIVE form only (shares/ratios/team-vs-team differences, never absolute
+totals) when coverage >=40% AND recall-proxy team-symmetry spread <=0.05; absolute-claim rendering
+still requires the original 50% recall gate. Implementation delegated to report_v2 (in flight).
 
 ## 2026-07-14 — AUDIT VERIFIED (2 corrections shipped), REPO PUSHED, GSR POSITIONING, DECEMBER PLAN
 
