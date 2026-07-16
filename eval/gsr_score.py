@@ -437,7 +437,7 @@ def _relink_and_write(
         from generator.extract import _build_detector  # noqa: PLC0415
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        embedder = OsnetEmbedder(params.model_name, device=device)
+        embedder = OsnetEmbedder(params.model_name, device=device, weights=params.weights)
         detector = _build_detector(device, "football")
     pred_out.mkdir(parents=True, exist_ok=True)
     stats: dict[str, dict] = {}

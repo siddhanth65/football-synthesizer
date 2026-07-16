@@ -10,14 +10,25 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+import pytest
+
 from generator.track_relink import (
     Fragment,
     frags_mergeable,
     greedy_merge,
     merge_precision,
     pair_similarities,
+    resolve_reid_weights,
     summarize_fragments,
 )
+
+
+def test_resolve_reid_weights_passthrough_and_unknown_key(tmp_path):
+    ckpt = tmp_path / "custom.pth.tar"  # an existing path is used verbatim (no network)
+    ckpt.write_bytes(b"x")
+    assert resolve_reid_weights(str(ckpt)) == ckpt
+    with pytest.raises(KeyError):  # neither a file nor a known model-zoo key
+        resolve_reid_weights("not_a_real_reid_model")
 
 
 def _unit(v: list[float]) -> np.ndarray:

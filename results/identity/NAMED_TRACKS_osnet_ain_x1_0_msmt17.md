@@ -24,19 +24,20 @@ Decisive case: our verified `20` back-reads are Diogo Dalot (shirtNumber 20); no
 | stage | count |
 |---|---|
 | gated close-up anchors (step-3 survivors) | 226 |
-| attached to a fragment (ReID margin gate) | 66 |
-| unattached: ambiguous | 95 |
+| attached to a fragment (ReID margin gate) | 73 |
+| unattached: ambiguous | 88 |
 | unattached: no_wide_frame | 65 |
-| named fragments after guard | 43 |
-| named-track rows written | 43 |
+| named fragments after guard | 42 |
+| named-track rows written | 42 |
 
 Anchor number histogram (shirtNumber): `{1: 1, 6: 1, 8: 186, 10: 27, 11: 3, 20: 8}` -- hero-shot concentration (Bruno #8 dominates).
 
 ## Propagation-guard decisions
 
-- Fragment-level naming: 43 fragments named by their own anchors.
+- Fragment-level naming: 42 fragments named by their own anchors.
 
-- Fragment disagreement flags (two anchors, different numbers, one fragment -> named neither): 0.
+- Fragment disagreement flags (two anchors, different numbers, one fragment -> named neither): 1.
+  - h1_chunk_003 track 743: numbers {8: 5, 10: 2}
 - Relink-merge clause (>=2 agreeing anchors to cross a merge): **not exercised** -- brighton_manutd carries no relink remap (relink is benchmark-side only, 35% merge precision). Covered by the synthetic test `test_anchor_wire.py`.
 
 ## Validation: our visible-minutes proxy vs oracle (directional sanity)
@@ -45,11 +46,13 @@ Visible-minutes != played-minutes. Broadcast shows ~37% of the pitch-time of any
 
 | player | team | # | our anchors | named frags | our visible min | oracle min | oracle touches |
 |---|---|---|---|---|---|---|---|
-| Bruno Fernandes | Man Utd | 8 | 56 | 36 | 6.5 | 79.0 | 49.0 |
-| Marcus Rashford | Man Utd | 10 | 5 | 4 | 0.9 | 65.0 | 23.0 |
-| Julio Enciso | Brighton | 10 | 5 | 3 | 0.2 | 11.0 | 12.0 |
+| Bruno Fernandes | Man Utd | 8 | 53 | 33 | 6.2 | 79.0 | 49.0 |
+| Marcus Rashford | Man Utd | 10 | 4 | 3 | 1.0 | 65.0 | 23.0 |
+| Diogo Dalot | Man Utd | 20 | 2 | 2 | 0.3 | 90.0 | 81.0 |
+| Julio Enciso | Brighton | 10 | 6 | 3 | 0.2 | 11.0 | 12.0 |
+| Altay Bayındır | Man Utd | 1 | 1 | 1 | 0.1 | nan | nan |
 
-Spearman(our_visible_min, oracle_min) over 3 named players with oracle minutes: **1.0** (None if <3 players or degenerate).
+Spearman(our_visible_min, oracle_min) over 4 named players with oracle minutes: **0.4** (None if <3 players or degenerate).
 
 Touch-count proxy: **skipped**. It needs per-frame ball-possession association on top of sparse named fragments; the post-`link_ball` usable-ball track and the ReID-limited naming make it noise, not signal, at this yield. Stated per the task's 'else skip and say so'.
 
@@ -57,23 +60,6 @@ Touch-count proxy: **skipped**. It needs per-frame ball-possession association o
 
 - **Hero-shot concentration:** ~5-6 distinct back-numbers surface legible close-up reads this match; #8 (Bruno) is 82% of anchors. This names the players who get repeated close-up hero shots, not a uniform XI.
 
-- **ReID is the bottleneck, not anchor precision.** OSNet is kit-dominated (Stage-2a: median cosine 0.81 on same-team pairs; 35% merge precision), so the margin gate rejects most same-kit disambiguations -- that is why attachment yield (66) is far below the anchor count (226). Anchor *reads* are ~99% precise; carrying them onto the right *track* is the hard, unsolved half.
+- **ReID is the bottleneck, not anchor precision.** OSNet is kit-dominated (Stage-2a: median cosine 0.81 on same-team pairs; 35% merge precision), so the margin gate rejects most same-kit disambiguations -- that is why attachment yield (73) is far below the anchor count (226). Anchor *reads* are ~99% precise; carrying them onto the right *track* is the hard, unsolved half.
 
 - **Season-scale extrapolation:** at ~5-6 hero-shot players/match, a 38-match season yields close-up anchors concentrated on the same marquee names (Bruno, Rashford, ...). Close-up anchors **supplement** roster/relink priors for those players; uniform per-player naming still needs the cluster/VLM close-up reader (Sem 2).
-
-## Stage-2c re-measurement: football-domain ReID embedder (osnet_ain_x1_0 MSMT17)
-
-Re-ran the whole funnel with a re-ID-objective embedder instead of ImageNet OSNet (`python -m tools.wire_anchors --model-name osnet_ain_x1_0 --weights osnet_ain_x1_0_msmt17`; variant outputs `*_osnet_ain_x1_0_msmt17.*`, baseline artifacts untouched). `osnet_ain_x1_0` MSMT17 was the best of four embedders on the pilot merge-precision gate (41.1% vs 35.0%; see `results/gsr_benchmark/GSR_BENCHMARK.md` Stage 2c).
-
-| metric | ImageNet baseline | osnet_ain_x1_0 MSMT17 |
-|---|---|---|
-| attached to a fragment (margin gate) | 66 / 226 | **73 / 226** |
-| unattached: ambiguous | **95** | **88** |
-| unattached: no_wide_frame | 65 | 65 |
-| named fragments after guard | 43 | 42 |
-| distinct **named players** | **3** | **5** |
-| Spearman(our_visible_min, oracle_min) | 1.0 (n=3) | 0.4 (n=4) |
-
-Named players gained: **Diogo Dalot #20** and **Altay Bayindir #1** join Bruno #8, Rashford #10, Enciso #10-BHA.
-
-**Honest read.** The better embedder helps only at the margin: ambiguous rate 95->88 (-7), attached 66->73 (+7), and 2 more marquee names. It does **not** break the same-kit wall -- 88/226 anchors are still rejected because the same-kit cosine separation is still ~0.04 (Stage 2c diagnostic). The two new names are the *easy* cases, not a same-kit win: **#1 is the goalkeeper** (different-coloured kit -> trivially separable), and **#20** has few wearers so the roster/team candidate filter already thins the field before ReID. Ordering correlation dropped (1.0->0.4) because Dalot is high-oracle-minutes but near-zero visible-minutes (he breaks the rank on n=4) -- more names, noisier proxy, still the expected `ours << oracle` direction. Anchor *reads* remain ~99% precise; carrying them to the right same-kit *track* is still the unsolved half, and person-domain ReID does not solve it (football part-based PRTreID is the remaining Sem-2 lever).

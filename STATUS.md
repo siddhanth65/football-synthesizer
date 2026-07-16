@@ -2,6 +2,23 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-16/17 — ARC CLOSE: ReID wall 4-way confirmed; named players 3→5; B4 scope evidence-fixed
+
+**ReID ladder (deep-worker requested: opus):** person-domain ReID CANNOT break the same-kit wall —
+ImageNet/Market-1501/MSMT17/MSMT-AIN all leave same-kit separation ~0.04; merge precision best 41%
+(AIN) vs the 80% bar → **relink stays benchmark-side; frozen gate correctly blocked the v2
+re-score.** Named players 3→**5** with AIN (adds Dalot #20 + GK Bayindir #1 — the easy cases; GK
+kit differs, rare number thins candidates). Weights now a wired parameter (back-compat default
+unchanged). **The real lever is located + priced: PRTreID (part-based, SoccerNet-trained,
+zenodo 10653453) — Sem-2 integration, needs prtreid pkg + HRNet.**
+**B4 imputation scope FIXED by baseline probe** (`results/imputation_probe.md`): interpolation is a
+solved floor (0.8-3.6 m); extrapolation is the headroom (3.4→6.8 m, inside FIFA's off-screen band);
+structure-aware centroid_rel OVERTAKES naive baselines at 4-8 s → build a learned STRUCTURE-AWARE
+imputer for the EXTRAPOLATION regime only; external truth = SkillCorner. Two-team opponent
+structural section shipped in report_v2 (guardrail 100% ×4). Roboflow basketball-ID blog reviewed:
+validates our ResNet>VLM + SigLIP-failure calls; adopted levers queued: roster-constrained decoding
++ N-consecutive-agreement on gated reads; Sem-2 idea: jersey-number-region detector class.
+
 ## 2026-07-16 — B2 STAGE 2c: FIRST NAMED PLAYERS — video→number→name→oracle-validated, end to end
 
 `generator/anchor_wire.py` + `tools/wire_anchors.py` (deep-worker requested: opus; 7 CPU tests).

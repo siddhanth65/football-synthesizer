@@ -218,8 +218,19 @@ def _spearman(a: list[float], b: list[float]) -> float | None:
     return round(float(np.corrcoef(ra, rb)[0, 1]), 3)
 
 
-def main() -> None:
-    """Attach -> guard -> name -> validate; write the named-tracks parquet and report."""
+def main(model_name: str = "osnet_x0_25", weights: str | None = None) -> None:
+    """Attach -> guard -> name -> validate; write the named-tracks parquet and report.
+
+    Args:
+        model_name: OSNet backbone for the ReID embedder (``osnet_x1_0``/``osnet_ain_x1_0`` for
+            re-ID-objective weights).
+        weights: torchreid re-ID weights key/path, or ``None`` for the ImageNet baseline embedder.
+            When set, outputs are written to ``*_<weights>`` variant paths so the baseline artifacts
+            (ImageNet run) are never clobbered.
+    """
+    tag = f"_{weights}" if weights else ""
+    out_parquet = OUT_PARQUET.with_name(OUT_PARQUET.stem + tag + OUT_PARQUET.suffix)
+    report = REPORT.with_name(REPORT.stem + tag + REPORT.suffix)
     match = registry.get(MATCH_ID)
     df = match.load_aligned()
     oracle = pd.read_parquet(ORACLE)
@@ -244,8 +255,8 @@ def main() -> None:
             need[a.chunk].add(wf)
     print(f"need candidate embeddings on {sum(len(v) for v in need.values())} wide frames")
 
-    embedder = OsnetEmbedder()
-    print(f"OSNet on {embedder.device}")
+    embedder = OsnetEmbedder(model_name, weights=weights)
+    print(f"OSNet ({model_name}, weights={weights}) on {embedder.device}")
     anchor_embs = embed_anchor_crops(anchors, embedder)
     cand_cache = build_candidate_embeddings(df, need, embedder)
 
@@ -273,16 +284,16 @@ def main() -> None:
             "n_anchors": r.n_anchors, "confidence_basis": r.basis,
         })
     named = pd.DataFrame(rows)
-    OUT_PARQUET.parent.mkdir(parents=True, exist_ok=True)
-    named.to_parquet(OUT_PARQUET, index=False)
-    print(f"wrote {len(named)} named-track rows -> {OUT_PARQUET}")
+    out_parquet.parent.mkdir(parents=True, exist_ok=True)
+    named.to_parquet(out_parquet, index=False)
+    print(f"wrote {len(named)} named-track rows -> {out_parquet}")
 
     _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolved, flags,
-                  named, name_by, jersey_by, unmatched_numbers, team_name)
+                  named, name_by, jersey_by, unmatched_numbers, team_name, report)
 
 
 def _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolved, flags, named,
-                  name_by, jersey_by, unmatched_numbers, team_name) -> None:
+                  name_by, jersey_by, unmatched_numbers, team_name, report=REPORT) -> None:
     """Write results/identity/NAMED_TRACKS.md: funnel, guard decisions, validation, caveats."""
     n_attached = len(attachments)
     # Validation table: per named player vs oracle.
@@ -404,9 +415,9 @@ def _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolv
                  "players; uniform per-player naming still needs the cluster/VLM close-up reader "
                  "(Sem 2).\n")
 
-    REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text("\n".join(lines), encoding="utf-8")
-    print(f"wrote report -> {REPORT}")
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text("\n".join(lines), encoding="utf-8")
+    print(f"wrote report -> {report}")
     print("VALIDATION TABLE:")
     if not vdf.empty:
         show = vdf.copy()
@@ -416,4 +427,11 @@ def _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolv
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--model-name", default="osnet_x0_25", help="OSNet backbone")
+    ap.add_argument("--weights", default=None,
+                    help="torchreid re-ID weights key/path (default: ImageNet baseline)")
+    a = ap.parse_args()
+    main(model_name=a.model_name, weights=a.weights)

@@ -88,6 +88,7 @@ class RelinkParams:
     max_crops: int = 10
     match_tol_px: float = 6.0
     model_name: str = "osnet_x0_25"
+    weights: str | None = None
 
 
 # === Pure merge logic (unit-tested; no CV / metric stack) ========================================
@@ -260,16 +261,69 @@ def greedy_merge(
 
 
 # === Appearance embedding (torchreid OSNet; GPU) =================================================
-class OsnetEmbedder:
-    """Pretrained torchreid OSNet appearance embedder (ImageNet weights; fp16-friendly on 4 GB)."""
+#: Where downloaded torchreid re-ID model-zoo weights (Market-1501/MSMT17) are cached.
+_REID_ZOO_DIR = Path.home() / ".cache" / "torchreid" / "reid_zoo"
 
-    def __init__(self, model_name: str = "osnet_x0_25", device: str | None = None) -> None:
+
+def resolve_reid_weights(weights: str) -> Path:
+    """Resolve a re-ID ``weights`` spec to a local checkpoint path, downloading if needed (IO).
+
+    Two forms are accepted:
+
+    * an existing filesystem path to a ``.pth``/``.pth.tar``/``.pt`` checkpoint (used verbatim,
+      e.g. a fine-tuned or football-domain checkpoint dropped on disk); or
+    * a torchreid model-zoo key such as ``"osnet_x1_0_market1501"`` -- looked up in the torchreid
+      ``reid_model_factory`` URL table and fetched with ``gdown`` into :data:`_REID_ZOO_DIR`.
+
+    Args:
+        weights: A checkpoint path or a model-zoo key (without the ``.pt`` suffix).
+
+    Returns:
+        Path to a local checkpoint file.
+
+    Raises:
+        KeyError: If ``weights`` is neither an existing file nor a known model-zoo key.
+    """
+    p = Path(weights)
+    if p.exists():
+        return p
+    import torchreid.reid_model_factory as _rf  # noqa: PLC0415
+
+    urls: dict[str, str] = _rf.__dict__["__trained_urls"]
+    key = weights if weights.endswith(".pt") else f"{weights}.pt"
+    if key not in urls:
+        raise KeyError(f"unknown re-ID weights '{weights}': not a file and not in {sorted(urls)}")
+    dst = _REID_ZOO_DIR / key
+    if not (dst.exists() and dst.stat().st_size > 1_000_000):
+        import gdown  # noqa: PLC0415
+
+        _REID_ZOO_DIR.mkdir(parents=True, exist_ok=True)
+        gdown.download(urls[key], str(dst), quiet=True)
+    return dst
+
+
+class OsnetEmbedder:
+    """torchreid OSNet appearance embedder (fp16-friendly on 4 GB).
+
+    With ``weights=None`` this is the original ImageNet-classification embedder (kit-dominated;
+    Stage-2a baseline). Passing a torchreid re-ID model-zoo key (e.g. ``"osnet_x1_0_market1501"``,
+    ``"osnet_ain_x1_0_msmt17"``) or a checkpoint path loads re-ID-objective weights instead --
+    ``model_name`` must then be the matching backbone (``osnet_x1_0`` / ``osnet_ain_x1_0``).
+    """
+
+    def __init__(self, model_name: str = "osnet_x0_25", device: str | None = None,
+                 weights: str | None = None) -> None:
         import torch  # noqa: PLC0415
         import torchreid  # noqa: PLC0415
 
         self._torch = torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        model = torchreid.models.build_model(model_name, num_classes=1000, pretrained=True)
+        self.weights = weights
+        model = torchreid.models.build_model(model_name, num_classes=1000, pretrained=weights is None)
+        if weights is not None:
+            from torchreid.reid.utils import load_pretrained_weights  # noqa: PLC0415
+
+            load_pretrained_weights(model, str(resolve_reid_weights(weights)))
         self.model = model.to(self.device).eval()
 
     def embed(self, crops: list[np.ndarray]) -> np.ndarray:

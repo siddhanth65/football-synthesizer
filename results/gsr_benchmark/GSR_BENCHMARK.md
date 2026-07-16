@@ -69,6 +69,46 @@ is **constraint-driven**, appearance only breaks near-ties. Upgrade path (Stage 
 ReID model (OSNet Market-1501 or a pitch-tuned embedding) and close-up jersey anchors to disambiguate
 same-kit fragments; that is where precision, not just recall, improves.
 
+## Stage 2c: football-domain ReID upgrade -- measured NEGATIVE on the 80% precision gate
+
+Stage 2a shipped the weakest possible embedder: `osnet_x0_25` with **ImageNet-classification** weights
+(no re-ID objective at all). Stage 2c swaps in re-ID-objective weights, wired as a parameter
+(`OsnetEmbedder(model_name, weights=...)`, `RelinkParams.weights`; `generator/track_relink.py`
+`resolve_reid_weights` downloads torchreid model-zoo keys via `gdown`, back-compatible with
+`weights=None`). Re-measured on the same 3 pilot sequences at the same frozen threshold 0.80, GT-audited
+pair-level merge precision + the same-kit cosine-separation diagnostic (same-player vs different-player
+same-kit constraint-valid pairs, n=213 / 1,633):
+
+| Embedder (weights) | merge precision | same-player median cos | diff-player (same-kit) median cos | separation |
+|---|---|---|---|---|
+| `osnet_x0_25` ImageNet (Stage-2a baseline) | 70/200 = **35.0%** | 0.872 | 0.832 | +0.040 |
+| `osnet_x1_0` Market-1501 | 74/214 = **34.6%** | 0.894 | 0.849 | +0.045 |
+| `osnet_x1_0` MSMT17 | 59/200 = **29.5%** | 0.879 | 0.838 | +0.041 |
+| `osnet_ain_x1_0` MSMT17 (best) | 79/192 = **41.1%** | 0.861 | 0.817 | +0.043 |
+
+**Verdict: person-domain re-ID does NOT clear the pre-committed >=80% bar** (best 41.1%, +6.1 pp over
+baseline). The reason is the diagnostic: the same-kit different-player median cosine stays **0.82-0.85**
+and the same/different **separation stays ~0.04 across all four embedders**. Market-1501 / MSMT17 / DukeMTMC
+re-ID learns to key on *clothing*, and two teammates wear identical clothing -- so a person-re-ID model hits
+the exact same kit wall as ImageNet. Four embedders now agree the wall is domain, not capacity. Per the
+frozen production gate, **the 58-sequence v2 re-score was NOT run** (merge precision 41% << 80%); relink
+stays benchmark-side only and does **not** graduate to per-player facts.
+
+**Downloadable weights inventory (rung 1 vs middle rung).**
+- *Middle rung (used here, drop-in):* torchreid `reid_model_factory` model zoo -- `osnet_x1_0_market1501`,
+  `osnet_x1_0_msmt17`, `osnet_ain_x1_0_msmt17` (Google-Drive, ~10-17 MB each), same 512-d global feature,
+  same forward path as the current embedder. These are the only re-ID weights that drop straight into
+  `OsnetEmbedder`.
+- *True football rung (documented, NOT integrated):* the sn-gamestate/TrackLab baseline ReID is **PRTreID**
+  = `bpbreid`, a **part-based** model (HRNet-32 backbone, gaussian body-part attention) trained on SoccerNet,
+  weights `prtreid-soccernet-baseline.pth.tar` at `https://zenodo.org/records/10653453` (+ HRNet backbone at
+  record 10604211). It is the one model designed to attend to body regions instead of global kit colour --
+  the only untested lever that could plausibly break the same-kit wall. It is **not a drop-in**: it needs the
+  uninstalled `prtreid`/`bpbreid` package and its part-attention head, and it is heavy for a 4 GB GPU. Its
+  test-time config uses the global embedding only (no pose masks at inference), so a future integration is
+  feasible but is Sem-2-scale work, not this rung. sn-reid ships no standalone released weights (checked the
+  repo + releases: it is the same torchreid fork, no `.pth` artifacts).
+
 ## Identity attributes we emit
 
 | Attribute | Emitted? | Source | Note |
