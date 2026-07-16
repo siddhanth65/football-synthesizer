@@ -65,6 +65,10 @@ class SofascoreFetcher(Protocol):
         """Return ScraperFC's team-stats DataFrame for a match id."""
         ...
 
+    def player_match_stats(self, match_id: int | str) -> pd.DataFrame:
+        """Return ScraperFC's player-stats DataFrame for a match id."""
+        ...
+
 
 class ScraperFCFetcher:
     """Default fetcher: ScraperFC's ``Sofascore`` module with a fixed rate limit after each call."""
@@ -90,6 +94,12 @@ class ScraperFCFetcher:
     def team_match_stats(self, match_id: int | str) -> pd.DataFrame:
         """Fetch team match stats, then sleep ``rate_limit_s``."""
         out = self._sofa().scrape_team_match_stats(match_id)
+        time.sleep(self.rate_limit_s)
+        return out
+
+    def player_match_stats(self, match_id: int | str) -> pd.DataFrame:
+        """Fetch per-player match stats, then sleep ``rate_limit_s``."""
+        out = self._sofa().scrape_player_match_stats(match_id)
         time.sleep(self.rate_limit_s)
         return out
 
@@ -189,6 +199,35 @@ def team_stats_df(
     if path.exists():
         return pd.read_parquet(path)
     df = fetcher.team_match_stats(match_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(path, index=False)
+    return df
+
+
+def player_stats_df(
+    match_id: int | str, fetcher: SofascoreFetcher, cache_dir: Path = SOFA_DIR
+) -> pd.DataFrame:
+    """Raw ScraperFC per-player match-stats DataFrame for a match, cache-first (parquet).
+
+    ScraperFC's ``scrape_player_match_stats`` flattens the player object and the statistics object
+    into the same frame, which duplicates a couple of columns (``position``, ``jerseyNumber``) that
+    parquet cannot write. Duplicates are dropped (first occurrence kept; values agreed in spot checks
+    on 2026-07 data) before caching.
+    # ponytail: first-wins dedup on name clash; revisit if a genuinely different duplicate appears.
+
+    Args:
+        match_id: Sofascore match id.
+        fetcher: Sofascore data source.
+        cache_dir: Where the raw parquet is cached.
+
+    Returns:
+        One row per player (both teams), columns per ScraperFC's ``scrape_player_match_stats``.
+    """
+    path = cache_dir / f"player_stats_{match_id}.parquet"
+    if path.exists():
+        return pd.read_parquet(path)
+    df = fetcher.player_match_stats(match_id)
+    df = df.loc[:, ~df.columns.duplicated()]
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(path, index=False)
     return df

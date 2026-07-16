@@ -53,6 +53,7 @@ class _StubFetcher:
     def __init__(self) -> None:
         self.n_dicts = 0
         self.n_stats = 0
+        self.n_players = 0
 
     def match_dicts(self, year: str, league: str) -> list[dict]:
         self.n_dicts += 1
@@ -74,6 +75,20 @@ class _StubFetcher:
     def team_match_stats(self, match_id: int | str) -> pd.DataFrame:
         self.n_stats += 1
         return _synthetic_team_stats()
+
+    def player_match_stats(self, match_id: int | str) -> pd.DataFrame:
+        self.n_players += 1
+        # mirrors ScraperFC's duplicate "position" column from concatenating player+stats dicts
+        df = pd.DataFrame(
+            {
+                "name": ["Bruno Fernandes", "Jason Steele"],
+                "teamName": ["Manchester United", "Brighton & Hove Albion"],
+                "position": ["M", "G"],
+                "minutesPlayed": [79.0, 90.0],
+                "rating": [7.0, 7.1],
+            }
+        )
+        return pd.concat([df, df[["position"]]], axis=1)
 
 
 # --------------------------------------------------------------------------------------------------
@@ -140,6 +155,19 @@ def test_team_stats_df_cache_first(tmp_path: Path) -> None:
     assert (tmp_path / "team_stats_12436888.parquet").exists()
     df2 = oracle.team_stats_df(12436888, stub, cache_dir=tmp_path)
     assert stub.n_stats == 1  # served from cache, fetcher NOT called again
+    pd.testing.assert_frame_equal(df1, df2)
+
+
+def test_player_stats_df_cache_first_and_dedup(tmp_path: Path) -> None:
+    stub = _StubFetcher()
+    df1 = oracle.player_stats_df(12436888, stub, cache_dir=tmp_path)
+    assert stub.n_players == 1
+    assert (tmp_path / "player_stats_12436888.parquet").exists()
+    # duplicate "position" column from the raw fetch is dropped (parquet can't write dupes)
+    assert list(df1.columns).count("position") == 1
+    assert df1.loc[df1["name"] == "Bruno Fernandes", "minutesPlayed"].iloc[0] == 79.0
+    df2 = oracle.player_stats_df(12436888, stub, cache_dir=tmp_path)
+    assert stub.n_players == 1  # served from cache, fetcher NOT called again
     pd.testing.assert_frame_equal(df1, df2)
 
 
