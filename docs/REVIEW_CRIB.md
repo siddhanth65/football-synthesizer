@@ -70,7 +70,8 @@ and we hold the free validation assets (SkillCorner tracking, SB360 same-censori
 | 47.8 / 48.6 / 0.009 | pass recall Utd / Brighton / symmetry spread — the comparative-tier license |
 | 44.2 vs 52 | our possession share vs Sofascore — the bias exhibit, leader inverts |
 | 51.9% / 71.2% | post-link ball coverage: full match / live-wide conditional |
-| 29.01 / 63.90 | GSR baseline / SOTA (challenge split) — brackets our benchmark score |
+| 14.8 / 43.1 / 48.9 / 92.5 | OUR GS-HOTA valid-split: official full / no-jersey / loc+assoc / LocA — jersey gap measured externally |
+| 29.01 / 63.90 | GSR baseline / SOTA (challenge split — context, not like-for-like ranking) |
 | 12.76 / 22 | players visible on average in broadcast (why imputation is THE problem) |
 | 100% | guardrail precision — no ungrounded number reaches a reader |
 

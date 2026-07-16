@@ -2,6 +2,22 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-16 — GS-HOTA EXTERNAL BENCHMARK SHIPPED: first public-metric grade in project history
+
+Full SoccerNet-GSR **valid split (58 seqs)** scored with the **official** evaluator (sn-trackeval
+0.4.0; GT-copy sanity = 100.0; deep-worker requested: opus + slice-runner driven by main session
+across 3 session restarts — resumable-by-disk-state design absorbed every kill).
+`results/gsr_benchmark/GSR_BENCHMARK.md` + `eval/gsr_score.py` (stub now real; 6 tests).
+**Headline: official gs_hota_full 14.8 | no_jersey 43.1 | role_only 45.0 | loc_assoc 48.9 |
+GS-LocA 92.5.** Reading: when we report a player, the position is right (LocA ~92.5 — the
+calibration/projection stack externally validated); the official composite is a **pre-Layer-2
+floor by construction** (we emit jersey=null → every numbered GT player unmatchable; full GS-HOTA
+tracks per-seq jersey-annotation density almost linearly). AssA ~37-40 = the track-churn/re-ID gap
+— the same problem jersey Layer 2 attacks. Split caveat stated (valid ≠ challenge; published
+baseline 29.01 / SOTA 63.90 are context, not ranking). Calib: period-25 measured equivalent to
+per-frame (-0.9 LocA, 6× faster). **December story now has its external anchor: pre-identity 14.8
+→ post-Layer-2 X, on a public benchmark.**
+
 ## 2026-07-15 — LIVE-PLAY FILTER SHIPPED; the pre-registered 50%-gate question is answered: NO
 
 Phase-B B1.2 done (deep-worker requested: opus; `generator/live_play.py`, `tools/live_play_probe.py`,
