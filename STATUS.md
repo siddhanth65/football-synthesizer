@@ -2,6 +2,22 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-16 — B2 STAGE 2c: FIRST NAMED PLAYERS — video→number→name→oracle-validated, end to end
+
+`generator/anchor_wire.py` + `tools/wire_anchors.py` (deep-worker requested: opus; 7 CPU tests).
+Funnel: 226 gated anchors → 65 no-wide-frame → 95 ReID-ambiguous (margin guard) → 66 attached →
+**43 named fragments → 3 named players** (Bruno Fernandes #8, Rashford #10, Enciso #10-BHA).
+Propagation guard held: the referee-badge false anchor named NOTHING; zero disagreement flags;
+relink merges untouched (benchmark-side only). **First per-player validation table in project
+history:** visible-minutes proxy vs Sofascore — direction as predicted (ours << oracle, broadcast
+visibility ceiling), ordering Spearman 1.0 on n=3 (1/6 by chance — weak evidence, stated).
+**Worker caught a premise error loudly: oracle `jerseyNumber` ≠ shirt-back number — `shirtNumber`
+is correct** (12 players differ; Dalot=20 proof; `(team, shirtNumber)` unique). **Bottleneck
+relocated with precision: NOT anchor accuracy (~99%) but same-kit ReID disambiguation** (95/226
+rejected by the margin gate; kit-dominated OSNet again — the same wall as relink's 35%). One
+football-domain ReID model would attack both. Season extrapolation: hero-shot skew means ~3-6
+named players/match at current reader quality; mechanism proven, coverage is Sem-2 work.
+
 ## 2026-07-16 — B2 STAGE 2b STEP 3: GATE CLEARED — 98.6% verified anchor precision; WIRE verdict
 
 Fourth lever pair wins (deep-worker requested: opus). 4-arm funnel, thresholds frozen pre-
