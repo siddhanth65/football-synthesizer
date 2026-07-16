@@ -12,7 +12,10 @@ Stage 1b ablation (second worker run): factorized tens×units heads **-0.4 to -1
 filtered digit loss **+0.1 pp** — both flat, stopped per the pre-set <1 pp rule; steps 3-4 skipped
 with cause. **Diagnosed ceiling: visual broadcast-resolution misreads** (4→29, 44→29 confusions);
 published-range recipes use pose/STN alignment, temporal fusion, heavier backbones — not head
-surgery. Next lever queued: torso-guided crops (cheap, visual). Strategic read: at 0.29
+surgery. Stage 1c (torso-band crop, pre-committed band 0.15-0.55): **+2.1 pp → 0.417/0.419** — the first
+lever that moved the headline, confirming the visual-resolution diagnosis, but below the >3 pp
+bar; adopted as free default preprocessing, multi-band ensemble rejected with cause. Jersey line
+CLOSED at 0.42 tracklet / 0.31 numbered-only. Strategic read: at 0.29
 numbered-only, jersey is a **weak prior to FUSE** (team+role+position+close-up anchors), not a
 standalone signal — which matches the close-up-anchored Layer-2 architecture from the July probe.
 Per-player Sofascore oracle cached meanwhile (40 players × 84 stats, brighton) — validation target

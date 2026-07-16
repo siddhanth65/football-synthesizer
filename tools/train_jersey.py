@@ -90,10 +90,12 @@ class _CropSampler(Dataset):
     successive epochs see different crops -- coverage over 733k crops without a giant epoch.
     """
 
-    def __init__(self, items: list[tuple[str, int, list[Path]]], per_tracklet: int) -> None:
+    def __init__(
+        self, items: list[tuple[str, int, list[Path]]], per_tracklet: int, *, torso: bool = False
+    ) -> None:
         self.items = items
         self.per = per_tracklet
-        self.tf = J.build_transform(train=True)
+        self.tf = J.build_transform(train=True, torso=torso)
 
     def __len__(self) -> int:
         return len(self.items) * self.per
@@ -109,9 +111,11 @@ class _CropSampler(Dataset):
         return torch.zeros(3, J.INPUT_H, J.INPUT_W), cls
 
 
-def _crop_acc(model: nn.Module, items: list, device: str, per: int = 8) -> float:
+def _crop_acc(
+    model: nn.Module, items: list, device: str, per: int = 8, *, torso: bool = False
+) -> float:
     """Quick per-crop top-1 accuracy on a sample of crops (training-progress signal, not the metric)."""
-    tf = J.build_transform(train=False)
+    tf = J.build_transform(train=False, torso=torso)
     xs, ys = [], []
     for _, cls, crops in items:
         for p in random.sample(crops, min(per, len(crops))):
@@ -173,10 +177,16 @@ def _multihead_loss(
 
 
 def train(args: argparse.Namespace) -> None:
-    """Train a wall-clock slice of the factorized model, resuming from/checkpointing to ``--ckpt``."""
+    """Train a wall-clock slice, resuming from/checkpointing to ``--ckpt``.
+
+    ``--arch single`` trains the Stage-1 100-way head (plain CE + label smoothing); ``multi`` trains
+    the Stage-1b factorized heads. ``--torso`` crops to the number band (Stage 1c). The checkpoint
+    stamps both so eval preprocesses identically.
+    """
     device = "cuda" if torch.cuda.is_available() else "cpu"
     ckpt = Path(args.ckpt)
-    model = J.MultiHeadJersey(pretrained=True).to(device)
+    single = args.arch == "single"
+    model = (J.build_model if single else J.MultiHeadJersey)(pretrained=True).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
     scaler = torch.amp.GradScaler(device) if device == "cuda" else None
     start_epoch = 0
@@ -195,11 +205,12 @@ def train(args: argparse.Namespace) -> None:
 
     tens_lut, units_lut, leg_lut = _digit_luts(device)
     tr, val = _split_train_val(_tracklets("train"))
-    _log(f"stage {args.stage}  train tracklets {len(tr)}, val {len(val)}, device {device}")
+    _log(f"arch {args.arch}  torso {args.torso}  stage {args.stage}  "
+         f"train tracklets {len(tr)}, val {len(val)}, device {device}")
     loader = DataLoader(
-        _CropSampler(tr, args.crops_per_tracklet), batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=(device == "cuda"), persistent_workers=args.workers > 0,
-        drop_last=True,
+        _CropSampler(tr, args.crops_per_tracklet, torso=args.torso), batch_size=args.batch_size,
+        shuffle=True, num_workers=args.workers, pin_memory=(device == "cuda"),
+        persistent_workers=args.workers > 0, drop_last=True,
     )
     ce = nn.CrossEntropyLoss(label_smoothing=0.1)
     ce_leg = nn.CrossEntropyLoss()
@@ -210,11 +221,14 @@ def train(args: argparse.Namespace) -> None:
         t0, tot, n = time.time(), 0.0, 0
         for xb, yb in loader:
             xb, yb = xb.to(device, non_blocking=True), yb.to(device, non_blocking=True)
-            tens_t, units_t, leg_t = tens_lut[yb], units_lut[yb], leg_lut[yb]
             opt.zero_grad()
             with torch.amp.autocast(device, enabled=(device == "cuda")):
-                loss = _multihead_loss(model(xb), tens_t, units_t, leg_t, ce, ce_leg,
-                                       stage=args.stage, filter_tau=args.filter_tau)
+                if single:
+                    loss = ce(model(xb), yb)
+                else:
+                    tens_t, units_t, leg_t = tens_lut[yb], units_lut[yb], leg_lut[yb]
+                    loss = _multihead_loss(model(xb), tens_t, units_t, leg_t, ce, ce_leg,
+                                           stage=args.stage, filter_tau=args.filter_tau)
             if scaler is not None:
                 scaler.scale(loss).backward()
                 scaler.step(opt)
@@ -225,9 +239,10 @@ def train(args: argparse.Namespace) -> None:
             tot += loss.item() * len(xb)
             n += len(xb)
         epoch += 1
-        acc = _crop_acc(model, val, device)
+        acc = _crop_acc(model, val, device, torso=args.torso)
         torch.save({"model_state": model.state_dict(), "opt_state": opt.state_dict(),
-                    "epoch": epoch, "arch": "multihead"}, ckpt)
+                    "epoch": epoch, "arch": "single" if single else "multihead",
+                    "torso": args.torso}, ckpt)
         _log(f"epoch {epoch}/{args.target_epochs}  loss {tot / max(n, 1):.4f}  "
              f"val_num_crop_acc {acc:.3f}  {time.time() - t0:.0f}s")
     if epoch >= args.target_epochs:
@@ -326,6 +341,10 @@ def main() -> None:
     t.add_argument("--lr", type=float, default=3e-4)
     t.add_argument("--workers", type=int, default=4)
     t.add_argument("--ckpt", default=str(OUT / "ckpt_mh.pt"))
+    t.add_argument("--arch", default="multi", choices=["single", "multi"],
+                   help="single: Stage-1 100-way head; multi: Stage-1b factorized heads")
+    t.add_argument("--torso", action="store_true",
+                   help="Stage-1c: crop to the torso/number band before resize")
     t.add_argument("--stage", type=int, default=1, choices=[1, 2],
                    help="1: factorized heads; 2: + legibility self-filter of digit loss")
     t.add_argument("--filter-tau", type=float, default=0.5,

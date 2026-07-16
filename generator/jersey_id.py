@@ -33,6 +33,13 @@ INPUT_W = 112
 _MEAN = (0.485, 0.456, 0.406)
 _STD = (0.229, 0.224, 0.225)
 
+# Stage-1c torso-guided crop: the jersey number lives in the upper-back region, so feeding the
+# whole body wastes input resolution on legs/grass. This fixed vertical band (fraction of crop
+# height, full width) is a pre-committed lazy proxy for a pose/torso model -- no tuning, no pose
+# net. Cropping to the band then resizing to INPUT_H x INPUT_W gives the number far more pixels.
+TORSO_BAND = (0.15, 0.55)
+"""Pre-committed (top, bottom) fractions of crop height for the torso/number band."""
+
 # Stage-1b factorized digit heads: a number is decoded from a tens digit (0-9 or "none" =
 # single-digit) and a units digit (0-9); a separate legibility head produces the -1 gate. Sharing
 # digit statistics across all numbers (units "2" is trained by 2/12/22/... not by jersey 62 alone)
@@ -105,16 +112,32 @@ def load_gt(path: str | Path) -> dict[str, int]:
     return {str(k): int(v) for k, v in json.loads(Path(path).read_text(encoding="utf-8")).items()}
 
 
-def build_transform(*, train: bool) -> transforms.Compose:
+def torso_crop(img: Image.Image) -> Image.Image:
+    """Crop the pre-committed :data:`TORSO_BAND` vertical band (number region) at full width.
+
+    Args:
+        img: A full-body player crop.
+
+    Returns:
+        The ``[TORSO_BAND[0], TORSO_BAND[1]]`` height band, full width -- a fixed proxy for a
+        pose/torso model so the number occupies far more pixels after resize.
+    """
+    w, h = img.size
+    return img.crop((0, round(TORSO_BAND[0] * h), w, round(TORSO_BAND[1] * h)))
+
+
+def build_transform(*, train: bool, torso: bool = False) -> transforms.Compose:
     """Build the crop preprocessing pipeline.
 
     Args:
         train: If true, add light photometric/affine augmentation; eval is deterministic.
+        torso: If true, first crop to the :data:`TORSO_BAND` number region (Stage 1c).
 
     Returns:
         A torchvision transform mapping a PIL crop to a normalized ``[3, H, W]`` tensor.
     """
-    steps: list[object] = [transforms.Resize((INPUT_H, INPUT_W))]
+    steps: list[object] = [transforms.Lambda(torso_crop)] if torso else []
+    steps.append(transforms.Resize((INPUT_H, INPUT_W)))
     if train:
         steps += [
             transforms.ColorJitter(0.2, 0.2, 0.2, 0.02),
@@ -254,19 +277,22 @@ def aggregate_votes(
 class JerseyRecognizer:
     """Loaded jersey model + Stage-2 inference contract (crop paths -> number + confidence)."""
 
-    def __init__(self, model: nn.Module, device: str, *, min_conf: float = 0.30) -> None:
+    def __init__(
+        self, model: nn.Module, device: str, *, min_conf: float = 0.30, torso: bool = False
+    ) -> None:
         """Wrap a model for inference.
 
         Args:
             model: A :func:`build_model` network with trained weights, already on ``device``.
             device: ``"cuda"`` or ``"cpu"``.
             min_conf: Tracklet-level ``-1`` threshold passed to :func:`aggregate_votes`.
+            torso: Preprocess crops with the Stage-1c torso band (must match training).
         """
         self.model = model.eval()
         self.device = device
         self.min_conf = min_conf
         self.multihead = isinstance(model, MultiHeadJersey)
-        self.tf = build_transform(train=False)
+        self.tf = build_transform(train=False, torso=torso)
 
     @classmethod
     def from_checkpoint(
@@ -275,7 +301,8 @@ class JerseyRecognizer:
         """Load a recognizer from a ``train_jersey.py`` checkpoint (``model_state`` key).
 
         The architecture (single 100-way head vs Stage-1b factorized heads) is auto-detected from
-        the checkpoint's ``arch`` tag or its state-dict keys, so old and new checkpoints both load.
+        the checkpoint's ``arch`` tag or its state-dict keys, and the Stage-1c ``torso`` crop flag
+        is read from the checkpoint, so old and new checkpoints both load with matching preprocessing.
         """
         device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         state = torch.load(Path(ckpt_path), map_location=device)
@@ -283,7 +310,7 @@ class JerseyRecognizer:
         multihead = state.get("arch") == "multihead" or "tens.weight" in sd
         model = (MultiHeadJersey if multihead else build_model)(pretrained=False).to(device)
         model.load_state_dict(sd)
-        return cls(model, device, min_conf=min_conf)
+        return cls(model, device, min_conf=min_conf, torso=bool(state.get("torso", False)))
 
     @torch.no_grad()
     def crop_probs(self, paths: Sequence[str | Path], batch_size: int = 256) -> np.ndarray:

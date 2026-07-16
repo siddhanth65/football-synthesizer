@@ -129,6 +129,65 @@ OCR head — not the head/loss re-parametrizations tried here. **Pipeline-readin
 accuracy (0.29 numbered-only) jersey ID is a weak prior to fuse with team/role/temporal cues, not a
 standalone track-identity signal.**
 
+# Stage 1c — torso-guided crop (positive but sub-threshold)
+
+Stage 1b relocated the ceiling to *visual* number signal and named one untested cheap lever: feed
+the number region instead of the whole body. Implemented and evaluated end-to-end on the official
+1211-tracklet test split. **It is the first lever that moved the headline — +2 pp — but stays under
+the pre-committed >3 pp "meaningful" bar.** The Stage-1 recipe is unchanged (single 100-way head,
+ResNet18, 20 epochs, Adam 3e-4, batch 96, 24 crops/tracklet, label smoothing 0.1, fp16); the *only*
+change is the input crop.
+
+**Torso band (pre-committed, no tuning, no pose model):** take the vertical band `[0.15, 0.55]` of
+each full-body crop's height at full width, then resize that band to 224×112 — so the upper-back
+number region occupies far more input pixels than when the whole body (legs/grass) is squeezed into
+224×112. Constants `TORSO_BAND = (0.15, 0.55)` in `generator/jersey_id.py`; a fixed band is the lazy
+proxy for a pose crop. Trained fresh from ImageNet (not warm-started), same slices as Stage 1.
+
+## Stage-1c ablation (official test, incl. `-1`, `eval-crops 48`)
+
+| Config | min_conf | tracklet acc | numbered-only | legP | legR | weights |
+|--------|---------|-------------|---------------|------|------|---------|
+| Stage-1 single 100-way head (whole body, baseline) | 0.20 | 0.3964 (480/1211) | 0.290 | 0.840 | 0.754 | `jersey_r224_acc396.pt` |
+| **Stage-1c single head + torso crop** | 0.20 | **0.4170 (505)** | 0.299 | 0.855 | 0.730 | `jersey_torso_r224_acc417.pt` |
+| Stage-1c single head + torso crop (val-best) | 0.05 | **0.4187 (507)** | 0.308 | 0.858 | 0.792 | `jersey_torso_r224_acc417.pt` |
+
+- **+2.1 pp at the baseline threshold (0.20): 0.3964 → 0.4170, +25 tracklets.** At each model's own
+  val-tuned threshold (baseline 0.20, torso 0.05) it is +2.2 pp (0.3964 → 0.4187). Numbered-only edges
+  up 0.290 → 0.299–0.308; legibility precision improves (0.840 → 0.855–0.858) with recall holding.
+  Eval is deterministic (seeded crop sampling), so these are exact tracklet counts, not noise.
+- **The gain is real and directional — it confirms the Stage-1b diagnosis that the ceiling is visual
+  resolution, not head/loss** — but it is below the pre-committed >3 pp bar. Several top confusions
+  are dented (33→25 drops out of the top list; the 4→29 misread grows, i.e. the band helps some
+  numbers and hurts the worst-case low-res ones). Torso cropping is a free +2 pp and should be the
+  default preprocessing going forward (the checkpoint stamps a `torso` flag that eval auto-detects).
+
+## Verdict and next step
+
+**The revised ceiling verdict stands: at 0.42 tracklet accuracy (0.30 numbered-only) jersey ID is a
+weak prior to fuse, not a standalone track-identity signal.** Per the pre-committed >3 pp rule the
+torso lever is *not* meaningful, so **Stage 2 is fusion-only** (jersey read fused with team/role/
+temporal cues), not a chase for standalone accuracy. A multi-band ensemble is the obvious next visual
+lever but is *not* justified: torso alone bought +2 pp, and an ensemble of shifted bands would at best
+recover a fraction of another marginal misread class at real cost (2–3× inference) — diminishing
+returns against the same broadcast-resolution wall that needs heavier backbones / STN alignment /
+external OCR to breach, which is out of scope here.
+
+## Stage-1c artifacts and reproduce
+
+Single-head torso model (`generator.jersey_id.build_model`; `torso` crop stamped in the checkpoint
+and auto-detected by `from_checkpoint`, so the `JerseyRecognizer` contract is unchanged):
+
+```
+python tools/train_jersey.py train --arch single --torso \
+    --ckpt outputs/jersey/ckpt_torso.pt --target-epochs 20 --batch-size 96   # ~15 min, resumable
+python tools/train_jersey.py tune --ckpt outputs/jersey/ckpt_torso.pt
+python tools/train_jersey.py eval --split test --min-conf 0.20 --ckpt outputs/jersey/ckpt_torso.pt
+```
+
+Eval JSONs: `outputs/jersey/eval_torso_mc20.json` (0.20), `eval_torso_mc05.json` (val-best 0.05).
+Seam test: `tests/test_jersey_torso.py` (band pixel mapping + input tensor shape, CPU).
+
 ## Stage-1b artifacts and reproduce
 
 Factorized model (`generator.jersey_id.MultiHeadJersey`, auto-detected by `from_checkpoint`):
