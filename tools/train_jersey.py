@@ -51,6 +51,16 @@ def _log(msg: str) -> None:
         fh.write(msg + "\n")
 
 
+def _digit_luts(device: str) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Lookup tensors mapping a crop's class ``0..99`` to ``(tens, units, legible)`` targets."""
+    tens = torch.zeros(J.NUM_CLASSES, dtype=torch.long)
+    units = torch.zeros(J.NUM_CLASSES, dtype=torch.long)
+    leg = torch.zeros(J.NUM_CLASSES, dtype=torch.long)
+    for c in range(J.NUM_CLASSES):
+        tens[c], units[c], leg[c] = J.to_digits(J.from_class(c))
+    return tens.to(device), units.to(device), leg.to(device)
+
+
 def _tracklets(split: str) -> list[tuple[str, int, list[Path]]]:
     """List ``(tracklet_id, class, crop_paths)`` for a split (``train`` or ``test``)."""
     gt = J.load_gt(DATA / split / f"{split}_gt.json")
@@ -113,42 +123,86 @@ def _crop_acc(model: nn.Module, items: list, device: str, per: int = 8) -> float
     if not xs:
         return 0.0
     model.eval()
-    correct = 0
+    correct = tot = 0
     with torch.no_grad():
         for i in range(0, len(xs), 256):
             xb = torch.stack(xs[i : i + 256]).to(device)
+            yb = np.array(ys[i : i + 256])
             with torch.amp.autocast(device, enabled=(device == "cuda")):
-                pred = model(xb).float().argmax(1).cpu().numpy()
-            correct += int((pred == np.array(ys[i : i + 256])).sum())
+                raw = model(xb)
+            if isinstance(raw, tuple):  # multi-head: number accuracy on numbered crops only
+                t = raw[0].float().argmax(1).cpu().numpy()
+                u = raw[1].float().argmax(1).cpu().numpy()
+                pred = np.array([J.from_digits(int(a), int(b)) for a, b in zip(t, u)])
+                m = yb > 0
+                correct += int((pred[m] == yb[m]).sum())
+                tot += int(m.sum())
+            else:
+                correct += int((raw.float().argmax(1).cpu().numpy() == yb).sum())
+                tot += len(yb)
     model.train()
-    return correct / len(xs)
+    return correct / max(tot, 1)
+
+
+def _multihead_loss(
+    raw: tuple[torch.Tensor, torch.Tensor, torch.Tensor], tens_t: torch.Tensor,
+    units_t: torch.Tensor, leg_t: torch.Tensor, ce: nn.Module, ce_leg: nn.Module,
+    *, stage: int, filter_tau: float,
+) -> torch.Tensor:
+    """Legibility + (masked) digit loss for one batch.
+
+    Stage 1 trains the digit heads on every numbered crop -- weak labels included (back-view crops
+    of a numbered tracklet still inherit its number). Stage 2 self-filters the *digit* loss only:
+    crops the model reads as the tracklet number with confidence ``< filter_tau`` are dropped from
+    the digit heads, so back-view / occluded crops stop teaching wrong digit associations. The
+    legibility head keeps training on tracklet ground truth (the working Stage-1 signal is left
+    intact -- it is what filters crops here and gates ``-1`` at inference). Warm-starting stage 2
+    from stage 1 makes the confidence filter meaningful from the first step.
+    """
+    tens_l, units_l, leg_l = raw
+    mask = leg_t == 1
+    if stage == 2:
+        idx = torch.arange(len(leg_t), device=leg_t.device)
+        conf = (torch.softmax(tens_l.detach().float(), 1)[idx, tens_t]
+                * torch.softmax(units_l.detach().float(), 1)[idx, units_t])
+        mask = mask & (conf >= filter_tau)
+    loss = ce_leg(leg_l, leg_t)
+    if mask.any():
+        loss = loss + ce(tens_l[mask], tens_t[mask]) + ce(units_l[mask], units_t[mask])
+    return loss
 
 
 def train(args: argparse.Namespace) -> None:
-    """Train in a wall-clock slice, resuming from and checkpointing to ``outputs/jersey/ckpt.pt``."""
+    """Train a wall-clock slice of the factorized model, resuming from/checkpointing to ``--ckpt``."""
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = J.build_model(pretrained=True).to(device)
+    ckpt = Path(args.ckpt)
+    model = J.MultiHeadJersey(pretrained=True).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
     scaler = torch.amp.GradScaler(device) if device == "cuda" else None
     start_epoch = 0
-    if CKPT.exists():
-        ck = torch.load(CKPT, map_location=device)
+    if ckpt.exists():
+        ck = torch.load(ckpt, map_location=device)
         model.load_state_dict(ck["model_state"])
         opt.load_state_dict(ck["opt_state"])
         start_epoch = ck["epoch"]
-        _log(f"resumed from epoch {start_epoch} (ckpt {CKPT})")
+        _log(f"resumed from epoch {start_epoch} (ckpt {ckpt})")
+    elif args.init_ckpt:
+        model.load_state_dict(torch.load(Path(args.init_ckpt), map_location=device)["model_state"])
+        _log(f"warm-started model weights from {args.init_ckpt}")
     if start_epoch >= args.target_epochs:
         _log(f"TARGET REACHED ({start_epoch}/{args.target_epochs} epochs)")
         return
 
+    tens_lut, units_lut, leg_lut = _digit_luts(device)
     tr, val = _split_train_val(_tracklets("train"))
-    _log(f"train tracklets {len(tr)}, val {len(val)}, device {device}")
+    _log(f"stage {args.stage}  train tracklets {len(tr)}, val {len(val)}, device {device}")
     loader = DataLoader(
         _CropSampler(tr, args.crops_per_tracklet), batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=(device == "cuda"), persistent_workers=args.workers > 0,
         drop_last=True,
     )
-    lossf = nn.CrossEntropyLoss(label_smoothing=0.1)
+    ce = nn.CrossEntropyLoss(label_smoothing=0.1)
+    ce_leg = nn.CrossEntropyLoss()
     model.train()
     deadline = time.time() + args.max_minutes * 60
     epoch = start_epoch
@@ -156,9 +210,11 @@ def train(args: argparse.Namespace) -> None:
         t0, tot, n = time.time(), 0.0, 0
         for xb, yb in loader:
             xb, yb = xb.to(device, non_blocking=True), yb.to(device, non_blocking=True)
+            tens_t, units_t, leg_t = tens_lut[yb], units_lut[yb], leg_lut[yb]
             opt.zero_grad()
             with torch.amp.autocast(device, enabled=(device == "cuda")):
-                loss = lossf(model(xb), yb)
+                loss = _multihead_loss(model(xb), tens_t, units_t, leg_t, ce, ce_leg,
+                                       stage=args.stage, filter_tau=args.filter_tau)
             if scaler is not None:
                 scaler.scale(loss).backward()
                 scaler.step(opt)
@@ -171,9 +227,9 @@ def train(args: argparse.Namespace) -> None:
         epoch += 1
         acc = _crop_acc(model, val, device)
         torch.save({"model_state": model.state_dict(), "opt_state": opt.state_dict(),
-                    "epoch": epoch}, CKPT)
+                    "epoch": epoch, "arch": "multihead"}, ckpt)
         _log(f"epoch {epoch}/{args.target_epochs}  loss {tot / max(n, 1):.4f}  "
-             f"val_crop_acc {acc:.3f}  {time.time() - t0:.0f}s")
+             f"val_num_crop_acc {acc:.3f}  {time.time() - t0:.0f}s")
     if epoch >= args.target_epochs:
         _log(f"TARGET REACHED ({epoch}/{args.target_epochs} epochs)")
     else:
@@ -227,7 +283,7 @@ def _score(means: list[tuple[int, np.ndarray]], min_conf: float) -> dict:
 
 def tune(args: argparse.Namespace) -> None:
     """Sweep ``min_conf`` on the train-val split; print the accuracy-maximizing threshold."""
-    rec = J.JerseyRecognizer.from_checkpoint(CKPT)
+    rec = J.JerseyRecognizer.from_checkpoint(args.ckpt)
     _, val = _split_train_val(_tracklets("train"))
     _log(f"tuning min_conf on {len(val)} val tracklets ...")
     means = _tracklet_means(rec, val, args.eval_crops)
@@ -242,7 +298,7 @@ def tune(args: argparse.Namespace) -> None:
 
 def evaluate(args: argparse.Namespace) -> None:
     """Tracklet-level accuracy on a held-out split (official metric incl. the ``-1`` class)."""
-    rec = J.JerseyRecognizer.from_checkpoint(CKPT, min_conf=args.min_conf)
+    rec = J.JerseyRecognizer.from_checkpoint(args.ckpt, min_conf=args.min_conf)
     items = _tracklets(args.split)
     _log(f"evaluating {len(items)} {args.split} tracklets at min_conf {args.min_conf} ...")
     means = _tracklet_means(rec, items, args.eval_crops)
@@ -266,15 +322,24 @@ def main() -> None:
     t.add_argument("--max-minutes", type=float, default=30.0)
     t.add_argument("--target-epochs", type=int, default=20)
     t.add_argument("--crops-per-tracklet", type=int, default=24)
-    t.add_argument("--batch-size", type=int, default=128)
+    t.add_argument("--batch-size", type=int, default=96)
     t.add_argument("--lr", type=float, default=3e-4)
     t.add_argument("--workers", type=int, default=4)
+    t.add_argument("--ckpt", default=str(OUT / "ckpt_mh.pt"))
+    t.add_argument("--stage", type=int, default=1, choices=[1, 2],
+                   help="1: factorized heads; 2: + legibility self-filter of digit loss")
+    t.add_argument("--filter-tau", type=float, default=0.5,
+                   help="stage-2 min digit confidence for a crop to train the number heads")
+    t.add_argument("--init-ckpt", default=None,
+                   help="warm-start model weights (e.g. stage-1 ckpt) when --ckpt is fresh")
     tn = sub.add_parser("tune")
     tn.add_argument("--eval-crops", type=int, default=48)
+    tn.add_argument("--ckpt", default=str(OUT / "ckpt_mh.pt"))
     e = sub.add_parser("eval")
     e.add_argument("--split", default="test", choices=["train", "test"])
     e.add_argument("--min-conf", type=float, default=0.30)
     e.add_argument("--eval-crops", type=int, default=48)
+    e.add_argument("--ckpt", default=str(OUT / "ckpt_mh.pt"))
     args = ap.parse_args()
     random.seed(SEED)
     {"train": train, "tune": tune, "eval": evaluate}[args.mode](args)

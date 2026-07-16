@@ -33,6 +33,15 @@ INPUT_W = 112
 _MEAN = (0.485, 0.456, 0.406)
 _STD = (0.229, 0.224, 0.225)
 
+# Stage-1b factorized digit heads: a number is decoded from a tens digit (0-9 or "none" =
+# single-digit) and a units digit (0-9); a separate legibility head produces the -1 gate. Sharing
+# digit statistics across all numbers (units "2" is trained by 2/12/22/... not by jersey 62 alone)
+# directly attacks the rare high-number collapse of the single 100-way head.
+TENS_CLASSES = 11
+UNITS_CLASSES = 10
+TENS_NONE = 10
+"""Tens-digit class marking a single-digit number (``label < 10``)."""
+
 
 def to_class(label: int) -> int:
     """Map a ground-truth jersey label to a class index.
@@ -56,6 +65,39 @@ def to_class(label: int) -> int:
 def from_class(cls: int) -> int:
     """Inverse of :func:`to_class`: class index -> jersey label (``0`` -> ``-1``)."""
     return -1 if cls == ILLEGIBLE else cls
+
+
+def to_digits(label: int) -> tuple[int, int, int]:
+    """Map a jersey label to ``(tens, units, legible)`` targets for the factorized heads.
+
+    Args:
+        label: Ground-truth value: ``-1`` (illegible) or a jersey number ``1..99``.
+
+    Returns:
+        ``(tens, units, legible)`` where ``legible`` is ``0`` for ``-1`` else ``1``. For an
+        illegible label the digit slots are placeholders (``TENS_NONE, 0``) meant to be masked
+        out of the digit loss; single-digit numbers use ``tens == TENS_NONE``.
+
+    Raises:
+        ValueError: If ``label`` is not ``-1`` or in ``1..99``.
+    """
+    if label == -1:
+        return TENS_NONE, 0, 0
+    if 1 <= label <= 9:
+        return TENS_NONE, label, 1
+    if 10 <= label <= 99:
+        return label // 10, label % 10, 1
+    raise ValueError(f"jersey label out of range: {label}")
+
+
+def from_digits(tens: int, units: int) -> int:
+    """Inverse of :func:`to_digits` digits: ``(tens, units)`` -> jersey number ``0..99``."""
+    return units if tens == TENS_NONE else tens * 10 + units
+
+
+# Per-number digit indices (index by jersey number 1..99) for the vectorized head composition.
+_NUM_TENS = np.array([to_digits(n)[0] if n >= 1 else TENS_NONE for n in range(NUM_CLASSES)])
+_NUM_UNITS = np.array([to_digits(n)[1] if n >= 1 else 0 for n in range(NUM_CLASSES)])
 
 
 def load_gt(path: str | Path) -> dict[str, int]:
@@ -95,6 +137,60 @@ def build_model(*, pretrained: bool = True) -> nn.Module:
     net = resnet18(weights=weights)
     net.fc = nn.Linear(net.fc.in_features, NUM_CLASSES)
     return net
+
+
+class MultiHeadJersey(nn.Module):
+    """ResNet18 trunk with factorized tens/units digit heads plus a legibility head (Stage 1b).
+
+    The single 100-way Stage-1 head starves rare high numbers (jersey 62 gets ~1 tracklet).
+    Factorizing into per-digit heads shares statistics across numbers, and a dedicated legibility
+    head carries the ``-1`` decision instead of folding it into a number class.
+    """
+
+    def __init__(self, *, pretrained: bool = True) -> None:
+        """Build the trunk and three heads.
+
+        Args:
+            pretrained: Load ImageNet-1k trunk weights (large win on this small dataset).
+        """
+        super().__init__()
+        weights = ResNet18_Weights.IMAGENET1K_V1 if pretrained else None
+        trunk = resnet18(weights=weights)
+        feat_dim = trunk.fc.in_features
+        trunk.fc = nn.Identity()
+        self.trunk = trunk
+        self.tens = nn.Linear(feat_dim, TENS_CLASSES)
+        self.units = nn.Linear(feat_dim, UNITS_CLASSES)
+        self.legible = nn.Linear(feat_dim, 2)
+
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Return ``(tens_logits, units_logits, legible_logits)`` for a crop batch."""
+        f = self.trunk(x)
+        return self.tens(f), self.units(f), self.legible(f)
+
+
+def heads_to_number_probs(
+    tens_p: np.ndarray, units_p: np.ndarray, legible_p: np.ndarray
+) -> np.ndarray:
+    """Compose factorized head softmaxes into the Stage-1 ``[.., NUM_CLASSES]`` layout.
+
+    Index ``0`` carries the illegible mass ``P(illegible)``; index ``n`` (``1..99``) carries
+    ``P(legible) * P(tens(n)) * P(units(n))``. Reusing this layout lets the factorized model share
+    the Stage-1 pooling / threshold / eval path unchanged -- the rare-number win lives in how the
+    marginals are *estimated* (shared digit features), not in the downstream vote.
+
+    Args:
+        tens_p: ``[n, TENS_CLASSES]`` tens-digit softmax rows.
+        units_p: ``[n, UNITS_CLASSES]`` units-digit softmax rows.
+        legible_p: ``[n, 2]`` legibility softmax rows (column ``1`` = legible).
+
+    Returns:
+        ``[n, NUM_CLASSES]`` rows compatible with :func:`tracklet_mean` / :func:`decide`.
+    """
+    out = np.zeros((tens_p.shape[0], NUM_CLASSES), dtype=np.float32)
+    out[:, ILLEGIBLE] = legible_p[:, 0]
+    out[:, 1:] = legible_p[:, 1:2] * tens_p[:, _NUM_TENS[1:]] * units_p[:, _NUM_UNITS[1:]]
+    return out
 
 
 def tracklet_mean(probs: np.ndarray, *, weighted: bool = True) -> np.ndarray:
@@ -169,17 +265,24 @@ class JerseyRecognizer:
         self.model = model.eval()
         self.device = device
         self.min_conf = min_conf
+        self.multihead = isinstance(model, MultiHeadJersey)
         self.tf = build_transform(train=False)
 
     @classmethod
     def from_checkpoint(
         cls, ckpt_path: str | Path, device: str | None = None, *, min_conf: float = 0.30
     ) -> JerseyRecognizer:
-        """Load a recognizer from a ``train_jersey.py`` checkpoint (``model_state`` key)."""
+        """Load a recognizer from a ``train_jersey.py`` checkpoint (``model_state`` key).
+
+        The architecture (single 100-way head vs Stage-1b factorized heads) is auto-detected from
+        the checkpoint's ``arch`` tag or its state-dict keys, so old and new checkpoints both load.
+        """
         device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        model = build_model(pretrained=False).to(device)
         state = torch.load(Path(ckpt_path), map_location=device)
-        model.load_state_dict(state["model_state"] if "model_state" in state else state)
+        sd = state["model_state"] if "model_state" in state else state
+        multihead = state.get("arch") == "multihead" or "tens.weight" in sd
+        model = (MultiHeadJersey if multihead else build_model)(pretrained=False).to(device)
+        model.load_state_dict(sd)
         return cls(model, device, min_conf=min_conf)
 
     @torch.no_grad()
@@ -206,8 +309,16 @@ class JerseyRecognizer:
         for i in range(0, len(tensors), batch_size):
             xb = torch.stack(tensors[i : i + batch_size]).to(self.device)
             with torch.amp.autocast(self.device, enabled=use_amp):
-                logits = self.model(xb)
-            out.append(torch.softmax(logits.float(), dim=1).cpu().numpy())
+                raw = self.model(xb)
+            if self.multihead:
+                tens_l, units_l, leg_l = raw
+                out.append(heads_to_number_probs(
+                    torch.softmax(tens_l.float(), 1).cpu().numpy(),
+                    torch.softmax(units_l.float(), 1).cpu().numpy(),
+                    torch.softmax(leg_l.float(), 1).cpu().numpy(),
+                ))
+            else:
+                out.append(torch.softmax(raw.float(), dim=1).cpu().numpy())
         return np.concatenate(out)
 
     def predict_tracklet(

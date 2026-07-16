@@ -80,6 +80,72 @@ Top test confusions (true→pred, count): 33→25 (24), 4→29 (17), 10→24 (14
 - More crops/epoch and longer training help the rare classes marginally; they do not lift the
   weak-label ceiling.
 
+# Stage 1b — factorized digit heads + two-stage filter (negative result)
+
+Stage 1 diagnosed number *recognition* (not legibility) as the cap and named two levers. Both were
+implemented and evaluated end-to-end on the official 1211-tracklet test split. **Neither moved the
+headline; the honest verdict is a negative result** — the Stage-1 single 100-way head at 0.396
+remains the best model. Eval is deterministic (seeded crop sampling), so the differences below are
+exact tracklet counts, not noise.
+
+## Per-step ablation (official test, incl. `-1`, `eval-crops 48`)
+
+| Config | min_conf | tracklet acc | numbered-only | legP | legR | weights |
+|--------|---------|-------------|---------------|------|------|---------|
+| Stage-1 single 100-way head (baseline) | 0.20 | **0.3964** (480/1211) | 0.290 | 0.840 | 0.754 | `jersey_r224_acc396.pt` |
+| Step 1: factorized tens×units + legibility heads | 0.20 | 0.3922 (475) | 0.243 | 0.843 | 0.551 | `ckpt_mh.pt` |
+| Step 1: same, at its val-tuned threshold | 0.05 | 0.3840 (465) | 0.255 | 0.841 | 0.669 | `ckpt_mh.pt` |
+| Step 2: + legibility self-filter of the digit loss | 0.20 | 0.3972 (481) | 0.266 | 0.843 | 0.640 | `ckpt_mh2.pt` |
+
+- **Step 1 (factorized digit heads): −0.4 to −1.2 pp — did not help.** Factorizing the 100-way head
+  into a tens digit (0–9 + `none`), a units digit (0–9) and a separate legibility head shares digit
+  statistics across numbers (units "2" is trained by 2/12/22/… not by jersey 62 alone). It was
+  predicted to be "the biggest single win" against rare-high-number collapse. On test it was flat-to-
+  slightly-worse. The rare-class confusions it targeted survive unchanged (62→31, 44→29), and the
+  composed per-crop confidence (a product of marginals) is systematically lower, which suppresses
+  legibility recall at a fixed threshold (0.754 → 0.551 at min_conf 0.20).
+- **Step 2 (true two-stage filter): +0.1 pp (1 tracklet) — flat.** Warm-started from step 1, the
+  digit loss is masked to crops the model reads as the tracklet number with confidence ≥ 0.5, so
+  back-view / occluded crops stop teaching wrong digit associations; the legibility head keeps
+  training on tracklet ground truth. (An earlier variant that also *relabelled* filtered crops
+  illegible for the legibility head crashed legibility recall to 0.30 — it corrupted the one working
+  component; it was corrected before this measurement.) Cleaning the digit labels did not lift the
+  ceiling.
+- **Stopped after step 2** per the measured-fix-path rule (gain < 1 pp → no ritual capacity). Steps 3
+  (class-balanced sampling) and 4 (torso crops) were **not** run: step 1 already shows that sharing
+  digit statistics does nothing for the rare classes on test, so class-balanced sampling is very
+  unlikely to help. The one untested lever that addresses the *actual* ceiling is torso crops (below).
+
+## Where the ceiling actually is (revised)
+
+The persistent top confusions are **visual**, not rare-class or head-parametrization artifacts:
+4→29, 33→25, 44→29, 36→22, 93→29. These are broadcast-resolution number misreads that neither
+factorization nor label cleaning touches. Stage-1's "weak labels / few-shot high numbers" diagnosis
+was only partly right: the folded head was not the floor, and cleaner per-crop labels did not raise
+it. Closing the gap to the published 0.73–0.92 range needs stronger *visual* number signal — the
+recipes that hit that range use pose/torso-guided crops (isolate the number region), heavier
+backbones or transformers with spatial-transformer alignment, temporal fusion, and often an external
+OCR head — not the head/loss re-parametrizations tried here. **Pipeline-readiness: at 0.396 tracklet
+accuracy (0.29 numbered-only) jersey ID is a weak prior to fuse with team/role/temporal cues, not a
+standalone track-identity signal.**
+
+## Stage-1b artifacts and reproduce
+
+Factorized model (`generator.jersey_id.MultiHeadJersey`, auto-detected by `from_checkpoint`):
+
+```
+python tools/train_jersey.py train --stage 1 --ckpt outputs/jersey/ckpt_mh.pt --target-epochs 20
+python tools/train_jersey.py train --stage 2 --ckpt outputs/jersey/ckpt_mh2.pt \
+    --init-ckpt outputs/jersey/ckpt_mh.pt --filter-tau 0.5 --target-epochs 15   # warm-started
+python tools/train_jersey.py eval --split test --min-conf 0.20 --ckpt outputs/jersey/ckpt_mh.pt
+```
+
+Eval logs: `outputs/jersey/eval_mh_stage1.json` (factorized), `eval_stage2.log`,
+`eval_stage1b*.log`. `eval_test.json` holds the canonical single-head baseline. The
+`JerseyRecognizer` contract is unchanged: multi-head checkpoints load through the same
+`from_checkpoint` / `predict_tracklet -> (number, conf)` and reuse the Stage-1
+pooling/threshold/eval path via `heads_to_number_probs` (per-crop head softmaxes → `[.., 100]`).
+
 ## Stage-2 wiring contract (what the GSR side needs)
 
 `generator/jersey_id.py` → `JerseyRecognizer`:

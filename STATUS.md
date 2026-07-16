@@ -2,6 +2,22 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-16 — B2 JERSEY STAGE 1+1b: model trained + honest negative on the cheap levers
+
+Stage 1 (deep-worker requested: opus; `generator/jersey_id.py`, `tools/train_jersey.py`, resumable
+slice trainer, 4 GB fp16): ResNet18 100-way head + tracklet voting on local SoccerNet jersey-2023.
+Official test (1,211 tracklets): **0.396 tracklet accuracy** (baseline 0.293; published 0.73-0.92
+— we are honestly below). Legibility works (P 0.84 / R 0.75); number recognition is the weak link.
+Stage 1b ablation (second worker run): factorized tens×units heads **-0.4 to -1.2 pp**; legibility-
+filtered digit loss **+0.1 pp** — both flat, stopped per the pre-set <1 pp rule; steps 3-4 skipped
+with cause. **Diagnosed ceiling: visual broadcast-resolution misreads** (4→29, 44→29 confusions);
+published-range recipes use pose/STN alignment, temporal fusion, heavier backbones — not head
+surgery. Next lever queued: torso-guided crops (cheap, visual). Strategic read: at 0.29
+numbered-only, jersey is a **weak prior to FUSE** (team+role+position+close-up anchors), not a
+standalone signal — which matches the close-up-anchored Layer-2 architecture from the July probe.
+Per-player Sofascore oracle cached meanwhile (40 players × 84 stats, brighton) — validation target
+ready. Also: per-crop mojibake in scraper names queued for the number→name matcher.
+
 ## 2026-07-16 — GS-HOTA EXTERNAL BENCHMARK SHIPPED: first public-metric grade in project history
 
 Full SoccerNet-GSR **valid split (58 seqs)** scored with the **official** evaluator (sn-trackeval
