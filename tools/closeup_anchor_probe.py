@@ -44,6 +44,8 @@ from core import registry
 from generator import live_play
 from generator.jersey_id import ILLEGIBLE, aggregate_votes, decide
 from generator.jersey_id import JerseyRecognizer
+from generator.team_anchor import PLAYER_ROLES, estimate_player_box
+from generator.teams import jersey_color
 
 OUT_DIR = Path("results/closeup_anchor_probe")
 CKPT = Path("outputs/jersey/jersey_torso_r224_acc417.pt")
@@ -56,6 +58,23 @@ MIN_BOX_H = 100           # px: crop-eligibility floor. A back number ~= 0.35*0.
 NEAR_WINDOW_S = 2.0       # +/- seconds across the cut for a tactical (live_wide) frame to attach to
 SHOT_GAP_FRAMES = 15      # consecutive close-up sampled frames within this gap = one close-up shot
 TEAM0_KIT = "red"         # registry: teams[0]=Man Utd (dark/anchored red home); teams[1]=Brighton
+
+# --- Stage-2b step-3 gate constants (FROZEN on the 20-crop spot-check set, before the full run) ----
+# LEVER A (kit-color gate): a candidate crop's median-torso CIELAB (generator.teams.jersey_color)
+# must sit within KIT_DIST_MAX of one of the two match-kit centroids (recomputed per match from
+# wide-play crops). On the spot-check set the 5 confirmed-correct Man Utd back crops sit at
+# dmin <= 18.7 while the referee (only clear non-player) sits at 40.5 -> 22.0 keeps players, drops
+# crowd/ref/coach. Single-negative caveat noted in the report.
+KIT_DIST_MAX = 22.0
+# LEVER B (OCR digit-evidence + agreement gate): easyocr on the upscaled torso band. Anchor valid
+# iff OCR returns a digit token (conf >= OCR_MIN_CONF) whose value AGREES with the classifier number.
+# Frozen on the spot-check set: band [0.15,0.55]v x [0.15,0.85]h, 3x cubic upscale reads the "8" and
+# "20" backs at conf 1.0, returns nothing on the referee / illegible Brighton / 2-body crops, and
+# reads 20 on the classifier's 20->24 misread (disagreement -> correctly rejected).
+OCR_BAND = (0.15, 0.55, 0.15, 0.85)  # (top, bot, left, right) fractions of the crop
+OCR_UPSCALE = 3
+OCR_TEXT_THRESH = 0.5
+OCR_MIN_CONF = 0.5
 
 
 def _video_for(match_id: str, chunk_key: str) -> Path:
@@ -158,6 +177,104 @@ def kit_team_guess(crop_bgr: np.ndarray) -> int | None:
     red = strong & ((hue < 10) | (hue > 170))
     red_share = float(red.sum()) / max(float(strong.sum()), 1.0)
     return 0 if red_share > 0.30 else 1
+
+
+def kit_centroids(match_id: str, df: pd.DataFrame, *, max_crops: int = 1200,
+                  frames_per_chunk: int = 20) -> np.ndarray:
+    """The two match-kit CIELAB centroids, recomputed from wide-play player crops (cached).
+
+    Samples ``live_wide`` player detections across chunks, estimates a torso box per foot point
+    (:func:`generator.team_anchor.estimate_player_box`), summarises each with
+    :func:`generator.teams.jersey_color`, and KMeans(2)s the colours into the two kit centroids.
+    Cached to ``kit_centroids.json`` in :data:`OUT_DIR` (delete it to recompute).
+
+    Args:
+        match_id: registry match id.
+        df: the match's aligned parquet.
+        max_crops: stop once this many wide crops are collected.
+        frames_per_chunk: wide frames sampled per chunk.
+
+    Returns:
+        ``(2, 3)`` float32 array of ``[L*, a*, b*]`` kit centroids.
+    """
+    from sklearn.cluster import KMeans  # noqa: PLC0415
+
+    cache = OUT_DIR / "kit_centroids.json"
+    if cache.exists():
+        blob = json.loads(cache.read_text(encoding="utf-8"))
+        if blob.get("match") == match_id:
+            return np.array(blob["centroids"], dtype=np.float32)
+
+    cols: list[np.ndarray] = []
+    for chunk_key, dfc in df.groupby("chunk", sort=True):
+        cls = classify_chunk(dfc)
+        wide = set(int(f) for f in cls.index[cls["shot_type"] == live_play.SHOT_LIVE_WIDE])
+        pl = dfc[dfc["role"].isin(PLAYER_ROLES) & dfc["frame"].isin(wide)]
+        frames = sorted(int(f) for f in pl["frame"].unique())
+        if not frames:
+            continue
+        pick = [frames[i] for i in
+                np.linspace(0, len(frames) - 1, min(frames_per_chunk, len(frames))).astype(int)]
+        video = _video_for(match_id, chunk_key)
+        if not video.exists():
+            continue
+        cap = cv2.VideoCapture(str(video))
+        fh, fw = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        for fr in pick:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, fr)
+            ok, bgr = cap.read()
+            if not ok:
+                continue
+            for r in pl[pl["frame"] == fr].itertuples(index=False):
+                x1, y1, x2, y2 = estimate_player_box(r.image_x, r.image_y, fh, fw)
+                crop = bgr[y1:y2, x1:x2]
+                if crop.size:
+                    cols.append(jersey_color(crop))
+        cap.release()
+        if len(cols) >= max_crops:
+            break
+    if len(cols) < 2:
+        raise ValueError(f"too few wide crops to fit kit centroids ({len(cols)})")
+    cent = KMeans(n_clusters=2, n_init=10, random_state=0).fit(np.stack(cols)).cluster_centers_
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps({"match": match_id, "n_crops": len(cols),
+                                 "centroids": cent.round(3).tolist()}, indent=2), encoding="utf-8")
+    return cent.astype(np.float32)
+
+
+def _kit_dist_ok(lab: np.ndarray, centroids: np.ndarray, dmax: float = KIT_DIST_MAX) -> bool:
+    """LEVER A: True iff ``lab`` is within ``dmax`` CIELAB of the nearest kit centroid (pure)."""
+    return bool(np.linalg.norm(centroids - lab, axis=1).min() <= dmax)
+
+
+def _ocr_reader():  # noqa: ANN202
+    """Lazy CPU easyocr reader (close-up digits are 100-200 px; GPU is busy with YOLO/recognizer)."""
+    import easyocr  # noqa: PLC0415
+
+    return easyocr.Reader(["en"], gpu=False, verbose=False)
+
+
+def _ocr_tokens(crop_bgr: np.ndarray, reader) -> list[tuple[str, float]]:  # noqa: ANN001
+    """OCR digit tokens ``(text, conf)`` from the upscaled torso band of a crop (impure: reader)."""
+    h, w = crop_bgr.shape[:2]
+    top, bot, left, right = OCR_BAND
+    band = crop_bgr[int(top * h):int(bot * h), int(left * w):int(right * w)]
+    if band.size == 0:
+        return []
+    band = cv2.resize(band, None, fx=OCR_UPSCALE, fy=OCR_UPSCALE, interpolation=cv2.INTER_CUBIC)
+    out = reader.readtext(band, allowlist="0123456789", text_threshold=OCR_TEXT_THRESH)
+    return [(t, float(c)) for _, t, c in out]
+
+
+def _digit_agreement(tokens: list[tuple[str, float]], pred: int,
+                     min_conf: float = OCR_MIN_CONF) -> bool:
+    """LEVER B: True iff any OCR digit token (conf >= ``min_conf``) equals ``pred`` (pure).
+
+    This is the precision play: the classifier already committed to ``pred``; requiring an
+    independent OCR read of the *same* number in the torso band both proves a digit region exists
+    (kills front/side no-number crops) and cross-checks the value (kills 20->24-style misreads).
+    """
+    return any(c >= min_conf and t.isdigit() and int(t) == pred for t, c in tokens)
 
 
 def detect_and_read(
@@ -356,20 +473,35 @@ def run_spotcheck(match_id: str, chunk_key: str, n: int, seed: int, ckpt: Path =
     print("Inspect the crops, fill the 'actual' column, then freeze --threshold.")
 
 
-def run_full(match_id: str, threshold: float, ckpt: Path = CKPT, *, consensus: bool = False) -> None:
+def run_full(match_id: str, threshold: float, ckpt: Path = CKPT, *, consensus: bool = False,
+             kit_gate: bool = False, ocr_gate: bool = False) -> None:
     """Full-match yield + propagation-feasibility measurement at the frozen ``threshold``.
+
+    With ``kit_gate`` and/or ``ocr_gate`` set, every conf-gated anchor is additionally scored by
+    LEVER A (:func:`_kit_dist_ok`) and LEVER B (:func:`_digit_agreement`) in a **single** detect+read
+    pass, and the funnel reports all four arms (baseline / +A / +B / +A+B) at once -- so the GPU
+    detector and recognizer run only once, not four times.
 
     Args:
         match_id: registry match id.
         threshold: anchor confidence floor (per-crop peak, and pooled floor for consensus).
         ckpt: recognizer checkpoint to load (e.g. a negatives-retrained model).
-        consensus: also aggregate reads per close-up shot (:func:`_consensus_anchors`) -- a true
-            player reads the same number across a shot's frames while hallucinations scatter, so the
-            shot vote suppresses inconsistent noise the per-frame gate lets through.
+        consensus: also aggregate reads per close-up shot (:func:`_consensus_anchors`).
+        kit_gate: evaluate LEVER A (kit-colour) on every anchor.
+        ocr_gate: evaluate LEVER B (OCR digit-evidence + agreement) on every anchor.
     """
     match = registry.get(match_id)
     df = match.load_aligned()
     fps = {ck: match.chunk_fps(ck) for ck in df["chunk"].unique()}
+
+    centroids = kit_centroids(match_id, df) if kit_gate else None
+    if kit_gate:
+        print(f"kit centroids: {np.round(centroids, 1).tolist()}")
+    reader = _ocr_reader() if ocr_gate else None
+    step3_dir = OUT_DIR / "spotcheck_step3"
+    if (kit_gate and ocr_gate) and step3_dir.exists():
+        shutil.rmtree(step3_dir)
+    survivors: list[dict] = []  # +A+B survivor crops (persistent copies) for the step-3 spot-check
 
     yolo = _load_yolo()
     recog = JerseyRecognizer.from_checkpoint(ckpt)
@@ -402,11 +534,23 @@ def run_full(match_id: str, threshold: float, ckpt: Path = CKPT, *, consensus: b
         legible = [r for r in crops if not r["illegible"]]
         anchors = [r for r in legible if r["conf"] >= threshold]
 
-        # Propagation: is there a live_wide frame within +/- NEAR_WINDOW_S seconds?
+        # LEVER A/B gates: score each conf-gated anchor once; the four arms are subsets.
+        for a in anchors:
+            crop = cv2.imread(a["crop_path"]) if (kit_gate or ocr_gate) else None
+            a["kit_ok"] = (not kit_gate) or (
+                crop is not None and _kit_dist_ok(jersey_color(crop), centroids))
+            a["ocr_ok"] = (not ocr_gate) or (
+                crop is not None and _digit_agreement(_ocr_tokens(crop, reader), a["pred"]))
+        arm_kit = [a for a in anchors if a["kit_ok"]]
+        arm_ocr = [a for a in anchors if a["ocr_ok"]]
+        arm_both = [a for a in anchors if a["kit_ok"] and a["ocr_ok"]]
+        final = arm_both  # strictest active arm (== baseline when no gate is set)
+
+        # Propagation (final arm): is there a live_wide frame within +/- NEAR_WINDOW_S seconds?
         win = int(round(NEAR_WINDOW_S * fps[chunk_key]))
         attachable = 0
         team_matchable = 0
-        for a in anchors:
+        for a in final:
             f = a["frame"]
             near = wide_frames[np.abs(wide_frames - f) <= win] if wide_frames.size else np.array([])
             a["near_wide_gap_frames"] = (int(np.abs(near - f).min()) if near.size else None)
@@ -418,11 +562,26 @@ def run_full(match_id: str, threshold: float, ckpt: Path = CKPT, *, consensus: b
                 if tg is not None and any(tg in teams_by_frame.get(int(nf), set()) for nf in near):
                     team_matchable += 1
 
+        # Persist +A+B survivors (both gates active) for the step-3 visual verification.
+        if kit_gate and ocr_gate:
+            (step3_dir / "_survivors").mkdir(parents=True, exist_ok=True)
+            for a in arm_both:
+                src = Path(a["crop_path"])
+                if src.exists():
+                    dst = (step3_dir / "_survivors"
+                           / f"{chunk_key}_f{a['frame']}_n{a['pred']:02d}_c{a['conf']:.3f}.jpg")
+                    shutil.copy(src, dst)
+                    survivors.append({"chunk": chunk_key, "frame": a["frame"], "pred": a["pred"],
+                                      "conf": a["conf"], "team_guess": a["team_guess"],
+                                      "file": dst.name, "path": str(dst)})
+
         # Collapse into distinct close-up shots (contiguous close-up sampled-frame runs).
         shots = _shots(close_frames)
         n_shots = len(shots)
         anchor_frames = {a["frame"] for a in anchors}
         n_shots_anchor = sum(any(lo <= af <= hi for af in anchor_frames) for lo, hi in shots)
+        final_frames = {a["frame"] for a in final}
+        n_shots_final = sum(any(lo <= af <= hi for af in final_frames) for lo, hi in shots)
 
         cons_anchors = _consensus_anchors(crops, shots, threshold) if consensus else []
         for ca in cons_anchors:  # persist a representative crop per shot-consensus anchor
@@ -449,18 +608,24 @@ def run_full(match_id: str, threshold: float, ckpt: Path = CKPT, *, consensus: b
             "eligible_crops": len(crops),
             "legible_reads": len(legible),
             "anchors": len(anchors),
+            "anchors_kit": len(arm_kit),
+            "anchors_ocr": len(arm_ocr),
+            "anchors_kit_ocr": len(arm_both),
             "anchors_attachable_2s": attachable,
             "anchors_team_matchable": team_matchable,
             "closeup_shots": n_shots,
             "shots_with_anchor": n_shots_anchor,
+            "shots_with_final_anchor": n_shots_final,
             "consensus_shot_anchors": len(cons_anchors),
         }
         c = per_chunk[chunk_key]
         print(f"{chunk_key}: close {c['close_up_frames']:5d} | persons {c['persons_detected']:5d} "
-              f"| eligible {c['eligible_crops']:4d} | legible {c['legible_reads']:4d} "
-              f"| anchors {c['anchors']:3d} | attach {attachable:3d} | shots "
-              f"{n_shots_anchor}/{n_shots} | cons {len(cons_anchors)}")
+              f"| eligible {c['eligible_crops']:4d} | anchors {c['anchors']:3d} "
+              f"| +A {c['anchors_kit']:3d} | +B {c['anchors_ocr']:3d} | +A+B {c['anchors_kit_ocr']:3d}"
+              f" | attach {attachable:3d} | shots {n_shots_final}/{n_shots}")
 
+    if kit_gate and ocr_gate:
+        _finalize_step3(step3_dir, survivors)
     _write_full_report(match_id, threshold, ckpt, per_chunk, rows, cons_reads)
 
 
@@ -514,14 +679,51 @@ def _consensus_anchors(
     return out
 
 
+def _finalize_step3(step3_dir: Path, survivors: list[dict], *, keep_all_max: int = 60,
+                    sample_n: int = 40) -> None:
+    """Copy the +A+B survivors into the step-3 spot-check with a verdicts template.
+
+    Keeps every survivor if there are ``<= keep_all_max``; otherwise takes a ``sample_n`` stratified
+    sample spread across the predicted numbers (sort by pred, even stride) so no single attractor
+    class dominates the audit.
+
+    Args:
+        step3_dir: ``spotcheck_step3`` output directory.
+        survivors: +A+B survivor records (each with a persistent ``path`` and ``file``).
+        keep_all_max: verify every survivor at or below this count.
+        sample_n: sample size when there are more survivors than ``keep_all_max``.
+    """
+    step3_dir.mkdir(parents=True, exist_ok=True)
+    picks = survivors
+    if len(survivors) > keep_all_max:
+        ordered = sorted(survivors, key=lambda s: (s["pred"], s["conf"]))
+        idx = np.linspace(0, len(ordered) - 1, sample_n).round().astype(int)
+        picks = [ordered[i] for i in dict.fromkeys(idx.tolist())]
+    table = []
+    for rank, s in enumerate(sorted(picks, key=lambda s: (s["chunk"], s["frame"]))):
+        dst = step3_dir / f"s3_{rank:02d}_n{s['pred']:02d}_c{s['conf']:.3f}.jpg"
+        if Path(s["path"]).exists():
+            shutil.copy(s["path"], dst)
+        table.append({"rank": rank, "file": dst.name, "chunk": s["chunk"], "frame": s["frame"],
+                      "pred": s["pred"], "conf": s["conf"], "team_guess": s["team_guess"],
+                      "verdict": ""})
+    (step3_dir / "verdicts.json").write_text(json.dumps(
+        {"n_survivors": len(survivors), "n_verified": len(table), "crops": table},
+        indent=2), encoding="utf-8")
+    print(f"step-3 spot-check: {len(survivors)} +A+B survivors, wrote {len(table)} crops "
+          f"-> {step3_dir}")
+
+
 def _write_full_report(
     match_id: str, threshold: float, ckpt: Path, per_chunk: dict, rows: list[dict],
     cons_reads: list[dict],
 ) -> None:
     """Aggregate the funnel across chunks and write the JSON yield artifact."""
     keys = ["close_up_frames", "persons_detected", "eligible_crops", "legible_reads",
-            "anchors", "anchors_attachable_2s", "anchors_team_matchable",
-            "closeup_shots", "shots_with_anchor", "consensus_shot_anchors"]
+            "anchors", "anchors_kit", "anchors_ocr", "anchors_kit_ocr",
+            "anchors_attachable_2s", "anchors_team_matchable",
+            "closeup_shots", "shots_with_anchor", "shots_with_final_anchor",
+            "consensus_shot_anchors"]
     total = {k: int(sum(c.get(k, 0) for c in per_chunk.values())) for k in keys}
     numbers = pd.Series(
         [r["pred"] for r in rows if r["conf"] >= threshold and not r["illegible"]]
@@ -560,6 +762,10 @@ def main() -> None:
     ap.add_argument("--ckpt", default=str(CKPT), help="full/spotcheck: recognizer checkpoint")
     ap.add_argument("--consensus", action="store_true",
                     help="full: also aggregate reads per close-up shot (per-shot consensus)")
+    ap.add_argument("--kit-gate", action="store_true",
+                    help="full: LEVER A -- require anchor torso colour near a match-kit centroid")
+    ap.add_argument("--ocr-gate", action="store_true",
+                    help="full: LEVER B -- require OCR digit in torso band agreeing with the number")
     ap.add_argument("--neg-out", default="data/jersey_negatives",
                     help="harvest_neg: output dir for non-player negative crops")
     ap.add_argument("--neg-cap", type=int, default=400,
@@ -571,7 +777,8 @@ def main() -> None:
     elif args.mode == "harvest_neg":
         harvest_negatives(args.match, Path(args.neg_out), args.neg_cap, args.seed)
     else:
-        run_full(args.match, args.threshold, Path(args.ckpt), consensus=args.consensus)
+        run_full(args.match, args.threshold, Path(args.ckpt), consensus=args.consensus,
+                 kit_gate=args.kit_gate, ocr_gate=args.ocr_gate)
 
 
 if __name__ == "__main__":

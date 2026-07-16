@@ -65,9 +65,33 @@ def test_negative_tracklets_group_and_label(tmp_path: Path) -> None:
     assert T._negative_tracklets(tmp_path / "empty", per_tracklet=2) == []
 
 
+def test_kit_dist_ok_keeps_players_drops_far_colours() -> None:
+    """LEVER A: within KIT_DIST_MAX of a centroid passes; a far (black-kit) colour fails."""
+    cent = np.array([[69.1, 4.5, -10.7], [42.8, 29.9, 7.3]], dtype=np.float32)  # Brighton, Man Utd
+    on_red = np.array([41.6, 48.0, 12.0], dtype=np.float32)   # confirmed "8" back, dmin ~18.7
+    referee = np.array([14.9, 2.0, -2.0], dtype=np.float32)   # black kit, dmin ~40.5
+    assert P._kit_dist_ok(on_red, cent) is True
+    assert P._kit_dist_ok(referee, cent) is False
+    # threshold is inclusive and the knob bites: a colour just past 22 fails, just under passes.
+    assert P._kit_dist_ok(cent[1] + np.array([21.0, 0, 0], np.float32), cent) is True
+    assert P._kit_dist_ok(cent[1] + np.array([23.0, 0, 0], np.float32), cent) is False
+
+
+def test_digit_agreement_requires_matching_confident_token() -> None:
+    """LEVER B: agreement iff a confident OCR digit token equals the classifier's number."""
+    assert P._digit_agreement([("20", 1.0)], 20) is True
+    assert P._digit_agreement([("20", 0.99)], 24) is False   # 20->24 misread: OCR disagrees
+    assert P._digit_agreement([], 8) is False                 # no digit region (front/side crop)
+    assert P._digit_agreement([("8", 0.3)], 8) is False       # low-conf token below the floor
+    assert P._digit_agreement([("x", 0.9)], 8) is False       # non-digit token ignored
+    assert P._digit_agreement([("11", 0.9), ("8", 0.9)], 8) is True  # any matching token suffices
+
+
 if __name__ == "__main__":
     test_has_player_inside_containment()
     test_shots_segment_by_gap()
     test_consensus_pools_agreement_and_rejects_noise()
     test_negative_tracklets_group_and_label(Path("_tmp_negtest"))
+    test_kit_dist_ok_keeps_players_drops_far_colours()
+    test_digit_agreement_requires_matching_confident_token()
     print("ok")

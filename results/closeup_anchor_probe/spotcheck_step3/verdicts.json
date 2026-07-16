@@ -1,0 +1,408 @@
+{
+  "n_survivors": 226,
+  "n_verified": 40,
+  "crops": [
+    {
+      "rank": 0,
+      "file": "s3_00_n20_c0.884.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 1430,
+      "pred": 20,
+      "conf": 0.884,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 1,
+      "file": "s3_01_n08_c0.742.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 2350,
+      "pred": 8,
+      "conf": 0.7422,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 2,
+      "file": "s3_02_n08_c0.913.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 4225,
+      "pred": 8,
+      "conf": 0.9126,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 3,
+      "file": "s3_03_n08_c0.907.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 5495,
+      "pred": 8,
+      "conf": 0.9073,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 4,
+      "file": "s3_04_n08_c0.821.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 5530,
+      "pred": 8,
+      "conf": 0.8205,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 5,
+      "file": "s3_05_n08_c0.866.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 5550,
+      "pred": 8,
+      "conf": 0.8656,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 6,
+      "file": "s3_06_n10_c0.738.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 6310,
+      "pred": 10,
+      "conf": 0.7382,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 7,
+      "file": "s3_07_n08_c0.778.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 10730,
+      "pred": 8,
+      "conf": 0.7783,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 8,
+      "file": "s3_08_n08_c0.849.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 10825,
+      "pred": 8,
+      "conf": 0.849,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 9,
+      "file": "s3_09_n08_c0.928.jpg",
+      "chunk": "h1_chunk_000",
+      "frame": 13615,
+      "pred": 8,
+      "conf": 0.9282,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 10,
+      "file": "s3_10_n10_c0.780.jpg",
+      "chunk": "h1_chunk_001",
+      "frame": 9460,
+      "pred": 10,
+      "conf": 0.7804,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 11,
+      "file": "s3_11_n08_c0.844.jpg",
+      "chunk": "h1_chunk_001",
+      "frame": 9510,
+      "pred": 8,
+      "conf": 0.8435,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 12,
+      "file": "s3_12_n08_c0.796.jpg",
+      "chunk": "h1_chunk_001",
+      "frame": 13290,
+      "pred": 8,
+      "conf": 0.7958,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 13,
+      "file": "s3_13_n08_c0.806.jpg",
+      "chunk": "h1_chunk_001",
+      "frame": 13605,
+      "pred": 8,
+      "conf": 0.8064,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 14,
+      "file": "s3_14_n08_c0.888.jpg",
+      "chunk": "h1_chunk_002",
+      "frame": 425,
+      "pred": 8,
+      "conf": 0.8877,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 15,
+      "file": "s3_15_n08_c0.771.jpg",
+      "chunk": "h1_chunk_002",
+      "frame": 560,
+      "pred": 8,
+      "conf": 0.7709,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 16,
+      "file": "s3_16_n08_c0.895.jpg",
+      "chunk": "h1_chunk_002",
+      "frame": 7200,
+      "pred": 8,
+      "conf": 0.8946,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 17,
+      "file": "s3_17_n08_c0.921.jpg",
+      "chunk": "h1_chunk_002",
+      "frame": 7300,
+      "pred": 8,
+      "conf": 0.9209,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 18,
+      "file": "s3_18_n08_c0.761.jpg",
+      "chunk": "h1_chunk_002",
+      "frame": 14065,
+      "pred": 8,
+      "conf": 0.7612,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 19,
+      "file": "s3_19_n08_c0.899.jpg",
+      "chunk": "h1_chunk_003",
+      "frame": 1925,
+      "pred": 8,
+      "conf": 0.8995,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 20,
+      "file": "s3_20_n08_c0.725.jpg",
+      "chunk": "h1_chunk_003",
+      "frame": 8750,
+      "pred": 8,
+      "conf": 0.7247,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 21,
+      "file": "s3_21_n08_c0.934.jpg",
+      "chunk": "h1_chunk_003",
+      "frame": 10980,
+      "pred": 8,
+      "conf": 0.9341,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 22,
+      "file": "s3_22_n10_c0.727.jpg",
+      "chunk": "h1_chunk_003",
+      "frame": 11250,
+      "pred": 10,
+      "conf": 0.7265,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 23,
+      "file": "s3_23_n20_c0.712.jpg",
+      "chunk": "h1_chunk_003",
+      "frame": 12890,
+      "pred": 20,
+      "conf": 0.712,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 24,
+      "file": "s3_24_n08_c0.883.jpg",
+      "chunk": "h1_chunk_004",
+      "frame": 275,
+      "pred": 8,
+      "conf": 0.8829,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 25,
+      "file": "s3_25_n08_c0.828.jpg",
+      "chunk": "h2_chunk_000",
+      "frame": 2495,
+      "pred": 8,
+      "conf": 0.8278,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 26,
+      "file": "s3_26_n08_c0.917.jpg",
+      "chunk": "h2_chunk_000",
+      "frame": 2610,
+      "pred": 8,
+      "conf": 0.9166,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 27,
+      "file": "s3_27_n08_c0.783.jpg",
+      "chunk": "h2_chunk_000",
+      "frame": 2630,
+      "pred": 8,
+      "conf": 0.783,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 28,
+      "file": "s3_28_n08_c0.813.jpg",
+      "chunk": "h2_chunk_000",
+      "frame": 2635,
+      "pred": 8,
+      "conf": 0.8134,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 29,
+      "file": "s3_29_n08_c0.712.jpg",
+      "chunk": "h2_chunk_000",
+      "frame": 3700,
+      "pred": 8,
+      "conf": 0.7121,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 30,
+      "file": "s3_30_n08_c0.902.jpg",
+      "chunk": "h2_chunk_000",
+      "frame": 7390,
+      "pred": 8,
+      "conf": 0.9021,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 31,
+      "file": "s3_31_n08_c0.872.jpg",
+      "chunk": "h2_chunk_000",
+      "frame": 9305,
+      "pred": 8,
+      "conf": 0.8718,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 32,
+      "file": "s3_32_n08_c0.758.jpg",
+      "chunk": "h2_chunk_001",
+      "frame": 3275,
+      "pred": 8,
+      "conf": 0.7582,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 33,
+      "file": "s3_33_n08_c0.952.jpg",
+      "chunk": "h2_chunk_001",
+      "frame": 4885,
+      "pred": 8,
+      "conf": 0.952,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 34,
+      "file": "s3_34_n08_c0.877.jpg",
+      "chunk": "h2_chunk_001",
+      "frame": 9225,
+      "pred": 8,
+      "conf": 0.8775,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 35,
+      "file": "s3_35_n08_c0.793.jpg",
+      "chunk": "h2_chunk_002",
+      "frame": 2120,
+      "pred": 8,
+      "conf": 0.7928,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 36,
+      "file": "s3_36_n08_c0.752.jpg",
+      "chunk": "h2_chunk_002",
+      "frame": 7520,
+      "pred": 8,
+      "conf": 0.7517,
+      "team_guess": 0,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 37,
+      "file": "s3_37_n10_c0.916.jpg",
+      "chunk": "h2_chunk_003",
+      "frame": 8725,
+      "pred": 10,
+      "conf": 0.9161,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 38,
+      "file": "s3_38_n10_c0.804.jpg",
+      "chunk": "h2_chunk_003",
+      "frame": 9610,
+      "pred": 10,
+      "conf": 0.8045,
+      "team_guess": 1,
+      "verdict": "CORRECT (legible back, kit+OCR agree)"
+    },
+    {
+      "rank": 39,
+      "file": "s3_39_n01_c0.768.jpg",
+      "chunk": "h2_chunk_004",
+      "frame": 11280,
+      "pred": 1,
+      "conf": 0.7678,
+      "team_guess": 0,
+      "verdict": "WRONG (melee front-crop, OCR fired on ref FIFA badge)"
+    }
+  ],
+  "verification_note": "226 +A+B survivors: 186 pred=8, 40 non-8. All 40 non-8 verified individually (39 correct legible backs; 1 WRONG = melee front-crop reading 1). 30/30 sampled pred=8 crops verified correct (montage_eights.png). Verified precision 69/70 = 98.6%.",
+  "sample_precision": "39/40"
+}

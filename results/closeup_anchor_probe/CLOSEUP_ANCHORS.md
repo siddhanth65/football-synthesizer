@@ -244,3 +244,93 @@ priority-1 recommendation, deferred by this task to step 3: the **kit-color gate
 crop's torso colour to match one of the two match kits). Unlike a same-domain reject head it keys on
 colour, not domain, so it can drop crowd/referee/coach crops without rejecting pitch players, and
 unlike consensus it acts per-crop so it is not diluted -- it is the correct next thing to measure.
+
+---
+
+# Stage-2b step 3 (kit-color gate + OCR digit-evidence gate) -- 2026-07-16
+
+**Both remaining cheap levers were implemented as flags, frozen on the 20-crop spot-check set, and
+run end-to-end in one 4-arm pass. The combined gate CLEARS the >=80% bar with enormous margin:
+verified precision 69/70 = 98.6% at a non-trivial yield of 226 frame-anchors over 95 close-up shots
+(161 propagation-feasible). VERDICT: WIRE the gated extractor -- with the concentration caveat
+below.** New code (flags, no deletions): `tools/closeup_anchor_probe.py` `--kit-gate`
+(`kit_centroids`, `_kit_dist_ok`) + `--ocr-gate` (`_ocr_reader`, `_ocr_tokens`, `_digit_agreement`),
+single-pass 4-arm funnel in `run_full`, `_finalize_step3`. New dep (OCR lever only):
+**easyocr 1.7.2** (CPU; cp314 wheels for scikit-image 0.26.0, pyclipper 1.4.0, python-bidi 0.6.11,
+etc.; torch/torchvision untouched). CPU seam tests: `tests/test_closeup_anchor_seams.py`
+(+2 = 6 green). Evidence: `spotcheck_step3/` (226 survivors in `_survivors/`, 40-crop sample
+`verdicts.json`, montages `montage_eights.png` / `montage_others_labeled.png` / `zoom_p01.png`),
+`kit_centroids.json`, `closeup_anchor_stats.json`.
+
+## The two levers (each targets one error mass, frozen before the run)
+
+- **LEVER A -- kit-color gate** (`_kit_dist_ok`, `KIT_DIST_MAX = 22.0`): a candidate's median-torso
+  CIELAB (`generator.teams.jersey_color`) must sit within 22 of one of the two match-kit centroids,
+  recomputed per match from wide-play crops (`kit_centroids`; Brighton `[69.1, 4.5, -10.7]`, Man Utd
+  red `[42.8, 29.9, 7.3]`). Frozen on the spot-check set: the 5 confirmed-correct Man Utd back crops
+  sit at dmin <= 18.7, the referee (only clear non-player) at 40.5 -> 22 keeps players, drops
+  crowd/ref/coach. (Single-negative caveat: only one non-player example existed in the frozen set.)
+- **LEVER B -- OCR digit-evidence + agreement gate** (`_digit_agreement`): easyocr on the 3x-upscaled
+  torso band (`OCR_BAND = (0.15,0.55,0.15,0.85)`); anchor valid iff OCR returns a digit token
+  (conf >= 0.5) whose value AGREES with the classifier's number. Frozen on the spot-check set: reads
+  the "8" and "20" backs at conf 1.0, returns nothing on the referee / illegible Brighton / 2-body
+  crops, and reads `20` on the classifier's `20->24` misread (disagreement -> correctly rejected).
+  This is the precision play: requiring an independent OCR read of the *same* number both proves a
+  digit region exists (kills the front/side no-number attractors) and cross-checks the value (kills
+  `20<->24`-style misreads).
+
+## 4-arm funnel (full match, threshold 0.70)
+
+| stage | count | note |
+|---|---|---|
+| eligible crops (box_h >= 100) | 43,020 | unchanged crop pool |
+| **baseline** anchors (conf >= 0.70) | **5,558** | ~20-25% precision (step-0 audit) |
+| **+A** kit-color gate | **4,281** | drops 1,277 off-kit (crowd/ref/coach); in-kit front/side survive |
+| **+B** OCR-agreement gate | **234** | drops 96% of baseline -- the dominant filter |
+| **+A+B** both | **226** | +A trims 8 off-kit OCR-agreements off +B (small precision insurance) |
+| +A+B propagation-feasible (wide within +/-2s) | 161 | 71% of survivors could attach |
+| close-up shots with an +A+B anchor | 95 / 802 | distinct shots covered |
+
+## Measured precision per arm vs the 80% bar
+
+- **baseline ~20-25%** and **+A alone still fails** (~25-30%): the kit gate removes non-kit
+  crops but the dominant error mass -- IN-KIT front/side players reading attractor 20/29/11 -- passes
+  colour untouched. Kit-color alone is necessary-not-sufficient, exactly as predicted.
+- **+B alone (234) and +A+B (226): PASS.** Every +A+B survivor was audited (226 > 60, so a 40-crop
+  stratified sample is the requirement; in practice ALL 40 non-`8` survivors were verified
+  individually plus a 30-crop sample of the 186 `8`s):
+  - 186 pred=`8`: sampled 30, **30/30 correct** -- every crop a clear Man Utd red back with a legible
+    white "8" (Bruno), `montage_eights.png`.
+  - 40 non-`8` (preds 10, 20, 11, 6, 1 -- the entire non-`8` population): **39/40 correct** legible
+    backs (Man Utd `20`/`10`/`6`, Brighton `10`/`11`), `montage_others_labeled.png`. The single
+    failure is a touchline-melee front-crop of a Man Utd player beside the FIFA referee read as `1`
+    @0.768 -- OCR fired on the referee's "FIFA REFEREE" badge digits (`zoom_p01.png`).
+  - **Verified precision 69/70 = 98.6%** (stratified 40-crop sample: 39/40 = 97.5%). **>> 80% bar.**
+
+## Yield (WIRE decision inputs)
+
+- **226 high-precision frame-anchors**, **95 distinct close-up shots covered**, **161
+  propagation-feasible** (a `live_wide` tactical frame within +/-2 s across the cut).
+- **Concentration caveat (honest):** the yield is skewed to hero-shot players. Number histogram of
+  the 226 survivors: `8`x186 (82%), `10`x27, `20`x8, `11`x3, `1`x1, `6`x1 -- roughly 5-6 distinct
+  player-numbers, dominated by Bruno #8. This is not a uniform per-player anchor source; it is a
+  high-confidence source for the handful of players who repeatedly get close-up hero shots.
+
+## Verdict: WIRE (gated close-up anchor extraction)
+
+The gate clears the pre-committed >=80% bar by ~19 pp (98.6% vs 80%) at a usable yield. **Wire the
+`--kit-gate --ocr-gate` extractor** (kit-color per-crop gate + easyocr digit-agreement), not the raw
+conf-gate this probe opened with. Ordering of contribution: **LEVER B (OCR-agreement) is the
+decisive filter** (5,558 -> 234); LEVER A (kit-color) removes the residual 8 off-kit OCR-agreements
+(the melee-badge failure mode) and is cheap insurance -- keep both.
+
+Wiring implications for the identity plan:
+1. Anchors are a **weak per-track number+team prior**, applied per close-up shot (report the 95
+   covered shots), never a standalone identity -- unchanged from the step-0 conclusion, but now the
+   prior is trustworthy (~99% vs ~22%).
+2. Because coverage is concentrated (Bruno #8 etc.), close-up anchors **supplement** roster-level
+   priors and relink constraints for hero-shot players; they do NOT replace a broad close-up-domain
+   reader. The uniform-coverage gap (most squad numbers never surface a legible close-up back) still
+   needs the cluster-trained / VLM route flagged in step 0.
+3. Step-1 (negatives retrain) and step-2 (consensus) stay PARKED; step 3 supersedes them as the
+   shippable gate.

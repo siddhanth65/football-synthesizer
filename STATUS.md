@@ -2,6 +2,22 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-16 — B2 STAGE 2b STEP 3: GATE CLEARED — 98.6% verified anchor precision; WIRE verdict
+
+Fourth lever pair wins (deep-worker requested: opus). 4-arm funnel, thresholds frozen pre-
+measurement: baseline 5,558 anchors @ ~20-25% → +kit-gate 4,281 @ ~25-30% (in-kit front-views
+survive colour) → **+OCR-digit-agreement 234 (the decisive filter) → +both 226 @ 69/70 = 98.6%
+verified** (every non-8 survivor individually checked; stratified sample 39/40). Yield: 226
+frame-anchors, 95/802 shots, 161 propagation-feasible (±2s wide frame). The one failure: OCR fired
+on a referee badge — kit gate exists for exactly this class. New dep: easyocr 1.7.2 (CPU; torch
+untouched, verified). **HONEST CAVEATS: hero-shot concentration — #8 (Bruno) = 82% of anchors,
+~5-6 distinct player-numbers/match; high-precision but NOT uniform coverage; uniform per-player
+naming still needs the cluster/VLM close-up reader (Sem 2).** Anchors may now be WIRED:
+propagation + number→name(roster) + per-player validation vs the cached Sofascore player oracle.
+Propagation rule (guard carries over): names propagate within original ByteTrack fragments freely;
+across relink merges ONLY where anchors confirm (relink merge precision is 35% — anchors become
+the validator, never the victim, of merges).
+
 ## 2026-07-16 — B2 STAGE 2b (anchors): probe positive, then TWO honest negatives; anchors stay unwired
 
 Probe (brighton, full match): 5,558 high-conf close-up anchors, 78% of shots covered, transfer
