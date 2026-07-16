@@ -20,6 +20,55 @@ External accuracy anchor for the CV pipeline. We run our existing generator (foo
 
 **Reading the decomposition.** GS-LocA ~92 says that *when* our pipeline reports a player, its pitch position is essentially where the ground truth puts it -- the calibration + projection geometry is sound. The score is then eroded by attribute gating: adding the **jersey** requirement collapses GS-DetA (official `gs_hota_full`) because our pipeline has **no jersey-number model yet** and emits `jersey = null`, so every GT player with a labelled number is unmatchable. The `no_jersey` -> `gs_hota_full` drop is therefore a direct, external measurement of the pre-Layer-2 identity gap, not a geometry failure.
 
+## Stage 2a: post-hoc track re-linking (appearance ReID) -- the association half
+
+ByteTrack fragments heavily on this footage (mean **79 track ids/sequence** for ~14 people/frame), and
+every id break costs GS-AssA and blocks identity propagation -- the weakest link in the decomposition
+above (AssA ~37-40 vs LocA ~92). Stage 2a is a **post-hoc merge pass** over the persisted positions
+(no re-tracking, geometry untouched): fragments are merge candidates iff temporally disjoint, same
+team, same role, and gap-consistent motion (end->start feasible at <= 9 m/s + 2 m calibration slack),
+then merged greedily by appearance cosine similarity above a frozen threshold. Appearance = median of
+<=10 crop embeddings per fragment from a pretrained torchreid **OSNet** (`osnet_x0_25`, ImageNet), crops
+recovered by re-detecting each frame and matching the persisted foot point (the parquet stores only the
+projected foot point; `image_x/image_y` are the raw box bottom-middle, so the same detector reproduces
+the box). Code: `generator/track_relink.py` (pure merge seams + embedder) + `eval/gsr_score.py --relink`.
+
+**Threshold provenance.** Cosine threshold swept 0.50-0.90 on the 3 pilot sequences (SNGS-021/022/023)
+**only**, then **frozen at 0.80** (the pilot-combined GS-AssA/GS-HOTA maximiser) before scoring the
+other 55. Re-scored with the same official evaluator into `gsr_scores_relink.json` (baseline
+`gsr_scores.json` untouched).
+
+### Before -> after (combined over the 58-sequence valid split, threshold 0.80)
+
+| Config | GS-AssA | GS-HOTA | GS-IDF1 | GS-DetA | GS-LocA |
+|---|---|---|---|---|---|
+| `gs_hota_full` | 36.4 -> **41.8** (+5.4) | 14.8 -> 15.8 | 8.1 -> 9.3 | 6.0 -> 6.0 | 91.3 -> 91.4 |
+| `no_jersey` | 36.8 -> **41.0** (+4.2) | 43.1 -> 45.4 | 45.7 -> 51.4 | 50.4 -> 50.2 | 92.5 -> 92.5 |
+| `role_only` | 38.1 -> **42.5** (+4.4) | 45.0 -> 47.4 | 47.9 -> 53.9 | 53.0 -> 52.8 | 92.4 -> 92.3 |
+| `loc_assoc` | 39.8 -> **44.7** (+4.9) | 48.9 -> 51.7 | 51.9 -> 58.5 | 60.2 -> 59.9 | 92.5 -> 92.5 |
+
+**Reading.** GS-AssA lifts **+4.2 to +5.4** across every attribute config and IDF1 lifts up to **+6.7**
+(loc_assoc 51.9 -> 58.5) -- the identity-linking gain the December story needs. GS-DetA and GS-LocA are
+flat by construction (relinking only relabels ids; it adds/removes no detection and moves no position),
+so the GS-HOTA gain (+1 to +2.8) is entirely the association half. The practical stat: **mean fragments
+per sequence 79 -> 36** (~55% fewer ids; per-seq 51-137 -> 27-51).
+
+### Merge precision (honest, and low)
+
+On the pilot (GT carries per-frame track ids, so true precision is computable) auditable pair-level
+merge precision is **70/200 = 35%** at threshold 0.80 (per-seq 28/50, 20/59, 22/91). That is well above
+the ~9% random baseline of merging two same-team disjoint fragments, but it means roughly two in three
+merges are wrong. **Why AssA still rises:** the 35% correct merges each stitch long same-identity chains
+(large AssA/IDF1 reward), while the motion+temporal constraints keep the wrong merges spatially
+plausible (small penalty), so the net is strongly positive.
+
+**Diagnosed ceiling.** The cosine similarity of constraint-valid pairs is kit-dominated (median 0.81;
+85% of pairs > 0.70), i.e. ImageNet OSNet cannot separate two players **in the same kit** -- exactly the
+pairs the constraints leave ambiguous. This is why AssA is near-flat over thresholds 0.50-0.80: the lift
+is **constraint-driven**, appearance only breaks near-ties. Upgrade path (Stage 2b): a football/person
+ReID model (OSNet Market-1501 or a pitch-tuned embedding) and close-up jersey anchors to disambiguate
+same-kit fragments; that is where precision, not just recall, improves.
+
 ## Identity attributes we emit
 
 | Attribute | Emitted? | Source | Note |

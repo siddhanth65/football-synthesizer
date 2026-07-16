@@ -2,6 +2,22 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-16 — B2 STAGE 2a: ReID track-relinking — GS-AssA +4.2..+5.4 external lift; 35% merge precision caveat
+
+Post-hoc fragment merging (deep-worker requested: opus; `generator/track_relink.py`, OSNet
+embeddings + team/role/temporal/motion constraint gates + greedy merge; threshold 0.80 frozen on 3
+pilot seqs before scoring the other 55). Re-scored all 58 GSR sequences, official evaluator:
+**GS-AssA +4.2 to +5.4 in every config** (loc_assoc 39.8→44.7, HOTA 48.9→51.7, IDF1 51.9→58.5;
+official full 14.8→15.8); DetA/LocA flat as expected (relabeling only). Fragments/seq 79→36.
+**HONEST CATCH: true merge precision on pilot GT = 35%** (vs ~9% random) — the lift is
+CONSTRAINT-driven, not appearance-driven: ImageNet OSNet is kit-dominated (median cosine 0.81 on
+constraint-valid pairs; AssA near-flat over thresholds 0.50-0.80) and cannot separate same-kit
+players — exactly what close-up jersey anchors (Stage 2b) attack. **PRODUCTION GUARD: relink is
+benchmark-side ONLY — do NOT wire into facts/report per-player metrics until merge precision
+clears a pre-committed bar (propose >=80%);** 65% wrong merges would corrupt player attribution.
+Worker also caught+fixed a real union-find bug mid-build (interval components). 12 targeted tests
+green. Baseline artifacts untouched (`gsr_scores_relink.json` separate).
+
 ## 2026-07-16 — B2 JERSEY STAGE 1+1b: model trained + honest negative on the cheap levers
 
 Stage 1 (deep-worker requested: opus; `generator/jersey_id.py`, `tools/train_jersey.py`, resumable

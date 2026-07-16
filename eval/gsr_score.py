@@ -413,6 +413,151 @@ def run_benchmark(
     return payload
 
 
+# === Stage 2a: post-hoc track re-linking (appearance ReID) =======================================
+#: Pilot sequences the re-link threshold is tuned on, then FROZEN before touching the other 55.
+PILOT_SEQS = ("SNGS-021", "SNGS-022", "SNGS-023")
+
+
+def _relink_and_write(
+    seqs: list[Path], data_dir: Path, out_dir: Path, pos_dir: Path, pred_out: Path, *,
+    params, audit_seqs: set[str], build_tools: bool,
+) -> dict[str, dict]:
+    """Relink every sequence's fragments and write relinked submissions -> per-seq stats.
+
+    Embeddings are cached under ``out_dir/relink_cache`` (resumable); the OSNet embedder + football
+    detector are built once, and only if some cache is cold (``build_tools``).
+    """
+    from generator.track_relink import OsnetEmbedder, relink_sequence  # noqa: PLC0415
+
+    cache_dir = out_dir / "relink_cache"
+    embedder = detector = None
+    if build_tools:
+        import torch  # noqa: PLC0415
+
+        from generator.extract import _build_detector  # noqa: PLC0415
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        embedder = OsnetEmbedder(params.model_name, device=device)
+        detector = _build_detector(device, "football")
+    pred_out.mkdir(parents=True, exist_ok=True)
+    stats: dict[str, dict] = {}
+    for i, seq_dir in enumerate(seqs):
+        name = seq_dir.name
+        parquet = pos_dir / f"{name}.parquet"
+        if not parquet.exists():
+            continue
+        df = pd.read_parquet(parquet)
+        relinked, st = relink_sequence(
+            seq_dir, df, params=params, embedder=embedder, detector=detector,
+            cache_path=cache_dir / f"{name}.npz", audit=name in audit_seqs)
+        _write_submission(relinked, seq_dir, pred_out / f"{name}.json")
+        stats[name] = st
+        logger.info("[%d/%d] %s: frags %d -> %d (%d merges, %d embedded, %.1f crops/frag)%s",
+                    i + 1, len(seqs), name, st["n_fragments_before"], st["n_fragments_after"],
+                    st["n_merges"], st["n_embedded"], st["mean_crops"],
+                    (f", merge-prec {st.get('merge_precision_correct')}/"
+                     f"{st.get('merge_precision_total')}" if name in audit_seqs else ""))
+    return stats
+
+
+def _caches_cold(seqs: list[Path], out_dir: Path) -> bool:
+    """True if any sequence lacks a cached embedding (so the GPU tools must be built)."""
+    cache_dir = out_dir / "relink_cache"
+    return any(not (cache_dir / f"{p.name}.npz").exists() for p in seqs)
+
+
+def run_relink_benchmark(
+    data_dir: Path, out_dir: Path, results_dir: Path, *, limit: int | None, threshold: float,
+) -> dict:
+    """Stage 2a: relink fragments, re-score the SAME sequences, write ``gsr_scores_relink.json``.
+
+    Never overwrites the baseline submissions or ``gsr_scores.json``: relinked submissions go to
+    ``out_dir/eval_relink`` and scores to ``results_dir/gsr_scores_relink.json``.
+    """
+    from generator.track_relink import RelinkParams  # noqa: PLC0415
+
+    pos_dir = out_dir / "positions"
+    seqs = sorted(p for p in data_dir.iterdir()
+                  if p.is_dir() and (pos_dir / f"{p.name}.parquet").exists())
+    if limit:
+        seqs = seqs[:limit]
+    params = RelinkParams(threshold=threshold)
+    logger.info("relink benchmark: %d sequences, threshold=%.3f", len(seqs), threshold)
+    pred_out = out_dir / "eval_relink"
+    stats = _relink_and_write(
+        seqs, data_dir, out_dir, pos_dir, pred_out / "predictions" / "data",
+        params=params, audit_seqs=set(PILOT_SEQS), build_tools=_caches_cold(seqs, out_dir))
+
+    scored = {p.name: 0 for p in seqs if (pred_out / "predictions" / "data" / f"{p.name}.json").exists()}
+    after: dict[str, dict] = {}
+    for cfg_name, cfg in EVAL_CONFIGS.items():
+        logger.info("scoring relinked config '%s' over %d sequences", cfg_name, len(scored))
+        after[cfg_name] = gs_hota(pred_out, data_dir, seq_info=scored, **cfg)
+
+    baseline = json.loads((results_dir / "gsr_scores.json").read_text(encoding="utf-8"))["configs"]
+    frags_before = float(np.mean([s["n_fragments_before"] for s in stats.values()]))
+    frags_after = float(np.mean([s["n_fragments_after"] for s in stats.values()]))
+    pilot_prec = _pilot_precision(stats)
+    payload = {
+        "n_sequences": len(scored), "threshold": threshold, "params": vars(params),
+        "mean_fragments_before": frags_before, "mean_fragments_after": frags_after,
+        "pilot_merge_precision": pilot_prec, "per_seq_stats": stats,
+        "before": {k: v["combined"] for k, v in baseline.items()},
+        "after": {k: v["combined"] for k, v in after.items()},
+        "after_per_seq": {k: v["per_seq"] for k, v in after.items()},
+    }
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / "gsr_scores_relink.json").write_text(json.dumps(payload, indent=2),
+                                                        encoding="utf-8")
+    for cfg_name in EVAL_CONFIGS:
+        b, a = baseline[cfg_name]["combined"], after[cfg_name]["combined"]
+        logger.info("== %-12s AssA %.2f -> %.2f (%+.2f)  HOTA %.2f -> %.2f  DetA %.2f -> %.2f",
+                    cfg_name, b["GS-AssA"], a["GS-AssA"], a["GS-AssA"] - b["GS-AssA"],
+                    b["GS-HOTA"], a["GS-HOTA"], b["GS-DetA"], a["GS-DetA"])
+    logger.info("fragments/seq %.0f -> %.0f; pilot merge precision %d/%d = %.1f%%",
+                frags_before, frags_after, pilot_prec[0], pilot_prec[1],
+                100.0 * pilot_prec[0] / max(pilot_prec[1], 1))
+    return payload
+
+
+def _pilot_precision(stats: dict[str, dict]) -> tuple[int, int]:
+    """Sum (correct, total) auditable merge pairs over the pilot sequences."""
+    c = sum(stats[s].get("merge_precision_correct", 0) for s in PILOT_SEQS if s in stats)
+    t = sum(stats[s].get("merge_precision_total", 0) for s in PILOT_SEQS if s in stats)
+    return c, t
+
+
+def tune_relink_threshold(
+    data_dir: Path, out_dir: Path, thresholds: list[float],
+) -> None:
+    """Sweep re-link thresholds on the 3 pilot sequences: report loc_assoc AssA + merge precision.
+
+    Embeddings are computed once (cached), so the sweep is CPU-only. Prints a table to pick and
+    freeze the threshold before applying it to the full split.
+    """
+    from generator.track_relink import RelinkParams  # noqa: PLC0415
+
+    pos_dir = out_dir / "positions"
+    seqs = [data_dir / s for s in PILOT_SEQS]
+    tune_out = out_dir / "eval_relink_tune"
+    logger.info("tuning on pilot %s over thresholds %s", PILOT_SEQS, thresholds)
+    print(f"{'thresh':>7} {'AssA':>7} {'HOTA_la':>8} {'frags':>12} {'merges':>7} {'merge_prec':>11}")
+    for th in thresholds:
+        params = RelinkParams(threshold=th)
+        pred_out = tune_out / f"th_{th:.2f}"
+        stats = _relink_and_write(
+            seqs, data_dir, out_dir, pos_dir, pred_out / "predictions" / "data",
+            params=params, audit_seqs=set(PILOT_SEQS), build_tools=_caches_cold(seqs, out_dir))
+        scored = {s: 0 for s in PILOT_SEQS}
+        r = gs_hota(pred_out, data_dir, seq_info=scored, **EVAL_CONFIGS["loc_assoc"])
+        c, t = _pilot_precision(stats)
+        fb = sum(stats[s]["n_fragments_before"] for s in PILOT_SEQS if s in stats)
+        fa = sum(stats[s]["n_fragments_after"] for s in PILOT_SEQS if s in stats)
+        prec = f"{c}/{t}={100.0 * c / max(t, 1):.0f}%"
+        print(f"{th:>7.2f} {r['combined']['GS-AssA']:>7.2f} {r['combined']['GS-HOTA']:>8.2f} "
+              f"{fb:>5} ->{fa:>5} {fb - fa:>7} {prec:>11}")
+
+
 def main() -> None:
     """CLI entry point: extract our pipeline over GSR sequences and score GS-HOTA."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -425,7 +570,21 @@ def main() -> None:
     ap.add_argument("--detector", default="football")
     ap.add_argument("--tracker", default="bytetrack")
     ap.add_argument("--score-only", action="store_true", help="reuse submissions; skip the GPU stage")
+    ap.add_argument("--relink", action="store_true",
+                    help="Stage 2a: merge fragments by appearance, re-score into gsr_scores_relink.json")
+    ap.add_argument("--relink-threshold", type=float, default=0.80,
+                    help="frozen cosine merge threshold (tuned on the 3 pilot sequences)")
+    ap.add_argument("--tune-relink", type=str, default=None,
+                    help="comma-separated thresholds to sweep on the pilot (prints AssA + precision)")
     args = ap.parse_args()
+    if args.tune_relink:
+        tune_relink_threshold(args.data_dir, args.out_dir,
+                              [float(t) for t in args.tune_relink.split(",")])
+        return
+    if args.relink:
+        run_relink_benchmark(args.data_dir, args.out_dir, args.results_dir,
+                             limit=args.limit, threshold=args.relink_threshold)
+        return
     run_benchmark(
         args.data_dir, args.out_dir, args.results_dir, limit=args.limit,
         calib_period=args.calib_period, detector=args.detector, tracker=args.tracker,
