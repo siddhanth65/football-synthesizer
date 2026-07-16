@@ -2,6 +2,20 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-16 — B2 STAGE 2b (anchors): probe positive, then TWO honest negatives; anchors stay unwired
+
+Probe (brighton, full match): 5,558 high-conf close-up anchors, 78% of shots covered, transfer
+POSITIVE on clean back-views — but naive conf-gating is ~80% hallucination (crowd→"1"@0.94;
+front-view players→"20/29/11"; illegible head never saw non-player crops). Fix attempt 1
+(negatives retrain, weak-labeled crowd/ref crops): **DOMAIN SHORTCUT — SoccerNet gate improves
+(0.417→0.448) while close-up recall collapses 100%→0.1-3.2%** (reject head keys on close-up domain,
+not the number patch; the task premise "negatives = core fix" is measured WRONG). Fix attempt 2
+(per-shot consensus): 5 anchors match-wide at 20% precision — consensus REINFORCES consistent
+front-view hallucinations, only cancels random scatter. **Anchors remain un-wired (80% bar not
+met).** Next levers (measured next, not assumed): kit-color gate (kills crowd/ref mass) + digit-
+evidence/OCR check on the torso band (kills in-kit front-view mass — the dominant error, which a
+kit gate alone cannot touch). Retrained weights kept but NOT promoted.
+
 ## 2026-07-16 — B2 STAGE 2a: ReID track-relinking — GS-AssA +4.2..+5.4 external lift; 35% merge precision caveat
 
 Post-hoc fragment merging (deep-worker requested: opus; `generator/track_relink.py`, OSNet

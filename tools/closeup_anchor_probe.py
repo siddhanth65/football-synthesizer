@@ -42,7 +42,7 @@ import pandas as pd
 
 from core import registry
 from generator import live_play
-from generator.jersey_id import ILLEGIBLE, decide
+from generator.jersey_id import ILLEGIBLE, aggregate_votes, decide
 from generator.jersey_id import JerseyRecognizer
 
 OUT_DIR = Path("results/closeup_anchor_probe")
@@ -82,6 +82,55 @@ def team_sets_by_frame(df_chunk: pd.DataFrame) -> dict[int, set[int]]:
     return {int(f): set(int(t) for t in g) for f, g in players.groupby("frame")["team"]}
 
 
+def player_points_by_frame(df_chunk: pd.DataFrame) -> dict[int, np.ndarray]:
+    """``{frame: [[image_x, image_y], ...]}`` for football-YOLO player/keeper detections.
+
+    Football-YOLO fires only on pitch players (and keepers); its detection points are the weak
+    label used to separate real players from non-players when harvesting reject negatives.
+
+    Args:
+        df_chunk: aligned rows for a single chunk.
+
+    Returns:
+        Per-frame array of player/keeper image points (empty array for frames with none).
+    """
+    players = df_chunk[df_chunk["role"].isin(live_play.PLAYER_ROLES)]
+    return {int(f): g[["image_x", "image_y"]].to_numpy(dtype=np.float32)
+            for f, g in players.groupby("frame")}
+
+
+def _zero_detection_frames(df_chunk: pd.DataFrame) -> list[int]:
+    """Sampled grid frames with no football-YOLO detection (SHOT_GRAPHIC: crowd/graphics/tunnel).
+
+    The aligned parquet stores only frames that carry >=1 detection, so zero-detection frames are
+    the gaps in the chunk's sampled grid. The grid step is the modal spacing between stored frames.
+
+    Args:
+        df_chunk: aligned rows for a single chunk.
+
+    Returns:
+        Sorted frame indices in the grid span that are absent from the parquet.
+    """
+    fr = np.array(sorted(df_chunk["frame"].unique()), dtype=int)
+    if fr.size < 2:
+        return []
+    step = int(np.median(np.diff(fr)))
+    if step < 1:
+        return []
+    grid = set(range(int(fr.min()), int(fr.max()) + 1, step))
+    return sorted(grid - set(int(x) for x in fr))
+
+
+def _has_player_inside(box: np.ndarray, pts: np.ndarray, margin: float = 12.0) -> bool:
+    """True if any football-YOLO player point lies inside ``box`` (``x1,y1,x2,y2``) with a margin."""
+    if pts.size == 0:
+        return False
+    x1, y1, x2, y2 = box
+    inside = ((pts[:, 0] >= x1 - margin) & (pts[:, 0] <= x2 + margin)
+              & (pts[:, 1] >= y1 - margin) & (pts[:, 1] <= y2 + margin))
+    return bool(inside.any())
+
+
 def kit_team_guess(crop_bgr: np.ndarray) -> int | None:
     """Cheap red-vs-not kit guess on a person crop (team 0 = Man Utd red, team 1 = Brighton).
 
@@ -118,6 +167,7 @@ def detect_and_read(
     yolo,  # noqa: ANN001 - ultralytics YOLO
     recog: JerseyRecognizer,
     tmp_dir: Path,
+    keep_probs: bool = False,
 ) -> list[dict]:
     """Detect people on the chunk's close-up frames and read jersey numbers.
 
@@ -177,6 +227,8 @@ def detect_and_read(
         m["pred"] = int(num)
         m["conf"] = round(float(conf), 4)
         m["illegible"] = bool(int(row.argmax()) == ILLEGIBLE)
+        if keep_probs:
+            m["_prob"] = row  # kept for per-shot consensus pooling (not written to CSV)
     meta.append({"_n_persons": n_persons})  # funnel bookkeeping
     return meta
 
@@ -191,7 +243,83 @@ def _load_yolo():  # noqa: ANN202
     return y
 
 
-def run_spotcheck(match_id: str, chunk_key: str, n: int, seed: int) -> None:
+def harvest_negatives(match_id: str, out_dir: Path, per_chunk_cap: int, seed: int) -> None:
+    """Harvest non-player reject negatives from close-up frames (weak-labeled, no manual labels).
+
+    Weak-label rule (documented), two non-player sources:
+      * **zero-detection (SHOT_GRAPHIC) frames** -- grid frames where football-YOLO found nothing
+        (:func:`_zero_detection_frames`): crowd, graphics, tunnel, extreme face close-ups. No pitch
+        player is present, so back-number leakage is near zero (the purest source).
+      * **close-up frames** -- a COCO person box (``box_h >= MIN_BOX_H``) containing **no**
+        football-YOLO player/keeper point (:func:`_has_player_inside`): crowd/ref behind play and,
+        usefully, front/side pitch players with no visible number (the class-20/29/11 hallucinations).
+
+    These crops are trained as the illegible/reject class so the recognizer stops hallucinating
+    attractor numbers on out-of-distribution close-up crops.
+
+    Ceiling: football-YOLO under-detects on close-ups, so the close-up source leaks real
+    back-number players; a downstream recognizer post-filter (keep illegible/attractor reads, drop
+    confident non-attractor numbers) plus a visual purity spot-check handle this -- not assumed clean.
+
+    Args:
+        match_id: registry match id.
+        out_dir: destination directory for negative crop JPGs (created).
+        per_chunk_cap: max negatives kept per chunk (spreads the set across the match).
+        seed: RNG seed for the per-chunk frame shuffle (deterministic harvest).
+    """
+    import random  # noqa: PLC0415
+
+    match = registry.get(match_id)
+    df = match.load_aligned()
+    yolo = _load_yolo()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    rng = random.Random(seed)
+    kept = 0
+    for chunk_key, dfc in df.groupby("chunk", sort=True):
+        cls = classify_chunk(dfc)
+        close_frames = [int(f) for f in cls.index[cls["shot_type"] == live_play.SHOT_CLOSE_UP]]
+        # Zero-detection grid frames (football-YOLO found nothing) are SHOT_GRAPHIC: crowd,
+        # graphics, tunnel, extreme face close-ups -- the purest non-player source (no pitch player
+        # to mislabel). These are absent from the aligned parquet, so reconstruct the sampled grid.
+        graphic_frames = _zero_detection_frames(dfc)
+        harvest_frames = close_frames + graphic_frames
+        rng.shuffle(harvest_frames)  # sample across the chunk, not just its first frames
+        pts_by_frame = player_points_by_frame(dfc)
+        video = _video_for(match_id, chunk_key)
+        if not video.exists():
+            print(f"WARN missing video {video}")
+            continue
+        cap = cv2.VideoCapture(str(video))
+        chunk_kept = 0
+        for fi in harvest_frames:
+            if chunk_kept >= per_chunk_cap:
+                break
+            cap.set(cv2.CAP_PROP_POS_FRAMES, fi)
+            ret, frame_bgr = cap.read()
+            if not ret:
+                continue
+            rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+            res = yolo(rgb, verbose=False, conf=COCO_CONF, classes=[0])[0]
+            xyxy = res.boxes.xyxy.cpu().numpy() if res.boxes is not None else np.zeros((0, 4))
+            pts = pts_by_frame.get(fi, np.empty((0, 2), dtype=np.float32))
+            for box in xyxy:
+                if chunk_kept >= per_chunk_cap:
+                    break
+                x1, y1, x2, y2 = (int(v) for v in box)
+                if float(y2 - y1) < MIN_BOX_H or _has_player_inside(box, pts):
+                    continue
+                crop = frame_bgr[max(y1, 0):y2, max(x1, 0):x2]
+                if crop.size == 0:
+                    continue
+                cv2.imwrite(str(out_dir / f"{chunk_key}_f{fi}_{chunk_kept:04d}.jpg"), crop)
+                chunk_kept += 1
+                kept += 1
+        cap.release()
+        print(f"{chunk_key}: kept {chunk_kept} negatives (running total {kept})")
+    print(f"harvested {kept} non-player negatives -> {out_dir}")
+
+
+def run_spotcheck(match_id: str, chunk_key: str, n: int, seed: int, ckpt: Path = CKPT) -> None:
     """Dump ~``n`` legible-candidate crops from ONE chunk spanning the confidence range to freeze
     the anchor threshold by manual verification."""
     match = registry.get(match_id)
@@ -202,7 +330,7 @@ def run_spotcheck(match_id: str, chunk_key: str, n: int, seed: int) -> None:
     print(f"{chunk_key}: {len(close_frames)} close-up frames of {len(cls)} sampled")
 
     yolo = _load_yolo()
-    recog = JerseyRecognizer.from_checkpoint(CKPT)
+    recog = JerseyRecognizer.from_checkpoint(ckpt)
     tmp = OUT_DIR / "_tmp_spot"
     recs = [r for r in detect_and_read(match_id, chunk_key, close_frames, yolo, recog, tmp)
             if "pred" in r]
@@ -228,18 +356,35 @@ def run_spotcheck(match_id: str, chunk_key: str, n: int, seed: int) -> None:
     print("Inspect the crops, fill the 'actual' column, then freeze --threshold.")
 
 
-def run_full(match_id: str, threshold: float) -> None:
-    """Full-match yield + propagation-feasibility measurement at the frozen ``threshold``."""
+def run_full(match_id: str, threshold: float, ckpt: Path = CKPT, *, consensus: bool = False) -> None:
+    """Full-match yield + propagation-feasibility measurement at the frozen ``threshold``.
+
+    Args:
+        match_id: registry match id.
+        threshold: anchor confidence floor (per-crop peak, and pooled floor for consensus).
+        ckpt: recognizer checkpoint to load (e.g. a negatives-retrained model).
+        consensus: also aggregate reads per close-up shot (:func:`_consensus_anchors`) -- a true
+            player reads the same number across a shot's frames while hallucinations scatter, so the
+            shot vote suppresses inconsistent noise the per-frame gate lets through.
+    """
     match = registry.get(match_id)
     df = match.load_aligned()
     fps = {ck: match.chunk_fps(ck) for ck in df["chunk"].unique()}
 
     yolo = _load_yolo()
-    recog = JerseyRecognizer.from_checkpoint(CKPT)
-    anchors_dir = OUT_DIR / "anchors"
+    recog = JerseyRecognizer.from_checkpoint(ckpt)
+    # keep the baseline (torso-ckpt) anchors/ intact as before/after evidence; a different
+    # checkpoint writes its per-frame anchors to a separate dir.
+    anchors_dir = OUT_DIR / ("anchors" if Path(ckpt) == CKPT else "anchors_retrained")
     anchors_dir.mkdir(parents=True, exist_ok=True)
+    cons_dir = OUT_DIR / "consensus_anchors"
+    if consensus and cons_dir.exists():
+        shutil.rmtree(cons_dir)
+    if consensus:
+        cons_dir.mkdir(parents=True, exist_ok=True)
 
     rows: list[dict] = []
+    cons_reads: list[dict] = []
     per_chunk: dict[str, dict] = {}
     for chunk_key, dfc in df.groupby("chunk", sort=True):
         cls = classify_chunk(dfc)
@@ -250,7 +395,8 @@ def run_full(match_id: str, threshold: float) -> None:
         tmp = OUT_DIR / "_tmp_full"
         if tmp.exists():
             shutil.rmtree(tmp)
-        recs = detect_and_read(match_id, chunk_key, close_frames, yolo, recog, tmp)
+        recs = detect_and_read(match_id, chunk_key, close_frames, yolo, recog, tmp,
+                               keep_probs=consensus)
         n_persons = sum(r.get("_n_persons", 0) for r in recs)
         crops = [r for r in recs if "pred" in r]
         legible = [r for r in crops if not r["illegible"]]
@@ -273,7 +419,19 @@ def run_full(match_id: str, threshold: float) -> None:
                     team_matchable += 1
 
         # Collapse into distinct close-up shots (contiguous close-up sampled-frame runs).
-        n_shots, n_shots_anchor = _shot_yield(close_frames, anchors)
+        shots = _shots(close_frames)
+        n_shots = len(shots)
+        anchor_frames = {a["frame"] for a in anchors}
+        n_shots_anchor = sum(any(lo <= af <= hi for af in anchor_frames) for lo, hi in shots)
+
+        cons_anchors = _consensus_anchors(crops, shots, threshold) if consensus else []
+        for ca in cons_anchors:  # persist a representative crop per shot-consensus anchor
+            src = Path(ca.pop("rep_crop"))
+            if src.exists():
+                shutil.copy(src, cons_dir / f"{chunk_key}_s{ca['shot']:03d}_f{ca['frame']}"
+                            f"_n{ca['pred']:02d}_c{ca['conf']:.3f}.jpg")
+            ca["chunk"] = chunk_key
+            cons_reads.append(ca)
 
         for a in anchors:  # persist anchor crops for audit
             src = Path(a["crop_path"])
@@ -283,6 +441,7 @@ def run_full(match_id: str, threshold: float) -> None:
         for r in crops:
             r["chunk"] = chunk_key
             r.pop("crop_path", None)
+            r.pop("_prob", None)
             rows.append(r)
         per_chunk[chunk_key] = {
             "close_up_frames": len(close_frames),
@@ -294,20 +453,21 @@ def run_full(match_id: str, threshold: float) -> None:
             "anchors_team_matchable": team_matchable,
             "closeup_shots": n_shots,
             "shots_with_anchor": n_shots_anchor,
+            "consensus_shot_anchors": len(cons_anchors),
         }
         c = per_chunk[chunk_key]
         print(f"{chunk_key}: close {c['close_up_frames']:5d} | persons {c['persons_detected']:5d} "
               f"| eligible {c['eligible_crops']:4d} | legible {c['legible_reads']:4d} "
               f"| anchors {c['anchors']:3d} | attach {attachable:3d} | shots "
-              f"{n_shots_anchor}/{n_shots}")
+              f"{n_shots_anchor}/{n_shots} | cons {len(cons_anchors)}")
 
-    _write_full_report(match_id, threshold, per_chunk, rows)
+    _write_full_report(match_id, threshold, ckpt, per_chunk, rows, cons_reads)
 
 
-def _shot_yield(close_frames: list[int], anchors: list[dict]) -> tuple[int, int]:
-    """Distinct close-up shots and how many carry >=1 anchor (contiguous run segmentation)."""
+def _shots(close_frames: list[int]) -> list[tuple[int, int]]:
+    """Segment sorted close-up sampled frames into contiguous shot ``(lo, hi)`` runs."""
     if not close_frames:
-        return 0, 0
+        return []
     shots: list[tuple[int, int]] = []
     lo = prev = close_frames[0]
     for f in close_frames[1:]:
@@ -316,23 +476,60 @@ def _shot_yield(close_frames: list[int], anchors: list[dict]) -> tuple[int, int]
             lo = f
         prev = f
     shots.append((lo, prev))
-    anchor_frames = {a["frame"] for a in anchors}
-    with_anchor = sum(any(lo <= af <= hi for af in anchor_frames) for lo, hi in shots)
-    return len(shots), with_anchor
+    return shots
 
 
-def _write_full_report(match_id: str, threshold: float, per_chunk: dict, rows: list[dict]) -> None:
+def _consensus_anchors(
+    crops: list[dict], shots: list[tuple[int, int]], min_conf: float
+) -> list[dict]:
+    """Per-close-up-shot consensus reads: pool every crop in a shot, one vote per shot.
+
+    Each shot is treated as a pseudo-tracklet: :func:`aggregate_votes` over its crops' softmax rows
+    yields one ``(number, pooled_conf)``. A shot dominated by non-players (rejected as illegible by
+    the negatives-retrained head) or by scattered hallucinations pools to ``-1``; a shot with a real
+    back number that reads consistently surfaces it. One representative crop (highest mass on the
+    winning number) is kept per anchor for the audit spot-check.
+
+    Args:
+        crops: per-crop records carrying ``frame``, ``_prob`` (softmax row) and ``crop_path``.
+        shots: contiguous close-up shot spans from :func:`_shots`.
+        min_conf: floor on the pooled winning-number probability.
+
+    Returns:
+        One record per shot that yields a number: ``shot, frame, pred, conf, n_crops, rep_crop``.
+    """
+    out: list[dict] = []
+    for si, (lo, hi) in enumerate(shots):
+        members = [c for c in crops if lo <= c["frame"] <= hi and "_prob" in c]
+        if not members:
+            continue
+        probs = np.stack([c["_prob"] for c in members])
+        num, conf = aggregate_votes(probs, min_conf=min_conf)
+        if num == -1:
+            continue
+        rep = max(members, key=lambda c: float(c["_prob"][num]))
+        out.append({"shot": si, "frame": rep["frame"], "pred": int(num),
+                    "conf": round(float(conf), 4), "n_crops": len(members),
+                    "rep_crop": rep["crop_path"]})
+    return out
+
+
+def _write_full_report(
+    match_id: str, threshold: float, ckpt: Path, per_chunk: dict, rows: list[dict],
+    cons_reads: list[dict],
+) -> None:
     """Aggregate the funnel across chunks and write the JSON yield artifact."""
     keys = ["close_up_frames", "persons_detected", "eligible_crops", "legible_reads",
             "anchors", "anchors_attachable_2s", "anchors_team_matchable",
-            "closeup_shots", "shots_with_anchor"]
-    total = {k: int(sum(c[k] for c in per_chunk.values())) for k in keys}
+            "closeup_shots", "shots_with_anchor", "consensus_shot_anchors"]
+    total = {k: int(sum(c.get(k, 0) for c in per_chunk.values())) for k in keys}
     numbers = pd.Series(
         [r["pred"] for r in rows if r["conf"] >= threshold and not r["illegible"]]
     )
+    cons_numbers = pd.Series([r["pred"] for r in cons_reads])
     out = {
         "match": match_id,
-        "checkpoint": str(CKPT),
+        "checkpoint": str(ckpt),
         "threshold": threshold,
         "min_box_h_px": MIN_BOX_H,
         "coco_conf": COCO_CONF,
@@ -340,10 +537,14 @@ def _write_full_report(match_id: str, threshold: float, per_chunk: dict, rows: l
         "per_chunk": per_chunk,
         "total": total,
         "anchor_number_histogram": {int(k): int(v) for k, v in numbers.value_counts().items()},
+        "consensus_number_histogram":
+            {int(k): int(v) for k, v in cons_numbers.value_counts().items()},
     }
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / "closeup_anchor_stats.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
     pd.DataFrame(rows).to_csv(OUT_DIR / "closeup_reads.csv", index=False)
+    if cons_reads:
+        pd.DataFrame(cons_reads).to_csv(OUT_DIR / "consensus_reads.csv", index=False)
     print("\nTOTAL FUNNEL:", json.dumps(total, indent=2))
     print(f"artifacts -> {OUT_DIR}")
 
@@ -352,16 +553,25 @@ def main() -> None:
     """CLI entry point (GPU; one job at a time)."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--match", default="brighton_manutd")
-    ap.add_argument("--mode", choices=["spotcheck", "full"], required=True)
+    ap.add_argument("--mode", choices=["spotcheck", "full", "harvest_neg"], required=True)
     ap.add_argument("--chunk", default="h1_chunk_000", help="spotcheck: which chunk to sample")
     ap.add_argument("--n", type=int, default=24, help="spotcheck: crops to dump")
     ap.add_argument("--threshold", type=float, default=0.90, help="full: frozen anchor confidence")
+    ap.add_argument("--ckpt", default=str(CKPT), help="full/spotcheck: recognizer checkpoint")
+    ap.add_argument("--consensus", action="store_true",
+                    help="full: also aggregate reads per close-up shot (per-shot consensus)")
+    ap.add_argument("--neg-out", default="data/jersey_negatives",
+                    help="harvest_neg: output dir for non-player negative crops")
+    ap.add_argument("--neg-cap", type=int, default=400,
+                    help="harvest_neg: max negatives kept per chunk")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
     if args.mode == "spotcheck":
-        run_spotcheck(args.match, args.chunk, args.n, args.seed)
+        run_spotcheck(args.match, args.chunk, args.n, args.seed, Path(args.ckpt))
+    elif args.mode == "harvest_neg":
+        harvest_negatives(args.match, Path(args.neg_out), args.neg_cap, args.seed)
     else:
-        run_full(args.match, args.threshold)
+        run_full(args.match, args.threshold, Path(args.ckpt), consensus=args.consensus)
 
 
 if __name__ == "__main__":

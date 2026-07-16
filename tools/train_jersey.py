@@ -82,6 +82,27 @@ def _split_train_val(items: list) -> tuple[list, list]:
     return shuffled[n_val:], shuffled[:n_val]
 
 
+def _negative_tracklets(neg_dir: Path, per_tracklet: int) -> list[tuple[str, int, list[Path]]]:
+    """Group harvested non-player negative crops into illegible pseudo-tracklets.
+
+    Each crop is a weak-labeled non-player (crowd/referee/bench: see
+    ``tools/closeup_anchor_probe.py --mode harvest_neg``). Chunking them into ``per_tracklet``-sized
+    pseudo-tracklets of class :data:`generator.jersey_id.ILLEGIBLE` lets the existing per-slot
+    :class:`_CropSampler` mix them into training at a controlled fraction, teaching the reject head
+    to fire on out-of-distribution close-up crops instead of hallucinating an attractor number.
+
+    Args:
+        neg_dir: directory of negative crop JPGs.
+        per_tracklet: crops per pseudo-tracklet (match the sampler's ``crops_per_tracklet``).
+
+    Returns:
+        ``(pseudo_id, ILLEGIBLE, crop_paths)`` items; empty list if ``neg_dir`` has no crops.
+    """
+    crops = sorted(neg_dir.glob("*.jpg"))
+    return [(f"neg_{i // per_tracklet:04d}", J.ILLEGIBLE, crops[i : i + per_tracklet])
+            for i in range(0, len(crops), per_tracklet)]
+
+
 class _CropSampler(Dataset):
     """One random crop per tracklet-slot per epoch (fresh draw each ``__getitem__``).
 
@@ -205,6 +226,13 @@ def train(args: argparse.Namespace) -> None:
 
     tens_lut, units_lut, leg_lut = _digit_luts(device)
     tr, val = _split_train_val(_tracklets("train"))
+    if args.neg_dir:
+        negs = _negative_tracklets(Path(args.neg_dir), args.crops_per_tracklet)
+        n_neg_crops = sum(len(c) for _, _, c in negs)
+        tr = tr + negs  # negatives join train only; val stays a clean player-tracklet monitor
+        _log(f"negatives: {n_neg_crops} crops -> {len(negs)} illegible pseudo-tracklets from "
+             f"{args.neg_dir} (~{n_neg_crops / max(len(tr) * args.crops_per_tracklet, 1):.0%} "
+             f"of each epoch)")
     _log(f"arch {args.arch}  torso {args.torso}  stage {args.stage}  "
          f"train tracklets {len(tr)}, val {len(val)}, device {device}")
     loader = DataLoader(
@@ -351,6 +379,8 @@ def main() -> None:
                    help="stage-2 min digit confidence for a crop to train the number heads")
     t.add_argument("--init-ckpt", default=None,
                    help="warm-start model weights (e.g. stage-1 ckpt) when --ckpt is fresh")
+    t.add_argument("--neg-dir", default=None,
+                   help="dir of harvested non-player negative crops (trained as illegible/reject)")
     tn = sub.add_parser("tune")
     tn.add_argument("--eval-crops", type=int, default=48)
     tn.add_argument("--ckpt", default=str(OUT / "ckpt_mh.pt"))

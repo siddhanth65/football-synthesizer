@@ -125,3 +125,122 @@ Extreme close-ups that yield **zero** football-YOLO detections are `SHOT_GRAPHIC
 aligned parquet) and were not sampled here -- so the biggest, most legible face-cam frames are
 partly missed. Those are predominantly front/face content (no back number), so the miss is largely
 non-anchoring; a full-grid re-decode would recover the minority of back-facing extreme close-ups.
+
+---
+
+# Stage-2b step 1 (negatives retrain) + step 2 (per-shot consensus) -- 2026-07-16
+
+**Both levers were implemented, run end-to-end, and MEASURED. Both FAIL the pre-committed >=80%
+propagation-precision bar. The negatives retrain is worse than a miss -- it destroys the anchor
+source. Honest negative result; the remaining untested lever is the kit-color gate (step 3 / the
+probe's own priority-1 recommendation).** Weights (kept for the record, NOT promoted):
+`outputs/jersey/ckpt_torso_neg.pt` (aggressive), `outputs/jersey/ckpt_torso_neg_gentle.pt` (gentle).
+New code: `tools/train_jersey.py` `--neg-dir` + `_negative_tracklets` (illegible pseudo-tracklets);
+`tools/closeup_anchor_probe.py` `--mode harvest_neg` (+`_zero_detection_frames`,
+`_has_player_inside`), `--consensus` (+`_shots`, `_consensus_anchors`). CPU seam tests:
+`tests/test_closeup_anchor_seams.py` (4, green). Baseline stats preserved:
+`closeup_anchor_stats_baseline.json`. Evidence montages: `neg_set_sample.png`,
+`step1_survivors_sample.png`, `step2_consensus_anchors.png`.
+
+## Step 1 -- negatives retrain of the illegible/reject head
+
+**Negative harvest (weak-labeled, no manual labels), two documented sources**
+(`closeup_anchor_probe.py --mode harvest_neg`):
+- *Zero-detection (SHOT_GRAPHIC) frames* -- grid frames where football-YOLO fired nothing
+  (`_zero_detection_frames`): crowd, referees, benches, coaches, graphics, extreme face close-ups.
+- *Close-up frames* -- COCO person boxes (`box_h >= 100`) with **no** football-YOLO player/keeper
+  point inside (`_has_player_inside`): crowd/ref behind play + front/side pitch players (no number).
+
+5,500 raw crops harvested (500/chunk). **Weak-label purity, measured by eyeball (not assumed):** the
+raw containment set leaks real numbered backs -- football-YOLO under-detects on close-ups, so many
+pitch players fall into the "no player point" bucket, and broadcast close-ups are full of player
+hero/celebration shots with legible numbers even on zero-detection frames. A recognizer post-filter
+(drop crops the torso model reads as a confident non-attractor number, conf>=0.35) removed
+897 (16%) likely-genuine backs; the kept 4,603-crop set (`data/jersey_negatives`) still carries
+~10% residual legible-back leakage (dominated by the attractor classes 1/11/20/29 we intend to
+suppress). This residual is the documented ceiling of the free weak-label.
+
+**Training:** warm-start from the torso checkpoint (`jersey_torso_r224_acc417.pt`), negatives added
+as illegible pseudo-tracklets (~13% of each epoch), 5 epochs, lr 1e-4. A second, gentler run used
+the pure zero-detection subset only, post-filtered (`data/jersey_negatives_graphic_clean`, 2,592
+crops, ~8%/epoch), 2 epochs, lr 5e-5.
+
+**SoccerNet regression gate (official 1211-tracklet test, the gate = must not drop below 0.41):**
+
+| model | min_conf | tracklet acc | numbered-only | legP | legR |
+|---|---|---|---|---|---|
+| torso baseline (Stage-1c) | 0.20 | 0.4170 | 0.299 | 0.855 | 0.730 |
+| **+ negatives (aggressive)** | 0.20 | **0.4476** | 0.308 | 0.855 | 0.530 |
+| **+ negatives (aggressive)** | 0.05 | **0.4500** | 0.322 | 0.855 | 0.590 |
+
+The gate **PASSES with margin -- the retrain even *improves* SoccerNet by +3.1 pp.** But that
+improvement is the tell: it comes entirely from rejecting more of the 355 illegible test tracklets
+(legibility recall drops 0.730 -> 0.530, i.e. the model now says "-1" far more often), and SoccerNet
+crops are broadcast-wide -- a **different visual domain** from the close-up crops the negatives came
+from.
+
+**Close-up anchor recall -- COLLAPSE (the decisive measurement).** Re-reading the 5,554 baseline
+high-conf anchor crops (`anchors/`) with the retrained model, counting those still read as a
+confident number (conf>=0.70):
+
+| model | anchors surviving | share | 3 verified-correct backs (8,8,20) |
+|---|---|---|---|
+| torso baseline | 5,554 (all, by construction) | 100% | read 8/8/20 correctly |
+| + negatives (aggressive) | **4** | **0.1%** | all three now read **illegible** |
+| + negatives (gentle) | **180** | **3.2%** | all three now read **illegible** |
+
+All 24 saved threshold-freezing spot-check crops (`spotcheck/sc_*.jpg`) -- including the three
+confirmed-correct Man Utd backs -- now read **illegible** under both retrained models. And the 180
+gentle-model survivors are **still ~30% precision** (eyeball of 48: a referee read as `10`, front/
+side reds labelled `20`/`16`/`10`, Brighton `29` -- the same attractor mass, just a random 3%
+subset): `step1_survivors_sample.png`.
+
+**Root cause -- domain shortcut.** Every harvested negative is a close-up-domain crop; at the
+recognizer's 224x112 upscaled input the discriminative signal it latches onto is *domain*
+(close-up blur / motion / scale artifacts), not the ~14-40 px number patch. So the reject head
+learns "close-up-domain crop -> illegible" wholesale and rejects the entire close-up domain,
+genuine back numbers included. SoccerNet (broadcast-wide) is a disjoint domain, so it is spared --
+which is exactly why the gate *improves* while close-up recall goes to zero. Cleanly separating a
+non-player crop from a back-number crop of the same domain needs close-up **positives** (labelled
+back numbers from close-ups), which the "no manual labelling" constraint of step 1 cannot provide.
+
+**Step-1 verdict: FAILS the 80% bar, and is counterproductive.** It does not clean the anchor
+population; it deletes it (recall 100% -> 0.1-3.2%) while the few survivors stay ~30% precise. The
+recognizer is fine on clean broadcast backs; retraining its reject head on cheap same-domain
+negatives is the wrong lever.
+
+## Step 2 -- per-shot consensus (original torso model)
+
+Ran the full funnel with `--consensus` (each close-up shot = one `aggregate_votes` over all its
+crops; `_shots` + `_consensus_anchors`), threshold 0.70 pooled, on the *original* torso model (the
+retrained model has no recall to aggregate). Per-frame numbers reproduce the baseline exactly
+(5,558 anchors, 802 shots); consensus adds:
+
+| unit | count match-wide | number histogram | est. precision |
+|---|---|---|---|
+| per-frame anchors (baseline) | 5,558 | 20/29/1/11 = 80% of mass | ~20-25% (probe audit) |
+| **per-shot consensus anchors** | **5** | {20: 3, 24: 2} | **1/5 = 20%** (per-crop verified) |
+
+Per-crop verdicts of all 5 consensus anchors (`step2_consensus_anchors.png`): `20`@0.72 on a clear
+Man Utd "20" back = **CORRECT**; `24`@0.83 on a clear "20" back = WRONG (20->24 misread); `24`@0.91
+on Casemiro's **front** (no back number) = WRONG; `20`@0.72 on Garnacho's "17" back = WRONG;
+`20`@0.72 on a motion-blur turn = WRONG.
+
+**Step-2 verdict: FAILS the 80% bar on both yield and precision.** Two independent failure modes:
+(1) pooling *all* of a shot's crops (foreground player + crowd + other players) dilutes any single
+number so hard that only 5 shots match-wide clear the 0.70 pooled floor -- consensus over a shot
+without per-person association inside the shot is the wrong aggregation unit; (2) the surviving
+reads are still attractor hallucinations because a front/side player reads the *same* attractor
+number on every frame of a shot, so pooling **reinforces** the consistent hallucination instead of
+cancelling it. Consensus suppresses random scatter (crowd), not consistent within-shot hallucination
+-- which is the majority of the false mass.
+
+## Bottom line vs the >=80% bar, and what is left
+
+Neither step 1 (negatives retrain) nor step 2 (per-shot consensus) produces clean gated anchors;
+both leave precision at ~20-30% or destroy recall. **The pre-committed >=80% propagation bar is NOT
+cleared -- do not wire close-up anchors.** The one lever not yet tried is the probe's *own*
+priority-1 recommendation, deferred by this task to step 3: the **kit-color gate** (require the
+crop's torso colour to match one of the two match kits). Unlike a same-domain reject head it keys on
+colour, not domain, so it can drop crowd/referee/coach crops without rejecting pitch players, and
+unlike consensus it acts per-crop so it is not diluted -- it is the correct next thing to measure.
