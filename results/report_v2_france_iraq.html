@@ -53,7 +53,7 @@ metrics; FIFA PMSR appears only in the validation appendix as an oracle we check
 <strong>Ball-evidence gate:</strong> post-link coverage 36% (needs &ge; 40%),
 pass-recall proxy 22.8% (needs &ge; 50%) &rarr;
 <span class="abstain">ABSTAIN on ball families</span>.<br>
-<strong>Body guardrail:</strong> 100% precision (38/38 numbers CV-backed).
+<strong>Body guardrail:</strong> 100% precision (50/50 numbers CV-backed).
 <p class="legend">Gate inputs from <code>outputs/eval/france_iraq_ball_eval.json</code> (oracle: FIFA PMSR).</p>
 <p class="legend">Provenance legend: <span class="tag tag-cv">CV</span> our metrics (body) &middot;
 <span class="tag tag-fifa">FIFA</span> official PMSR (appendix only).</p>
@@ -63,6 +63,13 @@ pass-recall proxy 22.8% (needs &ge; 50%) &rarr;
 <p>Our shape classifier reads France in a <strong>3-5-2</strong> (nominal 4-3-3). The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.</p>
 <p>In shape terms, their visibility-corrected defensive line sits <strong>36 m</strong> up the pitch (the raw broadcast line is censoring-inflated; the de-biased value is validated to within about <strong>5 m</strong> of FIFA&#x27;s per-phase lines); they build from a base line around <strong>58 m</strong>; the block is <strong>34 m</strong> wide and <strong>20 m</strong> deep; nearest-team-mate compactness holds near <strong>13.2</strong> (a spread index, lower is tighter).</p>
 <p>Where the shape lives (lane occupation, whole match):</p><ul><li>half-spaces <strong>48%</strong> &mdash; the dominant channel</li><li>centre <strong>29%</strong></li><li>wings <strong>23%</strong> &mdash; comparatively thin, a structural handle for opponents</li></ul>
+</section>
+<section class="prov-cv">
+<h2><span class="tag tag-cv">CV</span> Opponent structural read -- Iraq</h2>
+<p>Our shape classifier reads Iraq in a <strong>3-5-2</strong>. The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.</p>
+<p>In shape terms, their visibility-corrected defensive line sits <strong>14 m</strong> up the pitch (the raw broadcast line is censoring-inflated; the de-biased value is validated to within about <strong>5 m</strong> of FIFA&#x27;s per-phase lines); they build from a base line around <strong>38 m</strong>; the block is <strong>32 m</strong> wide and <strong>22 m</strong> deep; nearest-team-mate compactness holds near <strong>12.2</strong> (a spread index, lower is tighter).</p>
+<p>Where the shape lives (lane occupation, whole match):</p><ul><li>half-spaces <strong>47%</strong> &mdash; the dominant channel</li><li>centre <strong>36%</strong></li><li>wings <strong>17%</strong> &mdash; comparatively thin, a structural handle for opponents</li></ul>
+<p>Iraq move as a unit &mdash; velocity synchrony <strong>68%</strong> on a 0-1 scale (this is a position-only measure and always renders).</p>
 </section>
 <section class="prov-cv">
 <h2><span class="tag tag-cv">CV</span> In possession</h2>

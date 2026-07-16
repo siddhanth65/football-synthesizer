@@ -53,7 +53,7 @@ metrics; FIFA PMSR appears only in the validation appendix as an oracle we check
 <strong>Ball-evidence gate:</strong> post-link coverage 38% (needs &ge; 40%),
 pass-recall proxy 10.6% (needs &ge; 50%) &rarr;
 <span class="abstain">ABSTAIN on ball families</span>.<br>
-<strong>Body guardrail:</strong> 100% precision (38/38 numbers CV-backed).
+<strong>Body guardrail:</strong> 100% precision (50/50 numbers CV-backed).
 <p class="legend">Gate inputs from <code>outputs/eval/france_norway_ball_eval.json</code> (oracle: FIFA PMSR).</p>
 <p class="legend">Provenance legend: <span class="tag tag-cv">CV</span> our metrics (body) &middot;
 <span class="tag tag-fifa">FIFA</span> official PMSR (appendix only).</p>
@@ -63,6 +63,13 @@ pass-recall proxy 10.6% (needs &ge; 50%) &rarr;
 <p>Our shape classifier reads France in a <strong>3-5-2</strong> (nominal 4-3-3). The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.</p>
 <p>In shape terms, their visibility-corrected defensive line sits <strong>35 m</strong> up the pitch (the raw broadcast line is censoring-inflated; the de-biased value is validated to within about <strong>5 m</strong> of FIFA&#x27;s per-phase lines); they build from a base line around <strong>60 m</strong>; the block is <strong>33 m</strong> wide and <strong>18 m</strong> deep; nearest-team-mate compactness holds near <strong>11.9</strong> (a spread index, lower is tighter).</p>
 <p>Where the shape lives (lane occupation, whole match):</p><ul><li>half-spaces <strong>47%</strong> &mdash; the dominant channel</li><li>centre <strong>34%</strong></li><li>wings <strong>18%</strong> &mdash; comparatively thin, a structural handle for opponents</li></ul>
+</section>
+<section class="prov-cv">
+<h2><span class="tag tag-cv">CV</span> Opponent structural read -- Norway</h2>
+<p>Our shape classifier reads Norway in a <strong>4-4-2</strong>. The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.</p>
+<p>In shape terms, their visibility-corrected defensive line sits <strong>22 m</strong> up the pitch (the raw broadcast line is censoring-inflated; the de-biased value is validated to within about <strong>5 m</strong> of FIFA&#x27;s per-phase lines); they build from a base line around <strong>45 m</strong>; the block is <strong>35 m</strong> wide and <strong>23 m</strong> deep; nearest-team-mate compactness holds near <strong>13.4</strong> (a spread index, lower is tighter).</p>
+<p>Where the shape lives (lane occupation, whole match):</p><ul><li>half-spaces <strong>46%</strong> &mdash; the dominant channel</li><li>centre <strong>33%</strong></li><li>wings <strong>21%</strong> &mdash; comparatively thin, a structural handle for opponents</li></ul>
+<p>Norway move as a unit &mdash; velocity synchrony <strong>69%</strong> on a 0-1 scale (this is a position-only measure and always renders).</p>
 </section>
 <section class="prov-cv">
 <h2><span class="tag tag-cv">CV</span> In possession</h2>

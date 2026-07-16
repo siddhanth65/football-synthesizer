@@ -2,7 +2,7 @@
 
 *Body written entirely from our computer-vision metrics (the [CV] sections). FIFA PMSR appears only in the validation appendix [FIFA], as an oracle we check ourselves against -- never as content.*
 
-**Ball-evidence gate:** post-link coverage 46% (>= 40%), pass-recall proxy 55.0% (>= 50%) -> **PASS**.  Body guardrail precision: 100% (77/77 numbers CV-backed).
+**Ball-evidence gate:** post-link coverage 46% (>= 40%), pass-recall proxy 55.0% (>= 50%) -> **PASS**.  Body guardrail precision: 100% (89/89 numbers CV-backed).
 
 *Gate inputs read from `outputs/eval/france_senegal_ball_eval.json` (oracle: FIFA PMSR).*
 
@@ -16,6 +16,19 @@ Where the shape lives (lane occupation, whole match):
 - half-spaces **47%** -- the dominant channel
 - centre **31%**
 - wings **22%** -- comparatively thin, a structural handle for opponents
+
+## [CV] Opponent structural read -- Senegal
+
+Our shape classifier reads Senegal in a **3-5-2**. The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.
+
+In shape terms, their visibility-corrected defensive line sits **24 m** up the pitch (the raw broadcast line is censoring-inflated; the de-biased value is validated to within about **5 m** of FIFA's per-phase lines); they build from a base line around **50 m**; the block is **34 m** wide and **21 m** deep; nearest-team-mate compactness holds near **12.6** (a spread index, lower is tighter).
+
+Where the shape lives (lane occupation, whole match):
+- half-spaces **46%** -- the dominant channel
+- centre **35%**
+- wings **20%** -- comparatively thin, a structural handle for opponents
+
+Senegal move as a unit -- velocity synchrony **71%** on a 0-1 scale (this is a position-only measure and always renders).
 
 ## [CV] In possession
 

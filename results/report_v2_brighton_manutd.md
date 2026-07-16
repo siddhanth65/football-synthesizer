@@ -2,7 +2,7 @@
 
 *Body written entirely from our computer-vision metrics (the [CV] sections). Sofascore appears only in the validation appendix [ORACLE], as an oracle we check ourselves against -- never as content.*
 
-**Ball-evidence gate:** post-link coverage 52% (>= 40%), pass-recall proxy 48.2% (>= 50%) -> **COMPARATIVE (relative claims only)**.  Body guardrail precision: 100% (89/89 numbers CV-backed).
+**Ball-evidence gate:** post-link coverage 52% (>= 40%), pass-recall proxy 48.2% (>= 50%) -> **COMPARATIVE (relative claims only)**.  Body guardrail precision: 100% (100/100 numbers CV-backed).
 
 *Gate inputs read from `outputs/eval/brighton_manutd_ball_eval.json` (oracle: Sofascore).*
 
@@ -18,6 +18,19 @@ Where the shape lives (lane occupation, whole match):
 - half-spaces **49%** -- the dominant channel
 - centre **33%**
 - wings **18%** -- comparatively thin, a structural handle for opponents
+
+## [CV] Opponent structural read -- Brighton
+
+Our shape classifier reads Brighton in a **4-3-3**. The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.
+
+In shape terms, their visibility-corrected defensive line sits **25 m** up the pitch (the raw broadcast line is censoring-inflated; the visibility de-biasing was validated on the World Cup set, where FIFA per-phase lines exist); they build from a base line around **48 m**; the block is **33 m** wide and **22 m** deep; nearest-team-mate compactness holds near **12.8** (a spread index, lower is tighter).
+
+Where the shape lives (lane occupation, whole match):
+- half-spaces **45%** -- the dominant channel
+- centre **35%**
+- wings **20%** -- comparatively thin, a structural handle for opponents
+
+Brighton move as a unit -- velocity synchrony **70%** on a 0-1 scale (this is a position-only measure and always renders).
 
 ## [CV] In possession
 

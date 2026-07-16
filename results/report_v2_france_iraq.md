@@ -2,7 +2,7 @@
 
 *Body written entirely from our computer-vision metrics (the [CV] sections). FIFA PMSR appears only in the validation appendix [FIFA], as an oracle we check ourselves against -- never as content.*
 
-**Ball-evidence gate:** post-link coverage 36% (>= 40%), pass-recall proxy 22.8% (>= 50%) -> **ABSTAIN on ball families**.  Body guardrail precision: 100% (38/38 numbers CV-backed).
+**Ball-evidence gate:** post-link coverage 36% (>= 40%), pass-recall proxy 22.8% (>= 50%) -> **ABSTAIN on ball families**.  Body guardrail precision: 100% (50/50 numbers CV-backed).
 
 *Gate inputs read from `outputs/eval/france_iraq_ball_eval.json` (oracle: FIFA PMSR).*
 
@@ -16,6 +16,19 @@ Where the shape lives (lane occupation, whole match):
 - half-spaces **48%** -- the dominant channel
 - centre **29%**
 - wings **23%** -- comparatively thin, a structural handle for opponents
+
+## [CV] Opponent structural read -- Iraq
+
+Our shape classifier reads Iraq in a **3-5-2**. The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.
+
+In shape terms, their visibility-corrected defensive line sits **14 m** up the pitch (the raw broadcast line is censoring-inflated; the de-biased value is validated to within about **5 m** of FIFA's per-phase lines); they build from a base line around **38 m**; the block is **32 m** wide and **22 m** deep; nearest-team-mate compactness holds near **12.2** (a spread index, lower is tighter).
+
+Where the shape lives (lane occupation, whole match):
+- half-spaces **47%** -- the dominant channel
+- centre **36%**
+- wings **17%** -- comparatively thin, a structural handle for opponents
+
+Iraq move as a unit -- velocity synchrony **68%** on a 0-1 scale (this is a position-only measure and always renders).
 
 ## [CV] In possession
 

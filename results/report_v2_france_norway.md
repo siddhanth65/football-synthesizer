@@ -2,7 +2,7 @@
 
 *Body written entirely from our computer-vision metrics (the [CV] sections). FIFA PMSR appears only in the validation appendix [FIFA], as an oracle we check ourselves against -- never as content.*
 
-**Ball-evidence gate:** post-link coverage 38% (>= 40%), pass-recall proxy 10.6% (>= 50%) -> **ABSTAIN on ball families**.  Body guardrail precision: 100% (38/38 numbers CV-backed).
+**Ball-evidence gate:** post-link coverage 38% (>= 40%), pass-recall proxy 10.6% (>= 50%) -> **ABSTAIN on ball families**.  Body guardrail precision: 100% (50/50 numbers CV-backed).
 
 *Gate inputs read from `outputs/eval/france_norway_ball_eval.json` (oracle: FIFA PMSR).*
 
@@ -16,6 +16,19 @@ Where the shape lives (lane occupation, whole match):
 - half-spaces **47%** -- the dominant channel
 - centre **34%**
 - wings **18%** -- comparatively thin, a structural handle for opponents
+
+## [CV] Opponent structural read -- Norway
+
+Our shape classifier reads Norway in a **4-4-2**. The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.
+
+In shape terms, their visibility-corrected defensive line sits **22 m** up the pitch (the raw broadcast line is censoring-inflated; the de-biased value is validated to within about **5 m** of FIFA's per-phase lines); they build from a base line around **45 m**; the block is **35 m** wide and **23 m** deep; nearest-team-mate compactness holds near **13.4** (a spread index, lower is tighter).
+
+Where the shape lives (lane occupation, whole match):
+- half-spaces **46%** -- the dominant channel
+- centre **33%**
+- wings **21%** -- comparatively thin, a structural handle for opponents
+
+Norway move as a unit -- velocity synchrony **69%** on a 0-1 scale (this is a position-only measure and always renders).
 
 ## [CV] In possession
 

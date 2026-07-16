@@ -430,6 +430,35 @@ def _setup_section(cv: dict, ctx: Ctx) -> Section:
     return sec
 
 
+def _synchrony_block(cv: dict, team: str) -> Block | None:
+    """Position-only velocity-synchrony line for ``team``; shared by focus and opponent renderers."""
+    sync = _fr(cv, "style", "velocity_synchrony", team)
+    if sync is None:
+        return None
+    return Block("p", text=(
+        f"{team} move as a unit -- velocity synchrony **{_pct(sync)}** on a 0-1 scale (this "
+        f"is a position-only measure and always renders)."))
+
+
+def _opponent_structural_section(cv: dict, ctx: Ctx) -> Section:
+    """Mirror of the focus team's structural read for ``ctx.opponent`` -- same renderers, other team.
+
+    Reuses ``_setup_section`` (formation, de-biased line, block dimensions, lane occupation,
+    compactness) and ``_synchrony_block`` with a swapped ``Ctx`` so no rendering logic is duplicated.
+    ``roster={}`` on the swapped context deliberately drops the focus team's nominal-formation note --
+    that roster entry belongs to the focus team, not the opponent.
+    """
+    opp_ctx = Ctx(match_id=ctx.match_id, focus=ctx.opponent, opponent=ctx.focus,
+                  has_fifa=ctx.has_fifa, roster={}, oracle_name=ctx.oracle_name,
+                  oracle_ref=ctx.oracle_ref, home_team=ctx.home_team, away_team=ctx.away_team)
+    sec = _setup_section(cv, opp_ctx)
+    sec.title = f"Opponent structural read -- {ctx.opponent}"
+    sb = _synchrony_block(cv, opp_ctx.focus)
+    if sb is not None:
+        sec.blocks.append(sb)
+    return sec
+
+
 def _possession_comparative(cv: dict, ctx: Ctx, gate: GateResult, sec: Section) -> None:
     """Append the comparative-only (relative-claims) possession block: shares/ratios vs the opponent."""
     f, o = ctx.focus, ctx.opponent
@@ -479,11 +508,9 @@ def _possession_section(cv: dict, ctx: Ctx, gate: GateResult) -> Section:
     an explicit abstention otherwise. The position-only synchrony line always renders.
     """
     sec = Section("In possession", "CV")
-    sync = _fr(cv, "style", "velocity_synchrony", ctx.focus)
-    if sync is not None:
-        sec.blocks.append(Block("p", text=(
-            f"{ctx.focus} move as a unit -- velocity synchrony **{_pct(sync)}** on a 0-1 scale (this "
-            f"is a position-only measure and always renders).")))
+    sb = _synchrony_block(cv, ctx.focus)
+    if sb is not None:
+        sec.blocks.append(sb)
     if gate.comparative_only:
         _possession_comparative(cv, ctx, gate, sec)
         return sec
@@ -952,6 +979,7 @@ def build_document(match_id: str) -> tuple[list[Section], GateResult, dict, dict
 
     sections = [
         _setup_section(cv, ctx),
+        _opponent_structural_section(cv, ctx),
         _possession_section(cv, ctx, gate),
         _defence_section(cv, ctx, gate),
         _seams_section(cv, ctx, gate),
