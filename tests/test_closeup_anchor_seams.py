@@ -6,6 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from generator import jersey_id as J
 from tools import closeup_anchor_probe as P
@@ -87,6 +88,76 @@ def test_digit_agreement_requires_matching_confident_token() -> None:
     assert P._digit_agreement([("11", 0.9), ("8", 0.9)], 8) is True  # any matching token suffices
 
 
+def _row(pairs: dict[int, float]) -> np.ndarray:
+    """A prob row with the given class->mass entries (rest zero)."""
+    row = np.zeros(J.NUM_CLASSES, dtype=np.float32)
+    for cls, mass in pairs.items():
+        row[cls] = mass
+    return row
+
+
+def test_roster_mask_blocks_invalid_and_lifts_valid() -> None:
+    """LEVER 1: an off-roster peak can never win, and its mass lifts a sub-threshold valid read."""
+    mask = J.roster_mask([8, 10])
+    assert mask[J.ILLEGIBLE] and mask[8] and mask[10]
+    assert not mask[33] and not mask[99]
+    # off-roster 33 outscores valid 8 raw -> raw decides 33; masking removes 33 -> 8 wins.
+    row = _row({33: 0.6, 8: 0.35, J.ILLEGIBLE: 0.05})
+    raw_num, raw_conf = J.decide(row, min_conf=0.0)
+    assert raw_num == 33 and raw_conf == pytest.approx(0.6, abs=1e-5)
+    num, conf = J.decide(row, min_conf=0.0, mask=mask)
+    assert num == 8 and conf > 0.8
+    # a valid read just below 0.70 clears it once off-roster mass is redistributed.
+    row2 = _row({8: 0.65, 33: 0.30, J.ILLEGIBLE: 0.05})
+    assert J.decide(row2, min_conf=0.70)[0] == -1                    # raw: below the bar
+    assert J.decide(row2, min_conf=0.70, mask=mask)[0] == 8          # masked: clears it
+
+
+def test_iou_overlap_and_disjoint() -> None:
+    """IoU is 1.0 for identical boxes, 0.0 for disjoint, in-between for partial overlap."""
+    assert P._iou((0, 0, 10, 10), (0, 0, 10, 10)) == 1.0
+    assert P._iou((0, 0, 10, 10), (100, 100, 110, 110)) == 0.0
+    assert P._iou((0, 0, 10, 10), (5, 0, 15, 10)) == 0.5 / 1.5  # inter 50, union 150
+
+
+def _crop(frame: int, box: tuple[int, int, int, int], pred: int, conf: float,
+          *, kit_ok: bool = True, toks: list | None = None) -> dict:
+    """A synthetic candidate crop record for the tracker/agreement seams."""
+    return {"frame": frame, "box": box, "pred": pred, "conf": conf, "pred_m": pred,
+            "conf_m": conf, "kit_ok": kit_ok, "toks": toks or []}
+
+
+def test_link_tracklets_separates_two_people() -> None:
+    """Overlapping boxes across sampled frames chain into one track; a far box is a second track."""
+    a = (0, 0, 10, 20)
+    b = (100, 0, 110, 20)
+    crops = [_crop(0, a, 8, 0.6), _crop(0, b, 8, 0.6),
+             _crop(5, a, 8, 0.6), _crop(5, b, 8, 0.6), _crop(10, a, 8, 0.6)]
+    tracks = sorted(P._link_tracklets(crops), key=len, reverse=True)
+    assert [len(t) for t in tracks] == [3, 2]
+    assert [c["frame"] for c in tracks[0]] == [0, 5, 10]
+
+
+def test_agreement_admits_consistent_run_and_guards() -> None:
+    """LEVER 2: an N-consecutive same-number run passes only with kit + one OCR agreement."""
+    a = (0, 0, 10, 20)
+    run3 = [_crop(0, a, 8, 0.6), _crop(5, a, 8, 0.62, toks=[("8", 0.9)]), _crop(10, a, 8, 0.6)]
+    assert len(P._agreement_admit(run3, n=2)) == 3
+    assert len(P._agreement_admit(run3, n=3)) == 3
+    # a 2-frame run fails n=3.
+    assert P._agreement_admit(run3[:2], n=3) == []
+    # no OCR agreement anywhere -> rejected even though the number is consistent.
+    no_ocr = [_crop(0, a, 8, 0.6), _crop(5, a, 8, 0.6), _crop(10, a, 8, 0.6)]
+    assert P._agreement_admit(no_ocr, n=2) == []
+    # a kit failure inside the run breaks it (all-crops kit gate).
+    bad_kit = [_crop(0, a, 8, 0.6, toks=[("8", 0.9)]),
+               _crop(5, a, 8, 0.6, kit_ok=False), _crop(10, a, 8, 0.6)]
+    assert P._agreement_admit(bad_kit, n=3) == []
+    # a sub-floor confidence breaks the run.
+    low = [_crop(0, a, 8, 0.6, toks=[("8", 0.9)]), _crop(5, a, 8, 0.3), _crop(10, a, 8, 0.6)]
+    assert P._agreement_admit(low, n=3) == []
+
+
 if __name__ == "__main__":
     test_has_player_inside_containment()
     test_shots_segment_by_gap()
@@ -94,4 +165,8 @@ if __name__ == "__main__":
     test_negative_tracklets_group_and_label(Path("_tmp_negtest"))
     test_kit_dist_ok_keeps_players_drops_far_colours()
     test_digit_agreement_requires_matching_confident_token()
+    test_roster_mask_blocks_invalid_and_lifts_valid()
+    test_iou_overlap_and_disjoint()
+    test_link_tracklets_separates_two_people()
+    test_agreement_admits_consistent_run_and_guards()
     print("ok")

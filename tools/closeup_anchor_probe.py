@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+from collections import defaultdict
 from pathlib import Path
 
 import cv2
@@ -42,7 +43,7 @@ import pandas as pd
 
 from core import registry
 from generator import live_play
-from generator.jersey_id import ILLEGIBLE, aggregate_votes, decide
+from generator.jersey_id import ILLEGIBLE, aggregate_votes, decide, roster_mask
 from generator.jersey_id import JerseyRecognizer
 from generator.team_anchor import PLAYER_ROLES, estimate_player_box
 from generator.teams import jersey_color
@@ -50,6 +51,19 @@ from generator.teams import jersey_color
 OUT_DIR = Path("results/closeup_anchor_probe")
 CKPT = Path("outputs/jersey/jersey_torso_r224_acc417.pt")
 VIDEO_ROOT = Path("matches")
+ORACLE = Path("outputs/oracle/sofascore/player_stats_12436888.parquet")
+
+# --- Step-4 lever constants (FROZEN before the yield run) -----------------------------------------
+# LEVER 1 (roster-constrained decoding): mask the 100-way softmax to {both squads' shirtNumbers} u
+# {illegible} before confidence/voting (:func:`generator.jersey_id.roster_mask`). Same 0.70 anchor
+# threshold and same kit+OCR gates -- masking is a pure yield lever inside the step-3 gate.
+# LEVER 2 (N-consecutive-agreement): within a close-up shot, accept a (IoU-track, number) pair that
+# reads identically on >= N consecutive sampled frames at conf >= AGREE_FLOOR (below the 0.70 bar),
+# provided the kit gate passes on every admitted crop and OCR agrees with the number on >= 1 of them.
+AGREE_FLOOR = 0.50   # per-crop confidence floor for an agreement-admitted borderline read
+IOU_LINK = 0.30      # min IoU to link two boxes across adjacent sampled frames into one track
+# ponytail: greedy IoU chaining is the naive within-shot tracker (no motion model); the kit gate +
+# per-number run + OCR-agreement guard precision, so a mis-link degrades yield, not precision.
 
 # --- PRE-COMMITTED probe constants (frozen before any yield measurement) --------------------------
 COCO_CONF = 0.20          # person-detection confidence floor (matches the July feasibility probe)
@@ -285,6 +299,7 @@ def detect_and_read(
     recog: JerseyRecognizer,
     tmp_dir: Path,
     keep_probs: bool = False,
+    mask: np.ndarray | None = None,
 ) -> list[dict]:
     """Detect people on the chunk's close-up frames and read jersey numbers.
 
@@ -295,9 +310,13 @@ def detect_and_read(
         yolo: loaded COCO ``yolov8s`` model on the GPU.
         recog: loaded :class:`JerseyRecognizer` (torso checkpoint).
         tmp_dir: scratch dir for per-crop JPGs (recycled per chunk).
+        keep_probs: also stash each crop's softmax row (per-shot consensus pooling).
+        mask: optional :func:`roster_mask`; when given, each record also carries the box and the
+            roster-masked read (``pred_m``, ``conf_m``) for the step-4 lever arms.
 
     Returns:
-        One record per eligible crop: ``frame, box_h, pred, conf, team_guess, crop_path``.
+        One record per eligible crop: ``frame, box_h, pred, conf, team_guess, crop_path`` (plus
+        ``box, pred_m, conf_m`` when ``mask`` is set).
     """
     video = _video_for(match_id, chunk_key)
     if not video.exists():
@@ -329,10 +348,13 @@ def detect_and_read(
             p = tmp_dir / f"crop_{k:06d}.jpg"
             cv2.imwrite(str(p), crop)
             paths.append(p)
-            meta.append({
+            rec = {
                 "frame": fi, "box_h": round(box_h, 1),
                 "team_guess": kit_team_guess(crop), "crop_path": str(p),
-            })
+            }
+            if mask is not None:
+                rec["box"] = (max(x1, 0), max(y1, 0), x2, y2)
+            meta.append(rec)
     cap.release()
     if not paths:
         return [{"_n_persons": n_persons}] if n_persons else []
@@ -344,6 +366,10 @@ def detect_and_read(
         m["pred"] = int(num)
         m["conf"] = round(float(conf), 4)
         m["illegible"] = bool(int(row.argmax()) == ILLEGIBLE)
+        if mask is not None:
+            num_m, conf_m = decide(row, min_conf=0.0, mask=mask)  # roster-masked read
+            m["pred_m"] = int(num_m)
+            m["conf_m"] = round(float(conf_m), 4)
         if keep_probs:
             m["_prob"] = row  # kept for per-shot consensus pooling (not written to CSV)
     meta.append({"_n_persons": n_persons})  # funnel bookkeeping
@@ -751,11 +777,341 @@ def _write_full_report(
     print(f"artifacts -> {OUT_DIR}")
 
 
+def _roster_valid_numbers(oracle_path: Path = ORACLE) -> list[int]:
+    """Both squads' back-of-shirt numbers (the roster-masking valid set) from the oracle parquet."""
+    df = pd.read_parquet(oracle_path)
+    return sorted(int(x) for x in pd.to_numeric(df["shirtNumber"], errors="coerce").dropna().unique())
+
+
+def _iou(a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> float:
+    """IoU of two ``(x1, y1, x2, y2)`` boxes (pure; 0.0 when disjoint or degenerate)."""
+    ix1, iy1 = max(a[0], b[0]), max(a[1], b[1])
+    ix2, iy2 = min(a[2], b[2]), min(a[3], b[3])
+    inter = max(0, ix2 - ix1) * max(0, iy2 - iy1)
+    union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    return inter / union if union > 0 else 0.0
+
+
+def _link_tracklets(crops: list[dict], *, iou_min: float = IOU_LINK,
+                    step_max: int = SHOT_GAP_FRAMES) -> list[list[dict]]:
+    """Greedy IoU-chain the per-frame crops of one close-up shot into within-shot tracks (pure).
+
+    Each crop carries ``frame`` and ``box``; boxes on adjacent sampled frames (gap ``<= step_max``)
+    are matched highest-IoU-first (``>= iou_min``). Consecutive entries of a returned track are the
+    same person on consecutive sampled frames -- the unit LEVER 2 requires for N-frame agreement.
+
+    Args:
+        crops: crop records for a single shot (each with ``frame`` and ``box``).
+        iou_min: minimum IoU to link a box to a track's tail.
+        step_max: maximum sampled-frame gap across which to link (a longer gap starts a new track).
+
+    Returns:
+        One list of crops per track, each ordered by ascending frame.
+    """
+    by_frame: dict[int, list[dict]] = defaultdict(list)
+    for c in crops:
+        by_frame[c["frame"]].append(c)
+    chains: list[dict] = []  # {"crops": [...], "tail_box": box, "tail_frame": f}
+    for f in sorted(by_frame):
+        cur = by_frame[f]
+        prev = [(ci, ch) for ci, ch in enumerate(chains) if 0 < f - ch["tail_frame"] <= step_max]
+        pairs = sorted(
+            ((_iou(ch["tail_box"], c["box"]), ci, xi)
+             for ci, ch in prev for xi, c in enumerate(cur)
+             if _iou(ch["tail_box"], c["box"]) >= iou_min),
+            reverse=True, key=lambda t: t[0])
+        used_ch: set[int] = set()
+        used_cur: set[int] = set()
+        for _, ci, xi in pairs:
+            if ci in used_ch or xi in used_cur:
+                continue
+            ch, c = chains[ci], cur[xi]
+            ch["crops"].append(c)
+            ch["tail_box"], ch["tail_frame"] = c["box"], f
+            used_ch.add(ci)
+            used_cur.add(xi)
+        for xi, c in enumerate(cur):
+            if xi not in used_cur:
+                chains.append({"crops": [c], "tail_box": c["box"], "tail_frame": f})
+    return [ch["crops"] for ch in chains]
+
+
+def _agreement_admit(crops: list[dict], *, n: int, floor: float = AGREE_FLOOR,
+                     use_masked: bool = False, iou_min: float = IOU_LINK) -> list[dict]:
+    """LEVER 2: crops admitted by an N-consecutive same-number agreement run within a shot (pure).
+
+    Links the shot's crops into within-shot tracks (:func:`_link_tracklets`), then on each track
+    finds maximal runs of consecutive frames whose read (``pred``/``pred_m``) is the same number at
+    ``conf >= floor``. A run of length ``>= n`` is admitted iff the kit gate passes on every crop in
+    it and OCR agrees with that number on at least one crop -- so all N crops become anchors.
+
+    Args:
+        crops: crop records for one shot (each with ``frame, box, pred, conf[, pred_m, conf_m],
+            kit_ok, toks``).
+        n: minimum run length (consecutive agreeing frames).
+        floor: per-crop confidence floor for run membership.
+        use_masked: read ``pred_m``/``conf_m`` (roster-masked) instead of ``pred``/``conf``.
+        iou_min: linking IoU threshold.
+
+    Returns:
+        The admitted crop records (a subset of ``crops``).
+    """
+    pk = "pred_m" if use_masked else "pred"
+    ck = "conf_m" if use_masked else "conf"
+    admitted: list[dict] = []
+    for tr in _link_tracklets(crops, iou_min=iou_min):
+        i, length = 0, len(tr)
+        while i < length:
+            num = tr[i][pk]
+            if num < 1 or tr[i][ck] < floor:
+                i += 1
+                continue
+            j = i
+            while j + 1 < length and tr[j + 1][pk] == num and tr[j + 1][ck] >= floor:
+                j += 1
+            run = tr[i:j + 1]
+            if (len(run) >= n and all(c["kit_ok"] for c in run)
+                    and any(_digit_agreement(c["toks"], num) for c in run)):
+                admitted.extend(run)
+            i = j + 1
+    return admitted
+
+
+def _montage(paths: list[str], out: Path, *, cols: int = 10, cw: int = 96, ch: int = 160) -> None:
+    """Tile crops into a labelled grid PNG for one-image visual verification (best-effort)."""
+    if not paths:
+        return
+    rows = (len(paths) + cols - 1) // cols
+    canvas = np.full((rows * ch, cols * cw, 3), 40, np.uint8)
+    for k, p in enumerate(paths):
+        img = cv2.imread(p)
+        if img is None:
+            continue
+        r, c = divmod(k, cols)
+        canvas[r * ch:(r + 1) * ch, c * cw:(c + 1) * cw] = cv2.resize(img, (cw, ch))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(out), canvas)
+
+
+def _survivor_name(chunk: str, frame: int, number: int, conf: float) -> str:
+    """The step-3 survivor filename schema (`anchor_wire.parse_survivor_name` reads it back)."""
+    return f"{chunk}_f{frame}_n{number:02d}_c{conf:.3f}.jpg"
+
+
+LEVER_ARMS = ("roster", "agree2", "agree3", "both2", "both3")
+"""Step-4 lever arms layered on the step-3 baseline (+A+B kit+OCR gate)."""
+
+
+def run_levers(match_id: str, threshold: float = 0.70, floor: float = AGREE_FLOOR,
+               ckpt: Path = CKPT) -> None:
+    """Step-4: one detect+read pass measuring the roster + N-agreement levers as 4 arms.
+
+    Every close-up crop is read twice (raw and roster-masked); each candidate (conf ``>= floor`` in
+    either read) is scored once by the kit gate and, if it passes, once by OCR. From those cached
+    per-crop verdicts the arms are assembled without re-running the GPU detector/recognizer:
+    ``baseline`` (raw, conf ``>= threshold``, kit+OCR), ``roster`` (masked, same gate), and the
+    ``agree{2,3}`` / ``both{2,3}`` arms that additionally admit N-consecutive-agreement runs
+    (:func:`_agreement_admit`) on the raw / masked reads respectively. New anchors (not in the
+    baseline set) are persisted per arm with survivor filenames for the precision spot-check and for
+    a best-arm re-wire.
+
+    Args:
+        match_id: registry match id.
+        threshold: baseline/roster per-crop confidence bar (unchanged 0.70).
+        floor: agreement-run per-crop confidence floor (0.50).
+        ckpt: recognizer checkpoint (torso baseline).
+    """
+    match = registry.get(match_id)
+    df = match.load_aligned()
+    fps = {ck: match.chunk_fps(ck) for ck in df["chunk"].unique()}
+    valid = _roster_valid_numbers()
+    mask = roster_mask(valid)
+    print(f"roster valid numbers ({len(valid)}): {valid}")
+
+    centroids = kit_centroids(match_id, df)
+    print(f"kit centroids: {np.round(centroids, 1).tolist()}")
+    reader = _ocr_reader()
+
+    all_arms = ("baseline", *LEVER_ARMS)
+    lev_dir = OUT_DIR / "levers"
+    chunks_dir = lev_dir / "_chunks"
+    # Resume iff at least one per-chunk checkpoint exists; a fresh run wipes any partial (older,
+    # non-resumable) output so survivor/new dirs are never double-counted across runs.
+    resume = chunks_dir.exists() and any(chunks_dir.glob("*.json"))
+    if not resume and lev_dir.exists():
+        shutil.rmtree(lev_dir)
+    (lev_dir / "new").mkdir(parents=True, exist_ok=True)
+    chunks_dir.mkdir(parents=True, exist_ok=True)
+    surv_dirs = {a: lev_dir / f"{a}_survivors" for a in all_arms}
+    for d in surv_dirs.values():
+        d.mkdir(parents=True, exist_ok=True)
+
+    totals = {a: {"anchors": 0, "shots": 0, "feasible": 0} for a in all_arms}
+    hist = {a: defaultdict(int) for a in all_arms}
+    new_recs: list[dict] = []  # new-vs-baseline crops (for the spot-check)
+
+    def _merge(blob: dict) -> None:
+        """Fold one chunk's checkpoint (processed or cached) into the running totals."""
+        for a in all_arms:
+            s = blob["stats"][a]
+            totals[a]["anchors"] += s["anchors"]
+            totals[a]["shots"] += s["shots"]
+            totals[a]["feasible"] += s["feasible"]
+            for k, v in s["hist"].items():
+                hist[a][int(k)] += int(v)
+        for r in blob["new"]:
+            new_recs.append({**r, "path": str(lev_dir / "new" / r["file"])})
+
+    yolo = recog = None  # lazy GPU load -- skip entirely if every chunk is cached
+    for chunk_key, dfc in df.groupby("chunk", sort=True):
+        cj = chunks_dir / f"{chunk_key}.json"
+        if cj.exists():
+            _merge(json.loads(cj.read_text(encoding="utf-8")))
+            print(f"{chunk_key}: cached, skipped "
+                  f"(baseline total {totals['baseline']['anchors']})", flush=True)
+            continue
+        if yolo is None:
+            yolo = _load_yolo()
+            recog = JerseyRecognizer.from_checkpoint(ckpt)
+        cls = classify_chunk(dfc)
+        close_frames = sorted(int(f) for f in cls.index[cls["shot_type"] == live_play.SHOT_CLOSE_UP])
+        wide = np.array(sorted(int(f) for f in
+                               cls.index[cls["shot_type"] == live_play.SHOT_LIVE_WIDE]))
+        win = int(round(NEAR_WINDOW_S * fps[chunk_key]))
+        tmp = OUT_DIR / "_tmp_lev"
+        if tmp.exists():
+            shutil.rmtree(tmp)
+        recs = detect_and_read(match_id, chunk_key, close_frames, yolo, recog, tmp, mask=mask)
+        crops = [r for r in recs if "pred" in r]
+
+        # Gate scoring: one imread + kit test per candidate; OCR only if kit passes (cached tokens).
+        for c in crops:
+            c["kit_ok"], c["toks"] = False, []
+            cand = (c["pred"] >= 1 and c["conf"] >= floor) or \
+                   (c["pred_m"] >= 1 and c["conf_m"] >= floor)
+            if not cand:
+                continue
+            bgr = cv2.imread(c["crop_path"])
+            if bgr is None:
+                continue
+            c["kit_ok"] = _kit_dist_ok(jersey_color(bgr), centroids)
+            if c["kit_ok"]:
+                c["toks"] = _ocr_tokens(bgr, reader)
+
+        # Per-crop arm membership. baseline/roster = conf>=threshold + kit + OCR-agrees-with-number.
+        for c in crops:
+            c["in_baseline"] = (c["pred"] >= 1 and c["conf"] >= threshold and c["kit_ok"]
+                                and _digit_agreement(c["toks"], c["pred"]))
+            c["in_roster"] = (c["pred_m"] >= 1 and c["conf_m"] >= threshold and c["kit_ok"]
+                              and _digit_agreement(c["toks"], c["pred_m"]))
+        shots = _shots(close_frames)
+        adm: dict[str, set[int]] = {a: set() for a in ("agree2", "agree3", "both2", "both3")}
+        for lo, hi in shots:
+            members = [c for c in crops if lo <= c["frame"] <= hi]
+            for a, n, m_ in (("agree2", 2, False), ("agree3", 3, False),
+                             ("both2", 2, True), ("both3", 3, True)):
+                for c in _agreement_admit(members, n=n, floor=floor, use_masked=m_):
+                    adm[a].add(id(c))
+        for c in crops:
+            c["in_agree2"] = c["in_baseline"] or id(c) in adm["agree2"]
+            c["in_agree3"] = c["in_baseline"] or id(c) in adm["agree3"]
+            c["in_both2"] = c["in_roster"] or id(c) in adm["both2"]
+            c["in_both3"] = c["in_roster"] or id(c) in adm["both3"]
+
+        # Number reported per arm: masked arms use pred_m, raw arms use pred.
+        def _num(c: dict, arm: str) -> int:
+            return c["pred_m"] if arm in ("roster", "both2", "both3") else c["pred"]
+
+        chunk_stats: dict[str, dict] = {}
+        for arm in all_arms:
+            anchors = [c for c in crops if c[f"in_{arm}"]]
+            frames = {c["frame"] for c in anchors}
+            n_shots = sum(any(lo <= f <= hi for f in frames) for lo, hi in shots)
+            feasible = 0
+            h: dict[int, int] = defaultdict(int)
+            for c in anchors:
+                near = wide[np.abs(wide - c["frame"]) <= win] if wide.size else np.array([])
+                if near.size:
+                    feasible += 1
+                h[_num(c, arm)] += 1
+                src = Path(c["crop_path"])
+                if src.exists():
+                    shutil.copy(src, surv_dirs[arm]
+                                / _survivor_name(chunk_key, c["frame"], _num(c, arm), c["conf"]))
+            chunk_stats[arm] = {"anchors": len(anchors), "shots": n_shots, "feasible": feasible,
+                                "hist": {int(k): int(v) for k, v in h.items()}}
+
+        # Persist new-vs-baseline crops (any lever arm) for the precision spot-check.
+        chunk_new: list[dict] = []
+        for c in crops:
+            new_arms = [a for a in LEVER_ARMS if c[f"in_{a}"] and not c["in_baseline"]]
+            if not new_arms:
+                continue
+            src = Path(c["crop_path"])
+            if not src.exists():
+                continue
+            masked_arm = any(a in ("roster", "both2", "both3") for a in new_arms)
+            num = c["pred_m"] if masked_arm else c["pred"]
+            conf = c["conf_m"] if masked_arm else c["conf"]
+            dst = lev_dir / "new" / _survivor_name(chunk_key, c["frame"], num, conf)
+            shutil.copy(src, dst)
+            chunk_new.append({"chunk": chunk_key, "frame": c["frame"], "arms": new_arms,
+                              "pred": c["pred"], "conf": c["conf"], "pred_m": c["pred_m"],
+                              "conf_m": c["conf_m"], "file": dst.name})
+        blob = {"stats": chunk_stats, "new": chunk_new}
+        cj.write_text(json.dumps(blob), encoding="utf-8")  # checkpoint (resume-safe)
+        _merge(blob)
+        print(f"{chunk_key}: crops {len(crops):4d} | " + " | ".join(
+            f"{a} {totals[a]['anchors']:4d}" for a in all_arms), flush=True)
+
+    _finalize_levers(match_id, threshold, floor, valid, totals, hist, new_recs, lev_dir)
+
+
+def _finalize_levers(match_id: str, threshold: float, floor: float, valid: list[int],
+                     totals: dict, hist: dict, new_recs: list[dict], lev_dir: Path,
+                     keep_all_max: int = 60, sample_n: int = 40) -> None:
+    """Write the 4-arm table + per-arm new-anchor spot-check picks and montages."""
+    all_arms = ("baseline", *LEVER_ARMS)
+    # Per-arm new anchors + stratified spot-check picks.
+    spot: dict[str, list[dict]] = {}
+    for arm in LEVER_ARMS:
+        news = [r for r in new_recs if arm in r["arms"]]
+        if len(news) > keep_all_max:
+            ordered = sorted(news, key=lambda r: (r["pred_m"] if "both" in arm or arm == "roster"
+                                                  else r["pred"]))
+            idx = np.linspace(0, len(ordered) - 1, sample_n).round().astype(int)
+            picks = [ordered[i] for i in dict.fromkeys(idx.tolist())]
+        else:
+            picks = news
+        spot[arm] = picks
+        _montage([r["path"] for r in picks], lev_dir / f"montage_new_{arm}.png")
+
+    out = {
+        "match": match_id, "threshold": threshold, "agree_floor": floor,
+        "roster_valid_numbers": valid,
+        "arms": {a: {**totals[a],
+                     "number_histogram": {int(k): int(v) for k, v in sorted(hist[a].items())}}
+                 for a in all_arms},
+        "new_vs_baseline": {a: len([r for r in new_recs if a in r["arms"]]) for a in LEVER_ARMS},
+        "spotcheck_picks": {a: [{"file": r["file"], "pred": r["pred"], "conf": r["conf"],
+                                 "pred_m": r["pred_m"], "conf_m": r["conf_m"], "verdict": ""}
+                                for r in spot[a]] for a in LEVER_ARMS},
+    }
+    (lev_dir / "levers_stats.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
+    print("\n=== STEP-4 LEVER ARMS ===")
+    print(f"{'arm':<10} {'anchors':>8} {'shots':>6} {'feasible':>9} {'new':>5}")
+    for a in all_arms:
+        nv = 0 if a == "baseline" else out["new_vs_baseline"][a]
+        t = totals[a]
+        print(f"{a:<10} {t['anchors']:>8} {t['shots']:>6} {t['feasible']:>9} {nv:>5}")
+    print(f"artifacts -> {lev_dir}")
+
+
 def main() -> None:
     """CLI entry point (GPU; one job at a time)."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--match", default="brighton_manutd")
-    ap.add_argument("--mode", choices=["spotcheck", "full", "harvest_neg"], required=True)
+    ap.add_argument("--mode", choices=["spotcheck", "full", "harvest_neg", "levers"], required=True)
     ap.add_argument("--chunk", default="h1_chunk_000", help="spotcheck: which chunk to sample")
     ap.add_argument("--n", type=int, default=24, help="spotcheck: crops to dump")
     ap.add_argument("--threshold", type=float, default=0.90, help="full: frozen anchor confidence")
@@ -770,12 +1126,16 @@ def main() -> None:
                     help="harvest_neg: output dir for non-player negative crops")
     ap.add_argument("--neg-cap", type=int, default=400,
                     help="harvest_neg: max negatives kept per chunk")
+    ap.add_argument("--floor", type=float, default=AGREE_FLOOR,
+                    help="levers: per-crop confidence floor for an agreement-run member")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
     if args.mode == "spotcheck":
         run_spotcheck(args.match, args.chunk, args.n, args.seed, Path(args.ckpt))
     elif args.mode == "harvest_neg":
         harvest_negatives(args.match, Path(args.neg_out), args.neg_cap, args.seed)
+    elif args.mode == "levers":
+        run_levers(args.match, args.threshold, args.floor, Path(args.ckpt))
     else:
         run_full(args.match, args.threshold, Path(args.ckpt), consensus=args.consensus,
                  kit_gate=args.kit_gate, ocr_gate=args.ocr_gate)

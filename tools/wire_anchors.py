@@ -59,10 +59,10 @@ def _ascii(s: str) -> str:
     return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode() or "?"
 
 
-def load_anchors() -> list[aw.Anchor]:
-    """Parse the 226 step-3 survivor crops into :class:`anchor_wire.Anchor` records."""
+def load_anchors(survivors: Path = SURVIVORS) -> list[aw.Anchor]:
+    """Parse the step-3 (or step-4 best-arm) survivor crops into :class:`anchor_wire.Anchor` rows."""
     anchors: list[aw.Anchor] = []
-    for p in sorted(SURVIVORS.glob("*.jpg")):
+    for p in sorted(survivors.glob("*.jpg")):
         parsed = aw.parse_survivor_name(p.name)
         if parsed is None:
             continue
@@ -218,17 +218,22 @@ def _spearman(a: list[float], b: list[float]) -> float | None:
     return round(float(np.corrcoef(ra, rb)[0, 1]), 3)
 
 
-def main(model_name: str = "osnet_x0_25", weights: str | None = None) -> None:
+def main(model_name: str = "osnet_x0_25", weights: str | None = None,
+         survivors: Path = SURVIVORS, tag: str | None = None) -> None:
     """Attach -> guard -> name -> validate; write the named-tracks parquet and report.
 
     Args:
         model_name: OSNet backbone for the ReID embedder (``osnet_x1_0``/``osnet_ain_x1_0`` for
             re-ID-objective weights).
         weights: torchreid re-ID weights key/path, or ``None`` for the ImageNet baseline embedder.
-            When set, outputs are written to ``*_<weights>`` variant paths so the baseline artifacts
+            When set, outputs default to ``*_<weights>`` variant paths so the baseline artifacts
             (ImageNet run) are never clobbered.
+        survivors: directory of gated anchor survivor crops to wire (step-3 by default; a step-4
+            best-arm survivor dir for the lever re-measurement).
+        tag: explicit output-path suffix, overriding the ``weights``-derived one (so a best-arm
+            re-wire on the AIN embedder writes to its own artifacts).
     """
-    tag = f"_{weights}" if weights else ""
+    tag = tag if tag is not None else (f"_{weights}" if weights else "")
     out_parquet = OUT_PARQUET.with_name(OUT_PARQUET.stem + tag + OUT_PARQUET.suffix)
     report = REPORT.with_name(REPORT.stem + tag + REPORT.suffix)
     match = registry.get(MATCH_ID)
@@ -238,7 +243,7 @@ def main(model_name: str = "osnet_x0_25", weights: str | None = None) -> None:
     # jerseyNumber cross-map (only to quantify the shirtNumber-vs-jerseyNumber discrepancy).
     jersey_by, _ = aw.build_roster_maps(oracle, _team_id, number_col="jerseyNumber")
 
-    anchors = load_anchors()
+    anchors = load_anchors(survivors)
     print(f"loaded {len(anchors)} survivor anchors")
     hist = Counter(a.number for a in anchors)
     print(f"anchor number histogram: {dict(sorted(hist.items()))}")
@@ -433,5 +438,9 @@ if __name__ == "__main__":
     ap.add_argument("--model-name", default="osnet_x0_25", help="OSNet backbone")
     ap.add_argument("--weights", default=None,
                     help="torchreid re-ID weights key/path (default: ImageNet baseline)")
+    ap.add_argument("--survivors", default=str(SURVIVORS),
+                    help="dir of gated anchor survivor crops to wire (default: step-3 226)")
+    ap.add_argument("--tag", default=None,
+                    help="explicit output suffix (overrides the weights-derived one)")
     a = ap.parse_args()
-    main(model_name=a.model_name, weights=a.weights)
+    main(model_name=a.model_name, weights=a.weights, survivors=Path(a.survivors), tag=a.tag)

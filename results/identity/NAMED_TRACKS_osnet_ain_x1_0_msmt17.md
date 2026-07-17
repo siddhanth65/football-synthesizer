@@ -63,3 +63,15 @@ Touch-count proxy: **skipped**. It needs per-frame ball-possession association o
 - **ReID is the bottleneck, not anchor precision.** OSNet is kit-dominated (Stage-2a: median cosine 0.81 on same-team pairs; 35% merge precision), so the margin gate rejects most same-kit disambiguations -- that is why attachment yield (73) is far below the anchor count (226). Anchor *reads* are ~99% precise; carrying them onto the right *track* is the hard, unsolved half.
 
 - **Season-scale extrapolation:** at ~5-6 hero-shot players/match, a 38-match season yields close-up anchors concentrated on the same marquee names (Bruno, Rashford, ...). Close-up anchors **supplement** roster/relink priors for those players; uniform per-player naming still needs the cluster/VLM close-up reader (Sem 2).
+
+## Step-4 addendum: best-arm (both N=2) re-wire -- 5 -> 6 named players (2026-07-17)
+
+The Stage-2b **step-4** yield levers (roster-constrained decoding + N-consecutive-agreement; see `results/closeup_anchor_probe/CLOSEUP_ANCHORS.md`) raised the gated anchor set from 226 to **427** at ~98.6% verified precision. Re-running this same AIN funnel on the best arm's survivors (`--survivors results/closeup_anchor_probe/levers/both2_survivors --tag _both2_ain` -> `NAMED_TRACKS_both2_ain.md`) gives:
+
+| metric | step-3 (226 anchors) | step-4 both2 (426 anchors) |
+|---|---|---|
+| attached to a fragment | 73 | 109 |
+| named fragments after guard | 42 | 53 |
+| distinct **named players** | **5** | **6** |
+
+New name: **Harry Maguire #5 (Man Utd)**, from the levers' new `#5` anchors. The gain is modest and expected -- agreement's extra anchors deepen already-named players and roster's new red-kit numbers (`#3/#4/#5`) hit the same-kit ReID wall, so only `#5` crossed into a new name. The `#4` masked-front false anchors named no one (ambiguous / no_wide_frame; 2 `{8,10}` disagreement flags refused them). The ReID same-kit bottleneck above remains the cap; step-4 does not break it.

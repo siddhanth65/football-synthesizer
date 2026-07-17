@@ -14,7 +14,7 @@ Stage-2 wiring contract (see :class:`JerseyRecognizer`): a track's crop paths in
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 import numpy as np
@@ -105,6 +105,30 @@ def from_digits(tens: int, units: int) -> int:
 # Per-number digit indices (index by jersey number 1..99) for the vectorized head composition.
 _NUM_TENS = np.array([to_digits(n)[0] if n >= 1 else TENS_NONE for n in range(NUM_CLASSES)])
 _NUM_UNITS = np.array([to_digits(n)[1] if n >= 1 else 0 for n in range(NUM_CLASSES)])
+
+
+def roster_mask(valid_numbers: Iterable[int]) -> np.ndarray:
+    """Boolean class mask (length :data:`NUM_CLASSES`) for roster-constrained decoding.
+
+    Keeps :data:`ILLEGIBLE` and every jersey number a squad can actually wear; masks the rest.
+    Multiplying a softmax row by this mask and renormalising (see :func:`decide`) removes all
+    probability mass from numbers no player on either team wears, so an invalid number can never win
+    the argmax and its mass is redistributed to the valid set -- some true reads whose peak sat just
+    below a confidence floor clear it once the off-roster mass is removed.
+
+    Args:
+        valid_numbers: The union of both squads' back-of-shirt numbers (values outside ``1..99`` are
+            ignored).
+
+    Returns:
+        A boolean ``[NUM_CLASSES]`` array: ``True`` at :data:`ILLEGIBLE` and each valid number.
+    """
+    m = np.zeros(NUM_CLASSES, dtype=bool)
+    m[ILLEGIBLE] = True
+    for n in valid_numbers:
+        if 1 <= int(n) <= 99:
+            m[int(n)] = True
+    return m
 
 
 def load_gt(path: str | Path) -> dict[str, int]:
@@ -234,17 +258,27 @@ def tracklet_mean(probs: np.ndarray, *, weighted: bool = True) -> np.ndarray:
     return probs.mean(axis=0)
 
 
-def decide(mean_p: np.ndarray, *, min_conf: float = 0.30) -> tuple[int, float]:
+def decide(
+    mean_p: np.ndarray, *, min_conf: float = 0.30, mask: np.ndarray | None = None
+) -> tuple[int, float]:
     """Turn a pooled tracklet vector into a label + confidence.
 
     Args:
         mean_p: A :func:`tracklet_mean` vector. All-zero -> ``(-1, 0.0)``.
         min_conf: Floor on the winning number's probability; below it (or if illegible wins),
             the tracklet reads ``-1``.
+        mask: Optional :func:`roster_mask` boolean vector. When given, ``mean_p`` is restricted to
+            the kept classes and renormalised over them before the decision (roster-constrained
+            decoding), so off-roster numbers cannot win and their mass lifts the valid reads.
 
     Returns:
         ``(jersey_label, confidence)`` with ``jersey_label`` in ``{-1} u {1..99}``.
     """
+    if mask is not None:
+        mean_p = mean_p * mask
+        total = float(mean_p.sum())
+        if total > 0.0:
+            mean_p = mean_p / total
     if not mean_p.any():
         return -1, 0.0
     if int(mean_p.argmax()) == ILLEGIBLE:
@@ -255,7 +289,8 @@ def decide(mean_p: np.ndarray, *, min_conf: float = 0.30) -> tuple[int, float]:
 
 
 def aggregate_votes(
-    probs: np.ndarray, *, min_conf: float = 0.30, weighted: bool = True
+    probs: np.ndarray, *, min_conf: float = 0.30, weighted: bool = True,
+    mask: np.ndarray | None = None,
 ) -> tuple[int, float]:
     """Aggregate per-crop class probabilities into one tracklet label.
 
@@ -267,11 +302,12 @@ def aggregate_votes(
         probs: ``[n_crops, NUM_CLASSES]`` softmax rows. Empty -> ``(-1, 0.0)``.
         min_conf: Floor on the winning number's aggregated probability; below it, read ``-1``.
         weighted: Down-weight diffuse crops by their peak probability.
+        mask: Optional :func:`roster_mask` for roster-constrained decoding (see :func:`decide`).
 
     Returns:
         ``(jersey_label, confidence)`` where ``jersey_label`` is ``-1`` or ``1..99``.
     """
-    return decide(tracklet_mean(probs, weighted=weighted), min_conf=min_conf)
+    return decide(tracklet_mean(probs, weighted=weighted), min_conf=min_conf, mask=mask)
 
 
 class JerseyRecognizer:

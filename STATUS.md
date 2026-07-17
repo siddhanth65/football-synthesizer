@@ -2,6 +2,19 @@
 
 **Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
 
+## 2026-07-17 — STEP 4: Roboflow-blog levers BOTH KEEP — anchors 226→427 @ ~98.6%; 6th player named
+
+Roster-constrained decoding (+102 anchors, +45%, new numbers 3/4/5/6 surfaced, zero off-roster by
+construction) + N=2-consecutive-agreement (+83 anchors @ 100% in-sample — borderline back-reads the
+hard gate dropped). Best arm (both, N=2): **427 anchors / 121 shots / 275 propagation-feasible @
+~98.6%** — precision floor (95%) held on every arm; baseline reproduced exactly pre-measurement.
+Re-wire: named players 5→**6** (+Maguire #5); guard raised 2 disagreement flags, named neither;
+the 4 residual false anchors (front-facing hero crops of valid numbers) named no one. Same-kit
+ReID wall still caps naming (Utd 3/4 red-on-red unresolved) — Sem-2 lever unchanged. Worker also
+made the levers pass resumable (survived 2 quota kills) and fixed a stale test collection error.
+**NEXT (queued): Koshkina jersey-number-pipeline integration** (verified 87.45% public recipe) —
+inference-only reproduce → swap into tracklet reader + anchor path.
+
 ## 2026-07-16/17 — ARC CLOSE: ReID wall 4-way confirmed; named players 3→5; B4 scope evidence-fixed
 
 **ReID ladder (deep-worker requested: opus):** person-domain ReID CANNOT break the same-kit wall —

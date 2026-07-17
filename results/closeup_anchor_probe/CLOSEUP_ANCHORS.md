@@ -334,3 +334,100 @@ Wiring implications for the identity plan:
    needs the cluster-trained / VLM route flagged in step 0.
 3. Step-1 (negatives retrain) and step-2 (consensus) stay PARKED; step 3 supersedes them as the
    shippable gate.
+
+---
+
+# Stage-2b step 4 (two yield levers on top of the step-3 gate) -- 2026-07-17
+
+**Both bounded levers were implemented as one single-pass 4-arm measurement, run end-to-end on
+brighton, and spot-checked against the >=95% precision floor. BOTH CLEAR THE FLOOR AND ADD REAL
+YIELD; KEEP BOTH.** The combined arm nearly doubles the step-3 anchor count (226 -> 427) at ~98.6%
+verified precision. New code (no deletions, flags only): `generator.jersey_id.roster_mask` +
+`decide(..., mask=)`/`aggregate_votes(..., mask=)`; `tools/closeup_anchor_probe.py` `--mode levers`
+(`run_levers`, `_roster_valid_numbers`, `_iou`, `_link_tracklets`, `_agreement_admit`, `_montage`),
+resumable per-chunk checkpoints (`levers/_chunks/*.json` -> survives a kill, skips done chunks);
+`tools/wire_anchors.py` `--survivors`/`--tag`. CPU seam tests: `tests/test_closeup_anchor_seams.py`
+(+4 = 10 green). Artifacts: `levers/levers_stats.json`, `levers/{arm}_survivors/`, `levers/new/`,
+`levers/verify_{arm}.png` (labelled spot-check montages).
+
+## The two levers (each frozen before the run, layered on the step-3 +A+B kit+OCR gate)
+
+- **LEVER 1 -- roster-constrained decoding** (`roster_mask`): before the confidence gate the 100-way
+  softmax is restricted to `{both squads' shirtNumbers}` (28 numbers, from the oracle) `u {illegible}`
+  and renormalised. Off-roster mass redistributes, so (a) no off-roster number can ever anchor and
+  (b) a true read whose valid peak sat just below 0.70 clears it. Same 0.70 bar, same kit+OCR gates
+  (OCR agreement still required against the *masked* number).
+- **LEVER 2 -- N-consecutive-agreement** (`_agreement_admit`, N in {2,3}): within a close-up shot,
+  crops are IoU-chained into within-shot tracks (`_link_tracklets`, greedy, no motion model); a
+  (track, number) run of >= N consecutive sampled frames reading the same number at conf >= 0.50
+  (below the 0.70 bar) is admitted iff the kit gate passes on every crop and OCR agrees with that
+  number on >= 1 frame. Rescues genuine borderline-legible back sequences the hard 0.70 gate drops.
+
+## 4-arm funnel (full match, threshold 0.70, agreement floor 0.50)
+
+| arm | anchors | shots | prop-feasible | new-vs-baseline | new precision (spot-check) | overall |
+|---|---|---|---|---|---|---|
+| baseline (step-3 +A+B) | 226 | 95 | 161 | -- | -- | 98.6% (225/226) |
+| + roster | 328 | 114 | 223 | 102 | 39/40 = 97.5% | ~98.9% |
+| + agreement N=2 | 309 | 100 | 207 | 83 | **40/40 = 100%** | ~99.7% |
+| + agreement N=3 | 270 | 96 | 187 | 44 | **44/44 = 100%** | ~99.6% |
+| **+ both N=2 (best)** | **427** | **121** | **275** | 201 | 39/40 = 97.5% | ~98.6% |
+| + both N=3 | 384 | 117 | 255 | 158 | ~38/40 = 95-97.5% | ~97.7% |
+
+Baseline reproduces step-3 exactly (226 / 95 shots / 161 feasible), confirming the harness. Every
+arm is a strict superset of the baseline (arm - new == 226 for all), so each keeps the 225/226 base
+and adds new anchors; overall precision = (225 + verified-new) / total. **All six arms clear the
+>=95% floor.** New anchors were verified per the rule: every new anchor if <=60 (agreement N=3: all
+44), else a 40-crop stratified sample spread across predicted numbers (per-crop verdicts in
+`levers/verify_{arm}.png`).
+
+## New-anchor spot-check verdicts (what the levers actually add)
+
+- **Agreement (both N=2 and N=3): flawless in-sample (100%).** Every new anchor is a clean back
+  number the hard 0.70 gate had dropped on a borderline frame -- `8`/`10` Man Utd backs and Gilmour
+  `11` Brighton backs at conf 0.50-0.69 that read consistently across the shot. This is exactly the
+  borderline-legible-sequence yield the lever targets; OCR-on-one-frame + within-shot number
+  consistency keep it clean. Agreement admits **no new distinct numbers** -- it deepens coverage of
+  players already surfaced, it does not surface new ones.
+- **Roster masking: 97.5% new (39/40).** It surfaces new *distinct* numbers -- `3`/`4`/`5`/`6` beyond
+  the baseline `{1,6,8,10,11,20}` -- because removing off-roster mass lets valid runner-up numbers
+  win and clear 0.70. The one sampled failure is the residual **masked-front-crop** mode: a
+  front-facing Man Utd hero shot (Casemiro-type, no back number) read `#4 @0.90` after masking, with
+  OCR firing on a non-back digit. Same failure *class* as the step-3 melee-referee miss, and bounded
+  (~4 `#4` anchors match-wide). It does not touch the agreement arms (those key on the raw pred, not
+  the masked one).
+
+## Verdict per lever
+
+- **LEVER 1 (roster mask): KEEP.** +102 anchors (+45%), +19 shots, 97.5% new precision, and by
+  construction zero off-roster anchors. It is the lever that widens the *set* of named-able numbers.
+  Its one failure mode (masked reads on front-facing crops of a valid number) is rare and bounded;
+  the downstream propagation guard catches the cases that would mis-name (see below).
+- **LEVER 2 (N-agreement): KEEP at N=2.** +83 anchors at 100% in-sample precision; N=3 is stricter
+  (+44, also 100%) but N=2 already holds the floor with nearly double the yield, so N=2 is the
+  better operating point. It is the lever that deepens *robustness/coverage* of the hero-shot
+  players.
+- **Best arm = both N=2:** 427 anchors (+90% vs step-3), 121 distinct shots (vs 95), 275
+  propagation-feasible (vs 161), ~98.6% overall. Roster widens the number set, agreement deepens it;
+  together is strictly best and still clears 95%.
+
+## Best-arm re-wire (AIN embedder): named players 5 -> 6
+
+Re-ran `tools/wire_anchors.py --model-name osnet_ain_x1_0 --weights osnet_ain_x1_0_msmt17` on the
+best (both N=2) survivor set (`--survivors levers/both2_survivors --tag _both2_ain`;
+`NAMED_TRACKS_both2_ain.md`, baseline AIN variant untouched):
+
+| metric | step-3 AIN (226) | step-4 both2 AIN (426) |
+|---|---|---|
+| attached to a fragment | 73 | **109** |
+| named fragments after guard | 42 | **53** |
+| distinct **named players** | **5** | **6** |
+
+The one gained name is **Harry Maguire #5 (Man Utd)** -- surfaced by the roster/agreement new `#5`
+anchors. The gain is modest and expected: agreement's extra anchors pile onto players already named
+(Bruno #8, Rashford #10, Dalot #20), and roster's new numbers hit the **same-kit ReID wall** (Man
+Utd `#3`/`#4`/`#5` are red-on-red, so the margin gate rejects most). Only `#5` crossed into a new
+name. The `#4` masked-front false anchors named **no one** -- they fell to ambiguous / no_wide_frame,
+and the propagation guard raised 2 disagreement flags (`{8,10}` on two fragments), refusing to name
+them. So the step-4 levers add a real name at no precision cost, but do **not** break the ReID
+same-kit bottleneck that caps close-up naming (still the Sem-2 part-based-ReID / VLM lever).
