@@ -130,6 +130,25 @@ of this claim, not an embarrassment.
   enough for Review 1; 15 is stretch.
 
 ### B4 — The novelty module: validated off-screen imputation (Oct 1 → Nov 30)
+**Scope evidence-fixed 2026-07-17** (`results/imputation_probe.md`): EXTRAPOLATION regime only
+(interpolation is a solved 0.8-3.6 m floor); STRUCTURE-AWARE architecture (centroid-relative
+already overtakes naive baselines at 4-8 s gaps); external truth = SkillCorner 10-match release.
+Sem-2 identity levers located+priced meanwhile: PRTreID part-based ReID (zenodo 10653453; the only
+model class that can plausibly break the measured same-kit wall) and a jersey-number-REGION
+detector class (the Roboflow-recipe accuracy driver; needs annotation).
+
+**Recipe research 2026-07-17 [verified 3-0, deep-research #2]: the jersey gap has a public,
+proven, downloadable solution — Koshkina & Elder CVPRW'24 `jersey-number-pipeline`
+(github.com/mkoshkina/jersey-number-pipeline): ResNet34 legibility (SAM optimizer, 20 ep) →
+ViTPose pose-guided torso RoI (shoulder/hip joints +5 px) → PARSeq scene-text recognition
+(SoccerNet-fine-tuned, 25 ep, label len ≤2) → Centroid-ReID outlier removal → tracklet
+consolidation = 87.45% SoccerNet test (vs our 0.42). ALL weights on Google Drive, setup.py
+automated, inference-only viable on 4 GB. Training recipe = weak-label bootstrapping from hockey
+models (no manual annotation). ADOPTION PLAN: integrate inference-only first (replaces our
+Stage-1 reader AND upgrades close-up anchor reads — PARSeq is an STR model, exactly the
+close-up-domain reader we lack); reproduce their SoccerNet number before trusting it. Remaining
+research claims (GSR winners' ReID configs, PRTreID weight availability) are captured-unverified
+in the run journal; research loop #2 CLOSED.**
 The one place we can exceed published GSR SOTA on a real research axis [captured: SOTA uses linear
 interpolation off-screen; FIFA study names it the open problem]:
 1. Revive `generator/complete.py` (currently a stub) as a *probabilistic* imputer: predict
