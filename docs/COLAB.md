@@ -32,3 +32,10 @@ roles, phase split, possession report. No GPU needed for any of it.
 
 > The VS Code Colab extension can open and run this notebook directly; this repo can't drive the
 > extension for you, but the notebook is self-contained once the CONFIG cell is set.
+
+## Jersey-number pipeline reproduction
+
+Separate from the two jobs above: [`notebooks/koshkina_repro_colab.ipynb`](../notebooks/koshkina_repro_colab.ipynb)
+reproduces Koshkina & Elder's 87.45% SoccerNet tracklet accuracy on a T4, entirely self-contained
+(clones their repo, fetches their weights + SoccerNet test split fresh) — a cross-check against the
+local Windows repro's 0.42 baseline.
