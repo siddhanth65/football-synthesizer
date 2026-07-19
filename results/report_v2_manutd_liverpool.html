@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Man Utd v Liverpool - CV-primary tactical read</title>
+<style>
+:root{--ink:#1a1a1a;--muted:#5a5a5a;--cv:#0b6b3a;--fifa:#8a5a00;--line:#e2e2e2;--abst:#b03030;
+ --cmp:#0a5a8a;}
+*{box-sizing:border-box;}
+body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:var(--ink);max-width:820px;
+ margin:0 auto;padding:40px 28px;line-height:1.55;font-size:16px;}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em;}
+h2{font-size:19px;margin:34px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+.lede{color:var(--muted);font-style:italic;margin:6px 0 18px;}
+.gate{border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:14px 0 6px;
+ background:#fafafa;font-size:14.5px;}
+.gate .pass{color:var(--cv);font-weight:700;}
+.gate .abstain{color:var(--abst);font-weight:700;}
+.gate .cmp{color:var(--cmp);font-weight:700;}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;padding:2px 7px;
+ border-radius:4px;vertical-align:middle;margin-right:6px;}
+.tag-cv{background:#e6f4ec;color:var(--cv);}
+.tag-fifa{background:#f6ecd8;color:var(--fifa);}
+.prov-fifa{opacity:.96;}
+.prov-fifa h2{border-bottom-color:#e8d9b4;}
+.tag-oracle{background:#f6ecd8;color:var(--fifa);}
+.prov-oracle{opacity:.96;}
+.prov-oracle h2{border-bottom-color:#e8d9b4;}
+ul{margin:6px 0 14px;padding-left:22px;}
+li{margin:3px 0;}
+.abstain-box{border-left:4px solid var(--abst);background:#fdf3f3;padding:10px 14px;margin:12px 0;
+ color:#7a2020;border-radius:0 6px 6px 0;font-size:14.5px;}
+.cmp-box{border-left:4px solid var(--cmp);background:#eef6fb;padding:10px 14px;margin:12px 0;
+ color:#0a4a70;border-radius:0 6px 6px 0;font-size:14.5px;}
+.seam{border:1px solid var(--line);border-left:4px solid var(--cv);border-radius:0 8px 8px 0;
+ padding:12px 16px;margin:12px 0;background:#fbfdfb;}
+.seam-claim{margin:0 0 6px;font-weight:600;}
+.seam-back,.seam-fals{margin:4px 0;font-size:14px;color:var(--muted);}
+table{border-collapse:collapse;width:100%;margin:8px 0 4px;font-size:14.5px;}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;}
+th{background:#f4f4f4;font-weight:600;}
+figcaption{color:var(--muted);font-size:13px;font-style:italic;margin:4px 0 16px;}
+.legend{font-size:13px;color:var(--muted);margin:2px 0 0;}
+footer{margin-top:36px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);
+ font-size:13px;}
+@media print{body{padding:0;font-size:12px;max-width:100%;}h2{page-break-after:avoid;}
+ .seam,.abstain-box,figure{page-break-inside:avoid;}}
+</style></head>
+<body>
+<h1>Man Utd v Liverpool</h1>
+<p class="lede">A CV-primary tactical read. The body is written entirely from our computer-vision
+metrics; Sofascore appears only in the validation appendix as an oracle we check against.</p>
+<div class="gate">
+<strong>Ball-evidence gate:</strong> post-link coverage 46% (needs &ge; 40%),
+pass-recall proxy 29.0% (needs &ge; 50%) &rarr;
+<span class="cmp">COMPARATIVE (relative claims only)</span>.<br>
+<strong>Body guardrail:</strong> 100% precision (100/100 numbers CV-backed).
+<p class="legend">Gate inputs from <code>outputs/eval/manutd_liverpool_ball_eval.json</code> (oracle: Sofascore).</p><p class="legend">Gate readout: coverage clears the 40% bar by 5.7 pp; pass-recall 29.0% is below the 50% absolute bar but team-symmetric (spread 0.028 &le; 0.05) &mdash; ball families render in COMPARATIVE form only (shares/ratios/differences), absolute volumes withheld; structural sections render in full.</p>
+<p class="legend">Provenance legend: <span class="tag tag-cv">CV</span> our metrics (body) &middot;
+<span class="tag tag-oracle">ORACLE</span> Sofascore (appendix only).</p>
+</div>
+<section class="prov-cv">
+<h2><span class="tag tag-cv">CV</span> How Man Utd set up</h2>
+<p>Our shape classifier reads Man Utd in a <strong>4-2-3-1</strong>. The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.</p>
+<p>In shape terms, their visibility-corrected defensive line sits <strong>29 m</strong> up the pitch (the raw broadcast line is censoring-inflated; the visibility de-biasing was validated on the World Cup set, where FIFA per-phase lines exist); they build from a base line around <strong>52 m</strong>; the block is <strong>28 m</strong> wide and <strong>21 m</strong> deep; nearest-team-mate compactness holds near <strong>11.3</strong> (a spread index, lower is tighter).</p>
+<p>Where the shape lives (lane occupation, whole match):</p><ul><li>half-spaces <strong>46%</strong> &mdash; the dominant channel</li><li>centre <strong>35%</strong></li><li>wings <strong>19%</strong> &mdash; comparatively thin, a structural handle for opponents</li></ul>
+</section>
+<section class="prov-cv">
+<h2><span class="tag tag-cv">CV</span> Opponent structural read -- Liverpool</h2>
+<p>Our shape classifier reads Liverpool in a <strong>3-5-2</strong>. The structural read below is measured directly from tracked positions and does not depend on the ball, so it renders for every match regardless of ball-track quality.</p>
+<p>In shape terms, their visibility-corrected defensive line sits <strong>24 m</strong> up the pitch (the raw broadcast line is censoring-inflated; the visibility de-biasing was validated on the World Cup set, where FIFA per-phase lines exist); they build from a base line around <strong>46 m</strong>; the block is <strong>30 m</strong> wide and <strong>20 m</strong> deep; nearest-team-mate compactness holds near <strong>12.1</strong> (a spread index, lower is tighter).</p>
+<p>Where the shape lives (lane occupation, whole match):</p><ul><li>half-spaces <strong>47%</strong> &mdash; the dominant channel</li><li>centre <strong>33%</strong></li><li>wings <strong>20%</strong> &mdash; comparatively thin, a structural handle for opponents</li></ul>
+<p>Liverpool move as a unit &mdash; velocity synchrony <strong>71%</strong> on a 0-1 scale (this is a position-only measure and always renders).</p>
+</section>
+<section class="prov-cv">
+<h2><span class="tag tag-cv">CV</span> In possession</h2>
+<p>Man Utd move as a unit &mdash; velocity synchrony <strong>71%</strong> on a 0-1 scale (this is a position-only measure and always renders).</p>
+<div class="cmp-box"><strong>Relative claims only</strong> &mdash; capture ~29%, team-symmetric (spread 0.028); absolute volumes withheld.</div>
+<p>By our phase classifier the two sides split their in-possession time differently: Man Utd spend <strong>17%</strong> of it in the final third against Liverpool&#x27;s <strong>17%</strong>, and <strong>65%</strong> in build-up against <strong>60%</strong> &mdash; a team-vs-team tilt, not an absolute volume.</p>
+<p>With the ball, Man Utd account for <strong>54%</strong> of the two sides&#x27; tracked passing volume (<strong>46%</strong> Liverpool) at a similar mean length (<strong>8.5 m</strong> vs <strong>8.4 m</strong>); ball-progression threat (xT) splits <strong>52%</strong>/<strong>48%</strong> in Man Utd&#x27;s favour; goalward directness (verticality) runs <strong>7%</strong> for Man Utd vs <strong>9%</strong> for Liverpool; Man Utd produced <strong>57%</strong> of the defensive-line breaks between the sides.</p>
+<p>Relative pressing tempo (PPDA proxy, lower is more aggressive): Man Utd <strong>0.8</strong> vs Liverpool <strong>0.9</strong> &mdash; a ratio of Man Utd build-up passes allowed per defensive action, reported team-vs-team.</p>
+</section>
+<section class="prov-cv">
+<h2><span class="tag tag-cv">CV</span> Out of possession</h2>
+<p>Man Utd defend from a high starting point &mdash; the visibility-corrected line at <strong>29 m</strong> is a front-foot posture (position-only, always rendered).</p>
+<div class="cmp-box"><strong>Relative claims only</strong> &mdash; capture ~29%, team-symmetric (spread 0.028); absolute volumes withheld.</div>
+<p>Pressing intensity (a 0-1 time-to-intercept index) runs <strong>36%</strong> for Man Utd against <strong>40%</strong> for Liverpool &mdash; an intensity comparison, not a count of actions.</p>
+<p>Counterpress decay, side by side: within 5 s of a loss Man Utd regain the ball <strong>49%</strong> of the time against Liverpool&#x27;s <strong>46%</strong>, and by 8 s <strong>58%</strong> vs <strong>52%</strong> &mdash; both curves are per-team regain shares.</p>
+<p>Man Utd commit to the counterpress on <strong>71%</strong> of losses vs Liverpool&#x27;s <strong>72%</strong>; but convert <strong>26%</strong> of their losses into high regains against Liverpool&#x27;s <strong>37%</strong> &mdash; relative conversion, not absolute regains.</p>
+</section>
+<section class="prov-cv">
+<h2><span class="tag tag-cv">CV</span> Counter-structure seams -- how to play against Man Utd</h2>
+<p>Each seam pairs a concrete idea with the exact CV number behind it and a one-line condition that would close it. Seams resting on ball-tracked families abstain when the match fails the evidence gate.</p>
+<div class="cmp-box"><strong>Relative claims only</strong> &mdash; capture ~29%, team-symmetric (spread 0.028); absolute volumes withheld.</div>
+<div class="seam"><p class="seam-claim">Retain through the first press and play forward within about 5 s. Side by side, Man Utd recover <strong>49%</strong> of losses inside 5 s vs Liverpool&#x27;s <strong>46%</strong>, and by 8 s <strong>58%</strong> vs <strong>52%</strong> &mdash; the earlier-flattening side is the one to play through.</p><p class="seam-back"><em>Backing:</em> regain-curve comparison, Man Utd vs Liverpool: 5 s 49% vs 46%, 8 s 58% vs 52% (per-team regain shares; relative claim only).</p><p class="seam-fals"><em>Closes if:</em> Man Utd&#x27;s 5 s regain rate pulls clear of Liverpool&#x27;s 46% &mdash; the relative edge closes.</p></div>
+<div class="seam"><p class="seam-claim">Attack and switch into the wide lanes. Man Utd concentrate centrally and in the half-spaces (<strong>46%</strong> half-space, <strong>35%</strong> centre) with only <strong>19%</strong> in the wings &mdash; isolating the full-backs stretches a compact block.</p><p class="seam-back"><em>Backing:</em> lane occupation: half-space 46%, centre 35%, wing 19% (Man Utd, whole match, position-only).</p><p class="seam-fals"><em>Closes if:</em> Man Utd&#x27;s wing occupation climbs well above 19% toward their central load.</p></div>
+<div class="seam"><p class="seam-claim">Target the space behind the defensive line. Visibility-corrected, Man Utd&#x27;s line sits <strong>29 m</strong> up the pitch behind a base line near 52 m; early, direct balls in behind exploit that depth before the block resets.</p><p class="seam-back"><em>Backing:</em> de-biased defensive line 29 m (visibility de-biasing validated on the World Cup set; position-only).</p><p class="seam-fals"><em>Closes if:</em> Man Utd drop the line well below 29 m toward their own half.</p></div>
+<div class="seam"><p class="seam-claim">Commit to the counter the instant you win it back. Man Utd pour into the counterpress on <strong>71%</strong> of losses vs Liverpool&#x27;s <strong>72%</strong>, yet convert only <strong>26%</strong> of their losses into high regains against Liverpool&#x27;s <strong>37%</strong> &mdash; survive first contact and the pitch opens.</p><p class="seam-back"><em>Backing:</em> counterpress rate 71% vs Liverpool 72%; high-regain conversion 26% vs 37% (relative rates, no absolute regain counts).</p><p class="seam-fals"><em>Closes if:</em> Man Utd&#x27;s high-regain conversion pulls clear of Liverpool&#x27;s 37% &mdash; a counterpress that wins the ball high rather than just delaying.</p></div>
+<div class="seam"><p class="seam-claim">Stretch the block before entering it. Man Utd hold a tight, narrow shape &mdash; <strong>28 m</strong> wide by <strong>21 m</strong> deep at a nearest-team-mate spread of <strong>11.3</strong> &mdash; so pinning both flanks and switching fast forces the gaps a compact block does not want to open.</p><p class="seam-back"><em>Backing:</em> block size 28 m wide x 21 m deep, compactness 11.3 (Man Utd, whole match, position-only).</p><p class="seam-fals"><em>Closes if:</em> Man Utd&#x27;s block width climbs well above 28 m &mdash; a shape already spread enough to defend the flanks.</p></div>
+</section>
+<section class="prov-oracle">
+<h2><span class="tag tag-oracle">ORACLE</span> Validation against Sofascore -- oracle only, not used above</h2>
+<p>None of the numbers below feed the analysis above; the Sofascore oracle only checks our CV output where the two measure the same thing. Two honesty notes carry over from the pilot gate: (1) our possession figures are measured on trackable ball frames only, so they are biased by ball coverage and here INVERT the oracle &mdash; our space-control hands the territory to the side the event oracle has with less of the ball; the separately diagnosed trackable ball-possession share inverts identically (Man Utd ~44%; results/pl_pilot/possession_diagnosis.md). (2) We have no CV shot detector, so shots are an open gap shown for context only, never claimed as a CV output.</p>
+<figure><table><thead><tr><th>team</th><th>CV (ours)</th><th>Sofascore</th><th>note</th></tr></thead><tbody><tr><td>Man Utd</td><td>47% (space-control proxy)</td><td>53%</td><td>trackable-frame bias; inverts the oracle</td></tr><tr><td>Liverpool</td><td>53% (space-control proxy)</td><td>47%</td><td>trackable-frame bias; inverts the oracle</td></tr></tbody></table><figcaption>Possession &mdash; CV proxy vs Sofascore (biased-by-construction, reported caveated).</figcaption></figure>
+<figure><table><thead><tr><th>team</th><th>CV (ours)</th><th>Sofascore</th><th>recall proxy</th></tr></thead><tbody><tr><td>Man Utd</td><td>128</td><td>421</td><td>30.4%</td></tr><tr><td>Liverpool</td><td>108</td><td>391</td><td>27.6%</td></tr></tbody></table><figcaption>Pass volume in the usable ball track vs Sofascore completed passes.</figcaption></figure>
+<figure><table><thead><tr><th>team</th><th>CV (ours)</th><th>Sofascore</th><th>note</th></tr></thead><tbody><tr><td>Man Utd</td><td>-- (no CV shot detector)</td><td>8</td><td>honest gap</td></tr><tr><td>Liverpool</td><td>-- (no CV shot detector)</td><td>11</td><td>honest gap</td></tr></tbody></table><figcaption>Shots &mdash; shown for context; we do not detect shots from broadcast video.</figcaption></figure>
+</section>
+<footer>football-synthesizer report v2 &middot; Body = CV metrics (team-level; no player roster) &middot; Appendix = Sofascore oracle &middot; no C5 opponent-model claim (World-Cup-pooled).</footer>
+</body></html>
