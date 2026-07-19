@@ -45,3 +45,31 @@ matches:
     competition: ENG-Premier League 2024-2025 (MW2)
     home_team: Brighton
     away_team: Man Utd
+  # PL Archive 24/25, second brick (Phase B). Man Utd (red, home) vs Liverpool (white 24/25 away
+  # kit, confirmed on-screen "LFC"/"B.FERNANDES" reads at ~48 min mark). Full replay had no chapter
+  # markers / no black-frame HT bumper; half boundary found manually via visual inspection (restart
+  # formation at centre circle) at t=2940s (49:00) into the raw file -- h1_full=2940.1s,
+  # h2_full=3125.9s, sum matches source duration 6065.9s. Same manual-split convention as
+  # brighton_manutd (no explicit half-boundary field in this schema).
+  manutd_liverpool:
+    teams: [Man Utd, Liverpool]
+    aligned: outputs/manutd_liverpool/final/match_aligned.parquet
+    ball_dir: outputs/manutd_liverpool/final/ball
+    pmsr: null
+    roster: false
+    competition: ENG-Premier League 2024-2025
+    home_team: Man Utd
+    away_team: Liverpool
+  # PL Archive 24/25, third brick (Phase B). Man Utd (home, Old Trafford, MW1 opening fixture) vs
+  # Fulham. Half boundary not yet fixed at registration time -- see STATUS.md 2026-07-18 entry for
+  # the split time/method actually used (chunking is prep-only here, same manual-split convention as
+  # brighton_manutd / manutd_liverpool -- no explicit half-boundary field in this schema).
+  manutd_fulham:
+    teams: [Man Utd, Fulham]
+    aligned: outputs/manutd_fulham/final/match_aligned.parquet
+    ball_dir: outputs/manutd_fulham/final/ball
+    pmsr: null
+    roster: false
+    competition: ENG-Premier League 2024-2025
+    home_team: Man Utd
+    away_team: Fulham

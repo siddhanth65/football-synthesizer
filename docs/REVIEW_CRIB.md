@@ -10,8 +10,11 @@ Positional geometry cannot distinguish a shot from a pass — both are a carrier
 We pre-declared that boundary, measured it, and gate every claim behind validated evidence. The
 report's value is structural reads no media report has (de-biased line to 7.2 m vs FIFA, lane
 occupation, counterpress curves) with abstention where evidence is thin. Trust comes FROM the
-refusal to fake events. (Layer 3 action-spotting is planned — trained on SoccerNet labels,
-validated vs Sofascore counts — as capability, not as an excuse.)
+refusal to fake events. **Layer 3 update (2026-07-17): the probe landed — zero-shot E2E-Spot put
+all 3 real goals in the top-3 confidence peaks (correct halves), cards 3/0 exact, total shots 25/25
+exact, in 6.3 min on our GPU. Boundary stated: on/off-target split and offside unreliable; replays
+need a refractory window. The gate philosophy is unchanged — events ship only with this validation
+attached.**
 
 ## Q2 — "Your possession picks the wrong leader. Why publish?"
 It measures a different quantity — trackable-frame share; tracking fails precisely in transitions,
@@ -23,12 +26,14 @@ at every horizon (62% vs 52% at 5 s). Sterile possession, measured. Every absent
 partnered with a rendered structural strength.
 
 ## Q3 — "You scored ~X on GS-HOTA; SOTA is 63.9."
-GS-HOTA = localization × ALL-OR-NOTHING identity (jersey+role+team). We emit no jersey numbers yet
-— by design, pre-Layer-2 — so identity zeroes the composite. Read the localization component
-(competitive) and treat the composite as our external BASELINE: when jersey ID lands, the lift is
-measurable on a public benchmark instead of self-graded. We score the valid split; 63.9 is the
-challenge split — stated, not hidden. Never chase the leaderboard; labs optimize the benchmark,
-we use it as an anchor.
+GS-HOTA = localization × ALL-OR-NOTHING identity (jersey+role+team). Our pre-jersey baseline was
+14.8 (identity zeroes the composite by design); **wiring the jersey layer lifted it to 19.8 (+34%)
+with ZERO sequences hurt** — only 8.7% of tracks read a number, 91.3% abstain, and abstention
+discipline means a wrong number never attaches (numbering a GT-unnumbered player breaks the match,
+so sparse-but-right beats dense-but-wrong). That's the thesis demonstrated ON the public benchmark:
+the lift is externally graded, not self-graded. We score the valid split; 63.9 is the challenge
+split — stated, not hidden. Never chase the leaderboard; labs optimize the benchmark, we use it
+as an anchor.
 
 ## Q4 — "Comparative tier = moving the goalposts."
 The gate didn't move — the CLAIM changed. Absolute claims still require 50% recall and still
@@ -70,7 +75,7 @@ and we hold the free validation assets (SkillCorner tracking, SB360 same-censori
 | 47.8 / 48.6 / 0.009 | pass recall Utd / Brighton / symmetry spread — the comparative-tier license |
 | 44.2 vs 52 | our possession share vs Sofascore — the bias exhibit, leader inverts |
 | 51.9% / 71.2% | post-link ball coverage: full match / live-wide conditional |
-| 14.8 / 43.1 / 48.9 / 92.5 | OUR GS-HOTA valid-split: official full / no-jersey / loc+assoc / LocA — jersey gap measured externally |
+| 14.8 → **19.8** / 43.1 / 48.9 / 92.5 | OUR GS-HOTA valid-split: official full (pre→post jersey layer, +34%, 0 seqs hurt) / no-jersey / loc+assoc / LocA — the jersey lift is externally graded |
 | 29.01 / 63.90 | GSR baseline / SOTA (challenge split — context, not like-for-like ranking) |
 | 12.76 / 22 | players visible on average in broadcast (why imputation is THE problem) |
 | 100% | guardrail precision — no ungrounded number reaches a reader |

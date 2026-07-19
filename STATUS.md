@@ -1,6 +1,255 @@
 # STATUS
 
-**Last updated:** 2026-07-15 (C3 eval complete — the fix RESTORES the receiver headline)
+**Last updated:** 2026-07-19 (B-1..B-6 COMPLETE: case study + 3 narrative scouting packs shipped)
+
+## 2026-07-19 — B-5/B-6 SHIPPED: score-state analysis, the 0-3 case study, narrative scouting packs x3
+
+[fingerprint/score_state.py](fingerprint/score_state.py) (goal-boundary segmentation over validated
+metrics; 5 seam tests; style_fingerprint refactored to expose per-frame seams, v1 outputs
+byte-identical). **THE robust cross-match claim: ManU's counter-press vs Liverpool was flat FROM
+KICKOFF — 0.455 at 0-0 vs ~0.72 at level state vs both Brighton and Fulham — the collapse PRECEDED
+the scoreline**; chasing lifted it to 0.690 only once 0-3 down ("energy that arrived when the game
+was already gone"); Liverpool lost fewest balls outside their third (58) + lowest regain urgency
+(0.241). Full story: results/CASE_STUDY_manutd_liverpool.md + results/SCORE_STATE_v1.md
+(cross-match state table; fulham leading-state single-digit-frame flagged).
+[tools/render_scouting_v2.py](tools/render_scouting_v2.py): narrative packs (story->style->seams->
+players->validation-appendix) for all 3 matches -> results/reports/<match>_v2.html; every ceiling
+respected (brighton team-split excluded, players as floor-exemplars not rankings, no CV goal-scorer
+identity claimed — goal times from validated E2E peaks, ownership from per-half score deltas; the
+"oracle has goal minutes" premise was FALSE — flagged and documented). **B-1..B-6 all shipped.**
+Open: commit (Sid), PL uploads, liverpool montage verdict, audit items (fulham h2 segment,
+brighton split inversion, attempted-vs-completed).
+
+## 2026-07-19 — B-3 STAGE 2: event ledger built; team gate PARTIAL (2/3), player attribution = floor
+
+[tools/event_ledger.py](tools/event_ledger.py) (+6 tests; frame-clock mapping BAS-25fps↔parquet-stride-5
+test-locked; op-arm filter REUSED from bas_validate, not re-derived). Kick-moment carrier heuristic
+(window -0.6..+0.2s, nearest-player-to-ball; median 1.3 m). Ledgers written for all 3 matches
+(outputs/<match>/ledger.parquet + results/PLAYER_LEDGER.md). **Team gate: liverpool 181:174 vs
+507:464 and fulham 166:144 vs 482:384 HOLD; brighton INVERTS (223:191 favoring BHA vs truth 477:511
+favoring... truth has Utd 511 away) — real ceiling, reported.** Coverage ceiling is tracking
+density: only ~33-42% of passes have ANY tracked player on the ball at kick (industry regime).
+**Player attribution: 3.6%/5.6% of team-passes named (counts 1-5/player, Spearman inconclusive) —
+an honest FLOOR**; wall = named-fragment coverage 18% x carrier-specific requirement; same-kit ReID
+(PRTreID) remains the Sem-2 coverage lever. E2E events deliberately NOT merged into the ledger yet
+(no validation credit; separate clock). Match-level counts stay the validated product; team-level
+usable w/ caveats 2/3; player-level not claimable yet.
+
+## 2026-07-19 — LIVERPOOL IDENTITY CHAIN COMPLETE: 20 named players (10 Utd, 10 LFC incl. Salah)
+
+wire_anchors --match parameterized (fast-worker; brighton outputs byte-identical) + OsnetEmbedder
+OOM root-caused (3,348 crops in ONE forward; now internal 128-crop mini-batches, results identical,
+test locked). Liverpool wiring: 528/3,251 anchors attached (1,308 no-wide-frame, 1,415
+ReID-ambiguous — same-kit wall as ever), **279 named fragments, 20 disagreement flags guarded**.
+run_lineup_assign --match manutd_liverpool: **20 players assigned** — Utd: Bruno, Rashford, Dalot,
+Garnacho, Casemiro, Martinez, Mazraoui, Maguire, Mainoo, Collyer(sub); LFC: **Salah**, Mac Allister,
+Szoboszlai, Jota, Gravenberch, Konate, Diaz, Robertson, Nunez(sub), Gakpo(sub). Confidence
+0.78-1.00, sub windows enforced. Precision pending Sid's montage verdict (banner in MD). Corpus
+state: 2 matches with full identity chains (20 players each), 3 with validated events + pass
+counts. B-3 stage 2 (possession team-split + per-player event ledger) launching.
+
+## 2026-07-19 — EVENT LAYER 3-MATCH VALIDATED: goals 7/7 exact (with halves), cards/corners at-or-near exact
+
+E2E-Spot run on liverpool + fulham (probe multi-match fix: mkdir, per-match goal oracle derived
+from source season dict — which also corrected MY guessed liverpool split to the true 2 H1 / 1 H2).
+**Liverpool: goals 3/3 with exact halves, yellows 5/5, red 0/0, corners 7/7 EXACT**, shots 21 vs 19,
+fouls 16 vs 14, offsides 1 vs 2. **Fulham: goal 1/1 with exact half** (87' winner), fouls 21 vs 22,
+yellows 4 vs 5, corners 13 vs 15, offsides 2 vs 4 — but **shots 35 vs 24 over-fired in the same h2
+where BAS ran 1.17x: one flagged broadcast segment explains both** (replay/stoppage-heavy; single
+audit item). Combined with brighton (3/3 goals, cards exact, shots 25/25): **goal detection now
+7/7 across three matches with correct half attribution — zero-shot, validated**. wire_anchors
+--match parameterization dispatched (was brighton-hardcoded) → liverpool wiring next on GPU.
+
+## 2026-07-19 — B-2/B-3 stage 1: pass counts 0.97-0.98x of Sofascore — the "passes are half" problem closed
+
+BAS (lRomul 2023 winner, pass/drive) run on brighton complete + liverpool h1 (rest grinding).
+Raw over-count 1.38x; **premise correction (worker-measured): NOT replay double-counting** — the
+live_play filter separates wide-vs-tight framing (not live-vs-replay) and over-cuts to 0.81x; the
+real excess is low-confidence noise peaks: **conf floor 0.40 removes 93% of it, +1s dedup**.
+Operating point frozen on brighton h1 ONLY (538 vs 543), evaluated held-out. FINAL (all 32 chunks,
+3 matches 100% complete): **brighton 981/988 = 0.993x, liverpool 981/971 = 1.010x, fulham (fully
+held-out) 945/866 = 1.091x** (fulham h2 1.17x is the lone outlier — flagged for a look; other five
+halves 0.97-1.05). One threshold generalizes across matches within ~1-9%. [tools/bas_validate.py](tools/bas_validate.py) (+7 seam tests,
+results/bas_validation.md, auto-picks-up new BAS chunks). Liverpool identity probe DONE same day:
+**3,348 anchors** (vs brighton 1,897), montage verdict pending Sid. Remaining on this thread:
+per-team split (B-3 stage 2 via possession track), attempted-vs-completed, liverpool h2 + fulham
+BAS chunks, brighton h2 tail chunk rerun (fps tolerance fixed after a correct refusal at 25.005).
+
+## 2026-07-18 — B-1..B-6 EXECUTION: B-1 + B-4 shipped same-day, B-2 staged, liverpool probe live
+
+**B-1 lineup-prior assignment** ([generator/lineup_assign.py](generator/lineup_assign.py) +
+tools/run_lineup_assign.py, 9 seam tests; deep-worker requested: opus): Hungarian assignment of the
+known 22 to track-groups (jersey-vote + position-prior + kit + GK-veto costs, abstention
+first-class, sub windows from oracle minutes). Brighton validation: **20/20 open-set names
+reproduced exactly, 0 violations** (subs only in their halves; 0 keeper reads = keepers get no
+hero close-ups). Honest read: adds STRUCTURE (confidence, roster coverage accounting, constraints),
+not new identities — numbers are already a within-team bijection; position-only discovery needs
+persistent relink tracks (known ceiling). One-command-per-match; liverpool auto-wired.
+**B-4 style fingerprint v1** ([fingerprint/style_fingerprint.py](fingerprint/style_fingerprint.py) +
+tools/run_style_fingerprint.py, results/style_fingerprint_v1.md, 6 invariance tests): OT
+sliced-Wasserstein embedding (64 prototypes, exact EMD side-distance), rule-based 4-phase
+segmentation (block/width/compactness/depth per phase), StatsBomb-def counter-press (4.57 m / 5 s /
+outside-third). Findings on 3 matches: **weak ManU identity** (every ManU side's NN is another ManU
+side; mostly TERRITORIAL — centering collapses it; n=3 caveat). **Liverpool 0-3 quantified: ManU's
+positive transition died** (post-win centroid depth 48.9 m vs 60.8/56.9; worst counter-press 0.60 /
+regain 0.347) while Liverpool lost fewest balls outside their third + lowest regain urgency —
+beaten in the win-it/lose-it phase, not out-shaped. B-5 case-study spine.
+**B-2 staged** (~/ball-action-spotting MIT clone + ~/ball-action-env, winner weights 53 MB in hand,
+CPU smoke-loaded 6.8M params). **PLAN CORRECTION: 2023 BAS winner = 2-class PASS/DRIVE** (12-class
+list was the 2024 task — T-DEED queued as upgrade probe); pass/drive IS the pass-count fix; E2E-Spot
+covers richer events. Inference adapter (OpencvFrameFetcher swap, fps check, resumable driver)
+being built CPU-side; GPU run queues behind the **liverpool identity probe (running, chunk 3/11,
+1,150 cumulative both2 anchors, isolated out-root, own-session + monitored)**.
+
+## 2026-07-18 — STRATEGY RESET (Sid) + research sweep -> docs/MANUTD_ANALYSIS_PLAN.md
+
+Sid's critique of the first packs (all correct): reports read as CV-vs-Sofascore validation and lose;
+passes ~30% of truth (geometry-coverage artifact); possession biased; identity attached to NO
+actions. Plan doc written from two research passes: (a) xG FC corpus distillation (92 articles in
+the READ-ONLY sibling repo; Tier-1 tracking-native methods: OT sliced-Wasserstein style embedding,
+shape graphs + phase-of-play CNN, counter-press primitive, line-breaking/defender bands, Cox
+score-state hazard, possession-archetype mixtures); (b) web sweep (partially quota-clipped at the
+verify stage; raw claims harvested from the workflow journal): commercial broadcast trackers detect
+players only 36-64% of standard-broadcast frames (arXiv 2508.19477), 19+ visible ~5% of the time,
+SkillCorner does identity via LINEUP PRIORS + jersey fusion (their own disclosure) -> our coverage
+is the industry regime; lRomul BAS 2023 winner (86.47% mAP@1, public weights, EffNetV2-B0 =
+4GB-feasible) is the pass-count fix; sn-teamspotting adds team attribution. **Three pillars:
+lineup-prior Hungarian assignment (identity->22 known), event-spotting layer (counts from events,
+geometry for context), tracking-native style+score-state analytics. Build order B-1..B-6 in the
+plan doc.** manutd_fulham PROCESSED same-day (4,056 tactical frames: h1 2,254 / h2 1,802; ball
+post-link 39.4%): corpus = 3 matches. Liverpool identity probe prep: oracle path parameterization
++ player_stats fetch (Sofascore 12436920) dispatched.
+
+## 2026-07-18 — manutd_liverpool REPORT-READY + HTML scouting packs for both matches
+
+Liverpool facts/gates/report (deep-worker requested: opus, CPU while fulham owns GPU): oracle
+FETCHED live (Sofascore 12436920, **ManU 0-3 Liverpool**, 2024-09-01 MW3) — no oracle abstentions;
+ball_eval coverage 45.7%, pass-recall proxy 0.290 with symmetry spread **0.028 ≤ 0.05** →
+**COMPARATIVE tier** (same as brighton); report_v2 guardrail **100% (100/100)**. chunk_002 audit
+CLOSED — KEPT: the "101 m" was an inf-sentinel mean over all rows; its ACCEPTED frames are clean
+(0.240 m mean, max 0.852, 100% in-bounds) and the ≤1.0 m per-frame gate already protects facts.
+Key reads: Utd 4-2-3-1 line 29.4 m / LFC 3-5-2 line 24.0 m. **HTML renderer**
+([tools/render_html_report.py](tools/render_html_report.py), 3 seam tests; 71 targeted tests green):
+single-file self-contained (0 external refs), dark+light, inline SVG pitch diagrams, renders ONLY
+`report_v2.build_document` gated facts — recomputes nothing; identity/events panels per match
+(brighton: 20 named + action-spotting; liverpool: honest queued banners). Shipped:
+`results/reports/{brighton_manutd,manutd_liverpool}.html` (delivered to Sid).
+
+## 2026-07-18 — manutd_liverpool PROCESSED: full pipeline, corpus match #2 (first post-pivot match)
+
+Registered + chunked (fast-worker; halftime split by direct frame inspection at 49:00 source time —
+APPROXIMATE, same epistemic status as brighton's), then the whole chain run under the MAIN session
+(new policy after repeated worker-process reaping): extract 11/11 chunks OK — **3,901 accepted
+tactical frames** (h1 1,954 / h2 1,947), 10-12 players/frame, brighton flags reused verbatim
+(sample-every 5, calib-period 25, drift 2.0, football detector, bytetrack). Align + ball:
+`match_aligned.parquet` written (133k rows anchored by jersey colour); TrackNetV2 v6 ball —
+**post-link usable coverage 45.7% mean** (vs brighton 51.9%; per-chunk 34-63%). AUDIT FLAG:
+h1/chunk_002 logged mean calib 101 m (sentinel-inflated pattern; its 382 accepted frames passed the
+gate) — verify before metric use. Facts/gate/report NOT yet run for this match. Next: manutd_fulham
+same treatment; then fixture map for demo-opponent choice.
+
+## 2026-07-17 — SCOPE PIVOT (Sid): Manchester United, EPL 2024-25 — France/WC is reference-only
+
+Sid: "we ditched the wc, we're doing united now, france is only for reference." December demo =
+**opposition scouting pack for ManU**. Footage: PL-website 24-25 replays, supplied by Sid. FIFA
+PMSR PDFs stay as method-calibration ground truth only. CLAUDE.md scope line updated; stale France
+framing in docs to be fixed on contact. Held footage: Brighton v ManU (fully processed),
+**ManU v Fulham + ManU v Liverpool (raw, unprocessed, in repo root — processing starts now)**.
+
+## 2026-07-17 — ACTION-SPOTTING PROBE: the report can see goals — zero-shot, validated vs Sofascore
+
+E2E-Spot (Hong et al. ECCV'22, official `jhong93/e2e-spot-models` weights `soccer_rny002gsm_gru_rgb`,
+4.46M params, 17-class SoccerNet-v2 vocabulary; BSD-3 external code cloned to `~/action-spot-env`,
+NOT committed; one duck-type patch for timm 1.0's ConvBnAct rename; `timm` newly pip'd into main
+env). Whole brighton_manutd match in **6.3 min (~16x real-time), 760 MB VRAM peak** — fits our 4 GB
+easily. Pre-committed validation vs cached Sofascore oracle: **3 real goals = the top-3 Goal peaks
+(0.76-0.95 vs <0.08 noise floor), correct half split; yellow/red cards 3/0 EXACT; total shots 25/25
+EXACT; fouls 23 vs 22; corners 7 vs 8; offside 3 vs 6 (under)**. Known failure mode measured: goal
+REPLAYS produce mid-gate peaks (~90 s after the real goal) — a confidence gate + post-goal
+refractory window handles it. NOT reliable zero-shot: shot on/off-target split, offside — report
+aggregate shots only. Goal timestamps corroborative (H1 peak 31:35 ≈ known ~31' opener), not
+incident-proven (only team-aggregate oracle cached). **VERDICT: ADOPT-WITH-CAVEATS for Layer 3**
+— rebuts crib Q1 "your report can't see goals" with a measured, honest boundary. Artifacts:
+`results/action_spotting_probe.md`, `tools/action_spot_probe.py` (+3 seam tests green, ruff clean),
+per-chunk npz under `results/action_spotting_probe/brighton_manutd/`. (deep-worker requested: opus)
+
+## 2026-07-17 — EXTERNAL LIFT MEASURED: official GS-HOTA 14.76 → 19.83 (+34%), zero sequences hurt
+
+**GSR valid-split re-score with the Koshkina jersey layer** (`eval/gsr_jersey.py`, deep-worker
+requested: opus; run reaped mid-flight, resumed from per-seq checkpoints under the main session).
+Bridge: per-track tracklet vote (min_conf 0.3, ≤20 crops/track, NO roster prior — GSR has none),
+patched ONLY the `attributes.jersey` field (all other fields verified byte-identical). Full 58-seq
+aggregate: **attach 19.83 vs abstain 14.76 (+5.07)**; no_jersey 43.06 / loc_assoc 48.91 IDENTICAL
+across arms (invariant held); **n_seqs_hurt = 0** — abstention discipline means attaching never
+lost a point (key mechanism: numbering a GT-unnumbered player breaks the null==null match, so only
+confident reads attach). Read coverage just 8.7% of tracks (91.3% abstain on wide broadcast) —
+identity is all-or-nothing in GS-HOTA, so sparse-but-right beats dense-but-wrong. Best per-seq
+deltas +22.0/+19.6/+15.7, mean +6.2. Artifacts: `results/gsr_benchmark/gsr_scores_koshkina.json`
+(+ `GSR_RESCORE_KOSHKINA.md`). Crib update: the Q3 answer's "when jersey ID lands, the lift is
+measurable on a public benchmark" is now CASHED: 14.8 → 19.8.
+
+## 2026-07-17 — VALIDATION NEGATIVE: visible-minutes ordering is dead; naming itself stays clean
+
+Per-player validation of the 20 named (fast-worker; `results/identity/NAMED_VALIDATION_koshkina.md`):
+NO gate rescues Spearman(visible_min, oracle_min) — all-20 0.207, fragments≥3 −0.033, anchors≥10
+0.029, starters-only (oracle≥45) **−0.288**. Substitute hypothesis REJECTED (only 3/20 are subs).
+Root cause: close-up screen time is editorial attention, not playing time — full-90 players range
+3→85 anchors (Casemiro/Dunk vs Veltman); our max visible-minutes proxy is 6.4 of 90. **Claim
+retired: visible minutes never becomes a rendered ordering claim.** What survives: identity itself
+— 20/20 in-squad (no roster leak), zero GK false positives, 97.5% sample precision, 18 contaminated
+fragments correctly guarded. Per-player report claims stay gated on identity + per-fragment stats
+(Bruno-style), not screen-time aggregates.
+
+## 2026-07-17 — DEBTS CLOSED: attack_dirs confound NOT REAL (evidence); wire_anchors label fixed
+
+attack-direction half-time confound (deep-worker trace): **not real in any shipped path** —
+direction resolves per chunk via keeper median-x (`fingerprint/structural_metrics.py:92`), every
+consumer (facts, features, impute, pitch_control, style, roles, facets) resolves per single-half
+chunk, all 11 brighton_manutd chunks are h1_/h2_ prefixed. No code change, no METRICS_VERSION bump.
+One latent off-path wart found and fixed separately (fast-worker one-liner): `team_style.main
+--align` now calls `match_style_vector` (per-chunk direction) instead of whole-input
+`team_style_vector`; ruff + 3 targeted tests pass. wire_anchors embedder-label wart REAL and fixed:
+reports hardcoded "ImageNet OSNet" regardless of `--weights`; artifacts now record the actual
+backbone+weights (`_embedder_label`, 2 new tests; labels only, zero numbers changed).
+**Next: action-spotting zero-shot probe running (GPU); then fixture map + footage/B3 discussion.**
+
+## 2026-07-17 — PHASE 2: Koshkina reader in the anchor funnel — 4.4x anchors, named players 6→20 (UNVERIFIED)
+
+`KoshkinaRecognizer` in [generator/jersey_id.py](generator/jersey_id.py) (deep-worker requested: opus):
+legibility ResNet34 + KeypointRCNN torso RoI in-env, PARSeq via py3.11 sidecar
+([tools/koshkina_str_sidecar.py](tools/koshkina_str_sidecar.py)), same `crop_probs`→`[100]` contract so
+the IDENTICAL decide/roster/vote gates apply; 6 seam tests. Probe `--reader koshkina`, full match:
+**both2 arm 1,897 anchors / 315 shots / 1,166 propagation-feasible** vs shipped easyocr 427/121/275.
+Wired `--tag _koshkina` (shipped artifacts untouched): **20 distinct players named (11 Utd, 9 BHA)**
+vs 6 baseline; 18 disagreement flags correctly rejected by the propagation guard; funnel 1,887
+survivors → 392 attached → 177 named-track rows. Artifacts:
+`outputs/identity/brighton_manutd_named_tracks_koshkina.parquet`, `results/identity/NAMED_TRACKS_koshkina.md`.
+**PRECISION VERDICT (Sid, 2026-07-17): 39/40 montage tiles correct (~97.5% on sampled new reads)**
+— the one miss is a cut-off/no-number crop read as "4". The 95% floor HOLDS; the 4.4x anchors and
+20-named-players results stand as sample-verified. Remaining caveats: (1) PARSeq confidence ~1.0 on
+everything — kit + OCR-agreement + roster gates are the sole precision guards (confidence gate
+toothless, by measurement). (2) #34 Veltman = 407 anchors, never surfaced by easyocr — montage
+showed multiple clean #34s, attractor risk downgraded but per-number spot-check still worthwhile.
+(3) Spearman vs oracle minutes fell 1.0 (n=3) → 0.207 (n=20, noisier reads). (4) Colab cross-check
+ABANDONED (VM crashed) — the local 86.13% reproduction stands, with its two substitutions stated.
+Also fixed: transient WinError 145 rmtree race that aborted mid-match ("_safe_rmtree").
+
+## 2026-07-17 — KOSHKINA REPRODUCED LOCALLY: 86.13% tracklet accuracy (1043/1211) — 0.42 retracted
+
+Full SoccerNet jersey-2023 test split, their official eval convention (`helpers.evaluate_results`,
+incl. -1). Local chain: their legibility ResNet34 weights → torchvision KeypointRCNN pose (ViTPose
+swap — mmcv won't build on Windows/py3.14) → their `generate_crops` (109,680 torso crops) → their
+SoccerNet-fine-tuned PARSeq in the py3.11 sidecar (`~/jersey-str-env`, CPU, ~19.5 crops/s,
+checkpoint-resumable — survived one silent kill at 64k) → their bias-vote consolidation.
+**86.13% vs paper's 87.45%** with two known substitutions (KeypointRCNN pose; no Centroid-ReID
+outlier filter). The earlier 0.42% "local baseline" was a broken run, not a pipeline property —
+retracted. Drivers: `~/jersey-number-pipeline/repro_soccernet.py` (stages legible/pose/crops/
+combine, all resumable) + `repro_str.py`. Colab cross-check with the UNMODIFIED upstream stack
+(real ViTPose + conda envs) is running user-side (notebook `notebooks/koshkina_repro_colab.ipynb`;
+fixes en route: setup.py `a.remove("*")` crash, base-env torch, SAM clone, .DS_Store dirs, stale
+Drive tokens on the two ReID ckpts → gdown re-download).
+**NEXT: Phase 2 integration** — wrap the reproduced chain as a recognizer behind our anchor
+funnel (closeup crops → legibility → pose crop → PARSeq → gated vote) and re-run naming.
 
 ## 2026-07-17 — STEP 4: Roboflow-blog levers BOTH KEEP — anchors 226→427 @ ~98.6%; 6th player named
 

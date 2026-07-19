@@ -28,7 +28,9 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
 - **Git:** commit ONLY when explicitly asked. Never push or force-push. Author is "Sid" — no Claude
   co-author line, no "Generated with Claude" footer.
 - Sibling repos (e.g. `football-state-of-play`) are READ-ONLY.
-- Scope: national-team football; France WC2026 group stage is the current focus.
+- Scope (2026-07-17 pivot, per Sid): **Manchester United, EPL 2024-25 season** — demo = opposition
+  scouting pack for ManU. France/WC material is REFERENCE ONLY (PMSR PDFs stay as method-calibration
+  ground truth). Footage source: PL website 24-25 replays, supplied by Sid.
 - Never download copyrighted footage; the user supplies match video.
 - **Hardware:** 4 GB GPU laptop — one heavy GPU/data job at a time; never run the full pytest suite
   during GPU training (OOM killed a fine-tune once); targeted tests only while GPU is busy.
