@@ -158,7 +158,9 @@ def main() -> None:
     pos = pd.read_parquet(args.positions)
     if args.align:  # multi-chunk match parquet: make ids unique, then align team identities
         pos = align_teams_by_defended_goal(globalize_chunk_ids(pos))
-    z = team_style_vector(pos)
+        z = match_style_vector(pos)
+    else:
+        z = team_style_vector(pos)
     pd.set_option("display.width", 260, "display.max_columns", 60)
     print("team-style fingerprint z_T:\n")
     print(z.round(2).to_string(index=False))
