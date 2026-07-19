@@ -1,0 +1,194 @@
+[
+  {
+    "rank": 0,
+    "file": "sc_00_pred29_conf0.997.jpg",
+    "pred": 29,
+    "conf": 0.9971,
+    "box_h": 102.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 1,
+    "file": "sc_01_pred20_conf0.892.jpg",
+    "pred": 20,
+    "conf": 0.8919,
+    "box_h": 104.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 2,
+    "file": "sc_02_pred08_conf0.819.jpg",
+    "pred": 8,
+    "conf": 0.8187,
+    "box_h": 100.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 3,
+    "file": "sc_03_pred10_conf0.747.jpg",
+    "pred": 10,
+    "conf": 0.7469,
+    "box_h": 107.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 4,
+    "file": "sc_04_pred20_conf0.690.jpg",
+    "pred": 20,
+    "conf": 0.6898,
+    "box_h": 102.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 5,
+    "file": "sc_05_pred08_conf0.628.jpg",
+    "pred": 8,
+    "conf": 0.6284,
+    "box_h": 114.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 6,
+    "file": "sc_06_pred20_conf0.581.jpg",
+    "pred": 20,
+    "conf": 0.5813,
+    "box_h": 137.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 7,
+    "file": "sc_07_pred20_conf0.535.jpg",
+    "pred": 20,
+    "conf": 0.5349,
+    "box_h": 138.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 8,
+    "file": "sc_08_pred11_conf0.494.jpg",
+    "pred": 11,
+    "conf": 0.4939,
+    "box_h": 121.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 9,
+    "file": "sc_09_pred33_conf0.456.jpg",
+    "pred": 33,
+    "conf": 0.4562,
+    "box_h": 111.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 10,
+    "file": "sc_10_pred20_conf0.422.jpg",
+    "pred": 20,
+    "conf": 0.422,
+    "box_h": 105.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 11,
+    "file": "sc_11_pred14_conf0.396.jpg",
+    "pred": 14,
+    "conf": 0.3955,
+    "box_h": 108.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 12,
+    "file": "sc_12_pred23_conf0.368.jpg",
+    "pred": 23,
+    "conf": 0.3682,
+    "box_h": 102.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 13,
+    "file": "sc_13_pred24_conf0.340.jpg",
+    "pred": 24,
+    "conf": 0.3402,
+    "box_h": 176.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 14,
+    "file": "sc_14_pred10_conf0.314.jpg",
+    "pred": 10,
+    "conf": 0.3143,
+    "box_h": 101.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 15,
+    "file": "sc_15_pred20_conf0.291.jpg",
+    "pred": 20,
+    "conf": 0.2906,
+    "box_h": 123.0,
+    "team_guess": 0
+  },
+  {
+    "rank": 16,
+    "file": "sc_16_pred10_conf0.270.jpg",
+    "pred": 10,
+    "conf": 0.2701,
+    "box_h": 113.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 17,
+    "file": "sc_17_pred30_conf0.249.jpg",
+    "pred": 30,
+    "conf": 0.2491,
+    "box_h": 108.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 18,
+    "file": "sc_18_pred10_conf0.230.jpg",
+    "pred": 10,
+    "conf": 0.2296,
+    "box_h": 114.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 19,
+    "file": "sc_19_pred20_conf0.210.jpg",
+    "pred": 20,
+    "conf": 0.2097,
+    "box_h": 115.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 20,
+    "file": "sc_20_pred10_conf0.190.jpg",
+    "pred": 10,
+    "conf": 0.19,
+    "box_h": 118.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 21,
+    "file": "sc_21_pred29_conf0.168.jpg",
+    "pred": 29,
+    "conf": 0.1679,
+    "box_h": 101.0,
+    "team_guess": 1
+  },
+  {
+    "rank": 22,
+    "file": "sc_22_pred31_conf0.142.jpg",
+    "pred": 31,
+    "conf": 0.1421,
+    "box_h": 124.0,
+    "team_guess": 0
+  },
+  {
+    "rank": 23,
+    "file": "sc_23_pred05_conf0.065.jpg",
+    "pred": 5,
+    "conf": 0.0648,
+    "box_h": 101.0,
+    "team_guess": 1
+  }
+]

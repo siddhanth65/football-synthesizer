@@ -14,6 +14,7 @@ import pytest
 
 from generator.track_relink import (
     Fragment,
+    OsnetEmbedder,
     frags_mergeable,
     greedy_merge,
     merge_precision,
@@ -104,6 +105,17 @@ def test_summarize_fragments_drops_nan_only_and_uses_finite_boundaries():
     f = frags[0]
     assert f.track_id == 1 and f.start_frame == 0 and f.end_frame == 2
     assert f.start_xy == (20.0, 30.0) and f.end_xy == (22.0, 30.0)  # finite-pitch boundaries
+
+
+def test_osnet_embedder_embed_batches_internally_and_matches_single_batch():
+    # count > 2x the internal batch_size=4 forces >=3 mini-batches.
+    rng = np.random.default_rng(0)
+    crops = [rng.integers(0, 256, (64, 32, 3), dtype=np.uint8) for _ in range(10)]
+    embedder = OsnetEmbedder(device="cpu")
+    batched = embedder.embed(crops, batch_size=4)
+    single = embedder.embed(crops, batch_size=len(crops))
+    assert batched.shape == (10, 512)
+    assert np.allclose(batched, single, atol=1e-5)
 
 
 def test_merge_precision_counts_only_auditable_pairs():

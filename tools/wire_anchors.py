@@ -8,10 +8,12 @@ parquet, and validates a visible-minutes proxy against the oracle.
 Run (GPU, one job -- OSNet embeddings only, no re-detection)::
 
     python -m tools.wire_anchors
+    python -m tools.wire_anchors --match manutd_liverpool
 
-Outputs:
-    outputs/identity/brighton_manutd_named_tracks.parquet
-    results/identity/NAMED_TRACKS.md
+Outputs (``<match>`` = ``--match``, ``brighton_manutd`` keeps its original bare filenames):
+    outputs/identity/<match>_named_tracks<tag>.parquet
+    results/identity/NAMED_TRACKS.md                    (brighton_manutd)
+    results/identity/NAMED_TRACKS_<match><tag>.md        (any other match)
 """
 from __future__ import annotations
 
@@ -28,9 +30,9 @@ from generator import anchor_wire as aw
 from generator import live_play
 from generator.team_anchor import estimate_player_box
 from generator.track_relink import OsnetEmbedder
+from tools.action_spot_probe import SOFASCORE_MATCH_ID
 
 MATCH_ID = "brighton_manutd"
-ORACLE = Path("outputs/oracle/sofascore/player_stats_12436888.parquet")
 SURVIVORS = Path("results/closeup_anchor_probe/spotcheck_step3/_survivors")
 VIDEO_ROOT = Path("matches")
 OUT_PARQUET = Path("outputs/identity/brighton_manutd_named_tracks.parquet")
@@ -39,24 +41,62 @@ NEAR_WINDOW_S = 2.0  # matches the probe's cut window
 MAX_CAND_CROPS = 25  # safety cap on candidate crops embedded per wide frame
 
 
-def _team_id(team_name: str) -> int | None:
-    """Oracle ``teamName`` -> positions-table team id (0 = Man Utd red anchor, 1 = Brighton)."""
-    n = team_name.lower()
-    if "man" in n or "united" in n:
-        return 0
-    if "brighton" in n:
-        return 1
-    return None
+def _oracle_path(match_id: str) -> Path:
+    """Sofascore player-stats parquet for a registered match (ids shared with action_spot_probe)."""
+    return Path(f"outputs/oracle/sofascore/player_stats_{SOFASCORE_MATCH_ID[match_id]}.parquet")
 
 
-def _video_for(chunk_key: str) -> Path:
+def _out_paths(match_id: str) -> tuple[Path, Path]:
+    """``(out_parquet, report)`` base paths for a match; brighton_manutd keeps its bare filenames."""
+    if match_id == "brighton_manutd":
+        return OUT_PARQUET, REPORT
+    return (Path(f"outputs/identity/{match_id}_named_tracks.parquet"),
+            Path(f"results/identity/NAMED_TRACKS_{match_id}.md"))
+
+
+def _team_id_resolver(match: registry.Match, oracle: pd.DataFrame):
+    """Build ``oracle teamName -> positions-table team id`` from the registry's ``match.teams``.
+
+    ``match.teams[i]`` (registry order) is matched to the oracle's actual ``teamName`` strings by
+    first-word substring overlap (e.g. registry ``"Man Utd"`` <-> oracle ``"Manchester United"``).
+    """
+    oracle_names = sorted(oracle["teamName"].dropna().unique())
+    id_by_name: dict[str, int] = {}
+    for tid, reg_name in enumerate(match.teams):
+        tok = reg_name.split()[0].lower()
+        for on in oracle_names:
+            if tok in on.lower() or on.split()[0].lower() in reg_name.lower():
+                id_by_name[on] = tid
+    missing = set(oracle_names) - set(id_by_name)
+    if missing:
+        print(f"WARN oracle team name(s) unresolved against registry teams {match.teams}: {missing}")
+
+    def _team_id(team_name: str) -> int | None:
+        return id_by_name.get(team_name)
+
+    return _team_id
+
+
+def _video_for(chunk_key: str, match_id: str = MATCH_ID) -> Path:
     half, num = chunk_key.split("_chunk_")
-    return VIDEO_ROOT / MATCH_ID / half / f"chunk_{num}.mp4"
+    return VIDEO_ROOT / match_id / half / f"chunk_{num}.mp4"
 
 
 def _ascii(s: str) -> str:
     """cp1252-safe rendering for console prints (accents -> nearest ASCII)."""
     return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode() or "?"
+
+
+def _embedder_label(model_name: str, weights: str | None) -> str:
+    """Report label naming the ACTUAL ReID embedder used (backbone + weights source).
+
+    ``OsnetEmbedder(weights=None)`` loads ImageNet-classification weights; any non-None ``weights`` (a
+    model-zoo key or checkpoint path) loads re-ID-objective weights. The label must reflect what was
+    passed so an AIN/MSMT run is never mislabelled as the ImageNet baseline.
+    """
+    if weights is None:
+        return f"ImageNet-classification OSNet (`{model_name}`)"
+    return f"re-ID-objective OSNet (`{model_name}`, weights=`{weights}`)"
 
 
 def load_anchors(survivors: Path = SURVIVORS) -> list[aw.Anchor]:
@@ -82,7 +122,8 @@ def wide_frames_by_chunk(df: pd.DataFrame) -> dict[str, np.ndarray]:
 
 
 def build_candidate_embeddings(
-    df: pd.DataFrame, need: dict[str, set[int]], embedder: OsnetEmbedder
+    df: pd.DataFrame, need: dict[str, set[int]], embedder: OsnetEmbedder,
+    match_id: str = MATCH_ID,
 ) -> dict[tuple[str, int], dict[int, tuple[np.ndarray, int]]]:
     """Embed every player/GK track crop on each needed wide frame (one video read per frame).
 
@@ -90,6 +131,7 @@ def build_candidate_embeddings(
         df: The match positions table.
         need: ``chunk -> {wide_frame indices needed}``.
         embedder: The OSNet appearance embedder.
+        match_id: Registry match id (selects the broadcast chunk video root).
 
     Returns:
         ``(chunk, wide_frame) -> {track_id: (embedding, team)}``.
@@ -99,7 +141,7 @@ def build_candidate_embeddings(
     for chunk, frames in need.items():
         if not frames:
             continue
-        video = _video_for(chunk)
+        video = _video_for(chunk, match_id)
         if not video.exists():
             print(f"WARN missing video {video}")
             continue
@@ -219,7 +261,8 @@ def _spearman(a: list[float], b: list[float]) -> float | None:
 
 
 def main(model_name: str = "osnet_x0_25", weights: str | None = None,
-         survivors: Path = SURVIVORS, tag: str | None = None) -> None:
+         survivors: Path = SURVIVORS, tag: str | None = None,
+         precision_pending: bool = False, match_id: str = MATCH_ID) -> None:
     """Attach -> guard -> name -> validate; write the named-tracks parquet and report.
 
     Args:
@@ -232,16 +275,22 @@ def main(model_name: str = "osnet_x0_25", weights: str | None = None,
             best-arm survivor dir for the lever re-measurement).
         tag: explicit output-path suffix, overriding the ``weights``-derived one (so a best-arm
             re-wire on the AIN embedder writes to its own artifacts).
+        precision_pending: when set, the report marks every read precision-UNVERIFIED (the Koshkina
+            PARSeq arm, whose confidence gate is toothless and whose spot-check is not yet in).
+        match_id: registry match id to wire (default ``brighton_manutd``, output paths and Sofascore
+            oracle id all resolve from this).
     """
     tag = tag if tag is not None else (f"_{weights}" if weights else "")
-    out_parquet = OUT_PARQUET.with_name(OUT_PARQUET.stem + tag + OUT_PARQUET.suffix)
-    report = REPORT.with_name(REPORT.stem + tag + REPORT.suffix)
-    match = registry.get(MATCH_ID)
+    base_out_parquet, base_report = _out_paths(match_id)
+    out_parquet = base_out_parquet.with_name(base_out_parquet.stem + tag + base_out_parquet.suffix)
+    report = base_report.with_name(base_report.stem + tag + base_report.suffix)
+    match = registry.get(match_id)
     df = match.load_aligned()
-    oracle = pd.read_parquet(ORACLE)
-    name_by, teams_by = aw.build_roster_maps(oracle, _team_id, number_col="shirtNumber")
+    oracle = pd.read_parquet(_oracle_path(match_id))
+    team_id = _team_id_resolver(match, oracle)
+    name_by, teams_by = aw.build_roster_maps(oracle, team_id, number_col="shirtNumber")
     # jerseyNumber cross-map (only to quantify the shirtNumber-vs-jerseyNumber discrepancy).
-    jersey_by, _ = aw.build_roster_maps(oracle, _team_id, number_col="jerseyNumber")
+    jersey_by, _ = aw.build_roster_maps(oracle, team_id, number_col="jerseyNumber")
 
     anchors = load_anchors(survivors)
     print(f"loaded {len(anchors)} survivor anchors")
@@ -263,15 +312,15 @@ def main(model_name: str = "osnet_x0_25", weights: str | None = None,
     embedder = OsnetEmbedder(model_name, weights=weights)
     print(f"OSNet ({model_name}, weights={weights}) on {embedder.device}")
     anchor_embs = embed_anchor_crops(anchors, embedder)
-    cand_cache = build_candidate_embeddings(df, need, embedder)
+    cand_cache = build_candidate_embeddings(df, need, embedder, match_id)
 
     attachments, reasons = attach_anchors(anchors, anchor_embs, cand_cache, wide_by_chunk,
                                           teams_by, win_by_chunk)
     print(f"attached {len(attachments)} / {len(anchors)} anchors; unattached: {dict(reasons)}")
 
-    # brighton_manutd carries NO relink remap (relink is benchmark-side only, 35% precision) -- every
-    # fragment stands alone, so the >=2-anchor merge clause is not exercised on real data here (it is
-    # covered by the synthetic test). Pass remap=None.
+    # No match in this registry carries a relink remap (relink is benchmark-side only, 35% merge
+    # precision) -- every fragment stands alone, so the >=2-anchor merge clause is not exercised on
+    # real data here (it is covered by the synthetic test). Pass remap=None.
     resolved, flags = aw.resolve_identities(attachments, remap=None)
     print(f"resolved {len(resolved)} named fragments; {len(flags)} disagreement flags")
 
@@ -294,18 +343,24 @@ def main(model_name: str = "osnet_x0_25", weights: str | None = None,
     print(f"wrote {len(named)} named-track rows -> {out_parquet}")
 
     _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolved, flags,
-                  named, name_by, jersey_by, unmatched_numbers, team_name, report)
+                  named, name_by, jersey_by, unmatched_numbers, team_name, report, team_id,
+                  precision_pending=precision_pending, model_name=model_name, weights=weights)
 
 
 def _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolved, flags, named,
-                  name_by, jersey_by, unmatched_numbers, team_name, report=REPORT) -> None:
-    """Write results/identity/NAMED_TRACKS.md: funnel, guard decisions, validation, caveats."""
+                  name_by, jersey_by, unmatched_numbers, team_name, report=REPORT,
+                  team_id=None, *,
+                  precision_pending: bool = False, model_name: str = "osnet_x0_25",
+                  weights: str | None = None) -> None:
+    """Write results/identity/NAMED_TRACKS<_match>.md: funnel, guard decisions, validation, caveats."""
+    if team_id is None:
+        team_id = _team_id_resolver(match, oracle)
     n_attached = len(attachments)
     # Validation table: per named player vs oracle.
     vis = visible_seconds_by_player(resolved, df, match)
     orc = oracle.copy()
     orc["_num"] = pd.to_numeric(orc["shirtNumber"], errors="coerce")
-    orc["_team"] = orc["teamName"].map(_team_id)
+    orc["_team"] = orc["teamName"].map(team_id)
     orc_by = {(int(t), int(n)): row for row, t, n in
               zip(orc.to_dict("records"), orc["_team"], orc["_num"])
               if pd.notna(t) and pd.notna(n)}
@@ -334,11 +389,22 @@ def _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolv
         if sn != jn and sn not in ("None", "nan") and jn not in ("None", "nan"):
             disc.append((aw._norm_name(getattr(row, "name")), jn, sn))
 
+    prec_phrase = ("precision PENDING -- see banner" if precision_pending
+                   else "98.6% verified read precision")
     lines: list[str] = []
-    lines.append("# Named tracks -- brighton_manutd (B2 Stage-2c: anchors wired to tracks)\n")
-    lines.append(f"Generated by `tools/wire_anchors.py` from the {len(anchors)} step-3 gated "
-                 "close-up anchors (98.6% verified read precision). ReID attachment uses ImageNet "
-                 "OSNet (`generator.track_relink.OsnetEmbedder`); margin gate "
+    lines.append(f"# Named tracks -- {match.id} (B2 Stage-2c: anchors wired to tracks)\n")
+    if precision_pending:
+        lines.append("> **PRECISION PENDING (Koshkina arm).** These reads come from the Koshkina "
+                     "PARSeq recognizer (`--reader koshkina` both2 arm), NOT the shipped easyocr "
+                     "reader. PARSeq emits ~1.0 confidence on nearly every crop, so the confidence "
+                     "gate is toothless here and the kit + OCR-agreement gates are the sole "
+                     "precision guard. Montage first-pass looks >=95%, but human spot-check "
+                     "verdicts on `montage_new_both2.png` are NOT YET in. Treat every number below "
+                     "as precision-UNVERIFIED.\n")
+    lines.append(f"Generated by `tools/wire_anchors.py` from the {len(anchors)} gated "
+                 f"close-up anchors ({prec_phrase}). ReID attachment uses "
+                 f"{_embedder_label(model_name, weights)} via "
+                 "`generator.track_relink.OsnetEmbedder`; margin gate "
                  f"`REID_MIN_MARGIN={aw.REID_MIN_MARGIN}`, `REID_MIN_SIM={aw.REID_MIN_SIM}` (frozen "
                  "by reasoning -- no annotated anchor->track map exists for this match).\n")
 
@@ -412,8 +478,10 @@ def _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolv
     lines.append("- **ReID is the bottleneck, not anchor precision.** OSNet is kit-dominated "
                  "(Stage-2a: median cosine 0.81 on same-team pairs; 35% merge precision), so the "
                  "margin gate rejects most same-kit disambiguations -- that is why attachment yield "
-                 f"({n_attached}) is far below the anchor count ({len(anchors)}). Anchor *reads* are "
-                 "~99% precise; carrying them onto the right *track* is the hard, unsolved half.\n")
+                 f"({n_attached}) is far below the anchor count ({len(anchors)}). Anchor *read* "
+                 + ("precision is PENDING human spot-check (Koshkina arm)" if precision_pending
+                    else "precision is ~99%")
+                 + "; carrying reads onto the right *track* is the hard, unsolved half.\n")
     lines.append("- **Season-scale extrapolation:** at ~5-6 hero-shot players/match, a 38-match "
                  "season yields close-up anchors concentrated on the same marquee names (Bruno, "
                  "Rashford, ...). Close-up anchors **supplement** roster/relink priors for those "
@@ -442,5 +510,10 @@ if __name__ == "__main__":
                     help="dir of gated anchor survivor crops to wire (default: step-3 226)")
     ap.add_argument("--tag", default=None,
                     help="explicit output suffix (overrides the weights-derived one)")
+    ap.add_argument("--precision-pending", action="store_true",
+                    help="mark all reads precision-UNVERIFIED (Koshkina PARSeq arm)")
+    ap.add_argument("--match", default=MATCH_ID, choices=sorted(SOFASCORE_MATCH_ID),
+                    help=f"registry match id to wire (default: {MATCH_ID})")
     a = ap.parse_args()
-    main(model_name=a.model_name, weights=a.weights, survivors=Path(a.survivors), tag=a.tag)
+    main(model_name=a.model_name, weights=a.weights, survivors=Path(a.survivors), tag=a.tag,
+         precision_pending=a.precision_pending, match_id=a.match)

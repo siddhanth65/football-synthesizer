@@ -326,20 +326,32 @@ class OsnetEmbedder:
             load_pretrained_weights(model, str(resolve_reid_weights(weights)))
         self.model = model.to(self.device).eval()
 
-    def embed(self, crops: list[np.ndarray]) -> np.ndarray:
-        """Embed a list of RGB uint8 crops -> ``(N, D)`` L2-normalised float32 features."""
+    def embed(self, crops: list[np.ndarray], batch_size: int = 128) -> np.ndarray:
+        """Embed a list of RGB uint8 crops -> ``(N, D)`` L2-normalised float32 features.
+
+        Processes ``crops`` in mini-batches of at most ``batch_size`` so callers can pass
+        arbitrarily large crop lists without risking a CUDA OOM (4 GB GPU budget).
+        """
         torch = self._torch
         if not crops:
             return np.zeros((0, 512), np.float32)
         import cv2  # noqa: PLC0415
 
-        batch = np.empty((len(crops), _OSNET_HW[0], _OSNET_HW[1], 3), np.float32)
-        for i, c in enumerate(crops):
-            r = cv2.resize(c, (_OSNET_HW[1], _OSNET_HW[0]), interpolation=cv2.INTER_LINEAR)
-            batch[i] = (r.astype(np.float32) / 255.0 - _IMAGENET_MEAN) / _IMAGENET_STD
-        t = torch.from_numpy(batch).permute(0, 3, 1, 2).to(self.device)
-        with torch.no_grad():
-            feats = self.model(t).float().cpu().numpy()
+        out = []
+        for start in range(0, len(crops), batch_size):
+            chunk = crops[start:start + batch_size]
+            batch = np.empty((len(chunk), _OSNET_HW[0], _OSNET_HW[1], 3), np.float32)
+            for i, c in enumerate(chunk):
+                r = cv2.resize(c, (_OSNET_HW[1], _OSNET_HW[0]), interpolation=cv2.INTER_LINEAR)
+                batch[i] = (r.astype(np.float32) / 255.0 - _IMAGENET_MEAN) / _IMAGENET_STD
+            t = torch.from_numpy(batch).permute(0, 3, 1, 2).to(self.device)
+            with torch.inference_mode():
+                feats = self.model(t).float().cpu().numpy()
+            del t
+            if self.device == "cuda":
+                torch.cuda.empty_cache()
+            out.append(feats)
+        feats = np.concatenate(out, axis=0)
         norms = np.linalg.norm(feats, axis=1, keepdims=True)
         return feats / np.clip(norms, 1e-8, None)
 

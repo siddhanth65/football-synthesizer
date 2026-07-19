@@ -53,6 +53,40 @@ CKPT = Path("outputs/jersey/jersey_torso_r224_acc417.pt")
 VIDEO_ROOT = Path("matches")
 ORACLE = Path("outputs/oracle/sofascore/player_stats_12436888.parquet")
 
+# --- Koshkina jersey-number-pipeline reader (alternative arm; --reader koshkina) ------------------
+# Machine-local paths to the reproduced pipeline (legibility ResNet34 + PARSeq sidecar). Kept here,
+# not in generator/jersey_id.py, so the library module stays free of env-specific paths.
+KOSHKINA_REPO = Path.home() / "jersey-number-pipeline"
+KOSHKINA_LEG_WEIGHTS = KOSHKINA_REPO / "models" / "legibility_resnet34_soccer_20240215.pth"
+KOSHKINA_SIDECAR_PY = Path.home() / "jersey-str-env" / "Scripts" / "python.exe"
+KOSHKINA_WORK = OUT_DIR / "koshkina" / "_work"
+
+
+def _make_recog_factory(reader: str, ckpt: Path):  # noqa: ANN202
+    """Zero-arg factory building the requested reader lazily (so resume never loads the GPU).
+
+    Args:
+        reader: ``"torso"`` (our ResNet18 checkpoint) or ``"koshkina"`` (the reproduced pipeline).
+        ckpt: Torso-reader checkpoint (ignored for the koshkina arm).
+
+    Returns:
+        A callable returning a reader that satisfies the ``crop_probs`` contract.
+    """
+    if reader == "koshkina":
+        from generator.jersey_id import KoshkinaRecognizer  # noqa: PLC0415
+
+        parseq_ckpt = next(KOSHKINA_REPO.glob("models/parseq_epoch=24-*.ckpt"))
+        sidecar = Path(__file__).with_name("koshkina_str_sidecar.py")
+        return lambda: KoshkinaRecognizer(
+            legibility_weights=KOSHKINA_LEG_WEIGHTS,
+            sidecar_python=KOSHKINA_SIDECAR_PY,
+            sidecar_script=sidecar,
+            parseq_ckpt=parseq_ckpt,
+            parseq_repo=KOSHKINA_REPO,
+            work_dir=KOSHKINA_WORK,
+        )
+    return lambda: JerseyRecognizer.from_checkpoint(ckpt)
+
 # --- Step-4 lever constants (FROZEN before the yield run) -----------------------------------------
 # LEVER 1 (roster-constrained decoding): mask the 100-way softmax to {both squads' shirtNumbers} u
 # {illegible} before confidence/voting (:func:`generator.jersey_id.roster_mask`). Same 0.70 anchor
@@ -95,6 +129,26 @@ def _video_for(match_id: str, chunk_key: str) -> Path:
     """``h1_chunk_000`` -> ``matches/<id>/h1/chunk_000.mp4``."""
     half, num = chunk_key.split("_chunk_")
     return VIDEO_ROOT / match_id / half / f"chunk_{num}.mp4"
+
+
+def _safe_rmtree(path: Path, *, tries: int = 5, delay: float = 0.4) -> None:
+    """Remove a scratch tree, tolerating Windows' transient WinError 145 handle-release race.
+
+    The per-chunk scratch dir is only ever written with explicit crop filenames (never globbed for
+    reads), so a slow-to-release handle must not abort the whole match. Retries a few times, then
+    falls back to a best-effort delete.
+    """
+    import time  # noqa: PLC0415
+
+    if not path.exists():
+        return
+    for _ in range(tries):
+        try:
+            shutil.rmtree(path)
+            return
+        except OSError:
+            time.sleep(delay)
+    shutil.rmtree(path, ignore_errors=True)
 
 
 def classify_chunk(df_chunk: pd.DataFrame) -> pd.DataFrame:
@@ -551,8 +605,7 @@ def run_full(match_id: str, threshold: float, ckpt: Path = CKPT, *, consensus: b
                                       cls.index[cls["shot_type"] == live_play.SHOT_LIVE_WIDE]))
         teams_by_frame = team_sets_by_frame(dfc)
         tmp = OUT_DIR / "_tmp_full"
-        if tmp.exists():
-            shutil.rmtree(tmp)
+        _safe_rmtree(tmp)
         recs = detect_and_read(match_id, chunk_key, close_frames, yolo, recog, tmp,
                                keep_probs=consensus)
         n_persons = sum(r.get("_n_persons", 0) for r in recs)
@@ -903,7 +956,8 @@ LEVER_ARMS = ("roster", "agree2", "agree3", "both2", "both3")
 
 
 def run_levers(match_id: str, threshold: float = 0.70, floor: float = AGREE_FLOOR,
-               ckpt: Path = CKPT) -> None:
+               ckpt: Path = CKPT, *, recog_factory=None, out_root: Path = OUT_DIR,
+               oracle_path: Path = ORACLE) -> None:  # noqa: ANN001
     """Step-4: one detect+read pass measuring the roster + N-agreement levers as 4 arms.
 
     Every close-up crop is read twice (raw and roster-masked); each candidate (conf ``>= floor`` in
@@ -920,11 +974,19 @@ def run_levers(match_id: str, threshold: float = 0.70, floor: float = AGREE_FLOO
         threshold: baseline/roster per-crop confidence bar (unchanged 0.70).
         floor: agreement-run per-crop confidence floor (0.50).
         ckpt: recognizer checkpoint (torso baseline).
+        recog_factory: zero-arg reader factory (default: torso checkpoint). The koshkina arm passes
+            a factory so the exact same gates/levers isolate the reader swap.
+        out_root: root for the ``levers/`` artifacts (koshkina writes under ``koshkina/`` so the
+            baseline CSVs/levers are never clobbered).
+        oracle_path: Sofascore player-stats parquet for ``match_id``'s roster (both squads'
+            ``shirtNumber``); defaults to brighton_manutd's cached fixture.
     """
+    if recog_factory is None:
+        recog_factory = lambda: JerseyRecognizer.from_checkpoint(ckpt)  # noqa: E731
     match = registry.get(match_id)
     df = match.load_aligned()
     fps = {ck: match.chunk_fps(ck) for ck in df["chunk"].unique()}
-    valid = _roster_valid_numbers()
+    valid = _roster_valid_numbers(oracle_path)
     mask = roster_mask(valid)
     print(f"roster valid numbers ({len(valid)}): {valid}")
 
@@ -933,7 +995,7 @@ def run_levers(match_id: str, threshold: float = 0.70, floor: float = AGREE_FLOO
     reader = _ocr_reader()
 
     all_arms = ("baseline", *LEVER_ARMS)
-    lev_dir = OUT_DIR / "levers"
+    lev_dir = out_root / "levers"
     chunks_dir = lev_dir / "_chunks"
     # Resume iff at least one per-chunk checkpoint exists; a fresh run wipes any partial (older,
     # non-resumable) output so survivor/new dirs are never double-counted across runs.
@@ -972,15 +1034,14 @@ def run_levers(match_id: str, threshold: float = 0.70, floor: float = AGREE_FLOO
             continue
         if yolo is None:
             yolo = _load_yolo()
-            recog = JerseyRecognizer.from_checkpoint(ckpt)
+            recog = recog_factory()
         cls = classify_chunk(dfc)
         close_frames = sorted(int(f) for f in cls.index[cls["shot_type"] == live_play.SHOT_CLOSE_UP])
         wide = np.array(sorted(int(f) for f in
                                cls.index[cls["shot_type"] == live_play.SHOT_LIVE_WIDE]))
         win = int(round(NEAR_WINDOW_S * fps[chunk_key]))
         tmp = OUT_DIR / "_tmp_lev"
-        if tmp.exists():
-            shutil.rmtree(tmp)
+        _safe_rmtree(tmp)
         recs = detect_and_read(match_id, chunk_key, close_frames, yolo, recog, tmp, mask=mask)
         crops = [r for r in recs if "pred" in r]
 
@@ -1128,14 +1189,31 @@ def main() -> None:
                     help="harvest_neg: max negatives kept per chunk")
     ap.add_argument("--floor", type=float, default=AGREE_FLOOR,
                     help="levers: per-crop confidence floor for an agreement-run member")
+    ap.add_argument("--reader", choices=["torso", "koshkina"], default="torso",
+                    help="levers: recognizer arm -- torso ResNet18 baseline or Koshkina pipeline")
+    ap.add_argument("--oracle", default=str(ORACLE),
+                    help="levers: Sofascore player-stats parquet for the roster mask (both squads' "
+                         "shirtNumber); defaults to brighton_manutd's cached fixture")
+    ap.add_argument("--out-root", default=None,
+                    help="levers: override the levers/ artifacts + resume checkpoint root (default: "
+                         "results/closeup_anchor_probe, or its koshkina/ subdir for --reader "
+                         "koshkina) -- set per match to avoid clobbering another match's run")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
+    if args.reader == "koshkina" and args.mode != "levers":
+        ap.error("--reader koshkina is only wired for --mode levers (the baseline comparison path)")
     if args.mode == "spotcheck":
         run_spotcheck(args.match, args.chunk, args.n, args.seed, Path(args.ckpt))
     elif args.mode == "harvest_neg":
         harvest_negatives(args.match, Path(args.neg_out), args.neg_cap, args.seed)
     elif args.mode == "levers":
-        run_levers(args.match, args.threshold, args.floor, Path(args.ckpt))
+        if args.out_root is not None:
+            out_root = Path(args.out_root)
+        else:
+            out_root = OUT_DIR / "koshkina" if args.reader == "koshkina" else OUT_DIR
+        run_levers(args.match, args.threshold, args.floor, Path(args.ckpt),
+                   recog_factory=_make_recog_factory(args.reader, Path(args.ckpt)),
+                   out_root=out_root, oracle_path=Path(args.oracle))
     else:
         run_full(args.match, args.threshold, Path(args.ckpt), consensus=args.consensus,
                  kit_gate=args.kit_gate, ocr_gate=args.ocr_gate)

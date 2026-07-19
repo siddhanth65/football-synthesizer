@@ -131,6 +131,37 @@ def roster_mask(valid_numbers: Iterable[int]) -> np.ndarray:
     return m
 
 
+def parseq_positions_to_probs(p0: Sequence[float], p1: Sequence[float]) -> np.ndarray:
+    """Fold PARSeq's two positional softmaxes into a :data:`NUM_CLASSES` jersey distribution (pure).
+
+    The Koshkina STR head decodes a jersey number left-to-right; :mod:`tools.koshkina_str_sidecar`
+    emits, per torso crop, the softmax over tokens ``[E, 0, 1, ..., 9]`` at string positions 0 and 1
+    (token index ``0`` = end/empty, ``1..10`` = digit ``0..9``). This maps those two 11-vectors onto
+    the same ``[NUM_CLASSES]`` layout the ResNet reader uses (index ``0`` = illegible, ``n`` = number
+    ``n``), so the identical downstream :func:`decide` / :func:`roster_mask` / vote path applies to
+    both readers:
+
+    * empty read (``pos0 = E``) or a leading zero (``pos0 = '0'``) -> illegible mass at index ``0``;
+    * ``pos0 = d0`` (``1..9``), ``pos1 = E`` -> single-digit number ``d0``;
+    * ``pos0 = d0`` (``1..9``), ``pos1 = d1`` (``0..9``) -> two-digit number ``d0 * 10 + d1``.
+
+    Args:
+        p0: Length-11 softmax over ``[E, 0..9]`` at string position 0.
+        p1: Length-11 softmax over ``[E, 0..9]`` at string position 1.
+
+    Returns:
+        A ``[NUM_CLASSES]`` float32 distribution that sums to 1 (up to float error).
+    """
+    a0 = np.asarray(p0, dtype=np.float64)
+    a1 = np.asarray(p1, dtype=np.float64)
+    out = np.zeros(NUM_CLASSES, dtype=np.float64)
+    out[ILLEGIBLE] = a0[0] + a0[1]  # empty read, or leading-zero -> not a 1..99 number
+    d0 = a0[2:11]  # P(pos0 = digit 1..9); token index d+1 holds digit d
+    out[1:10] += d0 * a1[0]  # single-digit numbers 1..9 (pos1 = E)
+    out[10:100] += np.outer(d0, a1[1:11]).reshape(-1)  # two-digit numbers 10..99 in order
+    return out.astype(np.float32)
+
+
 def load_gt(path: str | Path) -> dict[str, int]:
     """Load a ``*_gt.json`` mapping ``{tracklet_id: jersey_label}`` (labels ``-1`` or ``1..99``)."""
     return {str(k): int(v) for k, v in json.loads(Path(path).read_text(encoding="utf-8")).items()}
@@ -401,3 +432,271 @@ class JerseyRecognizer:
         else:
             paths = crops
         return aggregate_votes(self.crop_probs(paths, batch_size), min_conf=self.min_conf)
+
+
+# Torso-crop pose gate (mirrors jersey-number-pipeline helpers.get_points / generate_crops): the
+# jersey number sits between the shoulders (COCO idx 5,6) and hips (idx 11,12). torchvision
+# KeypointRCNN sets keypoints[..., 2] = 1.0 for every predicted joint, so this 0.4 confidence gate is
+# a no-op in practice (matching the reproduced 86.13% chain) -- it only rejects a crop with < 12
+# keypoints (i.e. no person detected).
+_POSE_CONF = 0.4
+_TORSO_JOINTS = (6, 5, 11, 12)  # right/left shoulder, left/right hip
+_TORSO_PAD = 5
+
+
+def torso_from_keypoints(img_bgr: np.ndarray, kp: list | None) -> np.ndarray | None:
+    """Crop the shoulder-to-hip torso band from ``img_bgr`` using COCO-17 keypoints (pure).
+
+    Args:
+        img_bgr: The full person crop (BGR) the keypoints were estimated on.
+        kp: ``[17, 3]`` ``(x, y, score)`` keypoints, or ``None`` when no person was detected.
+
+    Returns:
+        The torso sub-image (BGR), or ``None`` if the keypoints are missing/unreliable or the box is
+        degenerate.
+    """
+    if kp is None or len(kp) < 12:
+        return None
+    pts = []
+    for j in _TORSO_JOINTS:
+        if kp[j][2] < _POSE_CONF:
+            return None
+        pts.append(kp[j][:2])
+    h, w = img_bgr.shape[:2]
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    x1 = int(max(0.0, min(xs) - _TORSO_PAD))
+    y1 = int(max(0.0, min(ys) - _TORSO_PAD))
+    x2 = int(min(float(w - 1), max(xs) + _TORSO_PAD))
+    y2 = int(min(float(h - 1), max(ys)))  # helpers.generate_crops does not pad the bottom
+    if x2 <= x1 or y2 <= y1:
+        return None
+    return img_bgr[y1:y2, x1:x2]
+
+
+class _Legibility34(nn.Module):
+    """ResNet34 binary legibility classifier, weight-compatible with the pipeline's checkpoint.
+
+    Mirrors ``jersey-number-pipeline networks.LegibilityClassifier34`` (submodule named ``model_ft``
+    so the published state dict loads unchanged); ``forward`` returns the sigmoid legibility score.
+    """
+
+    def __init__(self) -> None:
+        """Build a ResNet34 trunk with a single-logit head (no pretrained download)."""
+        super().__init__()
+        from torchvision.models import resnet34  # noqa: PLC0415
+
+        self.model_ft = resnet34(weights=None)
+        self.model_ft.fc = nn.Linear(self.model_ft.fc.in_features, 1)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Return the sigmoid legibility score for a crop batch."""
+        return torch.sigmoid(self.model_ft(x))
+
+
+class KoshkinaRecognizer:
+    """Koshkina & Elder recognizer chain wrapped in the :class:`JerseyRecognizer` reader contract.
+
+    Drop-in for :class:`JerseyRecognizer`: :meth:`crop_probs` maps a list of person-crop paths to
+    ``[n, NUM_CLASSES]`` softmax rows aligned 1:1 with the input, so the close-up anchor funnel
+    (kit gate, roster mask, N-agreement) swaps readers by a single flag. Internally, per crop:
+
+    1. ResNet34 legibility gate (main env, GPU) -- crops scoring ``<= leg_thresh`` read illegible.
+    2. torchvision KeypointRCNN pose (main env, GPU) + :func:`torso_from_keypoints` -> torso RoI.
+    3. SoccerNet-fine-tuned PARSeq in the py3.11 sidecar (subprocess JSON handoff, resumable) ->
+       positional softmaxes, folded to the ``[NUM_CLASSES]`` layout by
+       :func:`parseq_positions_to_probs`.
+
+    The main env never imports strhub; PARSeq runs only in the sidecar interpreter. The work dir is
+    wiped on construction (the caller's per-chunk checkpoint provides resume; a redone chunk gets
+    fresh torso crops), matching the pipeline's resumable-by-disk-state pattern.
+    """
+
+    def __init__(
+        self,
+        *,
+        legibility_weights: str | Path,
+        sidecar_python: str | Path,
+        sidecar_script: str | Path,
+        parseq_ckpt: str | Path,
+        parseq_repo: str | Path,
+        work_dir: str | Path,
+        device: str | None = None,
+        min_conf: float = 0.30,
+        leg_thresh: float = 0.5,
+        leg_batch: int = 128,
+        pose_batch: int = 8,
+    ) -> None:
+        """Load the legibility + pose models and prepare the (wiped) sidecar work dir.
+
+        Args:
+            legibility_weights: Path to ``legibility_resnet34_soccer_*.pth``.
+            sidecar_python: Path to the py3.11 sidecar interpreter (``jersey-str-env``).
+            sidecar_script: Path to :mod:`tools.koshkina_str_sidecar`.
+            parseq_ckpt: Path to the SoccerNet-fine-tuned PARSeq checkpoint.
+            parseq_repo: ``jersey-number-pipeline`` root (holds ``str/parseq`` for strhub).
+            work_dir: Scratch dir for torso crops + the sidecar's positional-softmax JSON (wiped).
+            device: ``"cuda"``/``"cpu"`` (auto-detected when ``None``).
+            min_conf: Interface-parity threshold for :meth:`predict_tracklet` (unused by the funnel).
+            leg_thresh: Legibility sigmoid floor; ``<=`` reads illegible.
+            leg_batch: Legibility forward-pass batch size.
+            pose_batch: KeypointRCNN batch size (small for the 4 GB GPU alongside YOLO).
+        """
+        import shutil  # noqa: PLC0415
+        import time  # noqa: PLC0415
+
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.min_conf = min_conf
+        self.leg_thresh = leg_thresh
+        self.leg_batch = leg_batch
+        self.pose_batch = pose_batch
+        # The sidecar runs with cwd=parseq_repo, so every path handed to it must be absolute.
+        self.sidecar_python = Path(sidecar_python).resolve()
+        self.sidecar_script = Path(sidecar_script).resolve()
+        self.parseq_ckpt = Path(parseq_ckpt).resolve()
+        self.parseq_repo = Path(parseq_repo).resolve()
+        self.work_dir = Path(work_dir).resolve()
+        # Fresh torso crops per run: torso names (c{call}_{i}) restart at call 0, so a stale crop of
+        # the same name would be re-used by the resumable sidecar -> the wipe must fully succeed.
+        # Retry past Windows' transient WinError 145 before giving up.
+        for _ in range(5):
+            if not self.work_dir.exists():
+                break
+            try:
+                shutil.rmtree(self.work_dir)
+            except OSError:
+                time.sleep(0.4)
+        self.torso_dir = self.work_dir / "torso"
+        self.torso_dir.mkdir(parents=True, exist_ok=True)
+        self.parseq_json = self.work_dir / "parseq_positions.json"
+        self._call = 0
+
+        self._leg_tf = transforms.Compose([
+            transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+            transforms.Normalize(_MEAN, _STD),
+        ])
+        self._leg = _Legibility34().to(self.device).eval()
+        sd = torch.load(Path(legibility_weights), map_location=self.device)
+        if hasattr(sd, "_metadata"):
+            del sd._metadata
+        self._leg.load_state_dict(sd)
+        self._pose, self._pose_tf = self._build_pose()
+
+    def _build_pose(self):  # noqa: ANN202
+        """KeypointRCNN pose model + its input transform (top-down COCO-17, shrunk input pyramid)."""
+        from torchvision.models.detection import (  # noqa: PLC0415
+            KeypointRCNN_ResNet50_FPN_Weights,
+            keypointrcnn_resnet50_fpn,
+        )
+
+        weights = KeypointRCNN_ResNet50_FPN_Weights.DEFAULT
+        model = keypointrcnn_resnet50_fpn(weights=weights, box_score_thresh=0.5)
+        model.transform.min_size = (256,)  # crops are tiny; do not up-sample to 800 px
+        model.transform.max_size = 480
+        return model.to(self.device).eval(), weights.transforms()
+
+    @torch.no_grad()
+    def _legible_indices(self, paths: Sequence[str | Path]) -> list[int]:
+        """Return the input indices whose crop passes the ResNet34 legibility gate."""
+        tensors: list[torch.Tensor] = []
+        idxs: list[int] = []
+        for i, p in enumerate(paths):
+            try:
+                tensors.append(self._leg_tf(Image.open(p).convert("RGB")))
+                idxs.append(i)
+            except (OSError, ValueError):
+                continue
+        legible: list[int] = []
+        use_amp = self.device == "cuda"
+        for s in range(0, len(tensors), self.leg_batch):
+            xb = torch.stack(tensors[s : s + self.leg_batch]).to(self.device)
+            with torch.amp.autocast(self.device, enabled=use_amp):
+                scores = self._leg(xb).float().squeeze(1).cpu().numpy()
+            for j, sc in enumerate(scores):
+                if sc > self.leg_thresh:
+                    legible.append(idxs[s + j])
+        return legible
+
+    @torch.no_grad()
+    def _write_torso_crops(
+        self, legible_idx: list[int], paths: Sequence[str | Path]
+    ) -> dict[str, int]:
+        """Pose + torso-crop the legible crops; return ``{torso_filename: input_index}``."""
+        import cv2  # noqa: PLC0415
+
+        torso_map: dict[str, int] = {}
+        batch: list[torch.Tensor] = []
+        bmeta: list[tuple[int, np.ndarray]] = []
+
+        def flush() -> None:
+            if not batch:
+                return
+            outs = self._pose([self._pose_tf(b.to(self.device)) for b in batch])
+            for (i, bgr), out in zip(bmeta, outs):
+                kp = out["keypoints"][0].cpu().numpy().tolist() if len(out["boxes"]) else None
+                torso = torso_from_keypoints(bgr, kp)
+                if torso is not None and torso.size:
+                    name = f"c{self._call:04d}_{i:06d}.jpg"
+                    cv2.imwrite(str(self.torso_dir / name), torso)
+                    torso_map[name] = i
+            batch.clear()
+            bmeta.clear()
+
+        for i in legible_idx:
+            bgr = cv2.imread(str(paths[i]))
+            if bgr is None:
+                continue
+            rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+            batch.append(torch.from_numpy(rgb).permute(2, 0, 1))  # uint8 CHW
+            bmeta.append((i, bgr))
+            if len(batch) >= self.pose_batch:
+                flush()
+        flush()
+        return torso_map
+
+    def _run_sidecar(self) -> None:
+        """Invoke the py3.11 PARSeq sidecar over the torso dir (resumable JSON, raises on failure)."""
+        import subprocess  # noqa: PLC0415
+
+        subprocess.run(
+            [
+                str(self.sidecar_python), str(self.sidecar_script),
+                "--crops-dir", str(self.torso_dir),
+                "--out-json", str(self.parseq_json),
+                "--ckpt", str(self.parseq_ckpt),
+                "--parseq-repo", str(self.parseq_repo),
+            ],
+            check=True,
+            cwd=str(self.parseq_repo),
+        )
+
+    def crop_probs(self, paths: Sequence[str | Path], batch_size: int = 256) -> np.ndarray:
+        """Softmax rows for each crop via the Koshkina chain (illegible one-hot when no read).
+
+        Args:
+            paths: Person-crop image paths (one close-up shot's crops). Aligned 1:1 with the output.
+            batch_size: Unused (batches are set at construction); kept for reader-interface parity.
+
+        Returns:
+            ``[len(paths), NUM_CLASSES]`` softmax rows. A crop that fails legibility, has no pose, or
+            gets no PARSeq read reads illegible (mass on :data:`ILLEGIBLE`).
+        """
+        n = len(paths)
+        out = np.zeros((n, NUM_CLASSES), dtype=np.float32)
+        out[:, ILLEGIBLE] = 1.0
+        if n == 0:
+            return out
+        legible_idx = self._legible_indices(paths)
+        torso_map = self._write_torso_crops(legible_idx, paths)
+        self._call += 1
+        if self.device == "cuda":
+            torch.cuda.empty_cache()
+        if torso_map:
+            self._run_sidecar()
+            positions = json.loads(self.parseq_json.read_text(encoding="utf-8"))
+            for name, i in torso_map.items():
+                entry = positions.get(name)
+                if entry is not None:
+                    out[i] = parseq_positions_to_probs(entry["p0"], entry["p1"])
+        return out
