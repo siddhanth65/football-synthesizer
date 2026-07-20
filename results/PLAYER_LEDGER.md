@@ -31,6 +31,15 @@ Filtered PASS events: 981 | team-attributed: 355 | abstained (no on-ball carrier
 
 Filtered PASS events: 945 | team-attributed: 310 | abstained (no on-ball carrier): 635 (67.2%)
 
+### manutd_tottenham -- team gate
+
+| team | side | h1 attr/truth | h2 attr/truth | match attr/truth | ratio |
+|------|------|---------------|---------------|------------------|-------|
+| Man Utd | home | 54/195 | 66/200 | 120/395 | 0.304 |
+| Tottenham | away | 104/331 | 114/305 | 218/636 | 0.343 |
+
+Filtered PASS events: 1079 | team-attributed: 338 | abstained (no on-ball carrier): 741 (68.7%)
+
 ## Player attribution (identity matches)
 
 ### brighton_manutd -- named-player passes vs oracle
@@ -64,10 +73,35 @@ Team-attributed passes: 355 | with a named player: 20 (coverage 5.6%) | Spearman
 | Kobbie Mainoo | 1 | 41 |
 | Ryan Gravenberch | 1 | 44 |
 
+### manutd_tottenham -- named-player passes vs oracle
+
+Team-attributed passes: 338 | with a named player: 42 (coverage 12.4%) | Spearman(attr, totalPass) = 0.236 over 18 named players (N too small to be conclusive; counts are a floor)
+
+| player | attr pass | oracle totalPass |
+|--------|-----------|------------------|
+| Dejan Kulusevski | 5 | 38 |
+| Micky van de Ven | 4 | 91 |
+| Timo Werner | 4 | 31 |
+| James Maddison | 4 | 53 |
+| Manuel Ugarte | 4 | 25 |
+| Rodrigo Bentancur | 4 | 82 |
+| Amad Diallo | 2 | 12 |
+| Alejandro Garnacho | 2 | 29 |
+| Diogo Dalot | 2 | 47 |
+| Brennan Johnson | 2 | 28 |
+| Destiny Udogie | 2 | 21 |
+| Dominic Solanke | 1 | 17 |
+| Bruno Fernandes | 1 | 23 |
+| Cristian Romero | 1 | 119 |
+| Fraser Forster | 1 | - |
+| Mason Mount | 1 | 9 |
+| Pedro Porro | 1 | 59 |
+| Noussair Mazraoui | 1 | 47 |
+
 ## Honest limits
 
 - Coverage ceiling is tracking, not the method: ~35-42% of filtered passes get an on-ball carrier within 3 m; the rest abstain because no tracked player is on the ball at the kick (broadcast detects players in a minority of frames -- the industry regime, cf. the plan doc). Where a carrier IS found the fit is tight (median ~1.3 m).
-- The per-team split holds for manutd_liverpool (attr 181:174 vs truth 507:464) and manutd_fulham (166:144 vs 482:384), but INVERTS for brighton_manutd (attr over-weights Brighton 223 vs Man Utd 191, while truth has Man Utd ahead 511:477) -- a real ceiling of the nearest-carrier heuristic on this match, not smoothed over.
+- The per-team split holds for manutd_liverpool (attr 181:174 vs truth 507:464), manutd_fulham (166:144 vs 482:384), and manutd_tottenham (attr Man Utd 120 : Tottenham 218 vs truth 395:636 -- the 0-3 possession loser stays behind by a clear margin), but INVERTS for brighton_manutd (attr over-weights Brighton 223 vs Man Utd 191, while truth has Man Utd ahead 511:477). Three holds vs one invert: the nearest-carrier split preserves the possession winner when the true gap is large (tottenham 395:636), but is marginal-to-unreliable when the two teams' attempted passes are near-level -- brighton's truth (511:477, ~7%) is exactly where noise flips the direction. A real ceiling, not smoothed over.
 - Team attribution rests on the nearest-player-to-ball heuristic, not a possession model; a loose ball between two players attributes to whoever is closest. The gate ratio is the check that this holds in aggregate.
 - Player coverage is bounded by named-fragment coverage (sparse): only passes whose carrier is a named track within the radius get a player, so counts are a floor, not a total.
 - `manutd_fulham` has no identity artifacts -> team-level only.

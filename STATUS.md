@@ -10,11 +10,41 @@ manutd_tottenham identity chain (main-session GPU, resumable, monitored): **4,64
 each). Utd: Bruno, Rashford, Garnacho, Casemiro, Martinez, Dalot, Mount(sub), Eriksen(sub), Ugarte,
 Mazraoui, Hojlund(sub), Amad(sub). Spurs: Maddison, Kulusevski, Bentancur, Porro, Udogie, Solanke,
 Johnson, van de Ven, Romero, Werner, Bergvall(sub). Confidence 0.53-1.00, sub windows enforced.
-Precision PENDING Sid montage verdict (labeled montage delivered). Artifacts
+**PRECISION VERDICT (Sid, 2026-07-20): 40/40 tiles correct** — all 3 identity matches now
+sample-verified (brighton 39/40, liverpool 40/40, tottenham 40/40). Artifacts
 outputs/identity/manutd_tottenham_{named_tracks_koshkina,lineup_assign}.parquet +
 results/identity/{NAMED_TRACKS,LINEUP_ASSIGN}_manutd_tottenham*.md. **All 3 heavy losses now have
 named players** — the honestly-scoped case-study trilogy (press-collapse = Liverpool-specific per
-the n=6 retraction) can be built. southampton team-collapse fix + tottenham B-3 ledger pending.
+the n=6 retraction) can be built. Southampton team-collapse fix DONE (0.004->0.909, committed
+1b332d8). **Tottenham B-3 ledger DONE: team-split HOLDS (3rd hold -- liverpool+fulham+tottenham;
+only brighton inverts).** Discriminator characterized: the TRUE possession gap. Tottenham's lopsided
+395:636 survives the nearest-carrier heuristic; brighton's near-level 511:477 (~7%) is where
+attribution noise flips the leader -- **team-split reliable when one side dominates, marginal when
+even** (a stated boundary, not an unexplained failure). Player attribution 12.4% coverage (best of
+3; counts 1-5, Spearman 0.236, floor; a mis-attributed backup GK surfaced honestly). Southampton facts/reports DONE.
+**Southampton (0-3 WIN) gate ABSTAINS** (not comparative): better-tracked side but had less ball +
+finished a man down -> asymmetric capture, symmetry spread 0.103 > 0.05 -> ball families withheld,
+position-only renders; real dominance lives in oracle appendix (gate discipline working). -1 rows
+(14.3%) verified handled as non-team everywhere (like referees), no pollution. **Win structural
+signature: lead-early / control / press-while-ahead** (led from 35', extended pre-HT, counter-press
+ROSE when ahead 0.39->0.50) -- structural mirror of the Liverpool press-collapse loss -> real
+win-shape vs loss-shape contrast survives the retraction. Fixed render_scouting_v2 focus bug
+(hardcoded teams[0] mislabeled palace/southampton where Man Utd isn't listed first; brighton/
+liverpool/fulham unaffected). CAPSTONE DONE (true n=6):
+**Style identity essentially GONE at n=6** — intra-ManU vs cross gap decayed monotonically 2.0(n=3)
+-> 0.74(n=5) -> **0.09(n=6)**; Southampton's outlier deep away-win shape collapsed it. Honest
+verdict: a single-team fingerprint from 6 broadcast matches is dominated by opponent/game-state/
+territory, NOT durable identity. **Win-vs-loss (2W/3L/1D at level state): PRESS does NOT separate**
+(Fulham-W 0.718 ~ Brighton-L 0.719; Soton-W 0.394 < Liverpool-L 0.455) — the press story is noise.
+**The one separator: defensive BLOCK HEIGHT** — both wins defended deepest (32.9/38.0 m) below all
+3 losses (40.6-49.9), but the DRAW sits in the win band -> read as a "did-not-LOSE" deep-control
+shape, not a win shape; n=2 wins, partly inside +11 m broadcast inflation. Direction not law.
+**3-loss framing: "three different ways Man Utd lost"** — Liverpool (flat press from kickoff, the
+retracted claim), Tottenham (conceded ~3', unevaluable), Brighton (pressed NORMALLY + most
+territorial side of the corpus, still lost to a 90+' winner = the direct counter-example). Files:
+results/{style_fingerprint_v3,SCORE_STATE_v3,WINS_VS_LOSSES}.md + CASE_STUDY rebuilt. (NB: the
+southampton exclusion was a hardcoded list, not balance-gated — fixed.) Pending: render palace/
+tottenham reports (fixed renderer) -> final commit+push.
 
 ## 2026-07-20 — n=6 SCOPING: the case-study headline does NOT generalize; southampton anchor collapsed
 

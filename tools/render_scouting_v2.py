@@ -43,8 +43,12 @@ OUT_DIR = Path("results/reports")
 E2E_DIR = Path("results/action_spotting_probe")
 LINEUP_DIR = Path("outputs/identity")
 
-SHORT = {"manutd_liverpool": "Liverpool", "brighton_manutd": "Brighton", "manutd_fulham": "Fulham"}
-RESULT = {"manutd_liverpool": "0-3 loss", "brighton_manutd": "1-2 loss", "manutd_fulham": "1-0 win"}
+SHORT = {"manutd_liverpool": "Liverpool", "brighton_manutd": "Brighton", "manutd_fulham": "Fulham",
+         "southampton_manutd": "Southampton", "palace_manutd": "Palace",
+         "manutd_tottenham": "Tottenham"}
+RESULT = {"manutd_liverpool": "0-3 loss", "brighton_manutd": "1-2 loss", "manutd_fulham": "1-0 win",
+          "southampton_manutd": "3-0 win", "palace_manutd": "0-0 draw",
+          "manutd_tottenham": "0-3 loss"}
 STATE_ORDER = {"level": 0, "chasing": 1, "leading": 2}
 
 # Validated event-layer summary per match (from results/action_spotting_probe/* + STATUS 2026-07-19).
@@ -56,6 +60,18 @@ EVENTS_VALIDATED = {
     "manutd_fulham": "Goal 1/1 with exact half (87' winner). Fouls 21 vs 22, yellows 4 vs 5, "
     "corners 13 vs 15, offsides 2 vs 4. Shots 35 vs 24 OVER-FIRED in H2 (one flagged "
     "broadcast segment explains it - a single audit item, not a claim).",
+    "southampton_manutd": "Goals 3/3 with exact halves (2 H1 / 1 H2, all Man Utd). Corners 7/7 "
+    "EXACT. Shots 27 vs 26, fouls 29 vs 25, yellows 3 vs 5. The one red card (Southampton) was NOT "
+    "detected - a measured zero-shot miss, aggregate events only.",
+    "palace_manutd": "Goals 0/0 - negative control passed (no false-positive goal spots on a "
+    "scoreless match). Yellows 3 vs oracle total 5, red 0/0. Corners 14 vs oracle total 15, fouls "
+    "22 vs 19, shots 22 vs 24, offsides 0 vs 1. Team-level aggregate only (E2E-Spot does not split "
+    "by team); no identity chain run on this match.",
+    "manutd_tottenham": "Goals: 3 true positives with exact halves (1 H1 / 2 H2, all Tottenham) "
+    "plus one flagged replay-window false positive (H2, score 0.338, the known FP - dropped, see "
+    "fingerprint.score_state.GOALS). Yellows 8/8 and corners 8/8 EXACT. Red 0/1 (Man Utd's red card "
+    "not detected - a measured zero-shot miss). Shots 34 vs oracle total 35, fouls 32 vs 30, "
+    "offsides 2 vs 3.",
 }
 
 # Story prose per match, grounded in the computed score-state numbers (verified against the tables).
@@ -73,6 +89,23 @@ STORY = {
         "Level for 87 minutes, then leading 1-0 after a late winner. In the handful of minutes ahead "
         "Man Utd dropped noticeably deeper (out-of-possession build-up 43.1 -> 28.5 m) - a "
         "shut-up-shop reflex, though on a tiny sample.",
+    "southampton_manutd":
+        "The mirror image of the two heavy losses: level for 35 minutes, then leading for the rest as "
+        "the lead only grew - 1-0 (35:04) -> 2-0 (41:03) -> 3-0. The lead arrived before half-time and "
+        "never narrowed. And unlike a shut-up-shop win, Man Utd's counter-press did not drop off once "
+        "ahead: the level-state fraction 0.39 rose to 0.50 while leading - they kept pressing on the "
+        "front foot (small per-state samples).",
+    "palace_manutd":
+        "Level the entire 90 minutes - Man Utd's only scoreless match in the sample, so there is no "
+        "score-state transition to slice. A single-phase read: Man Utd held the ball for most of the "
+        "match (space-control 0.544 vs Palace 0.456) without turning it into a goal.",
+    "manutd_tottenham":
+        "The shortest 'level' window of the six matches: Man Utd conceded inside 2:42 and chased for "
+        "the remaining 87 minutes as the deficit deepened 0-1 (02:42) -> 0-2 (H2 03:31) -> 0-3 (H2 "
+        "33:25). With only a single outside-third loss recorded at level state, the chasing-state read "
+        "is effectively the whole match: 47 of 48 outside-third losses came while chasing, counter-"
+        "press firing on 0.49 of them (5s regain 0.26) - a from-behind performance almost start to "
+        "finish, not a single seam that opened late.",
 }
 
 TRACKING = ("tracking-native", "cv")     # teal chip: position/fingerprint, ball-gap tolerant
@@ -238,12 +271,34 @@ SEAMS = {
         "regain 0.465, the best of the three at level) and a higher, wider in-possession block "
         "(build-up 56.9 m), converted late. Once 1-0 up they dropped deep to defend it (out-of-poss "
         "build-up 28.5 m) - effective here, but the leading sample is tiny (single-digit frames).",
+    "southampton_manutd":
+        "How they won: not a smash-and-grab. Man Utd led from the 35th minute and only extended the "
+        "lead (1-0 -> 2-0 before half-time -> 3-0), so most of the match was played from ahead. The "
+        "tell is that the counter-press did NOT relax with the lead - the level-state fraction 0.394 "
+        "(33 outside-third losses) rose to 0.500 while leading (54 losses): they kept hunting the ball "
+        "on the front foot rather than dropping into a block. A control-through-pressure win, not a "
+        "low-block heist - though the per-state samples are small and Southampton played the closing "
+        "stretch a man down (Sofascore red card, not CV-detected).",
+    "palace_manutd":
+        "No seam to name - Man Utd never fell behind and never scored. They pressed hard (counter-"
+        "press 0.75 of 40 outside-third losses, 5s regain 0.375) and held more space (0.544 vs 0.456) "
+        "and more attacking-third control (0.478 vs 0.326) than Palace, but the territorial edge did "
+        "not convert into goals: a stalemate, not a beaten or broken opponent.",
+    "manutd_tottenham":
+        "The seam was open before kickoff finished settling: Man Utd conceded at 2:42, so there is "
+        "almost no level-state sample to compare against (1 outside-third loss). From 0-1 on, their "
+        "counter-press only fired on 0.49 of 47 outside-third losses (5s regain 0.26) while defending "
+        "a growing deficit - Tottenham's third and final goal arrived at 33:25 of the second half, by "
+        "which point the game state had been chasing for over an hour. Full phase-by-phase context in "
+        "the validation appendix below.",
 }
 
 
 def _seams_section(match_id: str, focus: str, opp: str) -> str:
+    result = RESULT.get(match_id, "")
+    verb = "won" if result.endswith("win") else "drew" if result.endswith("draw") else "were beaten"
     seam = (f'<div class="seam"><p class="seam-claim">How {_html.escape(focus)} '
-            f'{"won" if match_id == "manutd_fulham" else "were beaten"} vs '
+            f'{verb} vs '
             f'{_html.escape(opp)}</p><p class="seam-back">{_inline(SEAMS[match_id])}</p></div>')
     extra = ""
     secs = _report_v2_sections(match_id)
@@ -372,8 +427,11 @@ def _validation_section(match_id: str) -> str:
 def render(match_id: str, generated: str) -> str:
     """Render the full narrative-first v2 scouting pack for one registered match."""
     m = get(match_id)
-    focus, opp = m.teams[0], m.teams[1]
-    home, away = m.home_team or focus, m.away_team or opp
+    # Scouting pack is Man-Utd-centric (style/seams/timeline all read Man Utd), so focus is Man Utd
+    # regardless of registry team order -- teams[0] is the away side for e.g. southampton/palace.
+    mi = ss.manu_index(m)
+    focus, opp = m.teams[mi], m.teams[1 - mi]
+    home, away = m.home_team or m.teams[0], m.away_team or m.teams[1]
     competition = getattr(m, "competition", "") or "match"
 
     ref_path = Path(f"outputs/eval/{match_id}_ball_eval.json")

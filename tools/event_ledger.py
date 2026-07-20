@@ -51,6 +51,7 @@ TEAM_TRUTH = {
     "brighton_manutd": "outputs/oracle/sofascore/team_stats_12436888.parquet",
     "manutd_liverpool": "outputs/oracle/sofascore/team_stats_12436920.parquet",
     "manutd_fulham": "outputs/oracle/sofascore/team_stats_12436870.parquet",
+    "manutd_tottenham": "outputs/oracle/sofascore/team_stats_12436995.parquet",
 }
 # match_id -> (player-stats parquet, named-tracks parquet). Identity matches only.
 PLAYER_TRUTH = {
@@ -58,6 +59,8 @@ PLAYER_TRUTH = {
                         "outputs/identity/brighton_manutd_named_tracks_koshkina.parquet"),
     "manutd_liverpool": ("outputs/oracle/sofascore/player_stats_12436920.parquet",
                          "outputs/identity/manutd_liverpool_named_tracks_koshkina.parquet"),
+    "manutd_tottenham": ("outputs/oracle/sofascore/player_stats_12436995.parquet",
+                         "outputs/identity/manutd_tottenham_named_tracks_koshkina.parquet"),
 }
 REPORT_PATH = Path("results/PLAYER_LEDGER.md")
 
@@ -411,10 +414,15 @@ def format_report(results: list[dict]) -> str:
         "carrier within 3 m; the rest abstain because no tracked player is on the ball at the kick "
         "(broadcast detects players in a minority of frames -- the industry regime, cf. the plan "
         "doc). Where a carrier IS found the fit is tight (median ~1.3 m).",
-        "- The per-team split holds for manutd_liverpool (attr 181:174 vs truth 507:464) and "
-        "manutd_fulham (166:144 vs 482:384), but INVERTS for brighton_manutd (attr over-weights "
-        "Brighton 223 vs Man Utd 191, while truth has Man Utd ahead 511:477) -- a real ceiling of "
-        "the nearest-carrier heuristic on this match, not smoothed over.",
+        "- The per-team split holds for manutd_liverpool (attr 181:174 vs truth 507:464), "
+        "manutd_fulham (166:144 vs 482:384), and manutd_tottenham (attr Man Utd 120 : Tottenham "
+        "218 vs truth 395:636 -- the 0-3 possession loser stays behind by a clear margin), but "
+        "INVERTS for brighton_manutd (attr over-weights Brighton 223 vs Man Utd 191, while truth "
+        "has Man Utd ahead 511:477). Three holds vs one invert: the nearest-carrier split "
+        "preserves the possession winner when the true gap is large (tottenham 395:636), but is "
+        "marginal-to-unreliable when the two teams' attempted passes are near-level -- brighton's "
+        "truth (511:477, ~7%) is exactly where noise flips the direction. A real ceiling, not "
+        "smoothed over.",
         "- Team attribution rests on the nearest-player-to-ball heuristic, not a possession model; a "
         "loose ball between two players attributes to whoever is closest. The gate ratio is the "
         "check that this holds in aggregate.",
