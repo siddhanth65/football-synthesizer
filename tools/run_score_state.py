@@ -25,9 +25,21 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from core import registry  # noqa: E402
 from fingerprint import score_state as ss  # noqa: E402
 
-MATCHES = ["manutd_liverpool", "brighton_manutd", "manutd_fulham"]
-SHORT = {"manutd_liverpool": "Liverpool", "brighton_manutd": "Brighton", "manutd_fulham": "Fulham"}
-RESULT = {"manutd_liverpool": "0-3 loss", "brighton_manutd": "1-2 loss", "manutd_fulham": "1-0 win"}
+# Ordered by result group: the losses first, then the win, then the draw -- so the cross-match
+# tables read as losses-vs-rest (the money comparison for the counter-press finding).
+# southampton_manutd (a 3-0 Man Utd win) is processed but its team anchor collapsed (149084 team-0
+# vs 670 team-1 player rows, balance 0.004) -- only one usable side, no Man Utd rows -- so it is
+# excluded from the two-team score-state analytics (re-anchoring is a generator fix, out of scope).
+EXCLUDED = {"southampton_manutd": "team-anchor collapse (0.004 balance) -> no usable Man Utd side"}
+MATCHES = ["manutd_liverpool", "manutd_tottenham", "brighton_manutd",
+           "manutd_fulham", "palace_manutd"]
+SHORT = {"manutd_liverpool": "Liverpool", "manutd_tottenham": "Tottenham",
+         "brighton_manutd": "Brighton", "manutd_fulham": "Fulham", "palace_manutd": "Palace"}
+RESULT = {"manutd_liverpool": "0-3 loss", "manutd_tottenham": "0-3 loss",
+          "brighton_manutd": "1-2 loss", "manutd_fulham": "1-0 win", "palace_manutd": "0-0 draw"}
+# Result bucket for the money table (level-state counter-press, losses vs rest).
+GROUP = {"manutd_liverpool": "loss", "manutd_tottenham": "loss", "brighton_manutd": "loss",
+         "manutd_fulham": "win", "palace_manutd": "draw"}
 STATE_ORDER = {"level": 0, "chasing": 1, "leading": 2}
 SCORELINE_CASE = ["0-0", "0-1", "0-2", "0-3"]
 
@@ -106,6 +118,29 @@ def cross_cp_table(res: dict) -> str:
     return "\n".join(lines)
 
 
+def money_table(res: dict) -> str:
+    """The money comparison: Man Utd LEVEL-state counter-press per match, grouped by result.
+
+    Answers whether the 'counter-press flat from kickoff in losses' finding repeats across the losses
+    versus the win + draw. Level state = scoreline 0-0 (before any goal moves Man Utd off level).
+    """
+    lines = ["| result group | match | level-state losses | counter-press frac | 5s regain |",
+             "|---|---|---|---|---|"]
+    for grp in ("loss", "win", "draw"):
+        for mid in MATCHES:
+            if GROUP[mid] != grp:
+                continue
+            lvl = res["cp"][mid][res["cp"][mid]["state"] == "level"]
+            if lvl.empty:
+                lines.append(f"| {grp} | {SHORT[mid]} ({RESULT[mid]}) | 0 | - | - |")
+                continue
+            r = lvl.iloc[0]
+            lines.append(f"| {grp} | {SHORT[mid]} ({RESULT[mid]}) | "
+                         f"{int(r['losses_outside_third'])} | {r['counterpress_frac']:.3f} | "
+                         f"{r['regain_5s_frac']:.3f} |")
+    return "\n".join(lines)
+
+
 def cross_phase_table(res: dict) -> str:
     """Cross-match Man Utd shape-by-state table for two readable phases (in_poss + trans_pos)."""
     lines = ["| match | state | phase | frames | def-line | width | buildup depth |",
@@ -143,18 +178,32 @@ def segments_block(seg: pd.DataFrame) -> str:
 def write_cross(res: dict, out: Path) -> None:
     """Render results/SCORE_STATE_v1.md."""
     lines = [
-        "# Score-state segmentation v1 (Plan B-5) - Man Utd shape + press by scoreline", "",
+        "# Score-state segmentation v2 (Plan B-5) - Man Utd shape + press by scoreline, 6-match corpus",
+        "",
         "Every metric below is the B-4 style fingerprint (validated tracking-native primitives)",
         "re-bucketed by Man Utd's score state. States are **from Man Utd's perspective** "
-        "(level / chasing / leading). Boundaries are the E2E-Spot goal peaks (validated 7/7 across",
-        "these three matches with correct halves); which team scored each goal comes from the",
-        "Sofascore per-half score deltas, with Brighton's two second-half goals split by the final",
-        "scoreline (the 90+' winner is Brighton's). Engine: `fingerprint/score_state.py`.", "",
-        "**n=3 matches, and each state is a slice of an already ball-gap-limited base** - counts",
-        "(`frames`, `outside-third losses`) are shown on every row so small samples are visible. The",
-        "leading state exists only in the Fulham match and only for the ~5 minutes after the 87'",
-        "winner (tiny n - suggestive, not a claim). Absolute line heights carry the ~+11m",
-        "partial-broadcast inflation from v1: read across states, not against FIFA numbers.", "",
+        "(level / chasing / leading). Boundaries are the validated E2E-Spot goal peaks (per-half count",
+        "matched to the Sofascore split); which team scored comes from the Sofascore per-half deltas.",
+        "Brighton's two H2 goals are split by the final scoreline (90+' winner is Brighton's);",
+        "Tottenham's fourth E2E H2 peak (the known replay false positive) is dropped to honour the true",
+        "1H1/2H2 split. Engine: `fingerprint/score_state.py`. v1 (n=3) kept at",
+        "`results/SCORE_STATE_v1.md`.", "",
+        "**Corpus: 5 of 6 matches** -- 3 losses (Liverpool 0-3, Tottenham 0-3, Brighton 1-2), 1 win",
+        "(Fulham 1-0) and 1 draw (Palace 0-0). `southampton_manutd` (a 3-0 Man Utd win) is processed",
+        "but excluded: its team anchor collapsed (149084 team-0 vs 670 team-1 player rows, balance",
+        "0.004), so it has no usable Man Utd side. That leaves the win column thinner than the corpus",
+        "headline suggests -- stated so the n is honest.", "",
+        "**n=5, each state a slice of an already ball-gap-limited base** - counts (`frames`,",
+        "`outside-third losses`) are on every row so small samples are visible. Two matches barely",
+        "have a level state: Tottenham (opener ~3', so level is only its first ~160 s) and Southampton",
+        "(excluded). The leading state exists only in the Fulham match (~5 min after the 87' winner,",
+        "tiny n). Absolute line heights carry the ~+11m partial-broadcast inflation: read across",
+        "states, not against FIFA numbers.", "",
+        "## The money comparison: level-state counter-press by result", "",
+        "Man Utd's counter-press while the game is still level (0-0), grouped by how the match ended.",
+        "This is the direct test of the Liverpool case-study finding -- was the press flat from",
+        "kickoff a losses pattern, or Liverpool-specific?", "",
+        money_table(res), "",
         "## Score-state timeline (validated goal boundaries)", "",
     ]
     for mid in MATCHES:
@@ -258,30 +307,39 @@ CASE_ABSTAIN = """\
 - Player pass counts are a floor bounded by named-fragment coverage, never a ranking."""
 
 CROSS_READ = """\
-1. The counter-press collapse against Liverpool was already present at 0-0. Man Utd's level-state
-   counter-press was 0.455 vs Liverpool but 0.719 (Brighton) and 0.718 (Fulham) - the press did not
-   fail because United were chasing; it was the weakest of the three even while the game was level
-   (Liverpool level n=22, Brighton 64, Fulham 71 - small but a wide gap).
-2. Chasing lifts the press, not lowers it. In both losses Man Utd's counter-press rose from level to
-   the trailing states as the match wore on (Liverpool 0.455 level -> 0.690 at 0-3; the numbers climb
-   with the deficit) - the intensity arrives late, once the game is gone.
-3. Leading = drop deep (one match, tiny n). In the ~5 minutes Man Utd led Fulham 1-0 they sat far
-   back (out-of-possession build-up 28.5 m vs 43.1 m at level; deepest-line 23.4 vs 38.0) - a
-   shut-up-shop signal, but n is single-digit-frames territory; suggestive only.
-4. Shape shifts with state as expected: trailing sides push their line and centroid higher (Brighton
-   trans_neg deepest-line 45.4 level -> 63.6 chasing; Liverpool build-up rises into 0-3) and widen
-   slightly - the score state moves the block, confirming the segmentation is tracking something real.
-5. Pass balance follows the scoreline: the trailing team sees marginally more of the ball
-   (Liverpool: ManU 112:100 when chasing vs 69:74 level; Fulham: ManU behind on the ball 8:16 only
-   while leading late) - a floor, but the direction is consistent.
-6. n=3, small per-state slices, one leading state: this is a shape of behaviour, not a validated
-   law. The one robust, cross-match claim is #1 - the Liverpool press was flat from kickoff, not just
-   after the goals."""
+1. THE finding does NOT repeat. The Liverpool 'counter-press flat from kickoff' was Liverpool-
+   specific, not a losses pattern. Level-state (0-0) counter-press: Liverpool 0.455 (flat, low) BUT
+   Brighton - also a loss - 0.719, essentially identical to Fulham (win 0.718) and Palace (draw
+   0.750). A losing side pressed exactly as hard at 0-0 as the win and the draw did. The collapse
+   did not precede the scoreline against Brighton.
+2. Tottenham cannot be tested for this. It conceded at ~3', so its level state holds a single
+   outside-third loss (0.000 counter-press on n=1 - meaningless). When a team goes behind almost
+   immediately there is no level-state sample to ask 'did the collapse precede the goal?'.
+3. So across the three losses the pre-scoreline-collapse claim is 1 for, 1 against, 1 unevaluable:
+   Liverpool shows it, Brighton contradicts it, Tottenham can't be judged. Not a repeatable pattern -
+   report the Liverpool case as a single-match observation, and the wider corpus argues against
+   generalizing it.
+4. Where the two 0-3 losses DO stand out is the match-level / chasing press, not the level state.
+   Tottenham's chasing counter-press 0.489 (regain 0.255) and Liverpool's match-level 0.600 are the
+   corpus lows - but that is press while ALREADY behind, confounded with game state, and Liverpool's
+   even rose with the deficit (0.455 level -> 0.660 chasing). Heavy losses show a weak press overall,
+   not a weak press before the scoreline.
+5. Leading = drop deep survives only as the one-match Fulham signal (tiny n): in the ~5 min at 1-0 up
+   Man Utd sat back (in-possession build-up 46.1 m vs 56.9 at level; deepest-line 41.1 vs 49.8).
+6. Shape shifts with state, confirming the segmentation tracks something real: trailing sides push
+   the line and centroid higher (Tottenham chasing in_poss build-up 58.3 m; Liverpool build-up rises
+   into 0-3). Ignore the Tottenham level rows (n=1/12 frames - garbage from the ~3' opener).
+7. Pass balance (floor, liverpool + fulham only) still follows the scoreline: the trailing team sees
+   marginally more of the ball (Liverpool ManU 112:100 chasing vs 69:74 level).
+8. Honest n: 5 usable matches (southampton excluded, anchor collapse), so the 'wins' side of the
+   comparison is Fulham alone plus the Palace draw; level-state samples range 1 (Tottenham) to 71
+   (Fulham). The one robust cross-match statement is the negative one: the flat-press-from-kickoff is
+   not a Man-Utd-in-losses law, it is what happened against Liverpool."""
 
 
 def main() -> None:
     res = build()
-    write_cross(res, Path("results/SCORE_STATE_v1.md"))
+    write_cross(res, Path("results/SCORE_STATE_v2.md"))
     write_case(res, Path("results/CASE_STUDY_manutd_liverpool.md"))
 
 

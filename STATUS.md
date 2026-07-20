@@ -1,6 +1,44 @@
 # STATUS
 
-**Last updated:** 2026-07-20 (PASS-COUNT GATE holds on ALL 6: mean |dev| 2.9%, 5/6 within 5%)
+**Last updated:** 2026-07-20 (Tottenham identity: 23/40 named -- best coverage; 3-loss trilogy has names)
+
+## 2026-07-20 — TOTTENHAM IDENTITY: 4,646 anchors (corpus high) -> 23/40 named (best yet)
+
+manutd_tottenham identity chain (main-session GPU, resumable, monitored): **4,646 both2 anchors**
+(brighton 1,897 -> liverpool 3,348 -> tottenham 4,646) -> 358 named fragments -> **23/40 assigned
+(12 Utd, 11 Spurs)** via run_lineup_assign — highest coverage of the three (brighton/liverpool 20
+each). Utd: Bruno, Rashford, Garnacho, Casemiro, Martinez, Dalot, Mount(sub), Eriksen(sub), Ugarte,
+Mazraoui, Hojlund(sub), Amad(sub). Spurs: Maddison, Kulusevski, Bentancur, Porro, Udogie, Solanke,
+Johnson, van de Ven, Romero, Werner, Bergvall(sub). Confidence 0.53-1.00, sub windows enforced.
+Precision PENDING Sid montage verdict (labeled montage delivered). Artifacts
+outputs/identity/manutd_tottenham_{named_tracks_koshkina,lineup_assign}.parquet +
+results/identity/{NAMED_TRACKS,LINEUP_ASSIGN}_manutd_tottenham*.md. **All 3 heavy losses now have
+named players** — the honestly-scoped case-study trilogy (press-collapse = Liverpool-specific per
+the n=6 retraction) can be built. southampton team-collapse fix + tottenham B-3 ledger pending.
+
+## 2026-07-20 — n=6 SCOPING: the case-study headline does NOT generalize; southampton anchor collapsed
+
+Recompute over the corpus (deep-worker requested: opus; results/style_fingerprint_v2.md +
+SCORE_STATE_v2.md, v1 preserved). TWO honest negatives, logged per validated-or-nothing:
+1. **The money finding fails to repeat.** Level-state (0-0) counter-press by result: Liverpool loss
+   **0.455** (the flat-from-kickoff press) BUT Brighton loss **0.719** = Fulham win 0.718 = Palace
+   draw 0.750. So pressing flat at 0-0 was **Liverpool-SPECIFIC, not a ManU losing signature** —
+   Brighton pressed normally and still lost; Tottenham conceded ~3' so level-state is n=1
+   (unevaluable). The Liverpool case study stays valid AS A SINGLE MATCH; the generalization is
+   RETRACTED. (Where the 2 heavy losses do co-vary is match-level/chasing press — corpus lows —
+   but that's confounded with game state.)
+2. **n=6 style identity WEAKENS.** Intra-ManU vs cross gap ~halved (4.36-vs-6.38 at n=3 ->
+   4.73-vs-5.47 at n=5-usable); ManU_vPalace's nearest neighbour is Crystal Palace (the 0-0
+   sides mirror). Still purely TERRITORIAL (centred/shape variant flat 1.56 vs 1.68) — n=6 surfaces
+   NO formation-shape fingerprint. "Every ManU side nearest another ManU side" (n=3) broke.
+- **southampton_manutd team-anchor COLLAPSED** (149,084 team-0 rows vs 670 team-1, balance 0.004 —
+  Soton red/white stripes vs ManU kit fooled the CIELAB KMeans; same class as the old team-collapse
+  bug). Excluded from all two-team analytics -> usable two-team corpus = **5 matches** (3 losses, 1
+  win Fulham, 1 draw Palace); the "2 wins" comparison is thinner than the corpus headline. NEEDS
+  re-anchoring (generator/team_anchor fix) before it rejoins. LOGGED.
+- Tottenham goal boundaries: E2E's 4th H2 peak (0.338, lowest) = the replay FP, dropped -> true
+  1 H1 / 2 H2 kept (matches Sofascore). Provenance in fingerprint/score_state.py GOALS.
+- Pass-count 6-match gate UNAFFECTED (that's match-level, anchor-independent): still 2.9% mean |dev|.
 
 ## 2026-07-20 — BAS PASS-COUNT: 6-MATCH VALIDATION, ONE FROZEN THRESHOLD (set on brighton-h1, 2026-07-19)
 

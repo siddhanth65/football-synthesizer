@@ -8,6 +8,7 @@ import pandas as pd
 from generator.team_anchor import (
     apply_chunkwise_team_labels,
     apply_global_team_labels,
+    cluster_chunk_centroids,
     estimate_player_box,
     global_team_map,
 )
@@ -60,6 +61,30 @@ def test_chunkwise_anchoring_survives_a_noisy_crossover_track():
         assert team[(ck, 1)] != team[(ck, 3)]        # red != blue
     # global consistency: red is the same global id in every chunk
     assert team[("A", 1)] == team[("B", 1)] == team[("C", 1)]
+
+
+def test_cluster_chunk_centroids_survives_lighting_dominated_striped_kits():
+    # Reproduces the Southampton red/white-stripe collapse: the two kits differ only weakly in b*
+    # (+5 vs -3), but each chunk carries a large per-chunk L* lighting offset and one chunk has a
+    # bright outlier. Raw-LAB KMeans splits by brightness (dumping every team onto one id); per-chunk
+    # centering must recover the within-chunk kit contrast -> a balanced, kit-consistent 2-way split.
+    kit_hi = np.array([0.0, 9.0, 5.0])    # a* ~equal (both warm), b* high  (Southampton)
+    kit_lo = np.array([0.0, 9.0, -3.0])   # a* ~equal,             b* low   (Man Utd away)
+    l_offset = {"c0": 21.0, "c1": 24.0, "c2": 30.0, "c3": 45.0}  # broadcast exposure drift per chunk
+    cent = {}
+    for ck, dl in l_offset.items():
+        cent[(ck, 0)] = kit_hi + np.array([dl, 0.0, 0.0])
+        cent[(ck, 1)] = kit_lo + np.array([dl, 0.0, 0.0])
+    cent[("c3", 1)] += np.array([12.0, 0.0, 0.0])   # a bright outlier in the last chunk
+
+    keys, lab, labels = cluster_chunk_centroids(cent)
+    g = dict(zip(keys, labels.tolist()))
+    # every chunk's two kits land on different global ids (no collapse)
+    for ck in l_offset:
+        assert g[(ck, 0)] != g[(ck, 1)]
+    # kit_hi is the same global id in every chunk (kit-consistent, not chunk-consistent)
+    assert len({g[(ck, 0)] for ck in l_offset}) == 1
+    assert set(labels.tolist()) == {0, 1} and abs((labels == 0).sum() - (labels == 1).sum()) <= 1
 
 
 def test_global_team_map_anchors_dark_kit_to_team0_across_chunks():

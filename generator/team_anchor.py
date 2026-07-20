@@ -92,6 +92,39 @@ def anchor_teams(positions: pd.DataFrame, video_map: dict[str, str], *, sample_f
     return label(positions, track_colors, random_state=random_state)
 
 
+def cluster_chunk_centroids(cent: dict[tuple[str, int], np.ndarray], *, random_state: int = 0,
+                            ) -> tuple[list[tuple[str, int]], np.ndarray, np.ndarray]:
+    """KMeans(2) over per-``(chunk, x)`` LAB centroids after removing each chunk's own mean colour.
+
+    Both teams in a chunk share that chunk's broadcast lighting/exposure, so subtracting the chunk
+    mean strips the cross-chunk brightness/white-balance drift and leaves the **within-chunk kit
+    contrast** -- the actual team signal. Without it, the ``L*`` lighting variance across chunks (and
+    any bright outlier chunk) swamps a low-contrast or striped kit: KMeans clusters by chunk-brightness
+    and dumps every team onto one global id (the Southampton red/white-stripe collapse). The clustering
+    is done on the centered vectors; the returned raw ``lab`` lets callers anchor identity on absolute
+    lightness.
+
+    Args:
+        cent: ``(chunk, x) -> LAB`` centroid per per-chunk team (``x`` is a per-chunk team/cluster id).
+        random_state: KMeans seed.
+
+    Returns:
+        ``(keys, lab, labels)``: the centroid keys, their **raw** ``(N, 3)`` LAB, and the ``(N,)``
+        global cluster label (0/1) from KMeans on the per-chunk-centered vectors.
+    """
+    from sklearn.cluster import KMeans  # noqa: PLC0415
+
+    keys = list(cent)
+    lab = np.stack([cent[k] for k in keys]).astype(float)
+    chunks = np.array([k[0] for k in keys])
+    centered = lab.copy()
+    for ck in set(chunks.tolist()):
+        m = chunks == ck
+        centered[m] -= lab[m].mean(axis=0)
+    labels = KMeans(n_clusters=2, n_init=10, random_state=random_state).fit_predict(centered)
+    return keys, lab, labels
+
+
 def apply_chunkwise_team_labels(positions: pd.DataFrame, track_colors: dict[tuple[str, int], np.ndarray],
                                 *, random_state: int = 0) -> pd.DataFrame:
     """Robust cross-chunk team anchoring: split each chunk into two teams, then match teams across chunks.
@@ -127,9 +160,7 @@ def apply_chunkwise_team_labels(positions: pd.DataFrame, track_colors: dict[tupl
                 centroids[(chunk, int(lab_i))] = sel.mean(axis=0)
     if len(centroids) < 2:
         raise ValueError(f"too few chunk clusters to anchor ({len(centroids)})")
-    ckeys = list(centroids)
-    global_lab = KMeans(n_clusters=2, n_init=10, random_state=random_state).fit_predict(
-        np.stack([centroids[k] for k in ckeys]))
+    ckeys, _, global_lab = cluster_chunk_centroids(centroids, random_state=random_state)
     global_of = {k: int(v) for k, v in zip(ckeys, global_lab)}
     team_of = {kt: global_of[loc] for kt, loc in track_local.items()}
     out = positions.copy()
@@ -149,13 +180,9 @@ def apply_global_team_labels(positions: pd.DataFrame, track_colors: dict[tuple[s
     Pure (no video): the testable core of :func:`anchor_teams`. Player/GK rows get the global cluster
     id; tracks without colour and all non-player rows become ``team = -1``.
     """
-    from sklearn.cluster import KMeans  # noqa: PLC0415
-
     if len(track_colors) < 2:
         raise ValueError(f"too few coloured tracks to anchor ({len(track_colors)})")
-    keys = list(track_colors)
-    labels = KMeans(n_clusters=2, n_init=10, random_state=random_state).fit_predict(
-        np.stack([track_colors[k] for k in keys]))
+    keys, _, labels = cluster_chunk_centroids(track_colors, random_state=random_state)
     team_of = {k: int(v) for k, v in zip(keys, labels)}
     out = positions.copy()
     is_player = out["role"].isin(PLAYER_ROLES)
@@ -175,15 +202,11 @@ def global_team_map(cent: dict[tuple[str, int], np.ndarray], *, dark_is_team0: b
     ``dark_is_team0``), so identity is consistent across chunks/halves without a which-cluster ambiguity.
     Pure (no video) -- the testable core of :func:`align_teams_by_color`.
     """
-    from sklearn.cluster import KMeans  # noqa: PLC0415
-
     if len(cent) < 2:
         raise ValueError(f"too few chunk-teams to align ({len(cent)})")
-    keys = list(cent)
-    gl = KMeans(n_clusters=2, n_init=10, random_state=random_state).fit_predict(
-        np.stack([cent[k] for k in keys]))
+    keys, lab, gl = cluster_chunk_centroids(cent, random_state=random_state)
     glob = {k: int(v) for k, v in zip(keys, gl)}
-    mean_L = {c: float(np.mean([cent[k][0] for k in keys if glob[k] == c])) for c in (0, 1)}
+    mean_L = {c: float(np.mean(lab[gl == c, 0])) for c in (0, 1)}
     dark = min(mean_L, key=mean_L.get)
     remap = {dark: (0 if dark_is_team0 else 1), 1 - dark: (1 if dark_is_team0 else 0)}
     return {k: remap[glob[k]] for k in keys}
@@ -203,8 +226,6 @@ def align_teams_by_color(positions: pd.DataFrame, video_map: dict[str, str], *, 
 
     Returns a copy of ``positions`` with player/GK ``team`` globally consistent (0/1); non-players ``-1``.
     """
-    from sklearn.cluster import KMeans  # noqa: PLC0415
-
     cent: dict[tuple[str, int], np.ndarray] = {}
     for chunk, g in positions.groupby("chunk"):
         if chunk not in video_map:

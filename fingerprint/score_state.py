@@ -4,14 +4,18 @@ Turns the VALIDATED goal timeline into a per-frame Man Utd score state, then sli
 style-fingerprint primitives (phase profile, counter-press) by that state. No new science here --
 this module only assembles validated pieces:
 
-* **Boundary times** are the E2E-Spot goal peaks, already validated 7/7 across the three matches
-  with correct halves (``results/action_spotting_probe/<match>/summary.json``, the top-N peaks that
-  match the oracle per-half count). The Sofascore season dict caches per-half goal *counts*, not
-  incident minutes, so the exact boundary *times* come from those validated spots.
+* **Boundary times** are the E2E-Spot goal peaks (``results/action_spotting_probe/<match>/
+  summary.json``, the top-N peaks that match the oracle per-half count). The Sofascore season dict
+  caches per-half goal *counts*, not incident minutes, so the exact boundary *times* come from those
+  validated spots. Across the six matches the E2E per-half count matches the Sofascore split
+  directly, with one correction: Tottenham emitted a fourth H2 peak (score 0.338) above the true
+  1H1/2H2 split -- the known replay false positive -- which is dropped (see :data:`GOALS`).
 * **Goal ownership** (which team scored) comes from the Sofascore per-half score deltas
   (``homeScore/awayScore`` ``period1``/``period2``). The two same-half Brighton second-half goals are
   disambiguated by the final scoreline: the 90+' goal is the winning team's (the known Joao Pedro
-  stoppage-time winner) -- so the earlier H2 goal is Man Utd's equaliser.
+  stoppage-time winner) -- so the earlier H2 goal is Man Utd's equaliser. Tottenham (0-3) and
+  Southampton (0-3 Man Utd win) are single-team scorelines; Palace (0-0) has no goals, so Man Utd is
+  level the whole match.
 
 Frame clock: each parquet frame sits in chunk ``hX_chunk_NNN`` at within-chunk 25 fps index
 ``frame``; its half-relative second is ``chunk_offset[hX][NNN] + frame / 25``. Offsets are the E2E
@@ -41,11 +45,18 @@ _CHUNK_NUM = re.compile(r"chunk(\d+)\.npz$")
 # Validated goal timeline per match: (half, half-relative t_s seconds, scorer). ``scorer`` is
 # 'manu' or 'opp'. Provenance in the module docstring (validated E2E spots + Sofascore per-half
 # deltas). Times are the ``t_s`` of the top-N goal peaks in each summary.json that match the oracle
-# per-half count -- liverpool 2H1/1H2 (all Liverpool), brighton 1H1/2H2, fulham 0H1/1H2.
+# per-half count -- liverpool 2H1/1H2 (all Liverpool), brighton 1H1/2H2, fulham 0H1/1H2,
+# tottenham 1H1/2H2 (all Tottenham), southampton 2H1/1H2 (all Man Utd), palace 0-0 (no goals).
+# tottenham: E2E emitted 4 peaks >0.3 (1H1/3H2) but the Sofascore split is 1H1/2H2; the extra H2
+# peak (h2 t_s=1692.5, score 0.338 -- the lowest of the three H2 peaks) is the known replay FP and
+# is dropped, keeping the two high-confidence H2 goals (0.963, 0.907) + the ~3' H1 opener.
 GOALS: dict[str, list[tuple[str, float, str]]] = {
     "manutd_liverpool": [("h1", 2066.0, "opp"), ("h1", 2518.0, "opp"), ("h2", 739.0, "opp")],
     "brighton_manutd": [("h1", 1895.5, "opp"), ("h2", 794.5, "manu"), ("h2", 2881.0, "opp")],
     "manutd_fulham": [("h2", 2512.5, "manu")],
+    "manutd_tottenham": [("h1", 162.5, "opp"), ("h2", 210.5, "opp"), ("h2", 2005.5, "opp")],
+    "southampton_manutd": [("h1", 2103.5, "manu"), ("h1", 2462.5, "manu"), ("h2", 3069.5, "manu")],
+    "palace_manutd": [],  # 0-0 draw: Man Utd level the whole match (Sofascore 12436962).
 }
 
 
@@ -234,6 +245,20 @@ def _demo() -> None:
     assert score_state_at("brighton_manutd", "h2", 1000.0)["state"] == "level"      # equalised
     end = score_state_at("brighton_manutd", "h2", 2900.0)
     assert end["state"] == "chasing" and end["scoreline"] == "1-2" and end["stoppage"], end
+    # Tottenham 0-3: chasing from the ~3' opener (162.5 s H1), 0-3 by the late H2 goal (2005.5 s).
+    assert score_state_at("manutd_tottenham", "h1", 100.0)["state"] == "level"
+    tot = score_state_at("manutd_tottenham", "h1", 200.0)
+    assert tot["state"] == "chasing" and tot["scoreline"] == "0-1", tot
+    assert score_state_at("manutd_tottenham", "h2", 300.0)["scoreline"] == "0-2"
+    assert score_state_at("manutd_tottenham", "h2", 2100.0)["scoreline"] == "0-3"
+    # Southampton (Man Utd 0-3 win): leading from the 1st H1 goal (2103.5 s), 3-0 by the H2 goal.
+    assert score_state_at("southampton_manutd", "h1", 2000.0)["state"] == "level"
+    sou = score_state_at("southampton_manutd", "h1", 2200.0)
+    assert sou["state"] == "leading" and sou["scoreline"] == "1-0", sou
+    assert score_state_at("southampton_manutd", "h1", 2500.0)["scoreline"] == "2-0"
+    assert score_state_at("southampton_manutd", "h2", 3100.0)["scoreline"] == "3-0"
+    # Palace 0-0: level for the whole match.
+    assert score_state_at("palace_manutd", "h2", 2600.0)["state"] == "level"
     print("score_state self-check OK")
 
 

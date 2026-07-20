@@ -33,6 +33,30 @@ def test_brighton_equaliser_then_late_loss():
     assert (end["state"], end["scoreline"], end["stoppage"]) == ("chasing", "1-2", True)
 
 
+def test_tottenham_chasing_from_early_opener():
+    # 0-3 loss, all Tottenham: level only for the ~3' (162.5 s) opener, chasing the rest.
+    assert score_state_at("manutd_tottenham", "h1", 100.0)["state"] == "level"
+    s = score_state_at("manutd_tottenham", "h1", 200.0)
+    assert (s["state"], s["scoreline"]) == ("chasing", "0-1")
+    # The dropped 4th H2 peak (replay FP, 1692.5 s) must NOT bump the scoreline past 0-3.
+    assert score_state_at("manutd_tottenham", "h2", 1800.0)["scoreline"] == "0-2"
+    assert score_state_at("manutd_tottenham", "h2", 2100.0)["scoreline"] == "0-3"
+
+
+def test_southampton_manutd_leading():
+    # Man Utd 0-3 win (2 H1, 1 H2, all Man Utd): level until the 1st goal, leading thereafter.
+    assert score_state_at("southampton_manutd", "h1", 2000.0)["state"] == "level"
+    s = score_state_at("southampton_manutd", "h1", 2200.0)
+    assert (s["state"], s["scoreline"]) == ("leading", "1-0")
+    assert score_state_at("southampton_manutd", "h1", 2500.0)["scoreline"] == "2-0"
+    assert score_state_at("southampton_manutd", "h2", 3100.0)["scoreline"] == "3-0"
+
+
+def test_palace_goalless_level_throughout():
+    assert score_state_at("palace_manutd", "h1", 100.0)["state"] == "level"
+    assert score_state_at("palace_manutd", "h2", 2600.0)["scoreline"] == "0-0"
+
+
 def test_stoppage_flag_boundary():
     assert score_state_at("manutd_fulham", "h1", STOPPAGE_S - 1)["stoppage"] is False
     assert score_state_at("manutd_fulham", "h1", STOPPAGE_S + 1)["stoppage"] is True
