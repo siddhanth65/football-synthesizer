@@ -1,6 +1,32 @@
 # STATUS
 
-**Last updated:** 2026-07-19 (B-1..B-6 COMPLETE: case study + 3 narrative scouting packs shipped)
+**Last updated:** 2026-07-20 (PASS-COUNT GATE holds on ALL 6: mean |dev| 2.9%, 5/6 within 5%)
+
+## 2026-07-20 — BAS PASS-COUNT: 6-MATCH VALIDATION, ONE FROZEN THRESHOLD (set on brighton-h1, 2026-07-19)
+
+Full corpus, op-arm (conf>=0.40 + 1s dedup, chosen on brighton h1 ONLY, never re-tuned):
+brighton 0.993 / liverpool 1.010 / fulham 1.091 / palace 1.014 / southampton 1.047 / tottenham
+0.996. **Mean |dev| 2.9%, 5/6 within 5%; fulham +9.1% the lone outlier (its h2 noisy segment,
+already logged).** The "passes are ~30% of Sofascore" problem is closed and the fix GENERALIZES
+across 6 matches from a single-half calibration — the robustness exhibit for review. Next: style
+fingerprint + score-state recompute at n=6 (Opus 4.8 standing in as orchestrator per /model, Fable
+quota; worker split held).
+
+## 2026-07-19 — CORPUS x2 IN A DAY: palace/southampton/tottenham processed; events validated on all 6
+
+Sid supplied 3 new matches; full chains run under main session: **palace_manutd** (0-0, 3,186
+tactical frames, ball 32.6%), **southampton_manutd** (0-3 W, 5,302 frames — richest yet, 43.0%),
+**manutd_tottenham** (0-3 L; first file corrupt — video track died at 61min, flagged by prep; Sid
+re-downloaded; 3,612 frames, 43.9%; NO visible halftime break in broadcast — split at 49:00 by
+precedent, corroborated by goal-celebration positions AND the E2E half-split check). Liverpool
+montage verdict (Sid): **40/40** — both identity matches sample-verified (brighton 39/40). 6
+logical commits landed (identity/gsr/events/style/reports/docs, author Sid), unpushed.
+**E2E-Spot on all 3 new matches: palace 0-0 = 0 goals detected (NEGATIVE CONTROL passed);
+southampton 3 goals split 2H1/1H2 EXACT; tottenham 3 true + 1 false H2 peak (replay-window fix
+applies); yellows 8/8 + corners 8/8 exact on tottenham, corners 7/7 southampton. Season total:
+13/13 real goals detected across 6 matches, 1 FP.** BAS pass-count runs grinding overnight (~34
+chunks); then bas_validate auto-extends the frozen-threshold table to 6 matches, style/score-state
+recompute at n=6, identity chains for new matches queue on GPU.
 
 ## 2026-07-19 — B-5/B-6 SHIPPED: score-state analysis, the 0-3 case study, narrative scouting packs x3
 
@@ -44,7 +70,9 @@ ReID-ambiguous — same-kit wall as ever), **279 named fragments, 20 disagreemen
 run_lineup_assign --match manutd_liverpool: **20 players assigned** — Utd: Bruno, Rashford, Dalot,
 Garnacho, Casemiro, Martinez, Mazraoui, Maguire, Mainoo, Collyer(sub); LFC: **Salah**, Mac Allister,
 Szoboszlai, Jota, Gravenberch, Konate, Diaz, Robertson, Nunez(sub), Gakpo(sub). Confidence
-0.78-1.00, sub windows enforced. Precision pending Sid's montage verdict (banner in MD). Corpus
+0.78-1.00, sub windows enforced. **PRECISION VERDICT (Sid, 2026-07-19): 40/40 montage tiles correct
+(100% on the labeled sample; brighton was 39/40)** — the liverpool identity claims are
+sample-verified; precision-pending banner cleared. Corpus
 state: 2 matches with full identity chains (20 players each), 3 with validated events + pass
 counts. B-3 stage 2 (possession team-split + per-player event ledger) launching.
 

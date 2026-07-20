@@ -1,0 +1,199 @@
+{
+  "per_class": {
+    "Ball out of play": {
+      "count": 55,
+      "by_half": {
+        "h1": 26,
+        "h2": 29
+      }
+    },
+    "Clearance": {
+      "count": 11,
+      "by_half": {
+        "h1": 4,
+        "h2": 7
+      }
+    },
+    "Corner": {
+      "count": 8,
+      "by_half": {
+        "h1": 2,
+        "h2": 6
+      }
+    },
+    "Direct free-kick": {
+      "count": 6,
+      "by_half": {
+        "h1": 2,
+        "h2": 4
+      }
+    },
+    "Foul": {
+      "count": 32,
+      "by_half": {
+        "h1": 17,
+        "h2": 15
+      }
+    },
+    "Goal": {
+      "count": 4,
+      "by_half": {
+        "h1": 1,
+        "h2": 3
+      }
+    },
+    "Indirect free-kick": {
+      "count": 24,
+      "by_half": {
+        "h1": 13,
+        "h2": 11
+      }
+    },
+    "Kick-off": {
+      "count": 0,
+      "by_half": {
+        "h1": 0,
+        "h2": 0
+      }
+    },
+    "Offside": {
+      "count": 2,
+      "by_half": {
+        "h1": 0,
+        "h2": 2
+      }
+    },
+    "Penalty": {
+      "count": 0,
+      "by_half": {
+        "h1": 0,
+        "h2": 0
+      }
+    },
+    "Red card": {
+      "count": 0,
+      "by_half": {
+        "h1": 0,
+        "h2": 0
+      }
+    },
+    "Shots off target": {
+      "count": 16,
+      "by_half": {
+        "h1": 6,
+        "h2": 10
+      }
+    },
+    "Shots on target": {
+      "count": 18,
+      "by_half": {
+        "h1": 9,
+        "h2": 9
+      }
+    },
+    "Substitution": {
+      "count": 3,
+      "by_half": {
+        "h1": 0,
+        "h2": 3
+      }
+    },
+    "Throw-in": {
+      "count": 25,
+      "by_half": {
+        "h1": 12,
+        "h2": 13
+      }
+    },
+    "Yellow card": {
+      "count": 8,
+      "by_half": {
+        "h1": 5,
+        "h2": 3
+      }
+    },
+    "Yellow->red card": {
+      "count": 0,
+      "by_half": {
+        "h1": 0,
+        "h2": 0
+      }
+    }
+  },
+  "goal_peaks_top": [
+    {
+      "half": "h2",
+      "t": "03:30",
+      "t_s": 210.5,
+      "score": 0.9629
+    },
+    {
+      "half": "h2",
+      "t": "33:25",
+      "t_s": 2005.5,
+      "score": 0.9072
+    },
+    {
+      "half": "h1",
+      "t": "02:42",
+      "t_s": 162.5,
+      "score": 0.8203
+    },
+    {
+      "half": "h2",
+      "t": "28:12",
+      "t_s": 1692.5,
+      "score": 0.3379
+    },
+    {
+      "half": "h2",
+      "t": "43:43",
+      "t_s": 2623.5,
+      "score": 0.0669
+    },
+    {
+      "half": "h1",
+      "t": "26:14",
+      "t_s": 1574.0,
+      "score": 0.0591
+    },
+    {
+      "half": "h2",
+      "t": "44:41",
+      "t_s": 2681.0,
+      "score": 0.0388
+    },
+    {
+      "half": "h1",
+      "t": "29:44",
+      "t_s": 1784.0,
+      "score": 0.0228
+    },
+    {
+      "half": "h1",
+      "t": "22:01",
+      "t_s": 1321.0,
+      "score": 0.0187
+    },
+    {
+      "half": "h1",
+      "t": "11:39",
+      "t_s": 699.5,
+      "score": 0.0151
+    },
+    {
+      "half": "h2",
+      "t": "29:57",
+      "t_s": 1797.5,
+      "score": 0.0118
+    },
+    {
+      "half": "h1",
+      "t": "36:39",
+      "t_s": 2199.5,
+      "score": 0.0109
+    }
+  ],
+  "thresh": 0.3,
+  "min_sep_s": 30.0
+}

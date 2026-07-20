@@ -73,3 +73,40 @@ matches:
     competition: ENG-Premier League 2024-2025
     home_team: Man Utd
     away_team: Fulham
+  # PL Archive 24/25, fourth brick (Phase B). Crystal Palace (home) vs Man Utd, 2024-09-21, 0-0.
+  # Sofascore match id 12436962. Prep-only at registration -- teams[0]/[1] placeholder = home/away
+  # order (same convention as manutd_fulham/manutd_liverpool; dark-kit anchor verified post-align,
+  # not yet run here).
+  palace_manutd:
+    teams: [Crystal Palace, Man Utd]
+    aligned: outputs/palace_manutd/final/match_aligned.parquet
+    ball_dir: outputs/palace_manutd/final/ball
+    pmsr: null
+    roster: false
+    competition: ENG-Premier League 2024-2025
+    home_team: Crystal Palace
+    away_team: Man Utd
+  # PL Archive 24/25, fifth brick (Phase B). Man Utd (home, Old Trafford) vs Tottenham, 2024-09-29,
+  # 0-3. Sofascore match id 12436995. Source file is notably shorter than siblings (87.3 min vs
+  # ~100-106 min raw duration) -- see STATUS.md 2026-07-19 entry for the length check; chunked as a
+  # full match (blackdetect + frame inspection found a normal, single kickoff-to-final-whistle cut).
+  manutd_tottenham:
+    teams: [Man Utd, Tottenham]
+    aligned: outputs/manutd_tottenham/final/match_aligned.parquet
+    ball_dir: outputs/manutd_tottenham/final/ball
+    pmsr: null
+    roster: false
+    competition: ENG-Premier League 2024-2025
+    home_team: Man Utd
+    away_team: Tottenham
+  # PL Archive 24/25, sixth brick (Phase B). Southampton (home) vs Man Utd, 2024-09-14, 0-3.
+  # Sofascore match id 12436949. Prep-only at registration (same convention as above).
+  southampton_manutd:
+    teams: [Southampton, Man Utd]
+    aligned: outputs/southampton_manutd/final/match_aligned.parquet
+    ball_dir: outputs/southampton_manutd/final/ball
+    pmsr: null
+    roster: false
+    competition: ENG-Premier League 2024-2025
+    home_team: Southampton
+    away_team: Man Utd
