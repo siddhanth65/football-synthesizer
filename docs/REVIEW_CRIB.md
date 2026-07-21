@@ -27,7 +27,14 @@ partnered with a rendered structural strength.
 
 ## Q3 — "You scored ~X on GS-HOTA; SOTA is 63.9."
 GS-HOTA = localization × ALL-OR-NOTHING identity (jersey+role+team). Our pre-jersey baseline was
-14.8 (identity zeroes the composite by design); **wiring the jersey layer lifted it to 19.8 (+34%)
+14.8 (identity zeroes the composite by design); **three stacked, externally-graded lifts took it to
+22.9 (+54%): jersey layer 19.8, PRTreID relink 20.7, jersey propagation 22.9.** The story to tell is
+the DIAGNOSIS, not the number: GS-HOTA = sqrt(DetA x AssA), and relink proved association was NOT
+the constraint (+15% AssA bought <1 point) because the jersey gate held DetA at 9.9 with 91% of
+tracks abstaining. Propagation attacked recall instead — filling abstaining fragments from
+validated same-player merges — and moved DetA for the first time (9.89 -> 11.12), 3x the composite
+gain of the association work. Honest ceiling: ~85% of the DetA gap still needs REAL reads.
+**Original framing retained: wiring the jersey layer alone lifted 14.8 to 19.8 (+34%)
 with ZERO sequences hurt** — only 8.7% of tracks read a number, 91.3% abstain, and abstention
 discipline means a wrong number never attaches (numbering a GT-unnumbered player breaks the match,
 so sparse-but-right beats dense-but-wrong). That's the thesis demonstrated ON the public benchmark:
@@ -75,7 +82,7 @@ and we hold the free validation assets (SkillCorner tracking, SB360 same-censori
 | 47.8 / 48.6 / 0.009 | pass recall Utd / Brighton / symmetry spread — the comparative-tier license |
 | 44.2 vs 52 | our possession share vs Sofascore — the bias exhibit, leader inverts |
 | 51.9% / 71.2% | post-link ball coverage: full match / live-wide conditional |
-| 14.8 → **19.8** / 43.1 / 48.9 / 92.5 | OUR GS-HOTA valid-split: official full (pre→post jersey layer, +34%, 0 seqs hurt) / no-jersey / loc+assoc / LocA — the jersey lift is externally graded |
+| 14.8 → 19.8 → 20.7 → **22.9** | OUR GS-HOTA valid-split, official full, three stacked externally-graded lifts: pre-jersey baseline → **+jersey layer 19.83** (+34%, 0/58 hurt) → **+PRTreID relink 20.65** (+4%, association; 15/58 hurt) → **+jersey propagation 22.85** (+15.2% total; DetA 9.89→11.12, and it REPAIRS relink's regressions to 1/58 hurt). Companion numbers: no-jersey 46.5 / loc+assoc 52.5 / LocA 91.9 |
 | 29.01 / 63.90 | GSR baseline / SOTA (challenge split — context, not like-for-like ranking) |
 | ~11.8 / 22 | players with usable pitch position per TRUSTED frame (~7.4/22 over the whole broadcast incl. graphics/close-ups) — why imputation is THE problem. [CORRECTED 2026-07-20: prior "12.76/22" was a category error — 12.76 is a compactness value in metres from brighton_cv_vs_oracle.md, not a player count; recomputed 11.75 from the aligned parquet. Caught by claims-audit.] |
 | 100% | guardrail precision — no ungrounded number reaches a reader |

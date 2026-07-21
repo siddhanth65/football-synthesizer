@@ -1,6 +1,87 @@
 # STATUS
 
-**Last updated:** 2026-07-20 (CORPUS COMPOSITION CAVEAT: all 6 matches are MW1-6, one manager era)
+**Last updated:** 2026-07-20 (GS-HOTA 14.76 -> 19.83 -> 20.65 -> **22.85**; jersey propagation moved DetA for the first time)
+
+## 2026-07-20 — JERSEY PROPAGATION: GS-HOTA 22.85 (+15.2% over shipped), and it REPAIRED relink's regressions
+
+Direct attack on the constraint the previous run diagnosed (DetA/abstention, not association).
+Idea: a validated 0.960 merge group says its fragments are the SAME player at ~81% precision, so a
+fragment that read a number can fill in group-mates that ABSTAINED — converting abstentions into
+numbered rows using only the already-validated relink, with **no new reads**.
+**Rule pre-committed with ZERO free parameters:** propagate only inside a merge group; fill only
+previously-abstaining members (never overwrite a read); **on ANY disagreement between numbered
+members, drop the whole group** — chosen over a confidence margin precisely because a margin is a
+knob that could be tuned to GS-HOTA. Fired 4/144 times.
+**Results (58 seqs, 0.960 throughout): gs_hota_full 19.83 -> 20.65 -> 22.85 (+3.02, +15.2% over
+shipped).** **DetA 9.89 -> 9.89 -> 11.12 (+12.4% rel) — the FIRST intervention ever to move DetA
+under the jersey gate**, which is exactly the predicted mechanism. AssA 43.09 -> 46.96 (numbered
+rows also shift the optimal assignment). Jersey-OFF configs identical to the last decimal vs the
+relink arm — the invariant proving only `attributes.jersey` changed.
+**Propagation precision (GT-audited): 133 correct / 33 wrong / **0 onto a GT-unnumbered player** /
+5 unauditable = 80.1%** — it inherits the merge's error rate and adds none of its own. **The zero is
+load-bearing:** 256/1222 GT tracks carry no jersey label and numbering one breaks the null==null
+match; all 33 wrong fills landed on players who already had a DIFFERENT number, i.e. rows that were
+already non-matches — which is why wrong fills cost ~nothing.
+**Regressions REPAIRED:** vs relink-only **0 hurt** (43 helped); vs jersey-only just **1 hurt**
+(-0.017), down from 15. Relink's three WORST sequences are propagation's three BEST (SNGS-082
++13.88, -085 +9.68, -080 +7.96) — propagation fixes exactly the disagreeing-read stitching that
+relink introduced. Abstention 91.27% -> 87.76% (425 -> 596 of 4870 tracks numbered).
+**Honest ceiling:** DetA 11.12 vs 60.10 unattributed; propagation reaches only 144 of 649
+multi-fragment groups, so **~85% of the remaining DetA gap needs REAL READS** (legibility/pose
+recall, more crops per track), not further redistribution of the 425 numbers we already have.
+
+## 2026-07-20 — GS-HOTA + PRTreID RELINK: 19.83 -> 20.65, and the real finding is WHERE the ceiling is
+
+Relink was previously BLOCKED from the scored path (OSNet 35% precision would corrupt association);
+at PRTreID's 84.7% it is legitimately unblocked, so that decision is now correctly reversed.
+Control: re-scored the untouched submissions -> **19.834495707, bit-identical** to the shipped
+artifact, so relink is the only variable. Full-split GT-audited merge precision reproduces the
+probe (84.4% @0.965, 81.0% @0.960 vs 84.7/81.7 predicted).
+**Results (58 seqs):** gs_hota_full **19.83 -> 20.56 (@0.965) -> 20.65 (@0.960, +0.82, +4.1%)**;
+DetA flat 9.89 (as it must be — relink touches ids only); **AssA 39.77 -> 43.09**; on the
+unattributed configs **loc_assoc AssA 39.79 -> 45.86 (+15.3% relative)**. Quote the **0.960** arm.
+**REGRESSIONS — the honest part:** the jersey layer hurt 0/58; relink hurts **15/58 @0.960** (38
+helped, 5 unchanged; gain mass +44.1 vs loss mass -4.4, worst -1.76). And hurt is NOT explained by
+bad merges: precision on hurt seqs 79.2% vs helped 81.8%, and SNGS-085 LOST ground with 96%
+correct merges — a CORRECT merge can still cost GS-HOTA by stitching disagreeing jersey reads or
+shifting the optimal GT-to-prediction assignment. The "zero regressions" story belongs to the
+jersey layer only; this arm trades a small, bounded loss for a ~10x larger gain.
+**THE DIAGNOSIS (most valuable output):** association was NOT the binding constraint. Relink
+delivered exactly the association win its precision promised (+15% AssA) but GS-HOTA =
+sqrt(DetA x AssA), and under the full config the jersey gate crushes **DetA 60.18 -> 9.89 (91.3% of
+tracks abstain; an abstention cannot match a numbered GT player)**. A +3.3 AssA gain on DetA 9.9
+buys under a point. **The next headline movement must come from jersey RECALL, not ReID.**
+Artifacts: eval/gsr_prtreid_relink.py, results/gsr_benchmark/{gsr_scores_prtreid_relink.json,
+GSR_RESCORE_PRTREID.md}; shipped koshkina artifacts untouched.
+
+## 2026-07-20 — THE SAME-KIT ReID WALL IS BROKEN (PRTreID) — first model ever to clear the 80% bar
+
+Sem-2 lever pulled forward and it LANDED (deep-worker requested: opus). PRTreID
+(VlSomers/prtreid, SoccerNet-trained, zenodo 10653453, BPBreID/HRNet-32) runs on our py3.14/torch
+2.11 with NO sidecar (0 missing state-dict keys); uses the pose-mask-free `globl` 256-d embedding,
+matching sn-gamestate inference config.
+**Protocol validated first:** the OSNet-ImageNet arm reproduces the published Stage-2c ladder
+EXACTLY (0.872/0.832, sep +0.0401, 35.0%) -> comparison is apples-to-apples.
+**Pilot (3 GSR seqs):** same-kit separation **+0.040 (the 4-embedder wall) -> +0.076**; merge
+precision 35-41% -> 46.0%.
+**Held-out (55 non-pilot seqs, 4,311 same / 37,739 diff pairs), threshold 0.965 PRE-COMMITTED on
+the pilot:** **PRTreID 84.7% (658/777) — CLEARS the 80% bar.** OSNet ImageNet never reaches 80% at
+any yield; OSNet-AIN reaches 82.6% but at only 109 usable merges. **PRTreID gives 988 merges at
+81.7% — ~9x the yield at equal precision. The lever is YIELD-AT-PRECISION, not precision alone**
+(at the old frozen 0.80 threshold nobody clears, PRTreID included at 49.0% — the gain is having a
+usable high-precision regime at all).
+**End-to-end on brighton (same 426 anchors, same frozen gate, ONLY embedder swapped):** attached
+109 -> **153 (+40%)**; **ReID-ambiguous 165 -> 121 (-27%)** — the bucket the wall created; named
+fragments 53 -> 69 (+30%); named players 6 -> 7; disagreement flags 2 -> 1.
+**Counter-evidence NOT buried:** visible-minutes Spearman 0.103 -> -0.213 (that validator is
+near-worthless at this n and its claim was already retired, but it did NOT improve), and the 2 new
+brighton names rest on 1 anchor each. **Shippable claim = "+44 attachments / -27% ambiguity";
+named-player count is a weak secondary.** Wired as `--embedder {osnet,prtreid}` (default osnet
+unchanged, all shipped artifacts reproducible), tagged outputs only. Premise correction: merge
+precision is only auditable where GT ids exist (GSR), not brighton — brighton carries the coverage
+delta instead. NOT done: (1) the 0.50/0.05 attachment gate was never recalibrated for PRTreID's
+tighter cosine scale (the +40% came FREE at OSNet-calibrated settings), (2) the 58-seq GS-HOTA
+re-score is now unblocked by the precision gate.
 
 ## 2026-07-20 — CORPUS COMPOSITION: our 6 matches are the season's FIRST 6 (MW1-6), not a spread
 

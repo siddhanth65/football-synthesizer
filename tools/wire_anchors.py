@@ -87,16 +87,39 @@ def _ascii(s: str) -> str:
     return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode() or "?"
 
 
-def _embedder_label(model_name: str, weights: str | None) -> str:
+def _embedder_label(model_name: str, weights: str | None, embedder: str = "osnet") -> str:
     """Report label naming the ACTUAL ReID embedder used (backbone + weights source).
 
     ``OsnetEmbedder(weights=None)`` loads ImageNet-classification weights; any non-None ``weights`` (a
     model-zoo key or checkpoint path) loads re-ID-objective weights. The label must reflect what was
     passed so an AIN/MSMT run is never mislabelled as the ImageNet baseline.
     """
+    if embedder == "prtreid":
+        return "football-domain PRTreID (part-based BPBreID/HRNet-32, SoccerNet-trained)"
     if weights is None:
         return f"ImageNet-classification OSNet (`{model_name}`)"
     return f"re-ID-objective OSNet (`{model_name}`, weights=`{weights}`)"
+
+
+def build_embedder(embedder: str, model_name: str, weights: str | None):
+    """Build the appearance embedder for the attachment gate (``osnet`` default, or ``prtreid``).
+
+    Both classes expose the same ``embed(crops) -> (N, D)`` L2-normalised interface, so the
+    attachment code path is identical across arms.
+
+    Args:
+        embedder: ``"osnet"`` (default, back-compatible) or ``"prtreid"``.
+        model_name: OSNet backbone (ignored for the PRTreID arm).
+        weights: OSNet re-ID weights key/path (ignored for the PRTreID arm).
+
+    Returns:
+        An embedder instance.
+    """
+    if embedder == "prtreid":
+        from tools.prtreid_probe import PrtreidEmbedder  # noqa: PLC0415
+
+        return PrtreidEmbedder()
+    return OsnetEmbedder(model_name, weights=weights)
 
 
 def load_anchors(survivors: Path = SURVIVORS) -> list[aw.Anchor]:
@@ -193,7 +216,8 @@ def attach_anchors(
     anchors: list[aw.Anchor], anchor_embs: dict[str, np.ndarray],
     cand_cache: dict[tuple[str, int], dict[int, tuple[np.ndarray, int]]],
     wide_by_chunk: dict[str, np.ndarray], teams_by_number: dict[int, set[int]],
-    win_by_chunk: dict[str, int],
+    win_by_chunk: dict[str, int], *, min_sim: float = aw.REID_MIN_SIM,
+    min_margin: float = aw.REID_MIN_MARGIN,
 ) -> tuple[list[aw.Attachment], Counter]:
     """Attach each anchor to a fragment by the ReID margin gate; tally unattached reasons."""
     attachments: list[aw.Attachment] = []
@@ -212,7 +236,7 @@ def attach_anchors(
         cands = cand_cache.get((a.chunk, wf), {})
         sims = {tid: float(np.dot(emb, cemb)) for tid, (cemb, team) in cands.items()
                 if team in teams and cemb.shape == emb.shape}
-        tid, basis = aw.choose_track(sims)
+        tid, basis = aw.choose_track(sims, min_margin=min_margin, min_sim=min_sim)
         if tid is None:
             reasons[basis] += 1
             continue
@@ -262,7 +286,9 @@ def _spearman(a: list[float], b: list[float]) -> float | None:
 
 def main(model_name: str = "osnet_x0_25", weights: str | None = None,
          survivors: Path = SURVIVORS, tag: str | None = None,
-         precision_pending: bool = False, match_id: str = MATCH_ID) -> None:
+         precision_pending: bool = False, match_id: str = MATCH_ID,
+         embedder_name: str = "osnet", min_sim: float = aw.REID_MIN_SIM,
+         min_margin: float = aw.REID_MIN_MARGIN) -> None:
     """Attach -> guard -> name -> validate; write the named-tracks parquet and report.
 
     Args:
@@ -279,8 +305,15 @@ def main(model_name: str = "osnet_x0_25", weights: str | None = None,
             PARSeq arm, whose confidence gate is toothless and whose spot-check is not yet in).
         match_id: registry match id to wire (default ``brighton_manutd``, output paths and Sofascore
             oracle id all resolve from this).
+        embedder_name: ``"osnet"`` (default, reproduces every shipped artifact) or ``"prtreid"``.
+        min_sim: Minimum best cosine for the attachment gate. Cosine scale is embedder-specific --
+            PRTreID's same-kit distribution sits far higher than OSNet's, so its operating point is
+            set from the GT-audited sweep in ``tools/prtreid_probe.py``, not shared with OSNet.
+        min_margin: Minimum best-minus-second-best cosine gap for the attachment gate.
     """
     tag = tag if tag is not None else (f"_{weights}" if weights else "")
+    if embedder_name != "osnet" and not tag:
+        tag = f"_{embedder_name}"
     base_out_parquet, base_report = _out_paths(match_id)
     out_parquet = base_out_parquet.with_name(base_out_parquet.stem + tag + base_out_parquet.suffix)
     report = base_report.with_name(base_report.stem + tag + base_report.suffix)
@@ -309,13 +342,15 @@ def main(model_name: str = "osnet_x0_25", weights: str | None = None,
             need[a.chunk].add(wf)
     print(f"need candidate embeddings on {sum(len(v) for v in need.values())} wide frames")
 
-    embedder = OsnetEmbedder(model_name, weights=weights)
-    print(f"OSNet ({model_name}, weights={weights}) on {embedder.device}")
+    embedder = build_embedder(embedder_name, model_name, weights)
+    print(f"embedder={embedder_name} ({model_name}, weights={weights}) on {embedder.device}; "
+          f"gate min_sim={min_sim} min_margin={min_margin}")
     anchor_embs = embed_anchor_crops(anchors, embedder)
     cand_cache = build_candidate_embeddings(df, need, embedder, match_id)
 
     attachments, reasons = attach_anchors(anchors, anchor_embs, cand_cache, wide_by_chunk,
-                                          teams_by, win_by_chunk)
+                                          teams_by, win_by_chunk, min_sim=min_sim,
+                                          min_margin=min_margin)
     print(f"attached {len(attachments)} / {len(anchors)} anchors; unattached: {dict(reasons)}")
 
     # No match in this registry carries a relink remap (relink is benchmark-side only, 35% merge
@@ -344,14 +379,17 @@ def main(model_name: str = "osnet_x0_25", weights: str | None = None,
 
     _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolved, flags,
                   named, name_by, jersey_by, unmatched_numbers, team_name, report, team_id,
-                  precision_pending=precision_pending, model_name=model_name, weights=weights)
+                  precision_pending=precision_pending, model_name=model_name, weights=weights,
+                  embedder_name=embedder_name, min_sim=min_sim, min_margin=min_margin)
 
 
 def _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolved, flags, named,
                   name_by, jersey_by, unmatched_numbers, team_name, report=REPORT,
                   team_id=None, *,
                   precision_pending: bool = False, model_name: str = "osnet_x0_25",
-                  weights: str | None = None) -> None:
+                  weights: str | None = None, embedder_name: str = "osnet",
+                  min_sim: float = aw.REID_MIN_SIM,
+                  min_margin: float = aw.REID_MIN_MARGIN) -> None:
     """Write results/identity/NAMED_TRACKS<_match>.md: funnel, guard decisions, validation, caveats."""
     if team_id is None:
         team_id = _team_id_resolver(match, oracle)
@@ -403,10 +441,9 @@ def _write_report(match, df, oracle, anchors, hist, reasons, attachments, resolv
                      "as precision-UNVERIFIED.\n")
     lines.append(f"Generated by `tools/wire_anchors.py` from the {len(anchors)} gated "
                  f"close-up anchors ({prec_phrase}). ReID attachment uses "
-                 f"{_embedder_label(model_name, weights)} via "
-                 "`generator.track_relink.OsnetEmbedder`; margin gate "
-                 f"`REID_MIN_MARGIN={aw.REID_MIN_MARGIN}`, `REID_MIN_SIM={aw.REID_MIN_SIM}` (frozen "
-                 "by reasoning -- no annotated anchor->track map exists for this match).\n")
+                 f"{_embedder_label(model_name, weights, embedder_name)}; margin gate "
+                 f"`min_margin={min_margin}`, `min_sim={min_sim}` (frozen by reasoning -- no "
+                 "annotated anchor->track map exists for this match).\n")
 
     lines.append("## Number->name source: shirtNumber, NOT jerseyNumber (contradicts the task "
                  "premise)\n")
@@ -514,6 +551,13 @@ if __name__ == "__main__":
                     help="mark all reads precision-UNVERIFIED (Koshkina PARSeq arm)")
     ap.add_argument("--match", default=MATCH_ID, choices=sorted(SOFASCORE_MATCH_ID),
                     help=f"registry match id to wire (default: {MATCH_ID})")
+    ap.add_argument("--embedder", default="osnet", choices=["osnet", "prtreid"],
+                    help="appearance embedder for the attachment gate (default: osnet)")
+    ap.add_argument("--min-sim", type=float, default=aw.REID_MIN_SIM,
+                    help="minimum best cosine to attach (embedder-specific scale)")
+    ap.add_argument("--min-margin", type=float, default=aw.REID_MIN_MARGIN,
+                    help="minimum best-minus-second-best cosine gap to attach")
     a = ap.parse_args()
     main(model_name=a.model_name, weights=a.weights, survivors=Path(a.survivors), tag=a.tag,
-         precision_pending=a.precision_pending, match_id=a.match)
+         precision_pending=a.precision_pending, match_id=a.match, embedder_name=a.embedder,
+         min_sim=a.min_sim, min_margin=a.min_margin)
