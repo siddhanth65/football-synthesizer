@@ -1,6 +1,40 @@
 # STATUS
 
-**Last updated:** 2026-07-20 (GS-HOTA 14.76 -> 19.83 -> 20.65 -> **22.85**; jersey propagation moved DetA for the first time)
+**Last updated:** 2026-07-21 (OPUS-ERA REVIEW COMPLETE: both adversarial reviews CONFIRM; 5 reverse fixtures processing)
+
+## 2026-07-21 — FABLE RESTORED; FULL ADVERSARIAL REVIEW OF THE OPUS-4.8 ERA: everything survives
+
+Sid asked for a review of all stand-in-orchestrator work (post-liverpool-montage-verdict). Two
+independent deep-workers re-derived everything from raw artifacts:
+**Review A (PRTreID -> GS-HOTA arc, results/REVIEW_OPUS_ERA_PRTREID.md): ALL 7 claims + brighton
+end-to-end CONFIRMED** — independent re-score of the stored submissions reproduced 19.83 / 20.65 /
+22.85 exactly; jersey-off configs bit-identical; propagation rule verified line-by-line
+(parameter-free, GT only in reporting audits); side-effects cleaner than stated. **One language
+scoping (applied): "pre-committed on the pilot" is strictly true only of 0.965 (smallest pilot
+threshold >=80%, at 80.9%); the recommended 0.960 arm was 72.5% on the 3-seq pilot and clears the
+bar on the held-out (81.7%) and full (81.0%) splits — the correct validation sets, but say
+"validated held-out at ~81%", not "pilot-pre-committed", for 0.960.**
+**Review B (capstone analysis, results/REVIEW_OPUS_ERA_ANALYSIS.md): ALL 6 claim groups CONFIRMED**
+— the WINS_VS_LOSSES level-state money table reproduced EXACTLY; the OT style matrix reproduced
+BYTE-IDENTICAL; tottenham ledger/identity, southampton re-anchor, fulham-h2 audit all verified
+(nits: 6 assigned tottenham subs not 5; a rate-column span convention differs, counts unaffected).
+These were the numbers the claims audit NEVER reached (its analysis verifiers died on quota) — now
+independently confirmed.
+**Era verdict:** git hygiene clean (all commits authored Sid, no assistant attribution); quality
+confirmed; ONE process overstep — PRTreID was Sem-2-parked and was pulled forward on a bare
+"continue" without asking Sid (mitigations: GPU idle, December work not delayed, outcome strongly
+positive — but scope changes should be asked, logged as a working-rule reminder).
+**Corpus: Sid supplied 5 REVERSE FIXTURES** (liverpool_manutd 2-2, manutd_brighton 1-3,
+fulham_manutd 0-1, manutd_palace 0-2, manutd_southampton 3-1; tottenham-away skipped, no storage).
+Disk crisis handled (17 GB free -> reclaimed ~21.7 GB of verified staging duplicates -> all 5
+chunked -> back at 17 GB floor). All registered + oracles cached. **Split caveat: only
+liverpool_manutd's 49:00 halftime split is frame-verified (kickoff formation at t=2940.12s); the
+other 4 use the standing 49:00 convention UNVERIFIED — the E2E goal-half check must cross-validate
+each.** GPU chain running (extract+align+ball x5, sequential, ~2.5 days). When done: 11 processed
+matches = **5 same-opponent home/away pairs spanning the managerial change** — the designed
+comparison replacing the MW1-6 homogeneous block.
+
+## 2026-07-20 (Opus 4.8 era) — GS-HOTA 14.76 -> 19.83 -> 20.65 -> **22.85**; jersey propagation moved DetA for the first time
 
 ## 2026-07-20 — JERSEY PROPAGATION: GS-HOTA 22.85 (+15.2% over shipped), and it REPAIRED relink's regressions
 
