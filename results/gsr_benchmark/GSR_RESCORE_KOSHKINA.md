@@ -123,12 +123,19 @@ hurt path reopens and per-sequence regressions become possible -- worth re-check
 - **Valid split, not the challenge leaderboard.** Published references (baseline GS-HOTA 29.01, 2024
   SOTA 63.90) are test/challenge-split numbers with a full jersey+ReID identity stack; 19.83 is our
   valid-split `gs_hota_full`. Not a like-for-like ranking -- context only.
-- **Reader precision is sample-verified on a different match, not on GSR.** The Koshkina chain was
-  measured at 86.13% tracklet accuracy on SoccerNet jersey-2023 test and 97.5% sample precision on our
-  Brighton-ManU match's close-ups; on GSR wide broadcast we have the aggregate GS-HOTA signal and the
-  zero-hurt distribution, but not a per-read GT audit of the 425 committed numbers. The +5.07 is the
-  end-to-end metric effect, which is the number that counts; a per-read precision audit against GSR GT
-  jersey labels is the natural next validator.
+- **Reader precision is sample-verified on a different match, not on GSR.** [CORRECTED 2026-07-20,
+  claims-audit] The Koshkina chain reproduces at 86.13% tracklet accuracy on the SoccerNet
+  jersey-2023 test split (1043/1211, two substitutions disclosed) -- that figure is confirmed. The
+  "97.5% sample precision on our Brighton-ManU match's close-ups" previously stated here is an
+  unpersisted directional human spot-check (39/40 on a 40-tile montage), not a stored measurement:
+  the `verdict` fields in every relevant `levers_stats.json` are empty strings, and there exist two
+  coincidentally-identical 39/40 brighton verdicts on two different reader arms (one persisted, for
+  the torso/easyocr arm; one prose-only, for the Koshkina arm) that cannot be disambiguated from
+  artifacts on disk. Treat 97.5% as directional, not as a measured precision figure for the Koshkina
+  reader specifically. On GSR wide broadcast we have the aggregate GS-HOTA signal and the zero-hurt
+  distribution, but not a per-read GT audit of the 425 committed numbers. The +5.07 is the end-to-end
+  metric effect, which is the number that counts; a per-read precision audit against GSR GT jersey
+  labels is the natural next validator.
 - **8.73% read coverage** is the binding constraint. The lift measures what a precision-first reader
   extracts from wide broadcast without roster priors; it is a floor on what a coverage-focused reader
   (higher-res crops, close-up anchors, roster-constrained decode) could add.

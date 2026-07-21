@@ -1,6 +1,22 @@
 # STATUS
 
-**Last updated:** 2026-07-20 (Tottenham identity: 23/40 named -- best coverage; 3-loss trilogy has names)
+**Last updated:** 2026-07-20 (CORPUS COMPOSITION CAVEAT: all 6 matches are MW1-6, one manager era)
+
+## 2026-07-20 — CORPUS COMPOSITION: our 6 matches are the season's FIRST 6 (MW1-6), not a spread
+
+Pulled ManU's real 24-25 PL season (38 matches, 11W-9D-18L, via the football-data skill / ESPN
+schedule). Our corpus maps to matchweeks 1-6 EXACTLY: Fulham H 1-0 (Aug 16), Brighton A 1-2
+(Aug 24), Liverpool H 0-3 (Sep 1), Southampton A 3-0 (Sep 14), Palace A 0-0 (Sep 21), Tottenham H
+0-3 (Sep 29). **This is a contiguous early-season block, not a season sample** — and it predates
+the managerial change (ten Hag sacked late Oct 2024; Amorim from Nov — worth confirming, but the
+date range is unambiguous). Implications, to be carried in every claim: (1) the "no durable ManU
+style fingerprint" result is measured on ONE manager's early-season side, so it under-tests
+identity rather than disproving it; (2) the 2W/3L/1D split is drawn from a 6-game window, so
+wins-vs-losses is not a season-representative comparison; (3) any seasonal-trend or
+manager-fingerprint question is currently UNTESTABLE with this corpus. **The single highest-value
+acquisition is now identified: all 6 REVERSE fixtures exist (Jan-Feb 2025) — same opponents, flipped
+venue, different manager — giving 6 same-opponent pairs that control opponent while varying venue,
+form and coach.** That converts the corpus from a homogeneous block into a designed comparison.
 
 ## 2026-07-20 — TOTTENHAM IDENTITY: 4,646 anchors (corpus high) -> 23/40 named (best yet)
 
@@ -73,9 +89,12 @@ SCORE_STATE_v2.md, v1 preserved). TWO honest negatives, logged per validated-or-
 ## 2026-07-20 — BAS PASS-COUNT: 6-MATCH VALIDATION, ONE FROZEN THRESHOLD (set on brighton-h1, 2026-07-19)
 
 Full corpus, op-arm (conf>=0.40 + 1s dedup, chosen on brighton h1 ONLY, never re-tuned):
-brighton 0.993 / liverpool 1.010 / fulham 1.091 / palace 1.014 / southampton 1.047 / tottenham
-0.996. **Mean |dev| 2.9%, 5/6 within 5%; fulham +9.1% the lone outlier (its h2 noisy segment,
-already logged).** The "passes are ~30% of Sofascore" problem is closed and the fix GENERALIZES
+brighton 0.993 / liverpool 1.010 / fulham 1.091 / palace 1.014 / southampton 0.996 / tottenham
+1.047. **Mean |dev| 2.9%, 5/6 within 5%; fulham +9.1% the lone outlier (its h2 noisy segment,
+already logged).** [CORRECTED 2026-07-20: southampton/tottenham ratios were transcribed swapped
+here on first write; the generated table results/bas_validation.md was always correct
+(tottenham 1079/1031=1.047, southampton 1087/1091=0.996). Aggregate stats unaffected. Caught by
+the claims-audit re-derivation.] The "passes are ~30% of Sofascore" problem is closed and the fix GENERALIZES
 across 6 matches from a single-half calibration — the robustness exhibit for review. Next: style
 fingerprint + score-state recompute at n=6 (Opus 4.8 standing in as orchestrator per /model, Fable
 quota; worker split held).
@@ -92,7 +111,16 @@ logical commits landed (identity/gsr/events/style/reports/docs, author Sid), unp
 **E2E-Spot on all 3 new matches: palace 0-0 = 0 goals detected (NEGATIVE CONTROL passed);
 southampton 3 goals split 2H1/1H2 EXACT; tottenham 3 true + 1 false H2 peak (replay-window fix
 applies); yellows 8/8 + corners 8/8 exact on tottenham, corners 7/7 southampton. Season total:
-13/13 real goals detected across 6 matches, 1 FP.** BAS pass-count runs grinding overnight (~34
+13/13 real goals detected across 6 matches, 1 FP.**
+[CORRECTED 2026-07-20 by claims-audit: RECALL is 13/13 = 100% (true goals are always the top peaks,
+0.75-0.96) but the FP count here is WRONG — at the documented operating point (thresh 0.30,
+min_sep 30 s) the detector emits **16 peaks vs 13 goals = 3 FPs, precision 81.3%**. The two extra
+are brighton h1 t=1982.5 s (0.4382) and h2 t=1404.0 s (0.5811) — disclosed in
+results/action_spotting_probe.md ("Goal 5 vs 3") but omitted from this six-match rollup. Say
+"100% goal recall, 81% precision at the operating point", never "1 FP". Also: the
+"replay-window fix" that would drop the tottenham FP is post-hoc and UNIMPLEMENTED — it must be
+applied uniformly and re-measured before it may define the operating point.]
+BAS pass-count runs grinding overnight (~34
 chunks); then bas_validate auto-extends the frozen-threshold table to 6 matches, style/score-state
 recompute at n=6, identity chains for new matches queue on GPU.
 

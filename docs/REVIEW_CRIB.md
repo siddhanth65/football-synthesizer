@@ -70,14 +70,14 @@ and we hold the free validation assets (SkillCorner tracking, SB360 same-censori
 ## Numbers to have cold
 | # | Meaning |
 |---|---|
-| ~37% / 80.5% | usable-geometry yield: whole broadcast / live-wide conditional |
+| 26.4% / 36.1% / 80.5% | usable-geometry yield: whole broadcast / of detection-frames / live-wide conditional. Corollary worth saying: **98.4% of our usable geometry IS live-wide** (7766/7891). [CORRECTED 2026-07-20: the prior "~37% whole broadcast" was the detection-conditional number mislabeled — it silently excluded the 26.7% zero-detection bucket, which is real broadcast time (close-ups, celebrations, graphics). Say "36.1% OF DETECTION-FRAMES" or "26.4% of the whole broadcast", never "~37% of the broadcast". Caught by claims-audit.] |
 | 16.4 → 7.2 m | line height raw → de-biased, HELD-OUT (5.5 m = in-sample; say "held-out" first) |
 | 47.8 / 48.6 / 0.009 | pass recall Utd / Brighton / symmetry spread — the comparative-tier license |
 | 44.2 vs 52 | our possession share vs Sofascore — the bias exhibit, leader inverts |
 | 51.9% / 71.2% | post-link ball coverage: full match / live-wide conditional |
 | 14.8 → **19.8** / 43.1 / 48.9 / 92.5 | OUR GS-HOTA valid-split: official full (pre→post jersey layer, +34%, 0 seqs hurt) / no-jersey / loc+assoc / LocA — the jersey lift is externally graded |
 | 29.01 / 63.90 | GSR baseline / SOTA (challenge split — context, not like-for-like ranking) |
-| 12.76 / 22 | players visible on average in broadcast (why imputation is THE problem) |
+| ~11.8 / 22 | players with usable pitch position per TRUSTED frame (~7.4/22 over the whole broadcast incl. graphics/close-ups) — why imputation is THE problem. [CORRECTED 2026-07-20: prior "12.76/22" was a category error — 12.76 is a compactness value in metres from brighton_cv_vs_oracle.md, not a player count; recomputed 11.75 from the aligned parquet. Caught by claims-audit.] |
 | 100% | guardrail precision — no ungrounded number reaches a reader |
 
 ## The one-sentence thesis

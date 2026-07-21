@@ -103,6 +103,16 @@ Top Goal-class peaks across the match (video-elapsed time within each half):
   ~31' opener. Precise match-clock alignment was not independently established (no incident-level
   oracle is cached — only team aggregates), so minute-level timestamps are corroborative, not proven.
 
+**[CORRECTED 2026-07-20, claims-audit] Corpus-level precision at the documented operating point.**
+This page's brighton "Goal 5 vs 3" result is not an isolated case: at the documented operating point
+(`--thresh 0.30`, `--min-sep-s 30.0`) across all 6 matches, the goal peak-picker emits **16 peaks
+vs 13 true goals = 100% recall, 81.3% precision, 3 false positives** -- brighton h1 1982.5 s
+(score 0.4382), brighton h2 1404.0 s (score 0.5811), and tottenham h2 1692.5 s (score 0.3379). Any
+six-match rollup that reports "1 false positive" is counting only the tottenham FP after a post-hoc
+"replay-window fix" that is **not implemented** in `tools/action_spot_probe.py` and has not been
+applied uniformly across matches; as persisted in the npz score files, it does not currently define
+the operating point. Say "13/13 recall, 81.3% precision (16 peaks, 3 FPs)" together, not "1 FP" alone.
+
 ---
 
 ## Cost (RTX 3050 Laptop, 4 GB)
