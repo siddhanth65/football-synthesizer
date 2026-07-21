@@ -27,6 +27,8 @@ outputs/
 *.log
 # SoccerNet downloads (4.4 GB incl. two ~1 GB zips — never commit; licensing + size)
 data/soccernet/
+# B4 imputation truth data (Metrica + SkillCorner open data — external, gitignored)
+data/imputation/
 # FIFA PMSR match reports (copyrighted ground truth — keep local, never commit)
 PMSR-*.pdf
 # archive safety net

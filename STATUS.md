@@ -1,6 +1,33 @@
 # STATUS
 
-**Last updated:** 2026-07-21 (OPUS-ERA REVIEW COMPLETE: both adversarial reviews CONFIRM; 5 reverse fixtures processing)
+**Last updated:** 2026-07-22 (B4 imputation STARTED EARLY per Sid; reverse-fixture chain on match 1/5)
+
+## 2026-07-22 — December stocktake delivered; B4 pulled forward with explicit approval
+
+Sid's calls after the stocktake: (1) **start B4 early** — plan written (`docs/B4_IMPUTATION_PLAN.md`),
+deep-worker launched on M1 (Metrica/SkillCorner acquisition + audit, censoring simulator, hold +
+linear-interp baselines; CPU-only so it coexists with the GPU chain). (2) Demo fixture **deferred**
+until the team-identity picture is locked — likely shape 1 win + 1 loss. (3) New program queued
+post-identity: **United player analysis** — impact players, def/mid/att lines, positional analysis,
+build-up patterns, defensive shape (maps to MANUTD plan Pillar 3.4/3.2 + ledger v2; binding
+constraint is per-player attribution coverage, which the PRTreID re-runs address). (4) Professor
+asks (claims regime + demo shape) handed to Sid — see the 07-22 conversation / stocktake message.
+Chain status: liverpool_manutd h1 tracking mid-flight, GPU 100%, 4 matches queued behind it.
+
+**B4-M1 LANDED same day (deep-worker, CPU-only, GPU untouched):**
+- **Metrica Sample_Game_1 audit: PASS as truth** — exactly 22 players at 100.00% of 145,006
+  frames, 25 fps, zero within-span NaNs, normalized coords on 105x68. License = "acknowledge
+  source" (no formal OSS text — fine for thesis use, note in writeup).
+- **SkillCorner audit: confirmed transfer-check, not truth** — per-point `is_detected` flag,
+  40.7% of player-points extrapolated, detected mean 13.04/frame. CC BY-NC.
+- **Censoring simulator calibrated:** ball-following window 33.8 m wide x full height →
+  visible mean 11.80/22, exactly our measured broadcast stat. 1.46 M hidden player-frames to score.
+- **Baseline bar quantified (RMSE metres, Sample_Game_1):** hold 17.7 overall; linear-interp
+  (offline, the published-SOTA practice) 10.1 overall — 0.87 at 0-1 s rising to 14.6 at 30 s+.
+  Causal/online linear degenerates to hold (stated). M2's model must beat the offline-linear
+  column per horizon bucket (gate 1). Total download 154 MB into gitignored `data/imputation/`.
+- Files: `tools/imputation_audit.py`, `synthesizer/imputation.py` (loader/camera/censor/
+  baselines/scorer + self-check). Ruff clean.
 
 ## 2026-07-21 — FABLE RESTORED; FULL ADVERSARIAL REVIEW OF THE OPUS-4.8 ERA: everything survives
 
