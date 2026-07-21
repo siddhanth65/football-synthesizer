@@ -297,11 +297,22 @@ class _FootballRoleDetector:
 
     @staticmethod
     def _download_default() -> str:
-        from huggingface_hub import hf_hub_download, list_repo_files  # noqa: PLC0415
+        # Prefer the already-cached snapshot (fully offline): a network outage must not break a
+        # detector build when the .pt is on disk. Only list/download over the network on a cache miss.
+        from huggingface_hub import hf_hub_download, list_repo_files, snapshot_download  # noqa: PLC0415
 
-        pts = [f for f in list_repo_files(_FootballRoleDetector.DEFAULT_REPO) if f.endswith(".pt")]
+        repo = _FootballRoleDetector.DEFAULT_REPO
+        try:
+            snap = Path(snapshot_download(repo, local_files_only=True, allow_patterns=["*.pt"]))
+            local_pts = [p.name for p in snap.glob("*.pt")]
+            if local_pts:
+                pref = [f for f in local_pts if "best" in f.lower()] or local_pts
+                return str(snap / pref[0])
+        except Exception:  # noqa: BLE001 - no local snapshot -> fall through to the network path
+            pass
+        pts = [f for f in list_repo_files(repo) if f.endswith(".pt")]
         pref = [f for f in pts if "best" in f.lower()] or pts
-        return hf_hub_download(_FootballRoleDetector.DEFAULT_REPO, pref[0])
+        return hf_hub_download(repo, pref[0])
 
     def detect(self, frame_rgb):
         """Return ``(person_xyxy, person_conf, role_ids, ball_xy_or_None)`` with real roles."""

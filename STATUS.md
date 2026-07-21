@@ -1,6 +1,19 @@
 # STATUS
 
-**Last updated:** 2026-07-22 (B4 imputation STARTED EARLY per Sid; reverse-fixture chain on match 1/5)
+**Last updated:** 2026-07-22 (chain relaunched after overnight network outage; B4 baselines complete)
+
+## 2026-07-22 (early AM) — chain outage + repair; two hardening fixes now permanent
+
+The reverse-fixtures chain died at ~04:18: (1) a home-network outage killed extraction because
+`generator/extract.py` called the HuggingFace list-repo API on EVERY detector build even with
+weights cached (getaddrinfo crash-loop; brighton h2 lost 1/6 chunks); (2) the align+ball driver
+lived in the session temp scratchpad and Windows temp-cleanup deleted it mid-run (chain exit 2 —
+align/ball had silently not run for ANY match). Fixes (deep-worker, verified): extract.py now
+resolves weights local-cache-first (smoke-tested under HF_HUB_OFFLINE=1 = the exact failure mode);
+driver promoted to durable `tools/run_align_ball.py` (registry paths, resumable by disk state).
+Chain relaunched from disk state, zero work redone: bha-h2 backfill DONE (6/6, 3249 frames),
+liverpool align DONE via the new driver, ball running. Lesson operationalized: nothing
+load-bearing lives in temp dirs; monitors must capture error LINES, not bare Traceback headers.
 
 ## 2026-07-22 — December stocktake delivered; B4 pulled forward with explicit approval
 
