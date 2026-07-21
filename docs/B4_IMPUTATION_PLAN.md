@@ -68,6 +68,20 @@ performance-rescue: the model being gated does not exist yet and no model number
 If the professor prefers the literal offline bar, we keep it and expect gate 4 (abstention) to
 carry the long horizons.
 
+## Prior work reconciliation (found 2026-07-22)
+
+A pre-registered closed-form baseline probe already existed: `ccf63c5` (2026-07-16),
+`tools/imputation_probe.py` + `results/imputation_probe.md`, run on OUR OWN tracking as
+self-truth (brighton + france_senegal parquets, gaps <= 8 s). Its findings AGREE with M1/M2a:
+interpolation is near the noise floor at short gaps; extrapolation is where the gap opens;
+structure (centroid_rel there, slot prior here) starts paying at the longest horizons. The new
+Metrica setup SUPERSEDES it as the grading harness — external full-pitch truth instead of
+self-truth (its own stated caveat), and 30 s+ horizons instead of <= 8 s. The probe still
+contributes two things going forward: the **re-entry error** metric (error at the moment the
+player reappears — adopt in M2), and a domain-matched self-truth harness for the M3 transfer
+check on our real footage. Both code paths stay: probe = measurement on our parquets,
+`synthesizer/imputation.py` = the build.
+
 ## Baseline results (M1+M2a, frozen fits on Game 1, held-out Game 2; RMSE metres)
 
 | horizon | B1_hold | B2_offline (oracle) | B3_veldecay | B4_slot | B5_blend (causal bar) |
