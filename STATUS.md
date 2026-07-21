@@ -29,6 +29,17 @@ Chain status: liverpool_manutd h1 tracking mid-flight, GPU 100%, 4 matches queue
 - Files: `tools/imputation_audit.py`, `synthesizer/imputation.py` (loader/camera/censor/
   baselines/scorer + self-check). Ruff clean.
 
+**B4-M2a LANDED same night: all 4 baselines + blend, held-out on Metrica Game 2 (audit: PASS,
+same full-pitch regime).** Fits frozen on Game 1 (veldecay tau 4.75 s; blend weights per bucket),
+zero held-out degradation. Held-out RMSE (ALL): hold 16.16 / offline-linear 8.66 / veldecay
+14.61 / slot-prior 26.69 / blend 12.63. **Two findings: (1) the slot prior is the worst baseline
+everywhere alone but cuts 30s+ error 18.6->16.0 inside the blend — model v1 needs memory AND
+structure jointly; (2) offline-linear PEEKS AT THE FUTURE sighting — no causal baseline beats it
+past 3 s (gap up to 7.1 m at 10-30 s). Gate-1 amendment proposed and dated in the plan doc BEFORE
+any learned model exists: score gate 1 against the best causal baseline (blend), report
+offline-linear as an oracle ceiling — pending professor sign-off (added to the prof-asks list).**
+Chain meanwhile: liverpool_manutd h1+h2 tracking both DONE (2402+1404 frames), ball stage next.
+
 ## 2026-07-21 — FABLE RESTORED; FULL ADVERSARIAL REVIEW OF THE OPUS-4.8 ERA: everything survives
 
 Sid asked for a review of all stand-in-orchestrator work (post-liverpool-montage-verdict). Two

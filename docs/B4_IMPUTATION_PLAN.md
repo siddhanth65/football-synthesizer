@@ -58,6 +58,35 @@ raw, possession undercount) on the oracle matches.
 3. Downstream: measurable bias reduction on ≥1 oracle-validated team metric.
 4. Abstention horizon: beyond the horizon where gate 1 fails, the imputer must say "don't know".
 
+**Gate-1 amendment (2026-07-22, dated BEFORE any learned-model result exists — baselines only):**
+M2a exposed that offline linear interpolation uses the FUTURE sighting, which a causal imputer
+never has; no causal baseline beats it past 3 s and the gap widens with horizon (7.1 m at
+10-30 s). Proposed restatement, pending professor sign-off: **gate 1 is scored against the best
+CAUSAL baseline (B5_blend) per bucket; offline-linear is reported alongside as an oracle
+ceiling, not the pass/fail line.** Rationale is structural (information asymmetry), not
+performance-rescue: the model being gated does not exist yet and no model numbers informed this.
+If the professor prefers the literal offline bar, we keep it and expect gate 4 (abstention) to
+carry the long horizons.
+
+## Baseline results (M1+M2a, frozen fits on Game 1, held-out Game 2; RMSE metres)
+
+| horizon | B1_hold | B2_offline (oracle) | B3_veldecay | B4_slot | B5_blend (causal bar) |
+|---|---|---|---|---|---|
+| 0-1s | 1.38 | 0.91 | 0.55 | 21.92 | **0.55** |
+| 1-3s | 4.48 | 2.63 | 2.42 | 22.63 | **2.27** |
+| 3-5s | 8.35 | 4.69 | 5.71 | 23.57 | **5.08** |
+| 5-10s | 13.58 | 7.35 | 11.00 | 24.47 | **9.05** |
+| 10-30s | 21.80 | 10.17 | 19.76 | 26.91 | **17.27** |
+| 30s+ | 19.20 | 12.46 | 18.58 | 33.36 | **15.95** |
+| ALL | 16.16 | 8.66 | 14.61 | 26.69 | **12.63** |
+
+Fitted params (Game 1 only): veldecay tau = 4.75 s; blend weight on B3 per bucket =
+[1.0, .95, .85, .75, .60, .65]. Findings: slot prior alone is the WORST baseline everywhere
+(22-33 m — a linear structural guess has no last-seen memory), yet blending 35-40% of it into
+veldecay cuts 30s+ RMSE 18.58 -> 15.95: model v1 needs last-seen memory AND structure jointly.
+Frozen fits transferred to Game 2 with zero degradation (held-out slightly better than
+in-sample) — no overfitting on the fit set. Game 2 audit: PASS, same full-pitch regime as Game 1.
+
 ## Milestones
 
 - **M1 (now → Aug 8):** data acquisition + audit; censoring simulator; baselines 1–2 scored on
