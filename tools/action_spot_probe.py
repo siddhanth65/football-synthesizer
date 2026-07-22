@@ -50,6 +50,7 @@ SOFASCORE_MATCH_ID = {
     "fulham_manutd": 12436899,
     "manutd_palace": 12436925,
     "manutd_southampton": 12436516,
+    "tottenham_manutd": 12436952,
 }
 SOFASCORE_MATCH_DICTS = Path(
     "outputs/oracle/sofascore/match_dicts_England_Premier_League_24_25.json"

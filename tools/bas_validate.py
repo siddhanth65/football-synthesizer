@@ -69,6 +69,7 @@ TRUTH = {
     "fulham_manutd": Path("outputs/oracle/sofascore/team_stats_12436899.parquet"),
     "manutd_palace": Path("outputs/oracle/sofascore/team_stats_12436925.parquet"),
     "manutd_southampton": Path("outputs/oracle/sofascore/team_stats_12436516.parquet"),
+    "tottenham_manutd": Path("outputs/oracle/sofascore/team_stats_12436952.parquet"),
 }
 BALL_ROOT = Path("outputs")               # outputs/<match>/ball_action/<half>/chunk_*_actions.json
 LIVEPLAY_CACHE = Path("outputs")          # outputs/<match>/live_play/<chunk>.json

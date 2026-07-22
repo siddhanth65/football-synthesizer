@@ -165,3 +165,16 @@ matches:
     competition: ENG-Premier League 2024-2025
     home_team: Man Utd
     away_team: Southampton
+  # PL Archive 24/25, reverse fixtures batch. Tottenham (home) vs Man Utd, 2025-02-16, 1-0.
+  # Sofascore match id 12436952. Prep-only at registration (same convention as above). Halftime
+  # split by frame inspection (kickoff formation at centre circle) at raw t=3115.0s -- h1_full
+  # 3115.12s, h2_full 2593.97s, sum 5709.09s vs source container 5708.97s.
+  tottenham_manutd:
+    teams: [Tottenham, Man Utd]
+    aligned: outputs/tottenham_manutd/final/match_aligned.parquet
+    ball_dir: outputs/tottenham_manutd/final/ball
+    pmsr: null
+    roster: false
+    competition: ENG-Premier League 2024-2025
+    home_team: Tottenham
+    away_team: Man Utd
