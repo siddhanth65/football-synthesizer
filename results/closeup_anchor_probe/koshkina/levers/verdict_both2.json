@@ -1,0 +1,9 @@
+{
+  "arm": "both2",
+  "match": "brighton_manutd",
+  "correct": 39,
+  "total": 40,
+  "wrong_tiles": [],
+  "notes": "Sid eyeball grade 2026-07-15 (brighton_manutd). Per CLAIMS_AUDIT C-3: the wrong tile is NOT identifiable from artifacts; the cut-off-crop-read-as-4 belongs to the torso/easyocr arm (spotcheck_step3), not this koshkina both2 sample. Directional human check, recorded retroactively 2026-07-22.",
+  "date": "2026-07-22"
+}

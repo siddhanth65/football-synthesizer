@@ -32,6 +32,7 @@ Run (GPU, one job)::
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import shutil
 from collections import defaultdict
@@ -1154,9 +1155,12 @@ def _finalize_levers(match_id: str, threshold: float, floor: float, valid: list[
                      "number_histogram": {int(k): int(v) for k, v in sorted(hist[a].items())}}
                  for a in all_arms},
         "new_vs_baseline": {a: len([r for r in new_recs if a in r["arms"]]) for a in LEVER_ARMS},
-        "spotcheck_picks": {a: [{"file": r["file"], "pred": r["pred"], "conf": r["conf"],
+        # tile index == montage tile order (row-major), so a human verdict recorded later
+        # (record_verdict) resolves each numerator tile back to its (chunk, frame, pred).
+        "spotcheck_picks": {a: [{"tile": i, "chunk": r["chunk"], "frame": r["frame"],
+                                 "file": r["file"], "pred": r["pred"], "conf": r["conf"],
                                  "pred_m": r["pred_m"], "conf_m": r["conf_m"], "verdict": ""}
-                                for r in spot[a]] for a in LEVER_ARMS},
+                                for i, r in enumerate(spot[a])] for a in LEVER_ARMS},
     }
     (lev_dir / "levers_stats.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
     print("\n=== STEP-4 LEVER ARMS ===")
@@ -1168,11 +1172,49 @@ def _finalize_levers(match_id: str, threshold: float, floor: float, valid: list[
     print(f"artifacts -> {lev_dir}")
 
 
+def record_verdict(stats_path: Path, arm: str, correct: int, total: int,
+                   wrong_tiles: list[int], notes: str) -> Path:
+    """Persist a human montage grade as a durable, tile-keyed sidecar (no GPU).
+
+    Resolves each wrong-tile index against ``spotcheck_picks[arm]`` in the levers stats
+    JSON so a graded numerator (e.g. 39/40) carries the (chunk, frame, pred) provenance of
+    every missed tile. Writes ``verdict_<arm>.json`` next to the stats file.
+
+    Args:
+        stats_path: A ``levers_stats.json`` produced by :func:`_finalize_levers`.
+        arm: Lever arm whose montage was graded (a key of ``spotcheck_picks``).
+        correct: Tiles graded correct by the human.
+        total: Tiles graded (montage tile count for that arm).
+        wrong_tiles: 0-based tile indices judged wrong (row-major montage order).
+        notes: Free-text description of the miss(es).
+
+    Returns:
+        Path to the written sidecar.
+    """
+    stats = json.loads(stats_path.read_text(encoding="utf-8"))
+    picks = stats.get("spotcheck_picks", {}).get(arm)
+    if picks is None:
+        raise SystemExit(f"no spotcheck_picks for arm {arm!r} in {stats_path}")
+    bad = sorted(set(wrong_tiles))
+    if bad and (min(bad) < 0 or max(bad) >= len(picks)):
+        raise SystemExit(f"wrong-tile index out of range 0..{len(picks) - 1}: {bad}")
+    out = {
+        "arm": arm, "match": stats.get("match"),
+        "correct": correct, "total": total,
+        "wrong_tiles": [{"tile": i, **picks[i]} for i in bad],
+        "notes": notes, "date": dt.date.today().isoformat(),
+    }
+    dst = stats_path.parent / f"verdict_{arm}.json"
+    dst.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    return dst
+
+
 def main() -> None:
     """CLI entry point (GPU; one job at a time)."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--match", default="brighton_manutd")
-    ap.add_argument("--mode", choices=["spotcheck", "full", "harvest_neg", "levers"], required=True)
+    ap.add_argument("--mode", choices=["spotcheck", "full", "harvest_neg", "levers"],
+                    help="required unless --record-verdict is given")
     ap.add_argument("--chunk", default="h1_chunk_000", help="spotcheck: which chunk to sample")
     ap.add_argument("--n", type=int, default=24, help="spotcheck: crops to dump")
     ap.add_argument("--threshold", type=float, default=0.90, help="full: frozen anchor confidence")
@@ -1199,7 +1241,26 @@ def main() -> None:
                          "results/closeup_anchor_probe, or its koshkina/ subdir for --reader "
                          "koshkina) -- set per match to avoid clobbering another match's run")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--record-verdict", metavar="LEVERS_STATS_JSON",
+                    help="no GPU: record a human montage grade as verdict_<arm>.json next to a "
+                         "levers_stats.json (needs --arm/--correct/--total)")
+    ap.add_argument("--arm", help="record-verdict: lever arm graded (spotcheck_picks key)")
+    ap.add_argument("--correct", type=int, help="record-verdict: tiles graded correct")
+    ap.add_argument("--total", type=int, help="record-verdict: tiles graded")
+    ap.add_argument("--wrong-tiles", type=int, nargs="*", default=[],
+                    help="record-verdict: 0-based tile indices judged wrong")
+    ap.add_argument("--notes", default="", help="record-verdict: free-text miss description")
     args = ap.parse_args()
+    if args.record_verdict:
+        if args.arm is None or args.correct is None or args.total is None:
+            ap.error("--record-verdict needs --arm, --correct and --total")
+        dst = record_verdict(Path(args.record_verdict), args.arm, args.correct, args.total,
+                             args.wrong_tiles, args.notes)
+        print(f"verdict -> {dst} ({args.correct}/{args.total} correct, "
+              f"{len(set(args.wrong_tiles))} wrong tiles)")
+        return
+    if args.mode is None:
+        ap.error("--mode is required unless --record-verdict is given")
     if args.reader == "koshkina" and args.mode != "levers":
         ap.error("--reader koshkina is only wired for --mode levers (the baseline comparison path)")
     if args.mode == "spotcheck":

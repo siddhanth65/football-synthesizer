@@ -1,0 +1,9 @@
+{
+  "arm": "both2",
+  "match": "manutd_tottenham",
+  "correct": 40,
+  "total": 40,
+  "wrong_tiles": [],
+  "notes": "Sid eyeball grade 2026-07-20 on montage_new_both2_labeled.png (manutd_tottenham): all tiles correct. Human spot-check recorded retroactively 2026-07-22; per-tile provenance in this legacy stats file is via crop filenames.",
+  "date": "2026-07-22"
+}
