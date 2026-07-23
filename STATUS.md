@@ -1,6 +1,38 @@
 # STATUS
 
-**Last updated:** 2026-07-22 (chain relaunched after overnight network outage; B4 baselines complete)
+**Last updated:** 2026-07-23 (style deep-research COMPLETE: 3 deliverables; tottenham_manutd registered = 12-match corpus; sweep on last 2 halves)
+
+## 2026-07-23 — style deep-research complete: United style-analysis v2 architecture
+
+56-agent workflow (survived one quota exhaustion + one web-permission stall; resumed from journal
+cache both times): 105 xGFC posts catalogued online (~50 newer than the 92 local), 107 adjacent
+sources mapped, 6 method axes synthesized, 19 build-recommendations adversarially verified
+(8 survive, 10 corrected/refuted — honesty trail inline). Deliverables:
+`results/STYLE_RESEARCH_{XGFC,SOURCES,METHODS}.md`. Headline findings:
+- **Next CV win is imputation of the invisible, not more accuracy on the visible** — every spatial
+  method across all axes gates on off-screen imputation (converges with B4, already in flight).
+- **Ten event-only builds need no GPU and no new models** (Phase 0-1): possession normalization,
+  passing networks + consistency, flow motifs, avg-position formation proxy, manager-regime split
+  (Ten Hag vs Amorim as discriminative-validity test), Bayesian win-probability game-state
+  covariate (KU Leuven, base subset only), counter-vs-sustained typing, style factor profile,
+  block-height + compactness on trusted frames.
+- EFPI named formations DOWNGRADED build->probe (needs imputation output, no quantitative accuracy
+  published); 7 tempting methods explicitly not-build (DefR, ScoutGPT training, synchrony, learned
+  Graph Imputer now, etc.) with reasons.
+Also: tottenham_manutd prepped+registered (30bd3a7) after a De Ligt-transfer-date false alarm
+(Sid corrected: joined Aug 2024); corpus = 6 complete home/away pairs once processed.
+
+## 2026-07-22 (evening) — reverse-fixture chain COMPLETE; corpus = 11 matches end-to-end
+
+All 5 reverse fixtures processed (extract + align + ball) after the relaunch — the corpus now
+holds 11 matches = 5 same-opponent home/away pairs spanning the managerial change + tottenham.
+Post-link ball coverage: liverpool_manutd 32.2% (corpus low, matches palace-away profile),
+manutd_brighton 51.3%, fulham_manutd 50.6%, manutd_palace 47.1%, manutd_southampton 48.7%.
+**Open flag: manutd_southampton kit anchoring labeled BOTH teams "red" (hue 25 vs 37) and mapped
+ManU->team0 on the redder cluster; attack-direction check clean. Mapping must be confirmed by the
+sweep (3-1 goal halves + Sofascore pass split) before any team-attributed claim ships for this
+match.** E2E+BAS validation sweep now running across all 5 (also validates the 4 unverified
+halftime splits via goal halves). Verdict-capture backlog item closed same day (2dd2d56).
 
 ## 2026-07-22 (early AM) — chain outage + repair; two hardening fixes now permanent
 
