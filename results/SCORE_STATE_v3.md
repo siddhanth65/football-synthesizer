@@ -1,5 +1,7 @@
 # Score-state segmentation v3 (Plan B-5) - Man Utd shape + press by scoreline, full 6-match corpus
 
+> **2026-07-23 CORRECTION:** `southampton_manutd` + `tottenham_manutd` team mappings corrected (see `results/PAIR_ANALYSIS_v1.md`). Every Southampton (0-3 win) Man Utd row is recomputed with team0 = Man Utd; the prior wins-sat-deeper block read is retracted/revised.
+
 Every metric below is the B-4 style fingerprint (validated tracking-native primitives)
 re-bucketed by Man Utd's score state. States are **from Man Utd's perspective** (level / chasing / leading). Boundaries are the validated E2E-Spot goal peaks (per-half count
 matched to the Sofascore split); which team scored comes from the Sofascore per-half deltas.
@@ -34,7 +36,7 @@ kickoff a losses pattern, or Liverpool-specific? (Full five-metric level-state s
 | loss | Tottenham (0-3 loss) | 1 | 0.000 | 0.000 |
 | loss | Brighton (1-2 loss) | 64 | 0.719 | 0.406 |
 | win | Fulham (1-0 win) | 71 | 0.718 | 0.465 |
-| win | Southampton (0-3 win) | 33 | 0.394 | 0.333 |
+| win | Southampton (0-3 win) | 26 | 0.423 | 0.192 |
 | draw | Palace (0-0 draw) | 40 | 0.750 | 0.375 |
 
 ## Score-state timeline (validated goal boundaries)
@@ -115,8 +117,8 @@ loss; 5s regain = ball won back in that window.
 | Brighton (1-2 loss) | chasing | 38 | 0.632 | 0.368 |
 | Fulham (1-0 win) | level | 71 | 0.718 | 0.465 |
 | Fulham (1-0 win) | leading | 8 | 0.750 | 0.500 |
-| Southampton (0-3 win) | level | 33 | 0.394 | 0.333 |
-| Southampton (0-3 win) | leading | 54 | 0.500 | 0.278 |
+| Southampton (0-3 win) | level | 26 | 0.423 | 0.192 |
+| Southampton (0-3 win) | leading | 77 | 0.519 | 0.325 |
 | Palace (0-0 draw) | level | 40 | 0.750 | 0.375 |
 
 ## Man Utd shape by state (in-possession + attacking transition)
@@ -142,10 +144,10 @@ goal). `trans_pos` = the win-it-and-go attacking transition.
 | Fulham | leading | in_poss | 7 | 41.1 | 28.8 | 46.1 |
 | Fulham | level | trans_pos | 343 | 52.0 | 32.5 | 57.9 |
 | Fulham | leading | trans_pos | 26 | 37.6 | 31.5 | 43.5 |
-| Southampton | level | in_poss | 63 | 37.2 | 35.7 | 42.5 |
-| Southampton | leading | in_poss | 195 | 30.0 | 34.7 | 35.2 |
-| Southampton | level | trans_pos | 82 | 40.8 | 34.4 | 46.2 |
-| Southampton | leading | trans_pos | 314 | 38.9 | 28.5 | 43.7 |
+| Southampton | level | in_poss | 85 | 58.9 | 42.0 | 64.6 |
+| Southampton | leading | in_poss | 596 | 51.9 | 34.5 | 57.7 |
+| Southampton | level | trans_pos | 88 | 45.5 | 31.7 | 51.1 |
+| Southampton | leading | trans_pos | 302 | 54.0 | 32.3 | 59.2 |
 | Palace | level | in_poss | 907 | 45.9 | 32.6 | 52.8 |
 | Palace | level | trans_pos | 192 | 42.8 | 32.9 | 48.8 |
 
@@ -166,22 +168,27 @@ team split held; Brighton is excluded (its split inverts); Southampton/Palace ha
 
 ## Honest read
 
+_2026-07-23 CORRECTION: southampton_manutd + tottenham_manutd team mappings corrected (see
+results/PAIR_ANALYSIS_v1). Every Southampton (0-3 win) Man Utd row below is recomputed with team0 =
+Man Utd; the prior "wins sat deeper" block read is retracted (point 3)._
+
 1. THE Liverpool finding still does NOT repeat -- and the second win makes it starker. Liverpool's
    flat 0-0 counter-press (0.455) was Liverpool-specific: Brighton (also a loss) pressed 0.719 at 0-0,
-   and the two WINS split the whole range -- Fulham 0.718 (high) vs Southampton 0.394 (low). Level-
+   and the two WINS split the whole range -- Fulham 0.718 (high) vs Southampton 0.423 (low). Level-
    state counter-press does not separate win from loss, nor even the two wins from each other. The
    pre-scoreline collapse is one match (Liverpool), not a corpus law.
 2. Tottenham stays unevaluable at level (conceded ~3', level = 1 loss). Southampton's level state is
-   small too (33 losses -- ahead from ~35') but usable, and it is the low-press win, which is exactly
+   small too (26 losses -- ahead from ~35') but usable, and it is the lower-press win, which is exactly
    what kills any 'wins press harder at 0-0' story.
-3. Where the wins DO differ at 0-0 is not the press but the defensive BLOCK: both wins sat deeper
-   (out-of-possession deepest line 32.9 Southampton / 38.0 Fulham vs 40.6-49.9 across the losses),
-   with the goalless draw (34.8) in the win band. Territorial, not press, and small-n -- the full
-   five-metric level-state synthesis is in `results/WINS_VS_LOSSES.md`.
+3. Block height at 0-0 does NOT separate wins from losses either (CORRECTED): the Southampton win
+   defended the HIGHEST out-of-possession line of the six (53.7 m, above every loss 40.6-49.9), while
+   the Fulham win was among the deepest (38.0 m) -- the two wins bracket the whole range. The prior
+   'both wins sat deeper (32.9 / 38.0)' read was the southampton_manutd mapping flip and is retracted;
+   the full five-metric level-state synthesis is in `results/WINS_VS_LOSSES.md`.
 4. The two 0-3 losses still carry the lowest match-level regain, but that is press while ALREADY
    behind (both spent almost the whole match chasing), confounded with game state -- not a 0-0 signal.
 5. Leading = press-while-ahead now has TWO matches, not one. Fulham dropped its line in the ~5 min at
-   1-0; Southampton led from ~35' and pressed MORE when ahead (leading 0.500-0.519 vs level 0.394) --
+   1-0; Southampton led from ~35' and pressed MORE when ahead (leading 0.519 vs level 0.423) --
    matching the Southampton report's 'counter-press rose when ahead'. The wins' energy is a
    with-the-lead trait, not a from-kickoff one.
 6. Shape shifts with state, confirming the segmentation tracks something real: trailing sides push the

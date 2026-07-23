@@ -22,35 +22,46 @@ numbers.
 
 ---
 
-## Claim 1 - WINS_VS_LOSSES level-state table: CONFIRMED (exact)
+## Claim 1 - WINS_VS_LOSSES level-state table: RETRACTED (mapping flip)
+
+> **2026-07-23 CORRECTION:** this "CONFIRMED (exact)" verdict re-derived the *then-current* generator
+> output, but that output rested on a **flipped `southampton_manutd` team mapping** (see
+> `results/PAIR_ANALYSIS_v1.md`). The Southampton (0-3 win) Man Utd row below carried the OPPONENT's
+> numbers. Corrected with team0 = Man Utd, United's level-state block in that win is **HIGH (53.7 m),
+> not deep (32.9 m)**, and their attacking-third control is the **highest** of the six (0.353), not the
+> lowest. The **"both wins defended deepest" conclusion is FALSE** and retracted; there is no
+> repeatable win-shape at level state (see the corrected `results/WINS_VS_LOSSES.md`).
 
 Recomputed fresh via `fingerprint.score_state.annotate` over `style_fingerprint.phase_frame_table`
 and `turnover_press_table` (both re-read every ball/aligned parquet and re-run `assign_possession`),
 then `level_synthesis` at `state == "level"`. ATT_THIRD_X = 70.0 m confirmed in `core/pitch.py`.
+(Southampton row corrected 2026-07-23; the other five legs were already correctly labelled.)
 
 | match (result) | n loss | cp frac | 5s regain | block ht | att-3rd | trans depth | in/out/tp frames |
 |---|---|---|---|---|---|---|---|
 | Fulham (1-0 win)      | 71 | 0.718 | 0.465 | 38.0 | 0.173 | 57.9 | 549/441/343 |
-| Southampton (0-3 win) | 33 | 0.394 | 0.333 | 32.9 | 0.111 | 46.2 | 63/76/82 |
+| Southampton (0-3 win) | 26 | 0.423 | 0.192 | 53.7 | 0.353 | 51.1 | 85/79/88 |
 | Liverpool (0-3 loss)  | 22 | 0.455 | 0.227 | 40.6 | 0.180 | 45.3 | 194/231/136 |
 | Tottenham (0-3 loss)  |  1 | 0.000 | 0.000 | 49.9 | 0.000 | 24.4 | 1/32/12 |
 | Brighton (1-2 loss)   | 64 | 0.719 | 0.406 | 46.9 | 0.262 | 61.4 | 344/535/387 |
 | Palace (0-0 draw)     | 40 | 0.750 | 0.375 | 34.8 | 0.127 | 48.8 | 907/182/192 |
 
-Every claimed cell matches to the printed precision, including the honesty counters. The conclusion
-follows from my numbers:
+After the correction:
 
-- **Press does not separate W/L.** cp_frac wins {0.718, 0.394} straddle losses {0.455, 0.719}:
-  Fulham-win 0.718 sits on Brighton-loss 0.719; Southampton-win 0.394 is below Liverpool-loss 0.455.
-- **Both wins defended deepest.** Out-poss block height ordering: Sou 32.9 < Palace-draw 34.8 < Ful
-  38.0 < Liv 40.6 < Bri 46.9 < Tot 49.9. Both wins are below all three losses; the draw sits in the
-  win band. True as stated.
-- **Att-3rd control points the same way** (wins 0.111 / 0.173 lowest of the evaluable; Brighton loss
-  0.262 highest). Regain and transition depth fully overlap - not win-shapes.
+- **Press does not separate W/L** (unchanged). cp_frac wins {0.718, 0.423} straddle losses {0.455,
+  0.719}: Fulham-win 0.718 sits on Brighton-loss 0.719; Southampton-win 0.423 is below Liverpool-loss
+  0.455.
+- **Block height does NOT separate W/L (RETRACTED).** Corrected ordering: Palace-draw 34.8 < Ful-win
+  38.0 < Liv 40.6 < Bri 46.9 < Tot 49.9 < **Sou-win 53.7**. The Southampton win defended the HIGHEST
+  block of all six, above every loss; the two wins bracket the range. "Both wins defended deepest" is
+  false.
+- **Att-3rd control does NOT separate either (RETRACTED).** Corrected: Sou-win 0.353 is the HIGHEST of
+  the evaluable (above Brighton-loss 0.262), Ful-win mid 0.173. Regain and transition depth still
+  fully overlap - no win-shape in any of the five metrics.
 
-The write-up's own hedges are honest: the Tottenham level slice is n=1 loss / 32 out-poss frames
-(the ~3' opener), the Southampton level slice is small (33 losses), and the block gap partly lives
-inside the stated ~+11 m broadcast inflation band. Nothing overstated.
+The write-up's hedges remain: the Tottenham level slice is n=1 loss / 32 out-poss frames (the ~3'
+opener), the Southampton level slice is small (26 losses), and lines carry the stated ~+11 m broadcast
+inflation. But the substantive block/territory conclusion was mapping-flipped and is now retracted.
 
 Evidence: `fingerprint/score_state.py`, `fingerprint/style_fingerprint.py`, per-match aligned + ball
 parquets via `core.registry`; the module `_demo()` seam self-checks pass.

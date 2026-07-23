@@ -147,6 +147,11 @@ def render(cal: dict, views: dict, atk: dict, out: Path) -> None:
     """Write results/GAME_STATE_v2.md."""
     lines = [
         "# Game-state v2 - win-probability bands + manager-regime attack typing", "",
+        "> **2026-07-23 CORRECTION:** `southampton_manutd` + `tottenham_manutd` team mappings corrected "
+        "(see `results/PAIR_ANALYSIS_v1.md`). The Southampton (0-3 win) Man Utd counter-press / shape / "
+        "attack-mix rows are recomputed with team0 = Man Utd; the prior Southampton-high-press and "
+        "wins=deeper-block claims are retracted/revised. `tottenham_manutd`, now processed, enters the "
+        "Amorim attack-typing pool (6 vs 6).", "",
         "Two upgrades to the game-state layer, both event-only (CPU):", "",
         "1. **Bayesian-style in-game win probability, base subset** (Robberechts, Van Haaren & Davis,",
         "   KDD'21) replaces the crude scoreline states (level / chasing / leading). WP(t) is",
@@ -224,7 +229,7 @@ HONEST = """\
 3. Cards are unavailable for our own matches, so red_diff/yellow_diff = 0 there; the card covariates
    are exercised only in fitting/calibration. This is a documented base-subset gap, not a silent one.
 4. Attack typing has LOW 3-way coverage (~10-20% of build attempts) at our ball coverage; the manager
-   split is a direction-only read over small n (6 ten-Hag vs 5 Amorim matches, tens of typed attacks
+   split is a direction-only read over small n (6 ten-Hag vs 6 Amorim matches, tens of typed attacks
    per regime). Do not report it as significance. The 2-way fallback tier is dominated by short
    fragments and is not used for the headline mix.
 5. Nothing here claims a tactical law. It claims: a calibrated game-state covariate now exists, and a

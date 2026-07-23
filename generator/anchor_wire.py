@@ -39,6 +39,16 @@ _SURVIVOR_RE = re.compile(r"^(h\d_chunk_\d+)_f(\d+)_n(\d+)_c([\d.]+)\.jpg$")
 REID_MIN_MARGIN = 0.05
 REID_MIN_SIM = 0.50
 
+# PRTreID lives on a different cosine scale than OSNet, so it needs its own frozen gate. GT-audited on
+# 58 SoccerNet-GSR sequences (cached embeddings, tools/prtreid_probe.py): the ABSOLUTE similarity is
+# the precision lever (same-player p50 0.918 vs different-player-same-kit p50 0.820 -- a real signal
+# OSNet lacks), so min_sim carries the gate and rises from OSNet's toothless 0.50 (which never fires
+# on PRTreID's ~0.82+ floor) to 0.92; a wider margin is precision-NEGATIVE on this embedder (the
+# margin-gate simulation shows precision FALLING as min_margin rises once min_sim is meaningful), so
+# the margin stays at OSNet's value. See results/gsr_benchmark/prtreid_probe_soccernet_sweep.json.
+PRTREID_MIN_SIM = 0.92
+PRTREID_MIN_MARGIN = 0.05
+
 
 @dataclass(frozen=True)
 class Anchor:

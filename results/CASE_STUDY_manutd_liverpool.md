@@ -21,8 +21,8 @@ Utd lost to Liverpool, Tottenham and Brighton in three different shapes:
 - **Tottenham (0-3):** behind from the ~3rd minute (162.5 s opener), so there is essentially no level
   state to judge (1 outside-third loss at 0-0). The loss shape is 'conceded early, chased all game' --
   the whole match is the chasing state, and the fingerprint can say nothing about their 0-0 posture.
-- **Brighton (1-2):** pressed NORMALLY at 0-0 (0.719 -- identical to the Fulham win 0.718) and had
-  MORE of the ball in the attacking third than any side (att-3rd control 0.262), yet still lost. They
+- **Brighton (1-2):** pressed NORMALLY at 0-0 (0.719 -- identical to the Fulham win 0.718) and were
+  highly territorial (att-3rd control 0.262, behind only the Southampton win's 0.353), yet still lost. They
   equalised for 1-1 and conceded a 90+' winner. This is a 'front-foot but couldn't hold on' defeat,
   the direct counter-example to the Liverpool press-collapse reading.
 
@@ -36,7 +36,7 @@ From the level-state synthesis (`results/WINS_VS_LOSSES.md`) -- the shape *befor
 | Tottenham (0-3 loss) | 1 | 0.000 | 0.000 | 49.9 | 0.000 | 24.4 |
 | Brighton (1-2 loss) | 64 | 0.719 | 0.406 | 46.9 | 0.262 | 61.4 |
 | Fulham (1-0 win) | 71 | 0.718 | 0.465 | 38.0 | 0.173 | 57.9 |
-| Southampton (0-3 win) | 33 | 0.394 | 0.333 | 32.9 | 0.111 | 46.2 |
+| Southampton (0-3 win) | 26 | 0.423 | 0.192 | 53.7 | 0.353 | 51.1 |
 
 ## Liverpool (0-3 loss)
 
@@ -128,13 +128,13 @@ half   state scoreline   t0_s   t1_s  stoppage
 ## Brighton (1-2 loss)
 
 Brighton is the direct counter-example to the Liverpool reading. At 0-0 Man Utd pressed hard (counter-
-press 0.719, essentially the Fulham-win number 0.718) and were the MOST territorial side of the whole
-corpus in possession -- 0.262 of their level in-possession frames had the team's mean line beyond the
-70 m third, more than any win. Their attacking transition at 0-0 was the deepest of the three losses
-(build-up 61.4 m) and they defended from a higher block (46.9 m). None of that is a pre-scoreline
-collapse. They fell behind 0-1, equalised for 1-1, and conceded a 90+' stoppage-time winner (Joao
-Pedro) to lose 1-2. This is a front-foot, high-territory performance that lost late -- pressing and
-possession at 0-0 looked like a win, and the result did not follow.
+press 0.719, essentially the Fulham-win number 0.718) and were among the most territorial sides in
+possession -- 0.262 of their level in-possession frames had the team's mean line beyond the 70 m third
+(behind only the corrected Southampton win's 0.353). Their attacking transition at 0-0 was the deepest
+of the three losses (build-up 61.4 m) and they defended from a higher block (46.9 m). None of that is a
+pre-scoreline collapse. They fell behind 0-1, equalised for 1-1, and conceded a 90+' stoppage-time
+winner (Joao Pedro) to lose 1-2. This is a front-foot, high-territory performance that lost late --
+pressing and possession at 0-0 looked like a win, and the result did not follow.
 
 Score-state timeline:
 

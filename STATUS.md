@@ -1,6 +1,37 @@
 # STATUS
 
-**Last updated:** 2026-07-23 (style deep-research COMPLETE: 3 deliverables; tottenham_manutd registered = 12-match corpus; sweep on last 2 halves)
+**Last updated:** 2026-07-23 night (RETRACTION: 2 team-mapping flips corrected; corpus 12/12; PRTreID identity shipped at 0.92)
+
+## 2026-07-23 (night) — LOUD RETRACTION: two team-mapping flips; "wins = deeper block" is DEAD
+
+Pair analysis (results/PAIR_ANALYSIS_v1.md) proved with HIGH confidence that `teams` order was
+flipped for **tottenham_manutd** (flagged by the kit-degeneracy warning) AND **southampton_manutd**
+(in the corpus since MW4, NEVER flagged — caught only by the possession-vs-oracle screen).
+Root cause: kit labeler degeneracy + `teams.index("Man Utd")` labeling. Consequences, corrected:
+- **"Southampton pressed high (37.4 m) and lost 0-3" — FALSE.** The 37.4 m high line is UNITED's
+  own (their highest of the corpus, in the 0-3 AWAY WIN). Southampton sat at 24.0 m. Corrected
+  read: ALL 11 opponents sit low/mid vs United, no high-press exception.
+- **"Wins = deeper block" — RETRACTED.** Corrected, the Southampton win = highest line (53.7 m)
+  + most territorial (0.353 att-3rd) of the six; no repeatable win-shape at level state remains.
+- Manager block read now: ten Hag 29.7 m / 16.7% high-spell vs Amorim 26.5 m / 13.6% — fragile,
+  driven by the corrected leg; block does not cleanly separate the managers either way.
+- Fixed: data/matches.yaml (2 orders), facts store, pass networks, WINS_VS_LOSSES,
+  SCORE_STATE_v3, CASE_STUDY, GAME_STATE_v2, BLOCK_AND_STYLE_v1, REVIEW_OPUS_ERA_ANALYSIS
+  (its "CONFIRMED (exact)" of the flipped table corrected) — all with dated notes.
+- **Permanent screen added:** tools/verify_team_mapping.py (possession-links-by-cluster vs
+  Sofascore majority; >8pp opposite-majority disagreement = loud WARNING + flag file). 12/12
+  matches pass post-fix; the tool's demo asserts it catches both pre-fix flips.
+- Pair findings (corrected): possession identity = the ONLY repeatable fingerprint (cross-leg
+  r=+0.83); block height NOT stable (r=-0.40); results opponent-determined (no W<->L flip in any
+  pair); venue effect ~null; venue x manager 2x2 balanced (n=3/cell) so pooled main effects are
+  direction-estimable.
+- **PRTreID identity shipped at pre-committed 0.92/0.05** (gate recalibrated from GT-audited
+  cached distributions; min_sim carries the gate, margin unchanged — wider margin measured
+  precision-NEGATIVE). Named frags 80/221/282; disagreement flags COLLAPSED 18/20/44 -> 2/2/1;
+  lost names are thin (2 provably spurious via NaN oracle minutes: Endo#3, Forster#20); Spearman
+  +0.06/-0.07/+0.12. Audit verdict: precision-improved, keep 0.92, keep koshkina artifacts
+  side-by-side as the recall arm. Pending: regenerate southampton_manutd report_v2 HTML (stale
+  swapped labels).
 
 ## 2026-07-23 (later) — Phase-0 event-only layer SHIPPED (3 workers, CPU, alongside GPU sweep)
 
@@ -14,7 +45,9 @@ All ten Phase-0/1 builds from the research architecture landed same day:
 - **Block height + style factors (C):** Ten Hag 27.4 m line / 64% low-block vs Amorim 26.5 m /
   65% — similar depth, Amorim +3.5 m ball-to-block. Broadcast bias MEASURED: +5.2 m median
   (relative ordering usable, absolute class not; gate-1 hand-annotation pending). 10/11
-  opponents low-block vs Utd; Southampton pressed high (37.4 m) and lost 0-3. FBref style PCA:
+  opponents low-block vs Utd. [RETRACTED 2026-07-23: "Southampton pressed high (37.4 m) and lost
+  0-3" was a team-mapping flip — that 37.4 m high line is UNITED's own, in the 0-3 away win;
+  Southampton sat at 24.0 m. See the 07-23 retraction entry + PAIR_ANALYSIS_v1.] FBref style PCA:
   United = corpus extreme on defensive engagement (+2.46), middling control. FBref blocked
   passing/defense pages -> season pressing-height feature unavailable (tracking covers it).
 - **Game-state (B):** manager+date fields in registry; Bayesian WP base subset (logistic, fit
@@ -269,11 +302,18 @@ win-shape vs loss-shape contrast survives the retraction. Fixed render_scouting_
 (hardcoded teams[0] mislabeled palace/southampton where Man Utd isn't listed first; brighton/
 liverpool/fulham unaffected). CAPSTONE DONE (true n=6):
 **Style identity essentially GONE at n=6** — intra-ManU vs cross gap decayed monotonically 2.0(n=3)
--> 0.74(n=5) -> **0.09(n=6)**; Southampton's outlier deep away-win shape collapsed it. Honest
+-> 0.74(n=5) -> **0.09(n=6)**; Southampton's outlier deep away-win shape collapsed it. [CAVEAT
+2026-07-23: that "deep away-win shape" was the OPPONENT's — southampton_manutd team labels were
+flipped (caught by pair analysis); the correlation-decay direction stands but its n=6 value was
+computed on one inverted leg.] Honest
 verdict: a single-team fingerprint from 6 broadcast matches is dominated by opponent/game-state/
 territory, NOT durable identity. **Win-vs-loss (2W/3L/1D at level state): PRESS does NOT separate**
 (Fulham-W 0.718 ~ Brighton-L 0.719; Soton-W 0.394 < Liverpool-L 0.455) — the press story is noise.
-**The one separator: defensive BLOCK HEIGHT** — both wins defended deepest (32.9/38.0 m) below all
+**The one separator: defensive BLOCK HEIGHT** — [RETRACTED 2026-07-23: "both wins defended
+deepest" rested on the flipped southampton leg; corrected, the Southampton win is the HIGHEST
+line (53.7 m) and most territorial performance in the six — no repeatable win-shape at level
+state survives. See PAIR_ANALYSIS_v1 + corrected WINS_VS_LOSSES.] Original text kept for the
+correction trail: both wins defended deepest (32.9/38.0 m) below all
 3 losses (40.6-49.9), but the DRAW sits in the win band -> read as a "did-not-LOSE" deep-control
 shape, not a win shape; n=2 wins, partly inside +11 m broadcast inflation. Direction not law.
 **3-loss framing: "three different ways Man Utd lost"** — Liverpool (flat press from kickoff, the

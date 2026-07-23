@@ -1,5 +1,7 @@
 # Game-state v2 - win-probability bands + manager-regime attack typing
 
+> **2026-07-23 CORRECTION:** `southampton_manutd` + `tottenham_manutd` team mappings corrected (see `results/PAIR_ANALYSIS_v1.md`). The Southampton (0-3 win) Man Utd counter-press / shape / attack-mix rows are recomputed with team0 = Man Utd; the prior Southampton-high-press and wins=deeper-block claims are retracted/revised. `tottenham_manutd`, now processed, enters the Amorim attack-typing pool (6 vs 6).
+
 Two upgrades to the game-state layer, both event-only (CPU):
 
 1. **Bayesian-style in-game win probability, base subset** (Robberechts, Van Haaren & Davis,
@@ -64,8 +66,8 @@ loss; 5 s regain = ball won back in that window.
 ```
        band  losses  cp_frac  regain_5s
 loss-likely     279    0.642      0.341
-   balanced      90    0.589      0.467
- win-likely      62    0.532      0.306
+   balanced      83    0.614      0.434
+ win-likely      85    0.541      0.341
 ```
 
 ### Man Utd in-possession shape by WP band (pooled)
@@ -75,8 +77,8 @@ loss-likely     279    0.642      0.341
 ```
        band  frames  def_line  buildup  width
 loss-likely    2300      46.4     53.1   33.0
-   balanced     604      50.8     57.8   33.1
- win-likely     202      30.3     35.6   34.5
+   balanced     626      53.3     60.2   34.1
+ win-likely     603      51.8     57.5   34.4
 ```
 
 ### Why WP bands are not just the scoreline states (frames: state x band)
@@ -95,8 +97,8 @@ bucket. This is the whole point of the upgrade.
    Brighton   level         1320       344           0
      Fulham leading            4         0         129
      Fulham   level          533      1051           0
-Southampton leading            0         0        1191
-Southampton   level            0       274           0
+Southampton leading            0         0        1355
+Southampton   level            0       309           0
      Palace   level         1442         0           0
 ```
 
@@ -112,8 +114,8 @@ Southampton   level            0       274           0
      Fulham    balanced      42    0.786      0.643
      Fulham loss-likely      29    0.621      0.207
      Fulham  win-likely       8    0.750      0.500
-Southampton    balanced      33    0.394      0.333
-Southampton  win-likely      54    0.500      0.278
+Southampton    balanced      26    0.423      0.192
+Southampton  win-likely      77    0.519      0.325
      Palace loss-likely      40    0.750      0.375
 ```
 
@@ -132,8 +134,8 @@ method scores defensive disorganisation from full opponent tracking we do not ha
 
 ```
 manager  matches  n_3way  fast_transition_n  fast_transition  sustained_build_up_n  sustained_build_up  direct_n  direct
-ten_hag        6      66                  6            0.091                    39               0.591        21   0.318
- amorim        5      61                  7            0.115                    30               0.492        24   0.393
+ten_hag        6      71                  7            0.099                    42               0.592        22   0.310
+ amorim        6      77                  8            0.104                    36               0.468        33   0.429
 ```
 
 ### Per-match detail (n_attack = build attempts; cov_3way = 3-way label coverage)
@@ -145,12 +147,13 @@ ten_hag   manutd_liverpool 2024-09-01        65      11     0.169      36       
 ten_hag      manutd_fulham 2024-08-16        75      16     0.213      24                3                   9       4
 ten_hag      palace_manutd 2024-09-21        40      18     0.450      17                0                  14       4
 ten_hag   manutd_tottenham 2024-09-29        47       3     0.064      29                0                   0       3
-ten_hag southampton_manutd 2024-09-14       107       8     0.075      17                0                   3       5
+ten_hag southampton_manutd 2024-09-14        89      13     0.146      35                1                   6       6
  amorim   liverpool_manutd 2025-01-05        68      12     0.176       8                1                   6       5
  amorim    manutd_brighton 2025-01-19        95       9     0.095      32                0                   7       2
  amorim      fulham_manutd 2025-01-26        99      20     0.202      40                4                   9       7
  amorim      manutd_palace 2025-02-02        97      10     0.103      33                0                   3       7
  amorim manutd_southampton 2025-01-16       102      10     0.098      38                2                   5       3
+ amorim   tottenham_manutd 2025-02-16        89      16     0.180      41                1                   6       9
 ```
 
 ## Honest read
@@ -165,7 +168,7 @@ ten_hag southampton_manutd 2024-09-14       107       8     0.075      17       
 3. Cards are unavailable for our own matches, so red_diff/yellow_diff = 0 there; the card covariates
    are exercised only in fitting/calibration. This is a documented base-subset gap, not a silent one.
 4. Attack typing has LOW 3-way coverage (~10-20% of build attempts) at our ball coverage; the manager
-   split is a direction-only read over small n (6 ten-Hag vs 5 Amorim matches, tens of typed attacks
+   split is a direction-only read over small n (6 ten-Hag vs 6 Amorim matches, tens of typed attacks
    per regime). Do not report it as significance. The 2-way fallback tier is dominated by short
    fragments and is not used for the headline mix.
 5. Nothing here claims a tactical law. It claims: a calibrated game-state covariate now exists, and a

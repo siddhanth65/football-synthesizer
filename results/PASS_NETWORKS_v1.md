@@ -4,7 +4,7 @@ Directed passing networks from the validated BAS pass stream + event-ledger carr
 
 ## GATE-0 verdicts
 
-- **Pass-total band:** 8/10 matches inside the Sofascore 0.97-1.09x band (op PASS vs attempted, complete halves).
+- **Pass-total band:** 9/12 matches inside the Sofascore 0.97-1.09x band (op PASS vs attempted, complete halves).
 - **Named-edge coverage:** named pass rate 0.0-3.9% across matches (the known 4-12% player floor). Named-player *edges* (both endpoints named, consecutive) are rarer still -- see per-match counts; the player-level network is volume-thin, structure-poor.
 - **Man Utd identifiability:** 3 ManU identity matches; mean intra-match player pass-volume cosine = 0.21 (the named-edge network is empty -- see limits; structural identifiability is not computable at this coverage).
 
@@ -67,8 +67,8 @@ GATE-0 band -- op PASS 1087 / truth 1091 = 0.996 (complete halves ['h1', 'h2']) 
 
 | team | poss links | named nodes | named edges | recip | top3 | Gini | cent | ABA ratio | ABA z |
 |------|-----------|-------------|-------------|-------|------|------|------|-----------|-------|
-| Man Utd | 39 | 0 | 0 | - | - | - | - | - | - |
-| Southampton | 69 | 0 | 0 | - | - | - | - | - | - |
+| Southampton | 39 | 0 | 0 | - | - | - | - | - | - |
+| Man Utd | 69 | 0 | 0 | - | - | - | - | - | - |
 
 ### liverpool_manutd
 
@@ -109,6 +109,26 @@ GATE-0 band -- op PASS 943 / truth 851 = 1.108 (complete halves ['h1', 'h2']) ->
 |------|-----------|-------------|-------------|-------|------|------|------|-----------|-------|
 | Man Utd | 74 | 0 | 0 | - | - | - | - | - | - |
 | Crystal Palace | 26 | 0 | 0 | - | - | - | - | - | - |
+
+### manutd_southampton
+
+Coverage -- PASS events 1066 | team-attributed 381 (35.7%) | named 0 (0.0%).
+GATE-0 band -- op PASS 1066 / truth 1000 = 1.066 (complete halves ['h1', 'h2']) -> **PASS** (band 0.97-1.09x).
+
+| team | poss links | named nodes | named edges | recip | top3 | Gini | cent | ABA ratio | ABA z |
+|------|-----------|-------------|-------------|-------|------|------|------|-----------|-------|
+| Man Utd | 65 | 0 | 0 | - | - | - | - | - | - |
+| Southampton | 51 | 0 | 0 | - | - | - | - | - | - |
+
+### tottenham_manutd
+
+Coverage -- PASS events 1036 | team-attributed 387 (37.4%) | named 0 (0.0%).
+GATE-0 band -- op PASS 1036 / truth 933 = 1.11 (complete halves ['h1', 'h2']) -> **FAIL** (band 0.97-1.09x).
+
+| team | poss links | named nodes | named edges | recip | top3 | Gini | cent | ABA ratio | ABA z |
+|------|-----------|-------------|-------------|-------|------|------|------|-----------|-------|
+| Man Utd | 61 | 0 | 0 | - | - | - | - | - | - |
+| Tottenham | 112 | 0 | 0 | - | - | - | - | - | - |
 
 ## Man Utd cross-match identifiability (player pass-volume cosine)
 

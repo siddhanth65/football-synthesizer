@@ -13,6 +13,13 @@ into a report as a validated claim until Gate 1 passes.
 Modules: `fingerprint/block_height.py`, `fingerprint/style_factors.py`. Test: `tests/test_block_and_style.py`
 (3 passed). Both ruff-clean at 100 cols. CPU only, no GPU, no writes to `data/matches.yaml`.
 
+> **2026-07-23 CORRECTION:** `southampton_manutd` + `tottenham_manutd` team mappings corrected (see
+> `results/PAIR_ANALYSIS_v1.md`). The `southampton_manutd` rows below had Man Utd and Southampton
+> **swapped**: the 37.4 m high block (34.5% high spells) is **United's** (a 0-3 away win, United's
+> highest line in the corpus), not Southampton's (who sat at 24.0 m). The prior
+> **Southampton-pressed-high claim is retracted** and the ten-Hag regime aggregate is recomputed. Only
+> `southampton_manutd` and the ten-Hag row change; the other 10 legs were already correctly labelled.
+
 ---
 
 ## Part 1 -- Defensive block geometry
@@ -45,7 +52,7 @@ that `fingerprint.phase_metrics` carries on the raw visible line, so these are u
 Each **out-of-possession spell** (contiguous frames a team defends within a chunk, >=5 usable frames) is
 classified by its median line. Class shares below are weighted by usable frames.
 
-### Per-match block table (11 processed matches; `tottenham_manutd` not yet processed)
+### Per-match block table (11 processed legs shown; `tottenham_manutd` was processed after this table and is not folded in here -- kept isolated to the mapping correction)
 
 `line` = mean de-biased block line (m from own goal). `vspr` = mean vertical spread (m). `b2b` = mean
 ball-to-block (m). `cov` = out-of-possession coverage. `bias` = broadcast-bias delta (m, see below).
@@ -63,8 +70,8 @@ ball-to-block (m). `cov` = out-of-possession coverage. `bias` = broadcast-bias d
 | palace_manutd | Crystal Palace | 28.4 | 5.7 | 18.9 | 0.96 | -6.0 | .664/.280/.055 | low |
 | manutd_tottenham (TH) | **Man Utd** | 26.0 | 6.2 | 25.7 | 0.97 | +10.3 | .677/.216/.108 | low |
 | manutd_tottenham | Tottenham | 27.1 | 6.1 | 17.1 | 0.93 | +5.0 | .625/.216/.158 | low |
-| southampton_manutd (TH) | **Man Utd** | 24.0 | 5.5 | 26.0 | 0.78 | -4.7 | .719/.226/.055 | low |
-| southampton_manutd | Southampton | 37.4 | 5.8 | 6.4 | 0.82 | -1.7 | .499/.155/.345 | low |
+| southampton_manutd (TH) | **Man Utd** | 37.4 | 5.8 | 6.4 | 0.82 | -1.7 | .499/.155/.345 | low |
+| southampton_manutd | Southampton | 24.0 | 5.5 | 26.0 | 0.78 | -4.7 | .719/.226/.055 | low |
 | liverpool_manutd (AM) | **Man Utd** | 20.8 | 5.7 | 30.1 | 0.96 | +0.5 | .768/.147/.086 | low |
 | liverpool_manutd | Liverpool | 27.6 | 5.8 | 21.5 | 0.87 | +13.2 | .642/.121/.237 | low |
 | manutd_brighton (AM) | **Man Utd** | 29.6 | 5.9 | 15.4 | 0.95 | +2.4 | .572/.314/.114 | low |
@@ -107,24 +114,30 @@ does not. Read the high/mid **shares**, not the modal label.
 
 | regime | n | mean line (m) | vspread (m) | ball-to-block (m) | low share | high share | coverage |
 |--------|--:|--------------:|------------:|------------------:|----------:|-----------:|---------:|
-| Ten Hag | 6 | 27.4 | 5.95 | 19.3 | 0.641 | 0.119 | 0.923 |
+| Ten Hag | 6 | 29.7 | 6.00 | 16.1 | 0.605 | 0.167 | 0.930 |
 | Amorim  | 5 | 26.5 | 6.34 | 22.8 | 0.654 | 0.136 | 0.949 |
 
-Directional read (NOT significant at this n): under Amorim United's own block sits a shade **deeper on the
-mean line** yet shows a **slightly higher high-block spell share** (0.136 vs 0.119) and a **wider vertical
-spread** (6.34 vs 5.95 m) -- consistent with a more bimodal press-or-drop shape, but the deltas are inside
-the noise. This doubles as a discriminative-validity check: the block metric does **not** cleanly separate
-the two regimes, so it is not (yet) a strong manager fingerprint on its own.
+Directional read (NOT significant at this n): after the mapping correction, under **Ten Hag** United's own
+block reads a shade **higher on the mean line** (29.7 vs 26.5 m) with a **higher high-block spell share**
+(0.167 vs 0.136), while Amorim shows a **wider vertical spread** (6.34 vs 6.00 m). This **reverses** the
+pre-correction read (which had Amorim marginally deeper / more bimodal) and is driven largely by the one
+corrected leg -- southampton_manutd's 37.4 m high line moving into the ten-Hag column -- so treat it as a
+fragile direction, not a manager law. Either way the block metric does **not** cleanly separate the two
+regimes, so it is not (yet) a strong manager fingerprint on its own. (Amorim held at n=5 as originally
+reported; `tottenham_manutd`, now processed, is not folded in so the correction stays isolated.)
 
 ### Man Utd vs opponents (block read)
 
-- **Opponents sit deep against United.** In 11 fixtures the non-United side's block line is 20-30 m in 10 of
-  11 cases (low/mid), i.e. opponents predominantly **drop into a low block vs United** rather than press.
-  The exception is **Southampton at home** (37.4 m, 34.5% high-block spells) -- the one side that pressed
-  United higher, and it lost 0-3.
-- **United's own block** is similar home and away (mean line 25-33 m) and low-block-dominant throughout;
-  the ball-to-block gap is *larger* in the away/reverse fixtures (e.g. 30.1 m at Anfield) -- United defending
-  with the ball further in front of a deeper block, i.e. conceding territory.
+- **Opponents sit deep against United -- no high-press exception.** In all 11 fixtures the non-United side's
+  block line is 20-30 m (low/mid): every opponent **drops into a low block vs United** rather than press. The
+  apparent "Southampton pressed high (37.4 m, 34.5% high spells) and lost 0-3" exception was a **team-mapping
+  flip** -- that 37.4 m high line is **United's own** (their highest line in the corpus, in the 0-3 away
+  win); Southampton at home actually sat at **24.0 m** (5.5% high spells), squarely low.
+- **United's own block** is low-block-dominant home and away (modal low in every leg) but its mean line
+  spans 24-37 m -- the top end is now the **corrected southampton_manutd away leg (37.4 m)**, United's
+  highest in the corpus. The ball-to-block gap is *larger* in most away/reverse fixtures (e.g. 30.1 m at
+  Anfield) -- United defending with the ball further in front, conceding territory -- but small (6.4 m) in
+  that Southampton away win where United defended higher.
 
 ---
 
@@ -239,4 +252,5 @@ as a sanity link, not a validation.
    table -- a future fetch when FBref is not blocking, or SkillCorner.
 5. **Manager split and opponent reads are directions, not significance** (n=5-6 per regime, n=1 per
    opponent fixture).
-6. **`tottenham_manutd` is unprocessed** (no aligned parquet) -- 11 of 12 fixtures covered.
+6. **`tottenham_manutd` is now processed** but is deliberately not folded into this table -- the
+   2026-07-23 correction is kept isolated to the two mislabelled legs (11 of 12 fixtures shown here).

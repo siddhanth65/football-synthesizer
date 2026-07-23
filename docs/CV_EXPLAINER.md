@@ -237,7 +237,13 @@ Weights: player YOLO auto-downloads from HuggingFace; PnLCalib HRNets live in `~
 3. `python -m tools.pl_pilot_run` — turnkey: extract → align → ball → facts → gate (resumable,
    `--from <stage>` to continue). WC-era pieces: `tools/batch_match.py`, `tools/analyze_match.py`,
    `tools/regen_ball.py`.
-4. `python -m report.report_v2 --match <id>` — the gated report.
+4. `python tools/verify_team_mapping.py --match <id>` — **team-mapping screen** (do this before any
+   per-team analysis). Compares the BAS Man Utd poss-link majority against the Sofascore possession
+   majority; on disagreement it prints a loud WARNING and writes `outputs/<id>/facts/
+   team_mapping_flag.json`, meaning the `teams` order in `data/matches.yaml` is likely flipped (the
+   degenerate red/striped-kit anchor failure that mislabelled southampton/tottenham — see
+   `results/PAIR_ANALYSIS_v1.md`). Fix the registry order and rerun before trusting any per-team number.
+5. `python -m report.report_v2 --match <id>` — the gated report.
 
 ## Glossary
 

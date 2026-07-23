@@ -101,6 +101,18 @@ def _embedder_label(model_name: str, weights: str | None, embedder: str = "osnet
     return f"re-ID-objective OSNet (`{model_name}`, weights=`{weights}`)"
 
 
+def _gate_defaults(embedder_name: str) -> tuple[float, float]:
+    """Frozen ``(min_sim, min_margin)`` for an embedder; PRTreID rides its own cosine scale.
+
+    OSNet's 0.50 floor never fires on PRTreID (whose worst same-kit pairs already sit ~0.82), so the
+    PRTreID gate raises min_sim to do the work the margin does for OSNet. Values are GT-audited in
+    :mod:`tools.prtreid_probe`; see :data:`generator.anchor_wire.PRTREID_MIN_SIM`.
+    """
+    if embedder_name == "prtreid":
+        return aw.PRTREID_MIN_SIM, aw.PRTREID_MIN_MARGIN
+    return aw.REID_MIN_SIM, aw.REID_MIN_MARGIN
+
+
 def build_embedder(embedder: str, model_name: str, weights: str | None):
     """Build the appearance embedder for the attachment gate (``osnet`` default, or ``prtreid``).
 
@@ -287,8 +299,8 @@ def _spearman(a: list[float], b: list[float]) -> float | None:
 def main(model_name: str = "osnet_x0_25", weights: str | None = None,
          survivors: Path = SURVIVORS, tag: str | None = None,
          precision_pending: bool = False, match_id: str = MATCH_ID,
-         embedder_name: str = "osnet", min_sim: float = aw.REID_MIN_SIM,
-         min_margin: float = aw.REID_MIN_MARGIN) -> None:
+         embedder_name: str = "osnet", min_sim: float | None = None,
+         min_margin: float | None = None) -> None:
     """Attach -> guard -> name -> validate; write the named-tracks parquet and report.
 
     Args:
@@ -306,11 +318,15 @@ def main(model_name: str = "osnet_x0_25", weights: str | None = None,
         match_id: registry match id to wire (default ``brighton_manutd``, output paths and Sofascore
             oracle id all resolve from this).
         embedder_name: ``"osnet"`` (default, reproduces every shipped artifact) or ``"prtreid"``.
-        min_sim: Minimum best cosine for the attachment gate. Cosine scale is embedder-specific --
-            PRTreID's same-kit distribution sits far higher than OSNet's, so its operating point is
-            set from the GT-audited sweep in ``tools/prtreid_probe.py``, not shared with OSNet.
-        min_margin: Minimum best-minus-second-best cosine gap for the attachment gate.
+        min_sim: Minimum best cosine for the attachment gate, or ``None`` to use the embedder's
+            frozen default (:func:`_gate_defaults`). Cosine scale is embedder-specific -- PRTreID's
+            same-kit distribution sits far higher than OSNet's, so its operating point is set from the
+            GT-audited sweep in ``tools/prtreid_probe.py``, not shared with OSNet.
+        min_margin: Minimum best-minus-second-best cosine gap, or ``None`` for the embedder default.
     """
+    default_sim, default_margin = _gate_defaults(embedder_name)
+    min_sim = default_sim if min_sim is None else min_sim
+    min_margin = default_margin if min_margin is None else min_margin
     tag = tag if tag is not None else (f"_{weights}" if weights else "")
     if embedder_name != "osnet" and not tag:
         tag = f"_{embedder_name}"
@@ -553,10 +569,10 @@ if __name__ == "__main__":
                     help=f"registry match id to wire (default: {MATCH_ID})")
     ap.add_argument("--embedder", default="osnet", choices=["osnet", "prtreid"],
                     help="appearance embedder for the attachment gate (default: osnet)")
-    ap.add_argument("--min-sim", type=float, default=aw.REID_MIN_SIM,
-                    help="minimum best cosine to attach (embedder-specific scale)")
-    ap.add_argument("--min-margin", type=float, default=aw.REID_MIN_MARGIN,
-                    help="minimum best-minus-second-best cosine gap to attach")
+    ap.add_argument("--min-sim", type=float, default=None,
+                    help="minimum best cosine to attach (default: OSNet 0.50 / PRTreID 0.92)")
+    ap.add_argument("--min-margin", type=float, default=None,
+                    help="minimum best-minus-second-best cosine gap (default 0.05 both embedders)")
     a = ap.parse_args()
     main(model_name=a.model_name, weights=a.weights, survivors=Path(a.survivors), tag=a.tag,
          precision_pending=a.precision_pending, match_id=a.match, embedder_name=a.embedder,

@@ -112,7 +112,7 @@ matches:
   # PL Archive 24/25, sixth brick (Phase B). Southampton (home) vs Man Utd, 2024-09-14, 0-3.
   # Sofascore match id 12436949. Prep-only at registration (same convention as above).
   southampton_manutd:
-    teams: [Southampton, Man Utd]
+    teams: [Man Utd, Southampton]  # 2026-07-23: order corrected (was [Southampton, Man Utd]); red/striped kit anchor flip, see results/PAIR_ANALYSIS_v1.md
     manager: ten_hag       # 2024-09-14; ten Hag era
     date: 2024-09-14
     aligned: outputs/southampton_manutd/final/match_aligned.parquet
@@ -192,7 +192,7 @@ matches:
   # split by frame inspection (kickoff formation at centre circle) at raw t=3115.0s -- h1_full
   # 3115.12s, h2_full 2593.97s, sum 5709.09s vs source container 5708.97s.
   tottenham_manutd:
-    teams: [Tottenham, Man Utd]
+    teams: [Man Utd, Tottenham]  # 2026-07-23: order corrected (was [Tottenham, Man Utd]); red/striped kit anchor flip, see results/PAIR_ANALYSIS_v1.md
     manager: amorim        # 2025-02-16; Amorim era (aligned parquet not yet built)
     date: 2025-02-16
     aligned: outputs/tottenham_manutd/final/match_aligned.parquet

@@ -249,6 +249,9 @@ def write_cross(res: dict, out: Path) -> None:
     lines = [
         "# Score-state segmentation v3 (Plan B-5) - Man Utd shape + press by scoreline, full 6-match "
         "corpus", "",
+        "> **2026-07-23 CORRECTION:** `southampton_manutd` + `tottenham_manutd` team mappings corrected "
+        "(see `results/PAIR_ANALYSIS_v1.md`). Every Southampton (0-3 win) Man Utd row is recomputed with "
+        "team0 = Man Utd; the prior wins-sat-deeper block read is retracted/revised.", "",
         "Every metric below is the B-4 style fingerprint (validated tracking-native primitives)",
         "re-bucketed by Man Utd's score state. States are **from Man Utd's perspective** "
         "(level / chasing / leading). Boundaries are the validated E2E-Spot goal peaks (per-half count",
@@ -304,6 +307,10 @@ def write_wins(res: dict, out: Path) -> None:
     """Render results/WINS_VS_LOSSES.md -- the level-state win-shape vs loss-shape synthesis."""
     lines = [
         "# Wins vs losses: is there a repeatable win-shape at level state? (Plan B-5 synthesis)", "",
+        "> **2026-07-23 CORRECTION:** `southampton_manutd` + `tottenham_manutd` team mappings corrected "
+        "(see `results/PAIR_ANALYSIS_v1.md`). The Southampton (0-3 win) Man Utd numbers below are "
+        "recomputed with team0 = Man Utd; the prior **wins = deeper-block** claim is retracted/revised "
+        "(United's true level-state block in that win is high, 53.7 m, not deep).", "",
         "The corpus now has **two real wins** (Fulham 1-0, Southampton 0-3) against **three losses**",
         "(Liverpool 0-3, Tottenham 0-3, Brighton 1-2) and one draw (Palace 0-0). The question Sid",
         "asked originally: *how do they win vs how do they lose*, in the tracking-native metrics. To",
@@ -389,22 +396,27 @@ def loss_level_table(res: dict) -> str:
 
 # Fixed prose, filled from the computed run (numbers verified against the tables above).
 CROSS_READ = """\
+_2026-07-23 CORRECTION: southampton_manutd + tottenham_manutd team mappings corrected (see
+results/PAIR_ANALYSIS_v1). Every Southampton (0-3 win) Man Utd row below is recomputed with team0 =
+Man Utd; the prior "wins sat deeper" block read is retracted (point 3)._
+
 1. THE Liverpool finding still does NOT repeat -- and the second win makes it starker. Liverpool's
    flat 0-0 counter-press (0.455) was Liverpool-specific: Brighton (also a loss) pressed 0.719 at 0-0,
-   and the two WINS split the whole range -- Fulham 0.718 (high) vs Southampton 0.394 (low). Level-
+   and the two WINS split the whole range -- Fulham 0.718 (high) vs Southampton 0.423 (low). Level-
    state counter-press does not separate win from loss, nor even the two wins from each other. The
    pre-scoreline collapse is one match (Liverpool), not a corpus law.
 2. Tottenham stays unevaluable at level (conceded ~3', level = 1 loss). Southampton's level state is
-   small too (33 losses -- ahead from ~35') but usable, and it is the low-press win, which is exactly
+   small too (26 losses -- ahead from ~35') but usable, and it is the lower-press win, which is exactly
    what kills any 'wins press harder at 0-0' story.
-3. Where the wins DO differ at 0-0 is not the press but the defensive BLOCK: both wins sat deeper
-   (out-of-possession deepest line 32.9 Southampton / 38.0 Fulham vs 40.6-49.9 across the losses),
-   with the goalless draw (34.8) in the win band. Territorial, not press, and small-n -- the full
-   five-metric level-state synthesis is in `results/WINS_VS_LOSSES.md`.
+3. Block height at 0-0 does NOT separate wins from losses either (CORRECTED): the Southampton win
+   defended the HIGHEST out-of-possession line of the six (53.7 m, above every loss 40.6-49.9), while
+   the Fulham win was among the deepest (38.0 m) -- the two wins bracket the whole range. The prior
+   'both wins sat deeper (32.9 / 38.0)' read was the southampton_manutd mapping flip and is retracted;
+   the full five-metric level-state synthesis is in `results/WINS_VS_LOSSES.md`.
 4. The two 0-3 losses still carry the lowest match-level regain, but that is press while ALREADY
    behind (both spent almost the whole match chasing), confounded with game state -- not a 0-0 signal.
 5. Leading = press-while-ahead now has TWO matches, not one. Fulham dropped its line in the ~5 min at
-   1-0; Southampton led from ~35' and pressed MORE when ahead (leading 0.500-0.519 vs level 0.394) --
+   1-0; Southampton led from ~35' and pressed MORE when ahead (leading 0.519 vs level 0.423) --
    matching the Southampton report's 'counter-press rose when ahead'. The wins' energy is a
    with-the-lead trait, not a from-kickoff one.
 6. Shape shifts with state, confirming the segmentation tracks something real: trailing sides push the
@@ -418,39 +430,40 @@ CROSS_READ = """\
    happened against Liverpool."""
 
 WINS_READ = """\
-**Short answer: no repeatable win-shape in the PRESS; a weak, consistent-direction win-shape in the
-defensive BLOCK. Small n -- read as direction, not law.**
+_2026-07-23 CORRECTION: southampton_manutd + tottenham_manutd team mappings corrected (see
+results/PAIR_ANALYSIS_v1). The Southampton (0-3 win) level-state row previously carried the OPPONENT's
+numbers -- Man Utd's true level-state block is HIGH (53.7 m), not deep (32.9 m). The prior
+"wins = deeper block" arrow is retracted below._
+
+**Short answer: after the mapping correction there is NO repeatable win-shape at level state -- not in
+the press, not in the block, not in territory. The earlier "wins defend a deeper block" finding was an
+artifact of the mislabelled Southampton leg. Small n -- read as direction, not law.**
 
 1. Counter-press fraction at 0-0 does NOT separate wins from losses. The two wins straddle the loss
-   range: Fulham 0.718 sits right on top of the Brighton loss (0.719), while Southampton 0.394 falls
-   BELOW the Liverpool loss (0.455). A team that pressed 0.394 at 0-0 won 3-0; a team that pressed
+   range: Fulham 0.718 sits right on top of the Brighton loss (0.719), while Southampton 0.423 falls
+   BELOW the Liverpool loss (0.455). A team that pressed 0.423 at 0-0 won 3-0; a team that pressed
    0.719 at 0-0 lost 1-2. Level-state press is n-limited noise here.
 
-2. 5 s regain and transition depth overlap the same way. Regain: wins 0.333-0.465, losses 0.227-0.406
-   -- the Brighton loss (0.406) beats the Southampton win (0.333). Transition depth: wins 46.2-57.9,
-   losses 45.3-61.4 -- total overlap. Neither is a win-shape.
+2. 5 s regain and transition depth overlap the same way. Regain: wins 0.192-0.465, losses 0.000-0.406
+   -- the Brighton loss (0.406) sits well ABOVE the Southampton win (0.192). Transition depth: wins
+   51.1-57.9, losses (evaluable) 45.3-61.4 -- total overlap. Neither is a win-shape.
 
-3. The ONE metric that separates: defensive block height at 0-0 (out-of-possession deepest line).
-   Both wins defended the deepest of the six -- Southampton 32.9 m and Fulham 38.0 m -- below all
-   three losses (Liverpool 40.6, Brighton 46.9, Tottenham 49.9), with the goalless draw (34.8) sitting
-   in the win band. Even dropping the unevaluable Tottenham level (32 out-poss frames), the two wins
-   (32.9, 38.0) still sit under the two evaluable losses (40.6, 46.9).
+3. Block height at 0-0 does NOT separate wins from losses -- the corrected headline. The Southampton
+   win defended the HIGHEST block of all six (53.7 m), ABOVE every loss (Liverpool 40.6, Brighton 46.9,
+   Tottenham 49.9); the Fulham win (38.0 m) was among the deepest. The two wins sit at OPPOSITE ends of
+   the block-height range. The pre-correction claim that "both wins defended the deepest" was the
+   Southampton mapping flip: United's true level-state line in that win is high, not deep.
 
-4. Attacking-third control points the same way. The two wins held the ball in the attacking third the
-   LEAST at 0-0 (Southampton 0.111, Fulham 0.173) while the Brighton loss was the most territorial
-   (0.262). So the win-shape at level state is a DEEPER, LESS territorial block -- a control/counter
-   posture -- not a front-foot press. That is consistent with the Southampton report: Man Utd's press
-   rose after they went ahead, they did not out-press at 0-0.
+4. Attacking-third control fails to separate too. The Southampton win was the MOST territorial side at
+   0-0 (0.353, above the Brighton loss 0.262) while the Fulham win was mid (0.173). One win pressed
+   high and territorial, the other sat deeper and less territorial -- no shared win posture.
 
-5. The honest ceiling. This is a two-win signal, and one of the wins (Southampton) has a tiny level
-   sample: 63 in-possession, 76 out-of-possession, 82 transition frames, 33 outside-third losses (the
-   ~35 min before the opener). The block-height gap (~5-15 m) lives partly inside the ~+11 m partial-
-   broadcast inflation band and is confounded with venue/opponent territory. And the goalless DRAW
-   sits with the wins on block depth, so 'deep block' is better read as a **did-not-lose** shape than
-   a **win** shape. Verdict: wins-vs-losses in the press is noise at this n; wins-vs-losses in
-   defensive block depth (and attacking-third control) is a weak, consistent-direction territorial
-   signal -- a real 'how they win vs how they lose' arrow, but one that needs more wins to confirm,
-   not a validated law."""
+5. The honest ceiling. Two wins, opposite shapes; the Southampton level sample is modest (85 in-
+   possession, 79 out-of-possession, 88 transition frames, 26 outside-third losses -- the ~35 min
+   before the opener) and every line carries the ~+11 m partial-broadcast inflation. Verdict after
+   correction: there is NO win-shape vs loss-shape at level state in this corpus -- the prior
+   "wins = deeper, less-territorial block" arrow is RETRACTED, having rested entirely on the
+   mislabelled Southampton leg. More wins are needed before any 'how they win vs how they lose' claim."""
 
 CASE_HEADLINE = """\
 Across the three defeats there is no single failure mode -- the n=6 corpus retracted that idea. Man
@@ -463,8 +476,8 @@ Utd lost to Liverpool, Tottenham and Brighton in three different shapes:
 - **Tottenham (0-3):** behind from the ~3rd minute (162.5 s opener), so there is essentially no level
   state to judge (1 outside-third loss at 0-0). The loss shape is 'conceded early, chased all game' --
   the whole match is the chasing state, and the fingerprint can say nothing about their 0-0 posture.
-- **Brighton (1-2):** pressed NORMALLY at 0-0 (0.719 -- identical to the Fulham win 0.718) and had
-  MORE of the ball in the attacking third than any side (att-3rd control 0.262), yet still lost. They
+- **Brighton (1-2):** pressed NORMALLY at 0-0 (0.719 -- identical to the Fulham win 0.718) and were
+  highly territorial (att-3rd control 0.262, behind only the Southampton win's 0.353), yet still lost. They
   equalised for 1-1 and conceded a 90+' winner. This is a 'front-foot but couldn't hold on' defeat,
   the direct counter-example to the Liverpool press-collapse reading."""
 
@@ -492,13 +505,13 @@ structural: when a side concedes in the third minute there is no 0-0 sample to a
 and this defeat's shape is simply 'behind from minute three, never level again'.""",
     "brighton_manutd": """\
 Brighton is the direct counter-example to the Liverpool reading. At 0-0 Man Utd pressed hard (counter-
-press 0.719, essentially the Fulham-win number 0.718) and were the MOST territorial side of the whole
-corpus in possession -- 0.262 of their level in-possession frames had the team's mean line beyond the
-70 m third, more than any win. Their attacking transition at 0-0 was the deepest of the three losses
-(build-up 61.4 m) and they defended from a higher block (46.9 m). None of that is a pre-scoreline
-collapse. They fell behind 0-1, equalised for 1-1, and conceded a 90+' stoppage-time winner (Joao
-Pedro) to lose 1-2. This is a front-foot, high-territory performance that lost late -- pressing and
-possession at 0-0 looked like a win, and the result did not follow.""",
+press 0.719, essentially the Fulham-win number 0.718) and were among the most territorial sides in
+possession -- 0.262 of their level in-possession frames had the team's mean line beyond the 70 m third
+(behind only the corrected Southampton win's 0.353). Their attacking transition at 0-0 was the deepest
+of the three losses (build-up 61.4 m) and they defended from a higher block (46.9 m). None of that is a
+pre-scoreline collapse. They fell behind 0-1, equalised for 1-1, and conceded a 90+' stoppage-time
+winner (Joao Pedro) to lose 1-2. This is a front-foot, high-territory performance that lost late --
+pressing and possession at 0-0 looked like a win, and the result did not follow.""",
 }
 
 CASE_PLAYERS = """\
