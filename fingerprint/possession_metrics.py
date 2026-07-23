@@ -31,6 +31,51 @@ PRESS_RADIUS_M = 3.0    # an off-ball defender this close to the carrier counts 
 PASS_MAX_GAP_S = 0.9
 
 
+def possession_share_proxy(team_passes: int, opp_passes: int) -> float:
+    """Pass-count-share PROXY for possession share (Phatak et al. use *time*-based possession).
+
+    Returns ``team_passes / (team_passes + opp_passes)`` -- a stand-in for the time-share the
+    original possession-normalization method assumes. It is a PROXY, not the same quantity: a team can
+    hold the ball long (high time share) while completing few passes (low pass share) and vice versa.
+    Callers must label any downstream number ``*_proxy`` / "pass-share proxy", never "possession".
+
+    Args:
+        team_passes: the team's (completed) pass count.
+        opp_passes: the opponent's pass count.
+
+    Returns:
+        Pass-share in ``[0, 1]``; ``nan`` when neither side has a pass.
+    """
+    total = team_passes + opp_passes
+    return float(team_passes) / total if total else float("nan")
+
+
+def normalize_kpi(kpi: float, poss_share: float) -> float:
+    """Possession-normalize a KPI: ``KPI / (1 - poss_share)`` (Phatak et al., Sci Rep 2022).
+
+    The correct denominator for any KPI accrued while the OPPONENT has the ball (shots conceded,
+    passes allowed, defensive-phase shares): a team that only sees 30% of the ball defends for 70% of
+    the match, so raw conceded counts understate its per-opportunity rate. Dividing by ``1 - poss``
+    puts teams with different possession styles on a comparable footing.
+
+    HONEST SCOPE (two caveats from the method's honesty trail):
+      * ``poss_share`` here is typically the **pass-share proxy** (:func:`possession_share_proxy`),
+        NOT the time-based possession the paper validated on -- label results as a proxy.
+      * the paper validated only on **whole-season aggregates**; single-match / per-phase use is our
+        extrapolation.
+
+    Args:
+        kpi: the raw metric (e.g. shots conceded, passes allowed, defensive-phase frame share).
+        poss_share: the team's possession (or pass-share proxy) in ``[0, 1)``.
+
+    Returns:
+        ``kpi / (1 - poss_share)``; ``nan`` when ``poss_share`` is not in ``[0, 1)``.
+    """
+    if not 0.0 <= poss_share < 1.0:
+        return float("nan")
+    return float(kpi) / (1.0 - poss_share)
+
+
 def _carrier_positions(players: pd.DataFrame) -> dict[tuple[int, int], tuple[float, float]]:
     """``(frame, track_id) -> (pitch_x, pitch_y)`` lookup for resolving carrier locations."""
     g = players.dropna(subset=["pitch_x", "pitch_y"])

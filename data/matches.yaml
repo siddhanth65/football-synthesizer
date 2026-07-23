@@ -38,6 +38,8 @@ matches:
   # Brighton blue/white stripes; anchor id verified empirically post-align (see fbref_gate.md).
   brighton_manutd:
     teams: [Man Utd, Brighton]
+    manager: ten_hag       # 2024-08-24 (MW2); ten Hag era (sacked 2024-10-28)
+    date: 2024-08-24
     aligned: outputs/brighton_manutd/final/match_aligned.parquet
     ball_dir: outputs/brighton_manutd/final/ball
     pmsr: null
@@ -53,6 +55,8 @@ matches:
   # brighton_manutd (no explicit half-boundary field in this schema).
   manutd_liverpool:
     teams: [Man Utd, Liverpool]
+    manager: ten_hag       # 2024-09-01 (MW3); ten Hag era
+    date: 2024-09-01
     aligned: outputs/manutd_liverpool/final/match_aligned.parquet
     ball_dir: outputs/manutd_liverpool/final/ball
     pmsr: null
@@ -66,6 +70,8 @@ matches:
   # brighton_manutd / manutd_liverpool -- no explicit half-boundary field in this schema).
   manutd_fulham:
     teams: [Man Utd, Fulham]
+    manager: ten_hag       # 2024-08-16 (MW1 opener); ten Hag era
+    date: 2024-08-16
     aligned: outputs/manutd_fulham/final/match_aligned.parquet
     ball_dir: outputs/manutd_fulham/final/ball
     pmsr: null
@@ -79,6 +85,8 @@ matches:
   # not yet run here).
   palace_manutd:
     teams: [Crystal Palace, Man Utd]
+    manager: ten_hag       # 2024-09-21; ten Hag era
+    date: 2024-09-21
     aligned: outputs/palace_manutd/final/match_aligned.parquet
     ball_dir: outputs/palace_manutd/final/ball
     pmsr: null
@@ -92,6 +100,8 @@ matches:
   # full match (blackdetect + frame inspection found a normal, single kickoff-to-final-whistle cut).
   manutd_tottenham:
     teams: [Man Utd, Tottenham]
+    manager: ten_hag       # 2024-09-29; ten Hag era
+    date: 2024-09-29
     aligned: outputs/manutd_tottenham/final/match_aligned.parquet
     ball_dir: outputs/manutd_tottenham/final/ball
     pmsr: null
@@ -103,6 +113,8 @@ matches:
   # Sofascore match id 12436949. Prep-only at registration (same convention as above).
   southampton_manutd:
     teams: [Southampton, Man Utd]
+    manager: ten_hag       # 2024-09-14; ten Hag era
+    date: 2024-09-14
     aligned: outputs/southampton_manutd/final/match_aligned.parquet
     ball_dir: outputs/southampton_manutd/final/ball
     pmsr: null
@@ -114,6 +126,8 @@ matches:
   # Sofascore match id 12436514. Prep-only at registration (same convention as above).
   liverpool_manutd:
     teams: [Liverpool, Man Utd]
+    manager: amorim        # 2025-01-05; Amorim era (first PL match 2024-11-24)
+    date: 2025-01-05
     aligned: outputs/liverpool_manutd/final/match_aligned.parquet
     ball_dir: outputs/liverpool_manutd/final/ball
     pmsr: null
@@ -125,6 +139,8 @@ matches:
   # Sofascore match id 12436883. Prep-only at registration (same convention as above).
   manutd_brighton:
     teams: [Man Utd, Brighton]
+    manager: amorim        # 2025-01-19; Amorim era
+    date: 2025-01-19
     aligned: outputs/manutd_brighton/final/match_aligned.parquet
     ball_dir: outputs/manutd_brighton/final/ball
     pmsr: null
@@ -136,6 +152,8 @@ matches:
   # Sofascore match id 12436899. Prep-only at registration (same convention as above).
   fulham_manutd:
     teams: [Fulham, Man Utd]
+    manager: amorim        # 2025-01-26; Amorim era
+    date: 2025-01-26
     aligned: outputs/fulham_manutd/final/match_aligned.parquet
     ball_dir: outputs/fulham_manutd/final/ball
     pmsr: null
@@ -147,6 +165,8 @@ matches:
   # Sofascore match id 12436925. Prep-only at registration (same convention as above).
   manutd_palace:
     teams: [Man Utd, Crystal Palace]
+    manager: amorim        # 2025-02-02; Amorim era
+    date: 2025-02-02
     aligned: outputs/manutd_palace/final/match_aligned.parquet
     ball_dir: outputs/manutd_palace/final/ball
     pmsr: null
@@ -158,6 +178,8 @@ matches:
   # Sofascore match id 12436516. Prep-only at registration (same convention as above).
   manutd_southampton:
     teams: [Man Utd, Southampton]
+    manager: amorim        # 2025-01-16; Amorim era
+    date: 2025-01-16
     aligned: outputs/manutd_southampton/final/match_aligned.parquet
     ball_dir: outputs/manutd_southampton/final/ball
     pmsr: null
@@ -171,6 +193,8 @@ matches:
   # 3115.12s, h2_full 2593.97s, sum 5709.09s vs source container 5708.97s.
   tottenham_manutd:
     teams: [Tottenham, Man Utd]
+    manager: amorim        # 2025-02-16; Amorim era (aligned parquet not yet built)
+    date: 2025-02-16
     aligned: outputs/tottenham_manutd/final/match_aligned.parquet
     ball_dir: outputs/tottenham_manutd/final/ball
     pmsr: null

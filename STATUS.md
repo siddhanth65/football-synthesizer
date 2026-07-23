@@ -2,6 +2,29 @@
 
 **Last updated:** 2026-07-23 (style deep-research COMPLETE: 3 deliverables; tottenham_manutd registered = 12-match corpus; sweep on last 2 halves)
 
+## 2026-07-23 (later) — Phase-0 event-only layer SHIPPED (3 workers, CPU, alongside GPU sweep)
+
+All ten Phase-0/1 builds from the research architecture landed same day:
+- **Pass networks (A): clean NEGATIVE result** — player-level network not viable at current
+  identity coverage (ManU 0 named->named edges across 3 identity matches; named-pass rate
+  0-3.9%). Team possession-links + per-player volumes + formation proxy survive. Confirms
+  identity coverage as THE bottleneck for player analysis; PRTreID re-runs now highest-leverage.
+  Worker fixed opponent-contamination bug (roster-team grouping). 8/10 in Sofascore band (2
+  provisional, BAS mid-write).
+- **Block height + style factors (C):** Ten Hag 27.4 m line / 64% low-block vs Amorim 26.5 m /
+  65% — similar depth, Amorim +3.5 m ball-to-block. Broadcast bias MEASURED: +5.2 m median
+  (relative ordering usable, absolute class not; gate-1 hand-annotation pending). 10/11
+  opponents low-block vs Utd; Southampton pressed high (37.4 m) and lost 0-3. FBref style PCA:
+  United = corpus extreme on defensive engagement (+2.46), middling control. FBref blocked
+  passing/defense pages -> season pressing-height feature unavailable (tracking covers it).
+- **Game-state (B):** manager+date fields in registry; Bayesian WP base subset (logistic, fit
+  StatsBomb open PL 2015/16 + clubelo; held-out ECE 0.0415; GBM rejected mid-task for
+  non-monotone elo effect); WP(t) parquets for 6 validated-goal matches; possession
+  normalization helper (pass-share proxy, flagged); attack typing (3-way at ~10-20% coverage,
+  honest). First manager read (direction only, n~60/regime): Amorim skews more direct +
+  fast-transition (0.12/0.49/0.39) vs ten Hag (0.09/0.59/0.32).
+Deliverables: results/PASS_NETWORKS_v1.md, BLOCK_AND_STYLE_v1.md, GAME_STATE_v2.md.
+
 ## 2026-07-23 — style deep-research complete: United style-analysis v2 architecture
 
 56-agent workflow (survived one quota exhaustion + one web-permission stall; resumed from journal

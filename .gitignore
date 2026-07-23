@@ -29,6 +29,10 @@ outputs/
 data/soccernet/
 # B4 imputation truth data (Metrica + SkillCorner open data — external, gitignored)
 data/imputation/
+# Win-probability open-data slice (StatsBomb goal/card timelines — external, gitignored)
+data/wp_opendata/
+# FBref public squad-stat HTML cache (style-factor profile — external public data, gitignored)
+data/fbref_style_cache/
 # FIFA PMSR match reports (copyrighted ground truth — keep local, never commit)
 PMSR-*.pdf
 # archive safety net

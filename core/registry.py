@@ -40,6 +40,8 @@ class Match:
     competition: str | None = None
     home_team: str | None = None
     away_team: str | None = None
+    manager: str | None = None
+    date: str | None = None
 
     @property
     def processed(self) -> bool:
@@ -118,6 +120,8 @@ def _load(path: Path = REGISTRY_PATH) -> dict[str, Match]:
             competition=m.get("competition"),
             home_team=m.get("home_team"),
             away_team=m.get("away_team"),
+            manager=m.get("manager"),
+            date=str(m["date"]) if m.get("date") else None,
         )
     return out
 
@@ -134,3 +138,9 @@ def get(match_id: str, *, path: Path = REGISTRY_PATH) -> Match:
     if match_id not in reg:
         raise KeyError(f"unknown match {match_id!r}; registered: {sorted(reg)}")
     return reg[match_id]
+
+
+def by_manager(manager: str, *, processed_only: bool = False,
+               path: Path = REGISTRY_PATH) -> list[Match]:
+    """Matches under one manager regime (e.g. ``"ten_hag"`` / ``"amorim"``); order preserved."""
+    return [m for m in matches(processed_only=processed_only, path=path) if m.manager == manager]
