@@ -1,6 +1,22 @@
 # STATUS
 
-**Last updated:** 2026-07-23 night (RETRACTION: 2 team-mapping flips corrected; corpus 12/12; PRTreID identity shipped at 0.92)
+**Last updated:** 2026-07-24 (identity phase COMPLETE: 9 named matches spanning both managers; player analysis v2)
+
+## 2026-07-24 — Amorim identity chain + player-level manager comparison (a+d done)
+
+Overnight chain (probe koshkina + wire PRTreID@0.92 + assign, 6 Amorim matches, ~2h GPU each):
+soton 18/40, spurs 19/40, liverpool 22/40 (corpus best), brighton 20/40, fulham 11/40, palace
+21/40 — full open-set recovery everywhere except fulham (weakest broadcast for close-ups).
+**Corpus: 9 of 12 matches have named players across both manager eras.** Player analysis v2
+(results/PLAYER_ANALYSIS_v2.md, 60d03bb): all-9 oracle validation (visibility rho positive 9/9;
+pos-order 7/9, both negatives = advanced-full-back artifact, explained); **first player-level
+manager read: 7/9 shared players sit higher under Amorim (Garnacho +15.1 m), Mazraoui bucks
+(-11 m) — directional, opponent-confounded.** Honest negatives held: the named-player structure
+CANNOT see the 3-4-3 switch; pooled per-player pass involvement peaks at 6 events (need 20) —
+event attribution remains the binding constraint (imputation/coverage work, not more analysis).
+Backup plans doc added (docs/BACKUP_PLANS_2026-07-24.md): #1 censoring-bias atlas = primary
+fallback; #3 same-kit identity paper = parachute. Prof message (B4 gates + claims regime)
+drafted and handed to Sid. Model routing per Sid: Fable=plan, Opus=explain, small models=execute.
 
 ## 2026-07-23 (night) — LOUD RETRACTION: two team-mapping flips; "wins = deeper block" is DEAD
 
