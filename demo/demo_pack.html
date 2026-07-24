@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>football-synthesizer &mdash; demo pack</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#2b3444;
+    --ink:#e8edf4; --dim:#9aa7b8; --amber:#f0b429; --green:#3fb950;
+    --red:#f85149; --blue:#58a6ff; --yellow:#f2cc4b;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:19px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px 90px}
+  header.hero{
+    padding:64px 28px 40px; text-align:center;
+    background:linear-gradient(160deg,#12182130 0%,#0d1117 70%);
+    border-bottom:1px solid var(--line);
+  }
+  .kicker{color:var(--amber); font-weight:700; letter-spacing:.14em;
+    text-transform:uppercase; font-size:15px}
+  h1{font-size:52px; line-height:1.05; margin:14px auto 10px; max-width:960px}
+  .thesis{font-size:24px; color:var(--dim); max-width:900px; margin:0 auto; font-weight:400}
+  .thesis b{color:var(--ink)}
+  h2{font-size:30px; margin:56px 0 6px; padding-bottom:10px;
+    border-bottom:2px solid var(--line)}
+  h2 .n{color:var(--amber); font-variant-numeric:tabular-nums; margin-right:12px}
+  .lead{color:var(--dim); font-size:18px; margin:6px 0 18px}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:22px 24px; margin:16px 0}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+  figure{margin:0}
+  img.montage{width:100%; border-radius:10px; border:1px solid var(--line); display:block}
+  figcaption{color:var(--dim); font-size:15px; margin-top:8px}
+  video{width:100%; border-radius:12px; border:1px solid var(--line);
+    background:#000; display:block}
+  a.report{display:block; text-decoration:none; color:var(--ink);
+    background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+    padding:20px 22px; transition:border-color .15s,transform .15s}
+  a.report:hover{border-color:var(--blue); transform:translateY(-2px)}
+  a.report .t{font-size:22px; font-weight:700}
+  a.report .m{color:var(--blue); font-size:15px; margin-top:6px; word-break:break-all}
+  a.report .d{color:var(--dim); font-size:16px; margin-top:8px}
+  table{width:100%; border-collapse:collapse; font-size:17px}
+  th,td{text-align:left; padding:12px 10px; border-bottom:1px solid var(--line)}
+  th{color:var(--dim); font-weight:600; font-size:14px; text-transform:uppercase;
+    letter-spacing:.05em}
+  td.num{font-variant-numeric:tabular-nums; font-weight:700; text-align:right;
+    white-space:nowrap}
+  .pass{color:var(--green)} .warn{color:var(--amber)} .fail{color:var(--red)}
+  .chip{display:inline-block; padding:3px 10px; border-radius:999px; font-size:13px;
+    font-weight:700; letter-spacing:.03em}
+  .chip.g{background:#1c3324; color:var(--green)}
+  .chip.a{background:#3a2f14; color:var(--amber)}
+  ul.tight{margin:6px 0; padding-left:22px} ul.tight li{margin:7px 0}
+  .limit{border-left:4px solid var(--amber); padding:6px 0 6px 18px; margin:16px 0}
+  .limit b{color:var(--amber)}
+  .road{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:8px}
+  .road .step{background:var(--panel2); border:1px solid var(--line);
+    border-radius:12px; padding:18px 20px}
+  .road .step .h{font-weight:700; font-size:19px; color:var(--blue)}
+  .road .step .s{color:var(--dim); font-size:16px; margin-top:6px}
+  .mono{font-family:"Cascadia Code",Consolas,monospace; font-size:14px; color:var(--dim)}
+  footer{color:var(--dim); font-size:15px; text-align:center; margin-top:60px;
+    padding-top:24px; border-top:1px solid var(--line)}
+  /* pipeline svg */
+  .pipe{width:100%; height:auto; display:block; margin:6px 0}
+  .pipe .box{fill:var(--panel2); stroke:var(--line); stroke-width:1.5}
+  .pipe .lbl{fill:var(--ink); font-size:15px; font-weight:600;
+    font-family:"Segoe UI",sans-serif}
+  .pipe .sub{fill:var(--dim); font-size:11.5px; font-family:"Segoe UI",sans-serif}
+  .pipe .arw{stroke:var(--amber); stroke-width:2.2; marker-end:url(#ah)}
+  .pipe .gate{fill:#3a2f14; stroke:var(--amber); stroke-width:1.5}
+  @media (max-width:820px){
+    h1{font-size:38px} .grid2,.grid3,.road{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">football-synthesizer &bull; BTP demo &bull; Manchester United, EPL 2024&ndash;25</div>
+  <h1>From broadcast video to named, validated tactical data</h1>
+  <p class="thesis">
+    <b>Uncertainty-aware tactical inference from broadcast video</b> &mdash;
+    measure what the broadcast supports, and prove exactly where it stops.
+  </p>
+</header>
+
+<div class="wrap">
+
+<!-- ================= b. PIPELINE ================= -->
+<h2><span class="n">01</span>The pipeline, one diagram</h2>
+<p class="lead">One broadcast feed in. Every stage is gated &mdash; nothing downstream ships
+  unless the stage above it validated.</p>
+<div class="card">
+<svg class="pipe" viewBox="0 0 1120 200" role="img" aria-label="pipeline diagram">
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3"
+            orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#f0b429"/>
+    </marker>
+  </defs>
+  <!-- boxes -->
+  <g>
+    <rect class="box" x="8"   y="66" width="150" height="66" rx="10"/>
+    <text class="lbl" x="83"  y="94"  text-anchor="middle">Broadcast</text>
+    <text class="sub" x="83"  y="114" text-anchor="middle">TV feed, 1 camera</text>
+
+    <rect class="box" x="196" y="66" width="158" height="66" rx="10"/>
+    <text class="lbl" x="275" y="94"  text-anchor="middle">Detect + Track</text>
+    <text class="sub" x="275" y="114" text-anchor="middle">ByteTrack + teams</text>
+
+    <rect class="box" x="392" y="66" width="158" height="66" rx="10"/>
+    <text class="lbl" x="471" y="94"  text-anchor="middle">Pitch coords</text>
+    <text class="sub" x="471" y="114" text-anchor="middle">homography / frame</text>
+
+    <rect class="box" x="588" y="66" width="150" height="66" rx="10"/>
+    <text class="lbl" x="663" y="94"  text-anchor="middle">Metrics</text>
+    <text class="sub" x="663" y="114" text-anchor="middle">structure, phases</text>
+
+    <rect class="gate" x="776" y="66" width="150" height="66" rx="10"/>
+    <text class="lbl" x="851" y="94"  text-anchor="middle">Identity</text>
+    <text class="sub" x="851" y="114" text-anchor="middle">gated jersey read</text>
+
+    <rect class="box" x="964" y="66" width="148" height="66" rx="10"/>
+    <text class="lbl" x="1038" y="94" text-anchor="middle">Gated report</text>
+    <text class="sub" x="1038" y="114" text-anchor="middle">numeric guardrail</text>
+  </g>
+  <!-- arrows -->
+  <line class="arw" x1="160" y1="99" x2="192" y2="99"/>
+  <line class="arw" x1="356" y1="99" x2="388" y2="99"/>
+  <line class="arw" x1="552" y1="99" x2="584" y2="99"/>
+  <line class="arw" x1="740" y1="99" x2="772" y2="99"/>
+  <line class="arw" x1="928" y1="99" x2="960" y2="99"/>
+  <text class="sub" x="560" y="176" text-anchor="middle">
+    every stage validated against ground truth before the next stage trusts it
+  </text>
+</svg>
+</div>
+
+<!-- ================= c. WE SEE PLAYERS ================= -->
+<h2><span class="n">02</span>We see players</h2>
+<p class="lead">Broadcast video &rarr; detection &rarr; tracking &rarr; per-frame pitch
+  geometry &rarr; players named by shirt number. This is <b>our</b> CV output from the
+  TV feed &mdash; not vendor tracking data.</p>
+<div class="card">
+  <video controls preload="metadata"
+         src="../results/demo/identity_demo_720p.mp4">
+    Your browser cannot play this MP4. Open
+    <span class="mono">results/demo/identity_demo_720p.mp4</span> directly.
+  </video>
+  <figcaption>Identity pipeline showcase &mdash; Man Utd v Brighton (PL 2024&ndash;25).
+    Every number on screen is read from a persisted artifact; the video states its own
+    failures on screen. 2:51, 720p.</figcaption>
+</div>
+<div class="grid2">
+  <figure class="card">
+    <img class="montage"
+         src="../results/closeup_anchor_probe/koshkina_manutd_southampton/levers/montage_new_both2.png"
+         alt="jersey read montage southampton">
+    <figcaption><b>Human-verified jersey reads</b> &mdash; Man Utd v Southampton audit grid
+      (United red, Southampton away yellow). Each crop is a gated close-up anchor the
+      classifier read and a human confirmed.</figcaption>
+  </figure>
+  <figure class="card">
+    <img class="montage"
+         src="../results/closeup_anchor_probe/koshkina_liverpool_manutd/levers/montage_new_both2.png"
+         alt="jersey read montage liverpool">
+    <figcaption><b>Human-verified jersey reads</b> &mdash; Liverpool v Man Utd audit grid
+      (Liverpool red, United white away). The montage <em>is</em> the identity-precision
+      audit &mdash; we look at every read, not a sampled few.</figcaption>
+  </figure>
+</div>
+
+<!-- ================= d. LIVE REPORTS ================= -->
+<h2><span class="n">03</span>We make validated reports &mdash; automatically</h2>
+<p class="lead">Open a live scouting pack. These are generated end-to-end from the tracked
+  data, with a numeric guardrail that refuses any figure not backed by a stored fact.</p>
+<div class="grid2">
+  <a class="report" href="../results/reports/manutd_liverpool_v2.html">
+    <div class="t">Man Utd v Liverpool</div>
+    <div class="m">../results/reports/manutd_liverpool_v2.html</div>
+    <div class="d">Opposition scouting pack v2. Structure, phases, counter-press
+      habit, pass-network shape.</div>
+  </a>
+  <a class="report" href="../results/reports/brighton_manutd_v2.html">
+    <div class="t">Man Utd v Brighton</div>
+    <div class="m">../results/reports/brighton_manutd_v2.html</div>
+    <div class="d">Opposition scouting pack v2 &mdash; the match behind the identity
+      video above.</div>
+  </a>
+</div>
+
+<!-- ================= e. VALIDATION ================= -->
+<h2><span class="n">04</span>We validate &mdash; hard numbers, external where possible</h2>
+<p class="lead">No metric ships without a validator: FIFA PMSR ground truth, a LOMO backtest,
+  externally-graded benchmark, or annotated frames.</p>
+<div class="card">
+<table>
+  <thead><tr><th>What</th><th>Result</th><th style="text-align:right">Number</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Ball-Anchor Stability (frozen 0.97&ndash;1.09 band)</td>
+      <td><span class="chip g">PASS</span> 2 flagged outliers, stated</td>
+      <td class="num pass">10 / 12</td>
+    </tr>
+    <tr>
+      <td>End-to-end goals recovered + all halftime splits</td>
+      <td><span class="chip g">PASS</span> every split correct</td>
+      <td class="num pass">14 / 16</td>
+    </tr>
+    <tr>
+      <td>GS-HOTA on SoccerNet-GSR (external, official scorer)</td>
+      <td>relink lift, valid split</td>
+      <td class="num warn">14.76 &rarr; 22.85</td>
+    </tr>
+    <tr>
+      <td>Players named across the corpus</td>
+      <td>PRTreID identity chain</td>
+      <td class="num pass">9 matches</td>
+    </tr>
+    <tr>
+      <td>Identity disagreement flags (re-wired vs prior)</td>
+      <td><span class="chip g">DOWN</span> from 18 / 20 / 44</td>
+      <td class="num pass">2 / 2 / 1</td>
+    </tr>
+    <tr>
+      <td>Win-probability calibration (ECE)</td>
+      <td>well-calibrated</td>
+      <td class="num pass">0.042</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ================= f. HONEST LIMITS ================= -->
+<h2><span class="n">05</span>We know exactly what could be better</h2>
+<p class="lead">The honest-limits section is the ask &mdash; each limit has a measured baseline
+  and a named path, not a hand-wave.</p>
+
+<div class="card">
+  <div class="limit">
+    <b>Visibility ceiling: ~11.8 of 22 players in frame.</b>
+    A broadcast never shows the whole pitch and we never invent the rest.
+    <br><span style="color:var(--ink)">Path:</span> B4 imputation plan with measured
+    baselines &mdash; fill off-screen players under an explicit uncertainty gate, validated
+    against the frames where they <em>are</em> visible.
+  </div>
+  <div class="limit">
+    <b>Per-player event attribution: 1&ndash;4% of touches.</b>
+    Naming is hero-shot-concentrated (close-ups cluster on a handful of players), so
+    per-player event counts are not yet trustworthy.
+    <br><span style="color:var(--ink)">Path:</span> the December attribution route &mdash;
+    football-domain ReID / VLM close-up reader to lift uniform coverage above the
+    same-kit margin guard.
+  </div>
+  <div class="limit">
+    <b>The retraction trail is the methodology, not an embarrassment.</b>
+    Two team-mapping flips (Tottenham, Southampton) sat in the corpus since MW4 and were
+    caught by <em>our own</em> automated possession-vs-oracle screen &mdash; then retracted
+    loudly. <span class="mono">tools/verify_team_mapping.py</span> now passes 12/12 and
+    the demo asserts both pre-fix flips are caught. Validated-or-nothing, in practice.
+  </div>
+</div>
+
+<!-- ================= g. ROADMAP ================= -->
+<h2><span class="n">06</span>December roadmap</h2>
+<div class="road">
+  <div class="step">
+    <div class="h">Pack demo</div>
+    <div class="s">Full opposition-scouting pack for Man Utd, end-to-end from broadcast
+      to gated narrative.</div>
+  </div>
+  <div class="step">
+    <div class="h">Forecast v0</div>
+    <div class="s">Opponent-conditioned synthesizer &rarr; first calibrated match-shape
+      forecast, error bars first.</div>
+  </div>
+  <div class="step">
+    <div class="h">Imputation gates</div>
+    <div class="s">B4 off-screen-player imputation behind explicit uncertainty gates &mdash;
+      lift the ~11.8/22 visibility floor honestly.</div>
+  </div>
+</div>
+
+<footer>
+  football-synthesizer &bull; every on-screen number reads from a persisted artifact &bull;
+  demo pack generated 2026-07-24 &bull; offline, no external assets
+</footer>
+
+</div>
+</body>
+</html>
