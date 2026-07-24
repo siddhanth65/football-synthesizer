@@ -44,6 +44,18 @@ from tools import event_ledger
 
 MANU = "Man Utd"
 PRTREID_TMPL = "outputs/identity/{}_named_tracks_both2_prtreid.parquet"
+# match id -> Sofascore player-stats parquet id. The registry carries no Sofascore id and
+# event_ledger.PLAYER_TRUTH only maps the 3 original matches (its second element points at koshkina
+# named-tracks parquets that do not exist for the 6 reverse-fixture matches). This map is the sole
+# source for oracle player validation here -- extend it when a match gains a player_stats parquet.
+SOFASCORE_ID = {
+    "brighton_manutd": "12436888", "manutd_liverpool": "12436920",
+    "manutd_tottenham": "12436995", "liverpool_manutd": "12436514",
+    "manutd_brighton": "12436883", "fulham_manutd": "12436899",
+    "manutd_palace": "12436925", "manutd_southampton": "12436516",
+    "tottenham_manutd": "12436952",
+}
+ORACLE_TMPL = "outputs/oracle/sofascore/player_stats_{}.parquet"
 FRAME_S = event_ledger.STEP / 25.0        # aligned parquet is 25 fps sampled every STEP frames
 MIN_FRAG_FR = 10                          # an unnamed track needs this many frames to seed a band
 MIN_TRUST_FR = 25                         # a named player needs this many frames for a trusted position
@@ -51,6 +63,9 @@ POS_RANK = {"D": 0, "M": 1, "F": 2}       # oracle outfield position -> advance 
 FINAL_THIRD_X = 2.0 * PITCH_LEN / 3.0     # oriented x beyond this = attacking third (own goal at 0)
 BAND_NAMES = ("defensive", "midfield", "attacking")
 REPORT_PATH = Path("results/PLAYER_ANALYSIS_v1.md")
+REPORT_PATH_V2 = Path("results/PLAYER_ANALYSIS_v2.md")
+ERAS = ("ten_hag", "amorim")
+POOL_PASS_MIN = 20  # pooled attributed passes needed before a per-player involvement claim is defensible
 
 
 # === discovery ===================================================================================
@@ -264,9 +279,9 @@ def involvement(ledger: pd.DataFrame, manu_int: int, roster: dict[str, str]) -> 
 # === oracle validation ===========================================================================
 def _oracle_manu(match_id: str) -> pd.DataFrame | None:
     """Sofascore Man Utd per-player passes/touches/minutes/position (whole match), or None."""
-    if match_id not in event_ledger.PLAYER_TRUTH:
+    if match_id not in SOFASCORE_ID:
         return None
-    path = Path(event_ledger.PLAYER_TRUTH[match_id][0])
+    path = Path(ORACLE_TMPL.format(SOFASCORE_ID[match_id]))
     if not path.exists():
         return None
     df = pd.read_parquet(path)
@@ -561,6 +576,250 @@ def _impact_section(profiles: list[dict], cross: pd.DataFrame) -> list[str]:
     return lines
 
 
+# === v2: manager-era analysis ====================================================================
+def _mean(vals: list[float]) -> float:
+    """Mean of a list, or NaN when empty."""
+    return round(float(np.mean(vals)), 1) if vals else float("nan")
+
+
+def manager_split(profiles: list[dict]) -> pd.DataFrame:
+    """Per Man Utd player, geometry split by manager era (ten Hag vs Amorim).
+
+    Geometry means use TRUSTED (>= :data:`MIN_TRUST_FR`) per-match positions only. Players seen in
+    both eras get a positional delta ``dx = amorim mean advance - ten_hag mean advance`` (positive =
+    higher up the pitch under Amorim), the first PLAYER-level manager comparison this corpus supports.
+
+    Args:
+        profiles: per-match profiles from :func:`match_profile` (``geom`` is Man Utd-only).
+
+    Returns:
+        One row per player with >= 2 matches total: ``player, n_th, n_am, ft_th, ft_am, x_th, x_am,
+        f3_th, f3_am, dx, both``. Era ``x``/``f3`` columns are NaN with no trusted record in that era.
+    """
+    rec: dict[str, dict[str, list]] = {}
+    for p in profiles:
+        key = "th" if p["manager"] == "ten_hag" else "am"
+        for _, r in p["geom"].iterrows():
+            rec.setdefault(r["player"], {"th": [], "am": []})[key].append(r)
+    rows: list[dict] = []
+    for player, d in rec.items():
+        if len(d["th"]) + len(d["am"]) < 2:
+            continue
+        th_t = [r for r in d["th"] if r["trusted"]]
+        am_t = [r for r in d["am"] if r["trusted"]]
+        x_th, x_am = _mean([r["x"] for r in th_t]), _mean([r["x"] for r in am_t])
+        f3_th = round(float(np.mean([r["final_third_frac"] for r in th_t])), 2) if th_t else float("nan")
+        f3_am = round(float(np.mean([r["final_third_frac"] for r in am_t])), 2) if am_t else float("nan")
+        both = bool(th_t and am_t)
+        rows.append({
+            "player": player, "n_th": len(d["th"]), "n_am": len(d["am"]),
+            "ft_th": int(sum(r["n_frames"] for r in d["th"])),
+            "ft_am": int(sum(r["n_frames"] for r in d["am"])),
+            "x_th": x_th, "x_am": x_am, "f3_th": f3_th, "f3_am": f3_am,
+            "dx": round(x_am - x_th, 1) if both else float("nan"), "both": both,
+        })
+    df = pd.DataFrame(rows)
+    return df.sort_values(["both", "ft_th"], ascending=False).reset_index(drop=True)
+
+
+def era_lines(profiles: list[dict]) -> dict[str, dict]:
+    """Mean defensive/midfield/attacking line centres per manager era (formation proxy).
+
+    Args:
+        profiles: per-match profiles.
+
+    Returns:
+        ``{era: {"n_matches": int, "centres": [def, mid, att], "def_anchors": {name: [x, ...]}}}``
+        where ``centres`` are the per-match band centroids averaged over the era's matches and
+        ``def_anchors`` collects every named player placed in the defensive band, with their advances.
+    """
+    out: dict[str, dict] = {}
+    for era in ERAS:
+        ps = [p for p in profiles if p["manager"] == era and p["lines"]["centres_m"]]
+        cent = [[p["lines"]["centres_m"][j] for p in ps] for j in range(3)]
+        anchors: dict[str, list[float]] = {}
+        for p in ps:
+            for tag in p["lines"]["bands"]["defensive"]:
+                name, x = tag.rsplit(" (", 1)
+                anchors.setdefault(name, []).append(float(x.rstrip("m)")))
+        out[era] = {"n_matches": len(ps),
+                    "centres": [round(float(np.mean(c)), 1) if c else float("nan") for c in cent],
+                    "def_anchors": anchors}
+    return out
+
+
+def _fmt_validation_x9(profiles: list[dict]) -> list[str]:
+    """The all-9-match validation table (pos-order + visibility Spearman), negatives flagged."""
+    lines = ["| match | manager | pos-order rho | n | vis rho | n | flag |",
+             "|-------|---------|-------------:|--:|--------:|--:|------|"]
+    for p in profiles:
+        v = p["val"]
+        px, sm = v["spearman_posx"], v["spearman_min"]
+        flag = "advanced full-back inversion" if px is not None and px < 0 else ""
+        lines.append(f"| {p['match']} | {p['manager']} | {px} | {v['n_posx']} | {sm} | "
+                     f"{v['n_min']} | {flag} |")
+    return lines
+
+
+def _fmt_manager_split(ms: pd.DataFrame) -> list[str]:
+    """Per-player geometry split by manager era; both-era rows first, with the advance delta."""
+    def cell(v: float, pct: bool = False) -> str:
+        if isinstance(v, float) and np.isnan(v):
+            return "-"
+        return f"{v * 100:.0f}%" if pct else f"{v:.0f}"
+
+    lines = ["| player | th n | th frames | th x | th f3 | am n | am frames | am x | am f3 | "
+             "dx (am-th) |",
+             "|--------|----:|---------:|----:|-----:|----:|---------:|----:|-----:|-------:|"]
+    for _, r in ms.iterrows():
+        dx = "-" if isinstance(r["dx"], float) and np.isnan(r["dx"]) else f"{r['dx']:+.1f}"
+        lines.append(f"| {r['player']} | {r['n_th']} | {r['ft_th']} | {cell(r['x_th'])} | "
+                     f"{cell(r['f3_th'], True)} | {r['n_am']} | {r['ft_am']} | {cell(r['x_am'])} | "
+                     f"{cell(r['f3_am'], True)} | {dx} |")
+    return lines
+
+
+def _fmt_formation(el: dict[str, dict], ms: pd.DataFrame) -> list[str]:
+    """Line-band centres per era + the full-back advance delta (the only formation signal we can test)."""
+    lines = [
+        "Mean Man Utd line-band centroids per era (m from own goal, all named + unnamed outfield "
+        "fragments clustered per match, then averaged over the era's matches):", "",
+        "| era | matches | def line | mid line | att line |",
+        "|-----|--------:|--------:|--------:|--------:|"]
+    for era in ERAS:
+        e = el[era]
+        c = e["centres"]
+        cs = [("-" if isinstance(v, float) and np.isnan(v) else f"{v:.1f}") for v in c]
+        lines.append(f"| {era} | {e['n_matches']} | {cs[0]} | {cs[1]} | {cs[2]} |")
+    # Formation proxy: do the recurring full-backs push higher under Amorim (wing-back in a back-3)?
+    fbs = ms[ms["both"] & ms["player"].isin(["Diogo Dalot", "Noussair Mazraoui"])]
+    def_delta = el["amorim"]["centres"][0] - el["ten_hag"]["centres"][0]
+    fb_dx = [float(r["dx"]) for _, r in fbs.iterrows()]
+    fb_mean = float(np.mean(fb_dx)) if fb_dx else float("nan")
+    lines += ["", "**Formation proxy (honest test).** ten Hag's nominal 4-2-3-1 vs Amorim's 3-4-3 "
+              "should, if the named-player x-structure can see it, push the wide defenders higher "
+              "under Amorim (full-back -> wing-back) and lift the defensive line. The recurring "
+              "full-backs' advance delta:"]
+    for _, r in fbs.iterrows():
+        lines.append(f"- {r['player']}: ten Hag {r['x_th']:.0f} m -> Amorim {r['x_am']:.0f} m "
+                     f"(dx {r['dx']:+.1f} m, frames {r['ft_th']}/{r['ft_am']}).")
+    supported = def_delta > 0 and fb_mean > 0
+    verdict = ("The proxy is CONSISTENT with the wing-back read" if supported else
+               "**The proxy does NOT support the wing-back read**")
+    lines += ["", f"Defensive-line centroid moves {def_delta:+.1f} m ten Hag -> Amorim and the "
+              f"recurring full-backs average {fb_mean:+.1f} m. {verdict}: under Amorim the defensive "
+              "line sits, if anything, deeper and the wide defenders do not push higher (Mazraoui "
+              "markedly deeper, Dalot flat). The named-player x-structure cannot see a 3-4-3 "
+              "wing-back signature here -- opponent mix (6 different Amorim opponents), scoreline, and "
+              "the broadcast-sparse full-back frame counts dominate any formation effect. Reported as "
+              "a negative result, not forced into the tactical narrative."]
+    return lines
+
+
+def _fmt_pooled_pass(cross: pd.DataFrame) -> list[str]:
+    """Pooled-across-9 named-pass involvement vs the defensibility threshold."""
+    top = cross.sort_values("attr_pass", ascending=False).head(5)
+    peak = int(top["attr_pass"].max()) if len(top) else 0
+    lines = [
+        f"Threshold stated first: a per-player attributed-pass claim needs >= {POOL_PASS_MIN} pooled "
+        "attributed passes before Poisson noise (relative SE ~ 1/sqrt(N)) drops below ~22%. Pooled "
+        "over all 9 matches, the busiest named players are:", "",
+        "| player | matches | pooled attr pass | pooled touch proxy |",
+        "|--------|--------:|----------------:|------------------:|"]
+    for _, r in top.iterrows():
+        lines.append(f"| {r['player']} | {r['n_matches']} | {r['attr_pass']} | {r['touch_proxy']} |")
+    lines += ["", f"Peak pooled attributed passes = {peak} (< {POOL_PASS_MIN}). **Pooling does NOT "
+              "rescue the event layer** -- even summed over 9 matches no player clears the threshold, "
+              "so no defensible per-player pass-involvement claim exists. The involvement columns stay "
+              "a floor, exactly as in v1; the validated content remains positional."]
+    return lines
+
+
+def format_report_v2(profiles: list[dict], cross: pd.DataFrame) -> str:
+    """Render ``results/PLAYER_ANALYSIS_v2.md`` (9-match, manager-split analysis)."""
+    ms = manager_split(profiles)
+    el = era_lines(profiles)
+    both = ms[ms["both"]]
+    n_th = sum(1 for p in profiles if p["manager"] == "ten_hag")
+    n_am = len(profiles) - n_th
+    posx = [(p["manager"], p["val"]["spearman_posx"]) for p in profiles
+            if p["val"]["spearman_posx"] is not None]
+    smin = [p["val"]["spearman_min"] for p in profiles if p["val"]["spearman_min"] is not None]
+    n_neg = sum(1 for _, r in posx if r < 0)
+    lines = [
+        "# Player analysis v2 (Phase A) -- Manchester United, across the manager change", "",
+        "Extends v1 (`results/PLAYER_ANALYSIS_v1.md`, kept) from 3 to **9 named matches spanning the "
+        f"ten Hag -> Amorim change** ({n_th} ten Hag, {n_am} Amorim). Same PRTreID PRECISION identity "
+        "artifacts + validated event ledger; Man Utd oriented to attack +x on the 105x68 pitch. v2 "
+        "adds the first PLAYER-level manager comparison, a formation proxy, and pooled-event test. "
+        "The v1 oracle-join bug (6 reverse-fixture matches printed `rho None` because their Sofascore "
+        "player-stats parquet was never mapped) is fixed -- **all 9 matches now validate**.", "",
+        "## Validation (all 9 matches -- read first)", "",
+        "Two independent oracle checks per match against Sofascore. **Visibility** "
+        f"(tracked-named frames vs minutes) is positive in all 9 ({min(smin):.2f}-{max(smin):.2f}): "
+        "the more a player is tracked-and-named, the more he actually played -- the positional layer's "
+        "load-bearing validator. **Position ordering** (mean advance x vs D<M<F) is positive in "
+        f"{len(posx) - n_neg}/9 and negative in {n_neg}/9.", "",
+    ]
+    lines += _fmt_validation_x9(profiles)
+    lines += [
+        "", "The two negatives are the same advanced-full-back artifact flagged in v1, not a mapping "
+        "error: in `brighton_manutd` Mazraoui (nominally D) is an overlapping full-back reading "
+        "highest at 72 m; in `fulham_manutd` (rho -0.96, n=6) the inversion is near-total -- the only "
+        "two D are the bombing full-backs Dalot (58 m) and Mazraoui (61 m) while the striker Zirkzee "
+        "(F) drops deepest to 20 m. With only 5-6 trusted players carrying a position label and "
+        "full-backs pushed to wing-back, a single dropping striker flips the rank. Mean-x recovers "
+        "role directionally (7/9 positive) but is fooled by advanced full-backs and sparse frames -- "
+        "read it with the frame count.", "",
+        "## Coverage statement (bounds every claim below)", "",
+        "- **What has real support: the positional layer, not events.** Where players play (mean "
+        "advance, line band) and how visible they are rest on hundreds of tracked-named frames per "
+        "player, validated in all 9 matches above.",
+        "- **What is DEAD: per-player event involvement.** 1.0-4.2% of Man Utd's attributed passes "
+        "carry a named player (2-5 per match); the pooled-across-9 test below shows even summing does "
+        "not rescue it. No plus-minus, no rate cards, no involvement-based impact ranking.", "",
+        "## Manager-split player table (the first PLAYER-level manager comparison)", "",
+        "Man Utd players named in 2+ matches, geometry split by era. `x` / `f3` (final-third share) "
+        "are means over TRUSTED (>=25-frame) per-match positions in that era; `frames` are totals "
+        "(all named frames, trusted or not). `dx` = Amorim mean advance minus ten Hag mean advance "
+        f"(positive = higher under Amorim), defined only for the {len(both)} players trusted in both "
+        "eras -- these are the only rows carrying a manager delta.", "",
+    ]
+    lines += _fmt_manager_split(ms)
+    if len(both):
+        hi = both.sort_values("dx", ascending=False)
+        lines += [
+            "", f"**Read.** Of {len(both)} both-era players, "
+            f"{int((both['dx'] > 0).sum())} sit higher up the pitch under Amorim and "
+            f"{int((both['dx'] < 0).sum())} deeper. Largest advance shift: "
+            f"{hi.iloc[0]['player']} ({hi.iloc[0]['dx']:+.1f} m). This is a positional shift with n "
+            "and frame support stated per row; at 2-5 trusted matches per player it is directional, "
+            "not a stable per-90 trait."]
+    lines += ["", "## Line composition x manager (formation proxy)", ""]
+    lines += _fmt_formation(el, ms)
+    lines += ["", "## Named-pass involvement pooled across 9 matches", ""]
+    lines += _fmt_pooled_pass(cross)
+    lines += ["", "## Who is the impact player? (the honest answer, unchanged)", ""]
+    lines += _impact_section(profiles, cross)
+    lines += [
+        "", "## What this CANNOT claim", "",
+        "- **Not a plus-minus or a rating.** Attribution coverage (1-4%) forbids goals/assists-added "
+        "or on/off splits. A low attributed count can be low involvement OR low broadcast visibility.",
+        "- **The manager deltas are positional, not tactical verdicts.** `dx` says a player's tracked "
+        "mean advance moved; it does not attribute that to the manager alone (opponent, scoreline, and "
+        "the specific matches sampled all move it). No opponent is measured twice under both managers.",
+        "- **Formation is NOT visible in this data.** The named-player x-structure did not show the "
+        "expected 3-4-3 wing-back signature (defensive line no higher, full-backs no higher under "
+        "Amorim) -- a negative result. 7-11 named players per match, dominated by opponent mix and "
+        "broadcast-sparse full-back frames, cannot distinguish 4-2-3-1 from 3-4-3 as a shape.",
+        "- **Pooling does not create event coverage.** Summing 9 matches leaves the busiest player "
+        f"below the {POOL_PASS_MIN}-pass floor; the event layer stays dead at the player level.",
+        "- **Line bands are geometric, not tactical roles**; **possession-link % over-counts**; "
+        "**frames != played minutes** (tracks minutes in rank only, validated above). See v1 for the "
+        "full form of these caveats.", ""]
+    return "\n".join(lines)
+
+
 # === orchestration ===============================================================================
 def build_all() -> tuple[list[dict], pd.DataFrame]:
     """Build every PRTreID match's profile and the cross-match aggregation."""
@@ -577,11 +836,12 @@ def build_all() -> tuple[list[dict], pd.DataFrame]:
 
 
 def main() -> None:
-    """Build profiles, write ``results/PLAYER_ANALYSIS_v1.md``."""
+    """Build profiles, write both ``results/PLAYER_ANALYSIS_v1.md`` and ``..._v2.md``."""
     profiles, cross = build_all()
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(format_report(profiles, cross), encoding="utf-8")
-    print(f"cross-match players (2+): {len(cross)} | wrote {REPORT_PATH}")
+    REPORT_PATH_V2.write_text(format_report_v2(profiles, cross), encoding="utf-8")
+    print(f"cross-match players (2+): {len(cross)} | wrote {REPORT_PATH} + {REPORT_PATH_V2}")
 
 
 if __name__ == "__main__":

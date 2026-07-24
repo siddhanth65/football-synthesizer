@@ -5,7 +5,7 @@ Per-named-player profiles from the PRTreID PRECISION identity artifacts (`output
 ## Coverage statement (read first -- this bounds every claim below)
 
 - **Identity matches: 9** (brighton_manutd, manutd_liverpool, manutd_tottenham -- all correct team-mapping, none of the two known flips).
-- **What has real support: the positional layer, not events.** Where players play (mean advance, line band) and how visible they are rest on hundreds of tracked-named frames per player. Visibility is validated in all three matches -- Spearman(frames, minutes played) = 0.27-0.59 (positive every leg: the more a player is tracked-and-named, the more he actually played). Position ordering Spearman(mean advance x, D<M<F) = -0.51-0.77: positive in 2/3 matches but NEGATIVE in brighton_manutd, where the few trusted frames of an attacking full-back (Mazraoui, nominally D) landed him at 72 m and inverted the naive defender-deep ordering. So mean-x recovers role directionally but is fooled by advanced full-backs and sparse-frame players -- read it with the frame count.
+- **What has real support: the positional layer, not events.** Where players play (mean advance, line band) and how visible they are rest on hundreds of tracked-named frames per player. Visibility is validated in all three matches -- Spearman(frames, minutes played) = 0.14-0.59 (positive every leg: the more a player is tracked-and-named, the more he actually played). Position ordering Spearman(mean advance x, D<M<F) = -0.96-0.93: positive in 2/3 matches but NEGATIVE in brighton_manutd, where the few trusted frames of an attacking full-back (Mazraoui, nominally D) landed him at 72 m and inverted the naive defender-deep ordering. So mean-x recovers role directionally but is fooled by advanced full-backs and sparse-frame players -- read it with the frame count.
 - **What is DEAD: per-player event involvement.** Only 1.0-4.2% of Man Utd's attributed passes carry a named player (the known 4-12% floor, a tracking limit not an identity error): 2-5 named passes per match. The attributed-pass / touch / possession-link counts are a **floor an order of magnitude below the truth**, and their Spearman vs the oracle is computed over a near-all-zero vector -- it is reported but is NOT a meaningful ranking. This confirms the `PASS_NETWORKS_v1` negative result at the player level.
 - **No plus-minus, no per-90 rate cards, no involvement-based impact ranking.** At this coverage on/off-ball impact cannot be estimated. The impact section below leads with what the positional layer CAN say (role, territory, line anchoring) and states plainly what it cannot.
 
@@ -146,9 +146,9 @@ Validation vs Sofascore (Man Utd):
 Man Utd named players: 10 | attributed Man Utd passes: 113 | named-attributed: 4 (coverage 3.5%) | Man Utd poss-links: 31.
 
 Validation vs Sofascore (Man Utd):
-- position ordering: Spearman(mean advance x, position D<M<F) = None over 0 trusted players.
-- visibility: Spearman(tracked-named frames, minutes played) = None over 0 players.
-- event involvement (DEAD -- 3 players with any attributed pass): Spearman(attr pass, totalPass) = None, top-5 overlap None/5 -- computed over a near-all-zero vector, NOT meaningful.
+- position ordering: Spearman(mean advance x, position D<M<F) = 0.804 over 10 trusted players.
+- visibility: Spearman(tracked-named frames, minutes played) = 0.365 over 10 players.
+- event involvement (DEAD -- 3 players with any attributed pass): Spearman(attr pass, totalPass) = -0.09, top-5 overlap 2/5 -- computed over a near-all-zero vector, NOT meaningful.
 
 **Lines** (centre m from own goal, 1141 entities clustered): def 21.7 / mid 46.5 / att 76.9.
 - defensive: Harry Maguire (19m), Lisandro Martínez (34m)
@@ -174,25 +174,25 @@ Validation vs Sofascore (Man Utd):
 
 | player | attr pass | oracle pass | touch proxy | oracle touch | poss-link % |
 |--------|----------:|------------:|------------:|-------------:|------------:|
-| Kobbie Mainoo | 2 | - | 3 | - | 6.5% |
-| Harry Maguire | 1 | - | 2 | - | 6.5% |
-| Noussair Mazraoui | 1 | - | 1 | - | 3.2% |
-| Alejandro Garnacho | 0 | - | 0 | - | 0.0% |
-| Amad Diallo | 0 | - | 1 | - | 0.0% |
-| Diogo Dalot | 0 | - | 1 | - | 0.0% |
-| Bruno Fernandes | 0 | - | 3 | - | 0.0% |
-| Lisandro Martínez | 0 | - | 0 | - | 0.0% |
-| Manuel Ugarte | 0 | - | 1 | - | 0.0% |
-| Rasmus Højlund | 0 | - | 0 | - | 0.0% |
+| Kobbie Mainoo | 2 | 29 | 3 | 44 | 6.5% |
+| Harry Maguire | 1 | 34 | 2 | 51 | 6.5% |
+| Noussair Mazraoui | 1 | 35 | 1 | 50 | 3.2% |
+| Alejandro Garnacho | 0 | 7 | 0 | 12 | 0.0% |
+| Amad Diallo | 0 | 30 | 1 | 42 | 0.0% |
+| Diogo Dalot | 0 | 40 | 1 | 71 | 0.0% |
+| Bruno Fernandes | 0 | 59 | 3 | 89 | 0.0% |
+| Lisandro Martínez | 0 | 30 | 0 | 49 | 0.0% |
+| Manuel Ugarte | 0 | 41 | 1 | 59 | 0.0% |
+| Rasmus Højlund | 0 | 9 | 0 | 17 | 0.0% |
 
 ### manutd_brighton  (amorim, home=Man Utd)
 
 Man Utd named players: 8 | attributed Man Utd passes: 187 | named-attributed: 3 (coverage 1.6%) | Man Utd poss-links: 75.
 
 Validation vs Sofascore (Man Utd):
-- position ordering: Spearman(mean advance x, position D<M<F) = None over 0 trusted players.
-- visibility: Spearman(tracked-named frames, minutes played) = None over 0 players.
-- event involvement (DEAD -- 2 players with any attributed pass): Spearman(attr pass, totalPass) = None, top-5 overlap None/5 -- computed over a near-all-zero vector, NOT meaningful.
+- position ordering: Spearman(mean advance x, position D<M<F) = 0.926 over 6 trusted players.
+- visibility: Spearman(tracked-named frames, minutes played) = 0.136 over 8 players.
+- event involvement (DEAD -- 2 players with any attributed pass): Spearman(attr pass, totalPass) = 0.737, top-5 overlap 3/5 -- computed over a near-all-zero vector, NOT meaningful.
 
 **Lines** (centre m from own goal, 1949 entities clustered): def 23.2 / mid 50.2 / att 77.4.
 - defensive: (no named anchor)
@@ -216,23 +216,23 @@ Validation vs Sofascore (Man Utd):
 
 | player | attr pass | oracle pass | touch proxy | oracle touch | poss-link % |
 |--------|----------:|------------:|------------:|-------------:|------------:|
-| Bruno Fernandes | 2 | - | 2 | - | 2.7% |
-| Harry Maguire | 1 | - | 2 | - | 1.3% |
-| Amad Diallo | 0 | - | 1 | - | 0.0% |
-| Alejandro Garnacho | 0 | - | 1 | - | 0.0% |
-| Diogo Dalot | 0 | - | 0 | - | 0.0% |
-| Leny Yoro | 0 | - | 0 | - | 0.0% |
-| Manuel Ugarte | 0 | - | 1 | - | 0.0% |
-| Noussair Mazraoui | 0 | - | 0 | - | 0.0% |
+| Bruno Fernandes | 2 | 61 | 2 | 79 | 2.7% |
+| Harry Maguire | 1 | 63 | 2 | 77 | 1.3% |
+| Amad Diallo | 0 | 26 | 1 | 52 | 0.0% |
+| Alejandro Garnacho | 0 | 6 | 1 | 12 | 0.0% |
+| Diogo Dalot | 0 | 46 | 0 | 73 | 0.0% |
+| Leny Yoro | 0 | 53 | 0 | 66 | 0.0% |
+| Manuel Ugarte | 0 | 26 | 1 | 39 | 0.0% |
+| Noussair Mazraoui | 0 | 30 | 0 | 45 | 0.0% |
 
 ### fulham_manutd  (amorim, home=Fulham)
 
 Man Utd named players: 7 | attributed Man Utd passes: 233 | named-attributed: 5 (coverage 2.1%) | Man Utd poss-links: 89.
 
 Validation vs Sofascore (Man Utd):
-- position ordering: Spearman(mean advance x, position D<M<F) = None over 0 trusted players.
-- visibility: Spearman(tracked-named frames, minutes played) = None over 0 players.
-- event involvement (DEAD -- 4 players with any attributed pass): Spearman(attr pass, totalPass) = None, top-5 overlap None/5 -- computed over a near-all-zero vector, NOT meaningful.
+- position ordering: Spearman(mean advance x, position D<M<F) = -0.956 over 6 trusted players.
+- visibility: Spearman(tracked-named frames, minutes played) = 0.505 over 7 players.
+- event involvement (DEAD -- 4 players with any attributed pass): Spearman(attr pass, totalPass) = 0.579, top-5 overlap 2/5 -- computed over a near-all-zero vector, NOT meaningful.
 
 **Lines** (centre m from own goal, 1662 entities clustered): def 22.6 / mid 51.4 / att 80.5.
 - defensive: Joshua Zirkzee (20m)
@@ -255,22 +255,22 @@ Validation vs Sofascore (Man Utd):
 
 | player | attr pass | oracle pass | touch proxy | oracle touch | poss-link % |
 |--------|----------:|------------:|------------:|-------------:|------------:|
-| Bruno Fernandes | 2 | - | 5 | - | 1.1% |
-| Alejandro Garnacho | 1 | - | 1 | - | 0.0% |
-| Diogo Dalot | 1 | - | 2 | - | 2.2% |
-| Noussair Mazraoui | 1 | - | 1 | - | 0.0% |
-| Amad Diallo | 0 | - | 0 | - | 0.0% |
-| Joshua Zirkzee | 0 | - | 0 | - | 0.0% |
-| Rasmus Højlund | 0 | - | 0 | - | 0.0% |
+| Bruno Fernandes | 2 | 75 | 5 | 88 | 1.1% |
+| Alejandro Garnacho | 1 | 29 | 1 | 45 | 0.0% |
+| Diogo Dalot | 1 | 37 | 2 | 52 | 2.2% |
+| Noussair Mazraoui | 1 | 28 | 1 | 52 | 0.0% |
+| Amad Diallo | 0 | 41 | 0 | 55 | 0.0% |
+| Joshua Zirkzee | 0 | 6 | 0 | 10 | 0.0% |
+| Rasmus Højlund | 0 | 9 | 0 | 20 | 0.0% |
 
 ### manutd_palace  (amorim, home=Man Utd)
 
 Man Utd named players: 11 | attributed Man Utd passes: 207 | named-attributed: 4 (coverage 1.9%) | Man Utd poss-links: 74.
 
 Validation vs Sofascore (Man Utd):
-- position ordering: Spearman(mean advance x, position D<M<F) = None over 0 trusted players.
-- visibility: Spearman(tracked-named frames, minutes played) = None over 0 players.
-- event involvement (DEAD -- 2 players with any attributed pass): Spearman(attr pass, totalPass) = None, top-5 overlap None/5 -- computed over a near-all-zero vector, NOT meaningful.
+- position ordering: Spearman(mean advance x, position D<M<F) = 0.394 over 8 trusted players.
+- visibility: Spearman(tracked-named frames, minutes played) = 0.547 over 11 players.
+- event involvement (DEAD -- 2 players with any attributed pass): Spearman(attr pass, totalPass) = 0.081, top-5 overlap 2/5 -- computed over a near-all-zero vector, NOT meaningful.
 
 **Lines** (centre m from own goal, 1359 entities clustered): def 24.1 / mid 51.0 / att 79.9.
 - defensive: Noussair Mazraoui (34m), Manuel Ugarte (34m)
@@ -297,26 +297,26 @@ Validation vs Sofascore (Man Utd):
 
 | player | attr pass | oracle pass | touch proxy | oracle touch | poss-link % |
 |--------|----------:|------------:|------------:|-------------:|------------:|
-| Diogo Dalot | 3 | - | 8 | - | 1.4% |
-| Amad Diallo | 1 | - | 1 | - | 0.0% |
-| Alejandro Garnacho | 0 | - | 0 | - | 0.0% |
-| Bruno Fernandes | 0 | - | 2 | - | 0.0% |
-| Christian Eriksen | 0 | - | 0 | - | 0.0% |
-| Harry Maguire | 0 | - | 0 | - | 0.0% |
-| Kobbie Mainoo | 0 | - | 0 | - | 0.0% |
-| Leny Yoro | 0 | - | 0 | - | 0.0% |
-| Lisandro Martínez | 0 | - | 0 | - | 0.0% |
-| Manuel Ugarte | 0 | - | 0 | - | 0.0% |
-| Noussair Mazraoui | 0 | - | 0 | - | 0.0% |
+| Diogo Dalot | 3 | 46 | 8 | 79 | 1.4% |
+| Amad Diallo | 1 | 45 | 1 | 64 | 0.0% |
+| Alejandro Garnacho | 0 | 33 | 0 | 49 | 0.0% |
+| Bruno Fernandes | 0 | 86 | 2 | 114 | 0.0% |
+| Christian Eriksen | 0 | 14 | 0 | 16 | 0.0% |
+| Harry Maguire | 0 | 73 | 0 | 87 | 0.0% |
+| Kobbie Mainoo | 0 | 17 | 0 | 33 | 0.0% |
+| Leny Yoro | 0 | 57 | 0 | 67 | 0.0% |
+| Lisandro Martínez | 0 | 68 | 0 | 82 | 0.0% |
+| Manuel Ugarte | 0 | 35 | 0 | 49 | 0.0% |
+| Noussair Mazraoui | 0 | 27 | 0 | 37 | 0.0% |
 
 ### manutd_southampton  (amorim, home=Man Utd)
 
 Man Utd named players: 7 | attributed Man Utd passes: 195 | named-attributed: 2 (coverage 1.0%) | Man Utd poss-links: 65.
 
 Validation vs Sofascore (Man Utd):
-- position ordering: Spearman(mean advance x, position D<M<F) = None over 0 trusted players.
-- visibility: Spearman(tracked-named frames, minutes played) = None over 0 players.
-- event involvement (DEAD -- 2 players with any attributed pass): Spearman(attr pass, totalPass) = None, top-5 overlap None/5 -- computed over a near-all-zero vector, NOT meaningful.
+- position ordering: Spearman(mean advance x, position D<M<F) = 0.894 over 5 trusted players.
+- visibility: Spearman(tracked-named frames, minutes played) = 0.299 over 7 players.
+- event involvement (DEAD -- 2 players with any attributed pass): Spearman(attr pass, totalPass) = 0.0, top-5 overlap 2/5 -- computed over a near-all-zero vector, NOT meaningful.
 
 **Lines** (centre m from own goal, 1200 entities clustered): def 24.6 / mid 49.8 / att 78.5.
 - defensive: Noussair Mazraoui (23m)
@@ -339,23 +339,23 @@ Validation vs Sofascore (Man Utd):
 
 | player | attr pass | oracle pass | touch proxy | oracle touch | poss-link % |
 |--------|----------:|------------:|------------:|-------------:|------------:|
-| Bruno Fernandes | 1 | - | 1 | - | 1.5% |
-| Manuel Ugarte | 1 | - | 2 | - | 1.5% |
-| Amad Diallo | 0 | - | 0 | - | 0.0% |
-| Alejandro Garnacho | 0 | - | 1 | - | 0.0% |
-| Christian Eriksen | 0 | - | 0 | - | 0.0% |
-| Leny Yoro | 0 | - | 0 | - | 0.0% |
-| Lisandro Martínez | 0 | - | 0 | - | 0.0% |
-| Noussair Mazraoui | 0 | - | 0 | - | 0.0% |
+| Bruno Fernandes | 1 | 67 | 1 | 85 | 1.5% |
+| Manuel Ugarte | 1 | 32 | 2 | 51 | 1.5% |
+| Amad Diallo | 0 | 58 | 0 | 92 | 0.0% |
+| Alejandro Garnacho | 0 | 39 | 1 | 65 | 0.0% |
+| Christian Eriksen | 0 | 8 | 0 | 8 | 0.0% |
+| Leny Yoro | 0 | 66 | 0 | 74 | 0.0% |
+| Lisandro Martínez | 0 | 73 | 0 | 83 | 0.0% |
+| Noussair Mazraoui | 0 | 47 | 0 | 70 | 0.0% |
 
 ### tottenham_manutd  (amorim, home=Tottenham)
 
 Man Utd named players: 8 | attributed Man Utd passes: 156 | named-attributed: 2 (coverage 1.3%) | Man Utd poss-links: 61.
 
 Validation vs Sofascore (Man Utd):
-- position ordering: Spearman(mean advance x, position D<M<F) = None over 0 trusted players.
-- visibility: Spearman(tracked-named frames, minutes played) = None over 0 players.
-- event involvement (DEAD -- 1 players with any attributed pass): Spearman(attr pass, totalPass) = None, top-5 overlap None/5 -- computed over a near-all-zero vector, NOT meaningful.
+- position ordering: Spearman(mean advance x, position D<M<F) = 0.397 over 7 trusted players.
+- visibility: Spearman(tracked-named frames, minutes played) = 0.412 over 8 players.
+- event involvement (DEAD -- 1 players with any attributed pass): Spearman(attr pass, totalPass) = 0.247, top-5 overlap 3/5 -- computed over a near-all-zero vector, NOT meaningful.
 
 **Lines** (centre m from own goal, 1692 entities clustered): def 25.2 / mid 54.4 / att 80.2.
 - defensive: (no named anchor)
@@ -379,14 +379,14 @@ Validation vs Sofascore (Man Utd):
 
 | player | attr pass | oracle pass | touch proxy | oracle touch | poss-link % |
 |--------|----------:|------------:|------------:|-------------:|------------:|
-| Diogo Dalot | 2 | - | 3 | - | 1.6% |
-| Alejandro Garnacho | 0 | - | 0 | - | 0.0% |
-| Bruno Fernandes | 0 | - | 4 | - | 0.0% |
-| Casemiro | 0 | - | 0 | - | 0.0% |
-| Harry Maguire | 0 | - | 0 | - | 0.0% |
-| Noussair Mazraoui | 0 | - | 1 | - | 0.0% |
-| Patrick Dorgu | 0 | - | 0 | - | 0.0% |
-| Rasmus Højlund | 0 | - | 1 | - | 0.0% |
+| Diogo Dalot | 2 | 51 | 3 | 73 | 1.6% |
+| Alejandro Garnacho | 0 | 18 | 0 | 40 | 0.0% |
+| Bruno Fernandes | 0 | 71 | 4 | 105 | 0.0% |
+| Casemiro | 0 | 52 | 0 | 76 | 0.0% |
+| Harry Maguire | 0 | 34 | 0 | 44 | 0.0% |
+| Noussair Mazraoui | 0 | 48 | 1 | 65 | 0.0% |
+| Patrick Dorgu | 0 | 31 | 0 | 56 | 0.0% |
+| Rasmus Højlund | 0 | 11 | 1 | 23 | 0.0% |
 
 ## Cross-match aggregation (Man Utd players named in 2+ matches)
 
