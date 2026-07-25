@@ -126,8 +126,8 @@ def test_conformal_coverage_is_nominal_on_gaussian_residuals() -> None:
     test = rng.normal(scale=[3.0, 1.5], size=(5000, 2))
     bkt_c = np.zeros(5000, dtype=int)
     w = region_scale(cal, bkt_c)
-    k = conformal_k(cal, bkt_c, w)
-    rows = coverage_table(test, bkt_c, w, k)
+    k = conformal_k(cal, bkt_c, w[bkt_c])
+    rows = coverage_table(test, bkt_c, w[bkt_c], k)
     assert 0.47 <= rows[0]["picp_50"] <= 0.53, rows[0]
     assert 0.88 <= rows[0]["picp_90"] <= 0.92, rows[0]
     assert rows[0]["r_90"] > rows[0]["r_50"] > 0

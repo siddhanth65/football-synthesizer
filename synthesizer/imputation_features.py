@@ -432,10 +432,9 @@ def region_scale(
     return w
 
 
-def _radial_score(resid: np.ndarray, bucket: np.ndarray, w: np.ndarray) -> np.ndarray:
+def _radial_score(resid: np.ndarray, w: np.ndarray) -> np.ndarray:
     """Normalised radial nonconformity score ``sqrt((rx/wx)^2 + (ry/wy)^2)``."""
-    ww = w[bucket]
-    return np.sqrt(((resid / ww) ** 2).sum(axis=1))
+    return np.sqrt(((resid / w) ** 2).sum(axis=1))
 
 
 def conformal_k(
@@ -446,14 +445,15 @@ def conformal_k(
     Args:
         resid: Signed calibration residuals ``pred - truth``, shape ``(M, 2)``.
         bucket: Horizon-bucket index per calibration sample.
-        w: Half-widths from :func:`region_scale`.
+        w: PER-SAMPLE half-widths, shape ``(M, 2)``. The uncertainty-only wrapper passes a
+            per-bucket table expanded with ``w[bucket]``; v1 passes its quantile-head widths.
         alphas: Miscoverage levels; ``0.5`` -> 50% region, ``0.1`` -> 90% region.
 
     Returns:
         Multipliers, shape ``(n_buckets, len(alphas))``; ``inf`` where a bucket has too few
         calibration points to certify the level.
     """
-    s = _radial_score(resid, bucket, w)
+    s = _radial_score(resid, w)
     k = np.full((len(BIN_LABELS), len(alphas)), np.inf)
     for b in range(len(BIN_LABELS)):
         sb = np.sort(s[bucket == b])
@@ -479,15 +479,16 @@ def coverage_table(
     Args:
         resid: Signed held-out residuals ``pred - truth``, shape ``(M, 2)``.
         bucket: Horizon-bucket index per held-out sample.
-        w: Frozen half-widths.
+        w: Frozen PER-SAMPLE half-widths, shape ``(M, 2)``.
         k: Frozen conformal multipliers.
         alphas: Miscoverage levels matching ``k``'s columns.
 
     Returns:
-        One dict per bucket with ``n`` plus ``picp_<pct>`` and ``r_<pct>`` (equivalent region
-        radius in metres, ``sqrt(area/pi)``) for each level.
+        One dict per bucket with ``n`` plus ``picp_<pct>`` and ``r_<pct>`` (mean equivalent
+        region radius in metres, ``sqrt(area/pi)``) for each level.
     """
-    s = _radial_score(resid, bucket, w)
+    s = _radial_score(resid, w)
+    geo = np.sqrt(w[:, 0] * w[:, 1])
     rows: list[dict[str, float]] = []
     for b in range(len(BIN_LABELS)):
         m = bucket == b
@@ -496,7 +497,7 @@ def coverage_table(
             pct = int(round((1.0 - a) * 100))
             inside = s[m] <= k[b, j] if m.any() else np.zeros(0, dtype=bool)
             row[f"picp_{pct}"] = float(inside.mean()) if m.any() else float("nan")
-            row[f"r_{pct}"] = float(k[b, j] * np.sqrt(w[b, 0] * w[b, 1]))
+            row[f"r_{pct}"] = float(k[b, j] * geo[m].mean()) if m.any() else float("nan")
         rows.append(row)
     return rows
 
@@ -569,7 +570,7 @@ def _self_check() -> None:
     rng = np.random.default_rng(0)
     r = rng.normal(size=(4000, 2))
     bkt = np.zeros(4000, dtype=int)
-    w = np.ones((len(BIN_LABELS), 2))
+    w = np.ones((4000, 2))
     k = conformal_k(r, bkt, w)
     rows = coverage_table(r, bkt, w, k)
     assert 0.45 <= rows[0]["picp_50"] <= 0.55, rows[0]

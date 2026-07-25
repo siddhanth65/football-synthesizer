@@ -156,9 +156,10 @@ def _wrapper_report(
         return blend_position(s, tau, blend_w) - s["target"]
 
     w = region_scale(resid(train), bucket_of(train["tsls"]))
-    k = conformal_k(resid(calib), bucket_of(calib["tsls"]), w)
-    rows = coverage_table(resid(hold), bucket_of(hold["tsls"]), w, k)
-    rc = coverage_table(resid(calib), bucket_of(calib["tsls"]), w, k)
+    bc, bh = bucket_of(calib["tsls"]), bucket_of(hold["tsls"])
+    k = conformal_k(resid(calib), bc, w[bc])
+    rows = coverage_table(resid(hold), bh, w[bh], k)
+    rc = coverage_table(resid(calib), bc, w[bc], k)
 
     print("\nFROZEN region parameters (w from TRAIN residuals, k from CALIB):")
     print("horizon   |  w_x    w_y  |  k(50%)  k(90%)")
