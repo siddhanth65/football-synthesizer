@@ -1,6 +1,48 @@
 # STATUS
 
-**Last updated:** 2026-07-24 (identity phase COMPLETE: 9 named matches spanning both managers; player analysis v2)
+**Last updated:** 2026-07-25 (B4 COMPLETE through M3: v1 gated, transfer-validated; 56.6 GB reclaimed)
+
+## 2026-07-25 — B4 model shipped and transfer-validated; supervisor gates settled
+
+**Supervisor answers (2026-07-24):** gate-1 bar = the CAUSAL baseline (oracle reported as ceiling);
+comparative-claims tier approved; the 50% geometric pass-recall gate RETIRED in favour of
+event-count validation (0.97-1.09x official, frozen threshold, 12 matches) — my call, delegated;
+demo shape (pre-match pack for a held-out fixture, scored after) approved; **NO paper venue — BTP
+only**, so B5 = review pack + thesis + live demo (CVSports/MLSA targets struck from the plan).
+
+**B4 arc, all committed:**
+- **Research -> plan** (14 agents): pick = quantile-GBM residual correction on the frozen causal
+  anchor, so a learner that finds nothing TIES the bar instead of losing. Heavy models explicitly
+  rejected on evidence (MIDAS shows Graph Imputer losing to cubic spline on our exact Metrica
+  split). docs/B4_MODEL_PLAN.md.
+- **Week 1:** published training-free method (B6_vote) LOSES (15.64 vs 13.24) — negative result
+  kept. But its vote field replaced B5's weakest component -> **B7**, better in 5/6 buckets, so I
+  **re-froze the bar harder** to B7 (11.46) rather than grade v1 against the weaker baseline.
+- **v1 GATED (run once):** **8.10 m vs the 11.46 m bar**, beats 5/6 buckets, ties at 0-1s;
+  calibration **PASS 6/6 at both 50% and 90%**; ACI remedy not needed. **Independently confirmed
+  by a Fable pass** that re-derived the bar from raw CSVs and reproduced all 7 frozen numbers
+  exactly, verified anchor==bar, and traced every threshold to TRAIN/CALIB only.
+- **M3 transfer: the gain is real broadcast physics, not a simulator artifact.** Under the
+  SkillCorner-MEASURED footprint (+lag, +feathered edge) v1 keeps 105-112% of its margin. Real
+  censoring measured: 98.4% of detected players inside the footprint, 94.7% of undetected outside.
+  **Standing caveat: the prior is aspect-dependent** (0.50 keeps 100%, 0.86 -> 60%, 3.67 -> n.s.);
+  not validated on tactical-cam/vertical-crop. **v1.1 (shape-randomised) tested, NOT adopted** —
+  recovers off-aspect margin but loses on the geometries we actually have and has no calibrated
+  head yet; held as a remedy.
+- **The sequencing finding:** on our own footage v1 is physically plausible (0.2-0.3% off-pitch,
+  better than the anchor) but the binding obstacle is OUR TRACKER — ~10 trusted players on ~25% of
+  frames with heavy re-id churn, so a "hidden player" is often a dead track of someone on screen.
+  **B2 identity must be applied before any B4 number reaches a scouting report.**
+
+**OPEN with the supervisor:** abstention Layer A is mis-specified — b* = 0-1s makes the literal
+rule abstain on 100% of the holdout, because it conflates "no skill" with "no improvement over the
+anchor". Proposed restatement (DEFER to the anchor where v1 adds nothing; abstain only on wide
+uncertainty) is written up but NOT used for any claim pending his approval.
+
+**Housekeeping:** 56.6 GB reclaimed after per-fixture proof (12 root .mp4s were byte-equivalent
+duplicates of the chunk sets — zero frames missing anywhere; plus .git orphans and 10 MD5-verified
+duplicate clips). The audit's "delete fra_sen" recommendation was RETRACTED — two of its clips are
+live ball-detector training inputs. Free space 5.1 -> 61.7 GB.
 
 ## 2026-07-24 — Amorim identity chain + player-level manager comparison (a+d done)
 
