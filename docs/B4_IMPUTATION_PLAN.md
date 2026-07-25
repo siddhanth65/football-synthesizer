@@ -58,6 +58,14 @@ raw, possession undercount) on the oracle matches.
 3. Downstream: measurable bias reduction on ≥1 oracle-validated team metric.
 4. Abstention horizon: beyond the horizon where gate 1 fails, the imputer must say "don't know".
 
+**Gate-1 amendment: ACCEPTED by the supervisor 2026-07-24.** Sid put the choice to his professor
+and the answer was option (b): **the model's pass/fail line is the best CAUSAL baseline
+(B5_blend), with offline-linear reported alongside as an oracle ceiling.** Rationale accepted as
+given ("go for b as we can validate claims"). The per-horizon numbers the model must beat are
+therefore the B5_blend column below: 0.55 / 2.27 / 5.08 / 9.05 / 17.27 / 15.95 m, overall 12.63.
+Gates 2-4 (calibration, downstream bias reduction, abstention horizon) stand unchanged. Original
+proposal text preserved below for the pre-registration trail.
+
 **Gate-1 amendment (2026-07-22, dated BEFORE any learned-model result exists — baselines only):**
 M2a exposed that offline linear interpolation uses the FUTURE sighting, which a causal imputer
 never has; no causal baseline beats it past 3 s and the gap widens with horizon (7.1 m at

@@ -6,10 +6,12 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
 
 ## Multi-agent orchestration (MANDATORY)
 
-- **Main session = Fable 5 = orchestrator/tech-lead ONLY.** It plans, decomposes, reviews results,
+- **Main session = orchestrator/tech-lead ONLY.** It plans, decomposes, reviews results,
   makes calls, talks to the user, and updates docs/STATUS/memory. It does **NOT** write or edit code.
-  (2026-07-11: Opus 4.8 stood in as orchestrator while Fable quota regenerated; Fable restored same
-  day via `/model` — the orchestrator/worker split held throughout.)
+  **Current orchestrator model: Opus 5 (Sid, 2026-07-24)** — "opus 5 will now be working instead of
+  fable 5 to plan; use opus 4.8 and sonnet 5 for coding and lower level tasks; for clarity and
+  confirmation use fable 5 to confirm." (History: Fable 5 held the seat 2026-07-11 → 07-24, with
+  Opus 4.8 standing in during quota gaps. The orchestrator/worker split held through every swap.)
 - **ALL code work → `deep-worker` subagent (Opus 4.8):** pipeline modules, metric implementations,
   debugging, validation harnesses, GPU scripts, architecture review.
 - **Mechanical, fully-specified work → `fast-worker` subagent (Sonnet 5):** parsers, boilerplate,

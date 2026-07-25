@@ -173,10 +173,12 @@ interpolation off-screen; FIFA study names it the open problem]:
   post-match. Commercial framing: "a scouting pack from any tape you own, every number graded";
   the coverage wedge (uncovered leagues/archives where clubs hold footage rights) is the
   commercial story, accuracy parity with vendors is NOT claimed.
-- Venue targets [captured]: **CVSports @ CVPR 2026** (exact topical match: tracking, calibration,
-  position estimation, tactics), **MLSA @ ECML-PKDD 2026**, MIT Sloan abstract (long shot,
-  worth one evening). Also the StatsBomb conference. A workshop paper draft doubles as the thesis
-  core — write once.
+- ~~Venue targets: CVSports @ CVPR 2026, MLSA @ ECML-PKDD 2026, MIT Sloan, StatsBomb conf.~~
+  **DROPPED 2026-07-24 (Sid): "we're not presenting a paper anywhere, this is for a btp project
+  in my college."** No external submission. B5 therefore = **review pack + thesis document +
+  live demo**, nothing written for a venue. Keep the rigour (pre-registered gates, external
+  benchmark, error bars, correction trail) — it is what makes the *thesis* defensible at the
+  viva, not a submission requirement.
 - LLM-report angle if space permits: our guardrail (100%/100%) is well-motivated by the measured
   LLM factuality gap (high FactScore, entailment only 60–72%) [captured] and aligns with the
   wordalisation literature (arXiv 2504.00767).
@@ -188,8 +190,19 @@ interpolation off-screen; FIFA study names it the open problem]:
    item.)*
 2. **Baselines for every claim**: linear interpolation vs our imputer; Tier-A vs Tier-B(true
    forecast); raw vs de-biased line (held-out); v5 vs v6 detector.
-3. **Pre-registered gates** (we already do this — keep receipts): the 50%-recall gate question for
-   relative-vs-absolute claims must be settled with the prof *in advance* — it is on the open list.
+3. **Pre-registered gates** — **SETTLED WITH THE SUPERVISOR 2026-07-24.** Three answers, all
+   dated before the work they gate:
+   - *Imputation bar:* the model is scored against the best **causal** baseline; offline linear
+     interpolation is an oracle ceiling, not the pass/fail line. (Sid: "go for b as we can
+     validate claims".)
+   - *Comparative tier:* **approved** — team-vs-team ratios may ship under symmetric capture
+     (spread ≤ 0.05) as an explicitly weaker, labelled claim type.
+   - *The 50% geometric pass-recall gate:* **RETIRED**, replaced by event-model counts validated
+     against official figures at 0.97–1.09× on a threshold frozen at the first match, held across
+     12 matches. Sid delegated the call ("decide whichever is the most accurate measure") and the
+     event channel is ~10× closer to truth than geometry (which never cleared 26–48%). This is a
+     move to a *better measurement*, not a loosened standard: geometry keeps its own gates for
+     geometry-derived claims (shape, block height, positions).
 4. **Error bars + negative results**: possession-bias proof, pose-carry negative, contamination
    restatement — presented as findings, not confessions.
 5. **The correction trail in the open**: git history now exists; commit fixes with honest messages.
