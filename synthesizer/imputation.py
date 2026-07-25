@@ -457,6 +457,7 @@ def collect_samples(
     fps: float,
     vel: np.ndarray,
     slot_pred: np.ndarray,
+    fields: dict[str, np.ndarray] | None = None,
 ) -> dict[str, np.ndarray]:
     """Gather per-hidden-sample states shared by every baseline.
 
@@ -472,16 +473,25 @@ def collect_samples(
         fps: Frame rate.
         vel: Per-frame velocity from :func:`estimate_velocity`.
         slot_pred: Per-frame slot-model position field from :func:`slot_prediction`.
+        fields: Optional extra per-frame position fields, shape ``(n, slots, 2)`` each,
+            sampled at the query frame (e.g. the ``B6_vote`` field).
 
     Returns:
         Dict of aligned 1-D/2-D arrays: ``tsls`` (s), ``target``, ``hold``, ``linear``,
-        ``v0``, ``slot`` (all metre positions, shape ``(M, 2)`` except ``tsls``).
+        ``v0``, ``slot`` (all metre positions, shape ``(M, 2)`` except ``tsls``), plus the
+        bookkeeping columns ``frame`` (global frame index), ``slot_id``, ``last_frame``
+        (global index of the last sighting) and ``period``. Any per-frame field passed in
+        ``fields`` is sampled at the query frame and added under its own key (NaN rows fall
+        back to the hold position).
     """
     keys = ("tsls", "target", "hold", "linear", "v0", "slot")
-    acc: dict[str, list[np.ndarray]] = {k: [] for k in keys}
+    idx_keys = ("frame", "slot_id", "last_frame", "period")
+    fields = fields or {}
+    acc: dict[str, list[np.ndarray]] = {k: [] for k in (*keys, *idx_keys, *fields)}
     slots = truth_m.shape[1]
     for per in np.unique(period):
         sel = period == per
+        gidx = np.where(sel)[0]
         tr_p = truth_m[sel]
         vis_p = visible[sel]
         vel_p = vel[sel]
@@ -520,7 +530,14 @@ def collect_samples(
             acc["linear"].append(lin_pos)
             acc["v0"].append(v0)
             acc["slot"].append(slot_pos)
-    return {k: np.concatenate(acc[k]) for k in keys}
+            acc["frame"].append(gidx[hi])
+            acc["slot_id"].append(np.full(hi.size, p))
+            acc["last_frame"].append(gidx[li])
+            acc["period"].append(np.full(hi.size, per))
+            for name, fld in fields.items():
+                pos = fld[gidx[hi], p]
+                acc[name].append(np.where(np.isfinite(pos), pos, hold_pos))
+    return {k: np.concatenate(v) for k, v in acc.items()}
 
 
 def veldecay_position(base: np.ndarray, v0: np.ndarray, tsls: np.ndarray, tau: float) -> np.ndarray:
@@ -632,7 +649,7 @@ def baseline_errors(
     b4 = samples["slot"]
     w = blend_w[_bucket_index(samples["tsls"])][:, None]
     b5 = w * b3 + (1.0 - w) * b4
-    return {
+    out = {
         "tsls": samples["tsls"],
         "B1_hold": err(samples["hold"]),
         "B2_offline": err(samples["linear"]),
@@ -640,30 +657,41 @@ def baseline_errors(
         "B4_slot": err(b4),
         "B5_blend": err(b5),
     }
+    if "b6" in samples:
+        out["B6_vote"] = err(samples["b6"])
+    return out
+
+
+def blend_position(samples: dict[str, np.ndarray], tau: float, blend_w: np.ndarray) -> np.ndarray:
+    """Return the frozen ``B5_blend`` point prediction for each sample, shape ``(M, 2)``."""
+    b3 = veldecay_position(samples["hold"], samples["v0"], samples["tsls"], tau)
+    w = blend_w[_bucket_index(samples["tsls"])][:, None]
+    return w * b3 + (1.0 - w) * samples["slot"]
 
 
 BASELINE_ORDER = ("B1_hold", "B2_offline", "B3_veldecay", "B4_slot", "B5_blend")
 
 
 def print_full_table(errors: dict[str, np.ndarray], title: str) -> None:
-    """Print RMSE / p50 / p90 by horizon for all five baselines, and per-bucket winners."""
+    """Print RMSE / p50 / p90 by horizon for every baseline present, and per-bucket winners."""
     tsls = errors["tsls"]
-    stats = {b: _bin_stats(errors[b], tsls) for b in BASELINE_ORDER}
+    order = tuple(b for b in (*BASELINE_ORDER, "B6_vote") if b in errors)
+    stats = {b: _bin_stats(errors[b], tsls) for b in order}
     print("=" * 92)
     print(title)
     print("=" * 92)
     for metric in ("rmse", "p50", "p90"):
         print(f"[{metric.upper()} metres]")
-        header = "horizon   |     n    | " + " ".join(f"{b:>11s}" for b in BASELINE_ORDER)
+        header = "horizon   |     n    | " + " ".join(f"{b:>11s}" for b in order)
         print(header)
         print("-" * len(header))
         for i, lab in enumerate(BIN_LABELS):
             n = stats["B1_hold"][i]["n"]
-            cells = " ".join(f"{stats[b][i][metric]:11.2f}" for b in BASELINE_ORDER)
+            cells = " ".join(f"{stats[b][i][metric]:11.2f}" for b in order)
             print(f"{lab:9s} | {n:8d} | {cells}")
         overall = " ".join(
             f"{np.sqrt(np.mean(errors[b] ** 2)) if metric == 'rmse' else np.percentile(errors[b], int(metric[1:])):11.2f}"
-            for b in BASELINE_ORDER
+            for b in order
         )
         print(f"{'ALL':9s} | {tsls.size:8d} | {overall}")
         print()
@@ -671,8 +699,8 @@ def print_full_table(errors: dict[str, np.ndarray], title: str) -> None:
     for i, lab in enumerate(BIN_LABELS):
         if stats["B1_hold"][i]["n"] == 0:
             continue
-        best = min(BASELINE_ORDER, key=lambda b: stats[b][i]["rmse"])
-        row = "  ".join(f"{b}={stats[b][i]['rmse']:5.2f}" for b in BASELINE_ORDER)
+        best = min(order, key=lambda b: stats[b][i]["rmse"])
+        row = "  ".join(f"{b}={stats[b][i]['rmse']:5.2f}" for b in order)
         print(f"  {lab:6s} winner={best:11s} | {row}")
     print()
 
@@ -730,7 +758,7 @@ def _prep_game(name: str, half_w: float | None) -> tuple[dict, np.ndarray, str]:
     )
     bundle = {
         "truth": truth_m, "visible": visible, "period": period, "fps": fps,
-        "cam": cam, "vel": vel, "cent": cent, "ranges": ranges,
+        "cam": cam, "vel": vel, "cent": cent, "ranges": ranges, "ball": ball_m,
     }
     return bundle, half_w, summary
 

@@ -61,10 +61,38 @@ raw, possession undercount) on the oracle matches.
 **Gate-1 amendment: ACCEPTED by the supervisor 2026-07-24.** Sid put the choice to his professor
 and the answer was option (b): **the model's pass/fail line is the best CAUSAL baseline
 (B5_blend), with offline-linear reported alongside as an oracle ceiling.** Rationale accepted as
-given ("go for b as we can validate claims"). The per-horizon numbers the model must beat are
-therefore the B5_blend column below: 0.55 / 2.27 / 5.08 / 9.05 / 17.27 / 15.95 m, overall 12.63.
-Gates 2-4 (calibration, downstream bias reduction, abstention horizon) stand unchanged. Original
-proposal text preserved below for the pre-registration trail.
+given ("go for b as we can validate claims"). Gates 2-4 (calibration, downstream bias reduction,
+abstention horizon) stand unchanged. Original proposal text preserved below for the
+pre-registration trail.
+
+**BAR RE-FROZEN 2026-07-24 (same day, before any v1 model exists) — two corrections, both
+raising the difficulty:**
+
+1. *Wrong split.* The numbers quoted above (0.55 / 2.27 / 5.08 / 9.05 / 17.27 / 15.95, ALL 12.63)
+   are full-Game-2. The frozen protocol (B4_MODEL_PLAN 4.1) holds out **Game 2 second half only**,
+   where the same frozen B5_blend scores **0.66 / 2.26 / 4.98 / 8.95 / 17.72 / 16.80, ALL 13.24**.
+   Comparing v1 against the full-game column would have been apples-to-oranges.
+2. *A better causal baseline exists, so it becomes the bar.* Week-1 measured the published
+   training-free role-anchored vote (**B6_vote**) — it **LOSES** to B5_blend (ALL 15.64 vs 13.24;
+   ahead only at 10-30 s) and is reported as a negative result. But replacing B5's weakest
+   component (the slot-OLS prior, 21-35 m alone) with the vote field — same veldecay, same frozen
+   tau=4.75 s, blend weights refit on TRAIN only — gives **B7 = veldecay (+) vote**, which beats
+   B5_blend in 5/6 buckets with non-overlapping 95% block-bootstrap CIs, on **both** CALIB
+   (9.92 vs 12.04, wins 6/6) and HOLDOUT.
+
+**THE GATE-1 BAR IS THEREFORE B7, HOLDOUT (Game 2 H2), per horizon:**
+
+| 0-1s | 1-3s | 3-5s | 5-10s | 10-30s | 30s+ | ALL |
+|---|---|---|---|---|---|---|
+| 0.66 | 2.09 | 4.37 | 7.55 | 14.91 | 15.16 | **11.46** |
+
+Rationale: the supervisor's decision was "score against the best CAUSAL baseline". B7 is causal and
+training-free, so honouring that decision means the bar moves with our knowledge of what causal
+methods achieve. Keeping the weaker B5 bar while letting v1 sit on the stronger B7 anchor would let
+v1 clear the gate by construction — inflation, not evidence. The anchor swap is justified on the
+**CALIB** split (where B7 wins 6/6); the holdout was also inspected during this exploration and that
+is disclosed here rather than hidden — the "run once" discipline applies to the v1 gate run, which
+has not happened.
 
 **Gate-1 amendment (2026-07-22, dated BEFORE any learned-model result exists — baselines only):**
 M2a exposed that offline linear interpolation uses the FUTURE sighting, which a causal imputer

@@ -51,6 +51,15 @@ What this means concretely for the model target:
 
 ## 2. Recommended model v1 — pick, fallback, stretch
 
+> **ANCHOR UPDATED 2026-07-24 (week-1 result, before any v1 model exists).** Everywhere this
+> section says `B5_blend`, read **`B7 = veldecay (+) role-anchored-vote`** — measured better in
+> 5/6 holdout buckets and 6/6 calibration buckets, still training-free and causal, tau still the
+> frozen 4.75 s, blend weights refit on TRAIN only. B7 is now BOTH the anchor v1 corrects and the
+> gate-1 bar v1 must beat (see B4_IMPUTATION_PLAN "BAR RE-FROZEN"). The published training-free
+> method **B6_vote on its own LOST** to B5_blend (ALL 15.64 vs 13.24) — a negative result we
+> report, not bury. Residual-on-anchor logic is unchanged: v1 predicts `truth - B7_prediction`,
+> so a learner that finds nothing ties the (now harder) bar instead of losing to it.
+
 ### 2.1 The pick (build this)
 
 **B4-v1 = quantile gradient-boosted residual correction on the frozen `B5_blend` anchor, in an
