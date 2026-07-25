@@ -74,39 +74,102 @@ EVENTS_VALIDATED = {
     "offsides 2 vs 3.",
 }
 
-# Story prose per match, grounded in the computed score-state numbers (verified against the tables).
+# Pundit-voice story prose per match. Paragraphs are separated by a blank line and rendered as
+# separate <p>. Every claim here restates a number computed elsewhere in the same report (score-state
+# table, counter-press table, WINS_VS_LOSSES level-state rows) in football language -- no new claims,
+# and the caveated space-control/possession proxy is deliberately never narrated (it inverts the
+# oracle; the report says so in the appendix and the palace/liverpool prose abstains explicitly).
 STORY = {
     "manutd_liverpool":
-        "Man Utd were level for 34 minutes, then chased for the rest of the match as the deficit "
-        "deepened 0-1 (34:26) -> 0-2 (41:58) -> 0-3 (57'). The telling detail is that the collapse "
-        "did not wait for the scoreboard (see the style read below): the counter-press was already "
-        "the flattest of the three matches while the game was still 0-0.",
+        "For a little over half an hour this was a contest. United stayed level to 34 minutes and "
+        "looked like they belonged in the game - and then it went in a hurry. Two Liverpool goals "
+        "inside eight first-half minutes, on 34 and 42, sent United in at the break two down and "
+        "already chasing, and when the third landed early in the second half the game was up. From "
+        "that 34th minute onward the night was spent running after the score."
+        "\n\n"
+        "The uncomfortable part is that the wobble started before the scoreboard did. Even at 0-0 the "
+        "one thing that is supposed to define this side - swarming the ball the instant they lose it "
+        "- just was not there: the counter-press fired on well under half of their high turnovers, "
+        "where in the Brighton and Fulham games it was going off nearly three times in four. They "
+        "only found that intensity, and only shoved their line up the pitch, once they were three "
+        "down and it no longer mattered. Liverpool, meanwhile, won it the way good sides win these - "
+        "control, not chaos: they gave the ball away in dangerous areas less than anyone on show and "
+        "never had to scramble to get it back.",
     "brighton_manutd":
-        "Level for 31 minutes, then chasing after Brighton's opener; Man Utd equalised early in the "
-        "second half to level it 1-1, before conceding a stoppage-time winner (chasing 1-2 from "
-        "90+3'). Two-thirds of the match was spent either level or a single goal apart.",
+        "This was a game United could, and probably should, have taken something from. They were "
+        "level for the first half hour, and even after Brighton nicked the opener right before the "
+        "interval they came back out like a side that fancied it - back on terms early in the second "
+        "half, 1-1, with the momentum. For most of the night the margin was a single goal or nothing "
+        "at all."
+        "\n\n"
+        "And then they lost it the way visiting sides so often come unstuck at Brighton: chasing the "
+        "game late, committing bodies forward, and undone on the counter deep in stoppage time. This "
+        "one stings because it was not a lack of effort or a pressing meltdown - if anything their "
+        "work off the ball held up better here than it did against Liverpool. It was a shape problem "
+        "the moment they went chasing, and Brighton had the composure to make them pay at the death.",
     "manutd_fulham":
-        "Level for 87 minutes, then leading 1-0 after a late winner. In the handful of minutes ahead "
-        "Man Utd dropped noticeably deeper (out-of-possession build-up 43.1 -> 28.5 m) - a "
-        "shut-up-shop reflex, though on a tiny sample.",
+        "Eighty-seven minutes of very little, and then the only moment that mattered. This was a "
+        "grind - two sides cancelling each other out until United finally found the goal that won "
+        "it, with the match all but over."
+        "\n\n"
+        "For almost the whole of it they went about the level game the right way: they hunted the "
+        "ball back on better than seven of every ten losses high up the pitch and, at 0-0, won it "
+        "back inside five seconds close to half the time - faster than in any of the other five "
+        "matches we have tracked - from a higher and wider shape with the ball. The moment the "
+        "goal went in the instinct was unmistakable: the whole side dropped a long way deeper to see "
+        "it out. Say that one plainly, though - the passage in front is only a few minutes of "
+        "football, so the shut-up-shop read is a glimpse, not a habit.",
     "southampton_manutd":
-        "The mirror image of the two heavy losses: level for 35 minutes, then leading for the rest as "
-        "the lead only grew - 1-0 (35:04) -> 2-0 (41:03) -> 3-0. The lead arrived before half-time and "
-        "never narrowed. And unlike a shut-up-shop win, Man Utd's counter-press did not drop off once "
-        "ahead: the level-state fraction 0.39 rose to 0.50 while leading - they kept pressing on the "
-        "front foot (small per-state samples).",
+        "A proper away performance, and 3-0 barely does it justice. United were level for 35 "
+        "minutes, went ahead just after the half hour, made it two before the break and three in "
+        "the second half. The lead arrived early and never once looked like narrowing - from the "
+        "moment they went in front they were in front for the rest of the night, with no "
+        "backs-to-the-wall stretch to survive."
+        "\n\n"
+        "What separates this from the usual away smash-and-grab is that going ahead did not make "
+        "them cautious. Most sides get their noses in front and settle into a block; United did the "
+        "opposite - they chased the ball harder once they led than they had at 0-0, and won it back "
+        "quicker with it. And they were on the front foot from the first whistle: at 0-0 this is the "
+        "highest defensive line and the most territory of any of the six matches we have tracked. "
+        "Two things to hold on to before anyone calls it a template - the level-state passage is "
+        "short (barely 35 minutes before the opener, so a modest sample) and Southampton finished "
+        "the game a man down, a red card the event oracle records and our video layer did not "
+        "detect."
+        "\n\n"
+        "One correction on the record, because it matters: an earlier version of this report had the "
+        "two teams the wrong way round and credited that high, front-foot game to Southampton. It "
+        "was United's. The mapping was corrected on 2026-07-23 and every number above is recomputed "
+        "from the fixed data (see results/PAIR_ANALYSIS_v1.md).",
     "palace_manutd":
-        "Level the entire 90 minutes - Man Utd's only scoreless match in the sample, so there is no "
-        "score-state transition to slice. A single-phase read: Man Utd held the ball for most of the "
-        "match (space-control 0.544 vs Palace 0.456) without turning it into a goal.",
+        "Ninety minutes, and nobody blinked. This is the only goalless match in the set, which means "
+        "there is no swing in the game state to read - nobody chasing, nobody protecting a lead, the "
+        "same problem for the full ninety."
+        "\n\n"
+        "What the tracking will say is that United were relentless without the ball: at 0-0 this is "
+        "the most aggressive counter-pressing of any of the six matches, going after the ball on "
+        "three of every four losses high up the pitch and winning it back inside five seconds on "
+        "better than a third of them. All that work and nothing to show for it - a stalemate, not an "
+        "opponent broken. And one thing we will not pretend to know: our possession-style figure for "
+        "this match is a coverage-biased proxy that disagrees with the event oracle, so from the "
+        "footage we cannot fairly say who had the better of the ball - only who worked harder to win "
+        "it back.",
     "manutd_tottenham":
-        "The shortest 'level' window of the six matches: Man Utd conceded inside 2:42 and chased for "
-        "the remaining 87 minutes as the deficit deepened 0-1 (02:42) -> 0-2 (H2 03:31) -> 0-3 (H2 "
-        "33:25). With only a single outside-third loss recorded at level state, the chasing-state read "
-        "is effectively the whole match: 47 of 48 outside-third losses came while chasing, counter-"
-        "press firing on 0.49 of them (5s regain 0.26) - a from-behind performance almost start to "
-        "finish, not a single seam that opened late.",
+        "There was barely a game to settle into. United were behind inside three minutes at Old "
+        "Trafford and spent the next eighty-seven running after it. Tottenham added a second almost "
+        "straight after the restart and a third with half an hour of the second half still to play - "
+        "by then it had long stopped being a contest."
+        "\n\n"
+        "That early goal is why there is so little to say about how United wanted to play: they were "
+        "level for under three minutes, which is not enough football to judge anybody on. What we "
+        "can read is the chase, and it makes for grim watching - all but one of their dangerous "
+        "give-aways came while behind, they went after the ball on roughly half of them, and got it "
+        "back inside five seconds only about a quarter of the time. A side pushing forward because "
+        "it had to, repeatedly failing to win it back before the next counter arrived. This was a "
+        "from-behind performance almost from the first whistle, not a game undone by one seam that "
+        "opened late.",
 }
+
+APPX_HINT = "the credibility spine -- every figure above, sourced (click to open)"
 
 TRACKING = ("tracking-native", "cv")     # teal chip: position/fingerprint, ball-gap tolerant
 VALID = ("validated", "oracle")          # blue chip: validated against the oracle
@@ -120,6 +183,27 @@ ORACLE = ("oracle", "oracle")
 def _panel(title: str, chip: tuple[str, str], inner: str) -> str:
     """Section shell with a tier chip (reuses rh._panel + the shared tag CSS)."""
     return rh._panel(title, chip[1], chip[0], inner)
+
+
+def _collapsed_panel(title: str, chip: tuple[str, str], hint: str, inner: str) -> str:
+    """Section shell whose body is collapsed behind a ``<details>`` summary.
+
+    Used for the validation appendix so the pundit narrative leads the document while the
+    credibility spine stays one click away (never deleted, never hidden).
+
+    Args:
+        title: section heading text.
+        chip: ``(label, css_class)`` tier chip, as in :func:`_panel`.
+        hint: muted one-liner shown next to the summary.
+        inner: pre-rendered HTML body.
+
+    Returns:
+        The section HTML.
+    """
+    return (f'<section class="prov-{chip[1]}"><details class="appx"><summary>'
+            f'<span class="tag tag-{chip[1]}">{_html.escape(chip[0].upper())}</span> '
+            f'{_html.escape(title)}<span class="hint">{_inline(hint)}</span></summary>'
+            f'{inner}</details></section>')
 
 
 def _table(df: pd.DataFrame, headers: dict[str, str], *, ndp: int = 1,
@@ -142,7 +226,9 @@ def _table(df: pd.DataFrame, headers: dict[str, str], *, ndp: int = 1,
 
 
 def _inline(text: str) -> str:
-    return _html.escape(text).replace("--", "&mdash;")
+    """Escape prose for HTML, en-dashing ``--`` but letting literal ``<code>`` spans through."""
+    return (_html.escape(text).replace("--", "&mdash;")
+            .replace("&lt;code&gt;", "<code>").replace("&lt;/code&gt;", "</code>"))
 
 
 def _p(text: str) -> str:
@@ -180,7 +266,7 @@ def _story_section(match_id: str, focus: str, opp: str) -> str:
                           + "-" + seg["t1_s"].map(lambda s: f"{int(s // 60):02d}:{int(s % 60):02d}"))
     tbl = _table(seg_disp, {"half": "half", "state": "Man Utd state", "scoreline": "score",
                             "window": "half-clock window", "stoppage": "reaches stoppage"})
-    body = (_p(STORY[match_id])
+    body = ("".join(_p(par) for par in STORY[match_id].split("\n\n"))
             + "<h3>Score-state phases (validated goal boundaries)</h3>" + tbl
             + "<h3>Validated event layer</h3>" + _goal_timeline(match_id, focus, opp)
             + _p(EVENTS_VALIDATED[match_id])
@@ -193,12 +279,13 @@ def _story_section(match_id: str, focus: str, opp: str) -> str:
 # Section 2 -- Man Utd style read (B-4 fingerprint + B-5 score-state slices).
 # ==================================================================================================
 IDENTITY_READ = (
-    "Across the three matches Man Utd carry a repeatable TERRITORIAL signature, not a formation "
-    "fingerprint: in the OT sliced-Wasserstein embedding every Man Utd side's nearest neighbour is "
-    "another Man Utd side (mean intra-Man Utd distance 4.36 vs 6.38 to opponents), but removing the "
-    "centroid collapses the separation - what repeats is WHERE they occupy the pitch, not a shape. "
-    "The one habit that holds match to match is a mid/high counter-press (fraction 0.60-0.72, 5s "
-    "regain 0.35-0.47). n=3, no significance claim.")
+    "Watch United across these three games and the thing that repeats is not a formation or a shape "
+    "- it is where they choose to live on the pitch. Line the matches up and every United "
+    "performance looks most like another United performance; take away that territorial footprint "
+    "and the resemblance falls apart. It is the real estate they occupy, not a fixed structure. The "
+    "one on-ball habit that travels match to match is a mid-to-high counter-press - they hunt the "
+    "ball in the opposition half, and across the set it fires on something like two of every three "
+    "high turnovers. Three matches only, so read it as a tendency, not a law.")
 
 
 def _style_section(match, match_id: str, focus: str) -> str:
@@ -249,48 +336,66 @@ def _style_section(match, match_id: str, focus: str) -> str:
 # ==================================================================================================
 # Section 3 -- seams (how beaten / how won). The case-study read per match.
 # ==================================================================================================
+# Pundit-voice seam read per match. Same discipline as STORY: restates numbers already in this
+# report's own tables (or in results/WINS_VS_LOSSES.md, quoted there) as football language.
 SEAMS = {
     "manutd_liverpool":
-        "Man Utd were beaten in the win-it/lose-it phase before the deficit forced their hand. At "
-        "0-0 their counter-press fired on only 0.455 of outside-third losses (22 losses) - against "
-        "~0.72 at level state vs Brighton and Fulham - and their attacking transition was the "
-        "shallowest at level state of the three (build-up 45.3 m vs 61.4/57.9). The first-half goals "
-        "then pinned them deeper (in-possession build-up 51.2 -> 41.4 m at 0-1); only 0-3 down did "
-        "they push up (57.1 m) and press hardest (0.690) - too late. Liverpool coughed the ball up "
-        "outside their own third the fewest times of any side (58) with the lowest regain urgency "
-        "(0.241): control, not chaos. Full phase-by-phase read: "
+        "United were beaten in the moments the ball changed hands, and it started before Liverpool "
+        "ever led. At 0-0 they went after their high turnovers less than half the time - against "
+        "roughly three-in-four when level in the Brighton and Fulham games - and when they did win "
+        "it back they broke from the shallowest starting point of the three matches. The first-half "
+        "goals then squeezed them deeper still, and it was only at 3-0, with the game gone, that "
+        "they finally pushed up and pressed with real venom - too late to matter. Liverpool simply "
+        "never let them in: fewest give-aways in dangerous areas of any side on show, and the "
+        "calmest of the lot about winning it back - control, not chaos. Full phase-by-phase read: "
         "<code>results/CASE_STUDY_manutd_liverpool.md</code>.",
     "brighton_manutd":
-        "The seam was the transition line when chasing: after Brighton's opener Man Utd's trans_neg "
-        "deepest-line jumped from 45.4 m (level) to 63.6 m (chasing) - caught high and stretched on "
-        "the counter, which is how the stoppage-time winner arrived. Their counter-press held up "
-        "better here than vs Liverpool (0.632-0.719), so this was a transition-shape loss, not a "
-        "pressing collapse.",
+        "The soft spot was their shape the instant they went chasing. While the game was level "
+        "United defended transitions from a sensible height; once they were behind and pouring "
+        "forward, the line they tried to hold when they lost the ball leapt up the pitch - and a "
+        "side as sharp on the break as Brighton needs no second invitation. That is exactly the "
+        "picture of the stoppage-time winner: caught high, stretched, punished. Crucially this was "
+        "not their pressing giving way - their work off the ball actually stood up better than it "
+        "had against Liverpool. It was a shape-when-chasing problem, not a lack of legs.",
     "manutd_fulham":
-        "How they won: a level-state grind (level for 87') with a solid counter-press (0.718, 5s "
-        "regain 0.465, the best of the three at level) and a higher, wider in-possession block "
-        "(build-up 56.9 m), converted late. Once 1-0 up they dropped deep to defend it (out-of-poss "
-        "build-up 28.5 m) - effective here, but the leading sample is tiny (single-digit frames).",
+        "How they won: patience, and the ball won back quickly. Eighty-seven minutes at 0-0, and "
+        "through all of it United were the better-organised side without it - going after better "
+        "than seven of every ten losses high up the pitch and recovering the ball inside five "
+        "seconds close to half the time, quicker than in any other match in the set, while playing "
+        "from a higher and wider shape on it. The goal came late and they immediately dropped deep "
+        "to protect it. That worked here, but it tells us very little: the passage in front lasts "
+        "only a few minutes of football.",
     "southampton_manutd":
-        "How they won: not a smash-and-grab. Man Utd led from the 35th minute and only extended the "
-        "lead (1-0 -> 2-0 before half-time -> 3-0), so most of the match was played from ahead. The "
-        "tell is that the counter-press did NOT relax with the lead - the level-state fraction 0.394 "
-        "(33 outside-third losses) rose to 0.500 while leading (54 losses): they kept hunting the ball "
-        "on the front foot rather than dropping into a block. A control-through-pressure win, not a "
-        "low-block heist - though the per-state samples are small and Southampton played the closing "
-        "stretch a man down (Sofascore red card, not CV-detected).",
+        "How they won: not a smash-and-grab. United led from the 35th minute and only stretched it "
+        "- 1-0, then 2-0 before the break, then 3-0 - so nearly the whole match was played from in "
+        "front. The tell is what they did with that lead. The pressing did not relax: at 0-0 they "
+        "went after roughly two in every five of their dangerous give-aways, and once ahead that "
+        "rose to better than one in two, with the ball won back inside five seconds far more often "
+        "than it had been before the opener. They defended from the highest line and spent more of "
+        "the game in the opposition's territory than in any other match we have tracked. That is a "
+        "control-through-pressure win, not a low-block heist. Two things before anyone calls it a "
+        "template: the level-state passage is a modest sample, and Southampton played the closing "
+        "stretch a man down (a red card the event oracle has and our video layer missed). And "
+        "across the corpus the two wins we have look nothing like each other - there is no "
+        "repeatable winning shape here yet "
+        "(<code>results/WINS_VS_LOSSES.md</code>).",
     "palace_manutd":
-        "No seam to name - Man Utd never fell behind and never scored. They pressed hard (counter-"
-        "press 0.75 of 40 outside-third losses, 5s regain 0.375) and held more space (0.544 vs 0.456) "
-        "and more attacking-third control (0.478 vs 0.326) than Palace, but the territorial edge did "
-        "not convert into goals: a stalemate, not a beaten or broken opponent.",
+        "There is no seam to name here - United never fell behind and never scored. What they did "
+        "do was press: at 0-0 this is the most aggressive counter-pressing of any match in the set, "
+        "chasing the ball on three of every four losses high up the pitch and winning it back "
+        "inside five seconds on better than a third of them. It bought them nothing. As for who "
+        "actually controlled the game, we abstain: our territory and possession figures for this "
+        "match are coverage-biased proxies that disagree with the event oracle, so from the footage "
+        "we cannot fairly settle that argument. A stalemate, not a beaten or broken opponent.",
     "manutd_tottenham":
-        "The seam was open before kickoff finished settling: Man Utd conceded at 2:42, so there is "
-        "almost no level-state sample to compare against (1 outside-third loss). From 0-1 on, their "
-        "counter-press only fired on 0.49 of 47 outside-third losses (5s regain 0.26) while defending "
-        "a growing deficit - Tottenham's third and final goal arrived at 33:25 of the second half, by "
-        "which point the game state had been chasing for over an hour. Full phase-by-phase context in "
-        "the validation appendix below.",
+        "The seam was open before the game had settled. United conceded at 2:42, which leaves "
+        "effectively no level-state football to judge them on - a single dangerous give-away before "
+        "they went behind is not a sample. From 0-1 onwards their counter-press fired on around "
+        "half of those give-aways and turned into a regain inside five seconds only about a quarter "
+        "of the time, all while the deficit grew; Tottenham's third arrived with half of the second "
+        "half still to play. So from this footage we cannot fairly judge how this side plays when "
+        "the game is level - that game barely existed here. Full phase-by-phase context in the "
+        "validation appendix below.",
 }
 
 
@@ -318,9 +423,9 @@ def _players_section(match, match_id: str, focus: str, opp: str) -> str:
     if not path.exists():
         banner = (f'<div class="queued"><strong>Identity layer not run for '
                   f'{_html.escape(focus)} v {_html.escape(opp)}.</strong> The close-up '
-                  f'jersey-number naming pipeline that named 20 players for Brighton and Liverpool '
-                  f'has not been run on this broadcast - no players are named here. This is team-level '
-                  f'only.</div>')
+                  f'jersey-number naming pipeline that names players on the Brighton and Liverpool '
+                  f'broadcasts has not been run on this one - no players are named here. This is '
+                  f'team-level only.</div>')
         return _panel("Players - named on pitch", FLOOR, banner)
     la = pd.read_parquet(path)
     assigned = la[la["assigned"]].copy()
@@ -408,7 +513,7 @@ def _validation_section(match_id: str) -> str:
             "The CV-vs-oracle tactical tables + evidence gate are not available; the validated layers "
             "shown above (score-state boundaries, event spotting, fingerprint) stand on their own "
             "artifacts.</div>")
-        return _panel("Validation appendix", ORACLE, "".join(parts))
+        return _collapsed_panel("Validation appendix", ORACLE, APPX_HINT, "".join(parts))
     tlabel, tcls = rh.tier_badge(gate.tier)
     parts.append(
         f'<div class="gate"><span class="gbadge {tcls}">{tlabel}</span><div class="gtext">'
@@ -418,7 +523,7 @@ def _validation_section(match_id: str) -> str:
         f'({audit["n_backed"]}/{audit["n_numbers"]} numbers grounded).</div></div>')
     parts.append("<h3>CV-vs-oracle tactical tables (report_v2)</h3>")
     parts.append(rh._render_section(secs[-1], position_only=False))
-    return _panel("Validation appendix", ORACLE, "".join(parts))
+    return _collapsed_panel("Validation appendix", ORACLE, APPX_HINT, "".join(parts))
 
 
 # ==================================================================================================
@@ -477,12 +582,11 @@ def main() -> None:
     """CLI: render narrative-first v2 scouting packs."""
     ap = argparse.ArgumentParser(description="Narrative-first scouting pack v2 renderer.")
     ap.add_argument("--match", default="all",
-                    help="registered match id, comma list, or 'all' (the three ManU matches)")
+                    help="registered match id, comma list, or 'all' (every match with story prose)")
     ap.add_argument("--out-dir", default=str(OUT_DIR))
     ap.add_argument("--date", default=date.today().isoformat())
     args = ap.parse_args()
-    ids = (["manutd_liverpool", "brighton_manutd", "manutd_fulham"] if args.match == "all"
-           else [s.strip() for s in args.match.split(",")])
+    ids = list(STORY) if args.match == "all" else [s.strip() for s in args.match.split(",")]
     for mid in ids:
         out = generate(mid, out_dir=Path(args.out_dir), generated=args.date)
         print(f"[render_scouting_v2] {mid} -> {out}")

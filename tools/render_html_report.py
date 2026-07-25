@@ -536,6 +536,13 @@ figure.pitch svg{width:100%;height:auto;background:var(--pf);border-radius:6px;}
 .pt{fill:var(--ink);font-size:11px;font-weight:600;font-family:'Segoe UI',sans-serif;}
 footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);
  font-size:12.5px;}
+details.appx{margin:8px 0 4px;}
+details.appx>summary{cursor:pointer;list-style:none;padding:11px 2px;font-weight:600;
+ font-size:19px;letter-spacing:-.01em;color:var(--ink);border-bottom:1px solid var(--line);}
+details.appx>summary::-webkit-details-marker{display:none;}
+details.appx>summary::before{content:"\25B8";color:var(--accent2);margin-right:9px;font-size:14px;}
+details.appx[open]>summary::before{content:"\25BE";}
+details.appx>summary .hint{color:var(--muted);font-weight:400;font-size:13px;margin-left:8px;}
 @media (max-width:560px){.kit{font-size:18px;}.score{font-size:24px;}
  .gate{flex-direction:column;}main{padding:20px 14px 48px;}}
 """
