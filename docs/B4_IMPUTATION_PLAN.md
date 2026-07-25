@@ -80,6 +80,41 @@ raising the difficulty:**
    B5_blend in 5/6 buckets with non-overlapping 95% block-bootstrap CIs, on **both** CALIB
    (9.92 vs 12.04, wins 6/6) and HOLDOUT.
 
+**GATE RESULT 2026-07-24 (run once, after freezing): v1 PASSES gates 1 and 2.**
+v1 = quantile-GBM residual correction on B7. Holdout ALL **8.10 m vs the 11.46 m bar**
+[95% CI -4.27, -2.53]; beats in 5/6 buckets, ties at 0-1s (+0.02 m, CI includes 0 — the anchor is
+already accurate to 0.66 m there, so there is nothing to add). Biggest wins where the plan
+predicted: 10-30s -35%, 30s+ -26%. Gate 2 **PASS 6/6 at BOTH 50% and 90%** (PICP 45.5-50.9 /
+89.2-90.6); the pre-declared ACI remedy was not needed and not applied.
+**Independently confirmed** (Fable pass, 2026-07-24): the bar was re-derived from raw Metrica CSVs
+and reproduced all seven frozen numbers exactly; anchor and bar are literally the same array (no
+inflation possible); every threshold (hyperparameters, conformal k, b*, R_max) traced to
+TRAIN/CALIB only. Standing caveats it attached, which travel with the claim: the 0-1s tie, and
+that the holdout was opened more than once across the *exploration* (disclosed, and v1's config
+was identical across runs — no tuning followed).
+
+**TWO OPEN ISSUES FROM THE GATE RUN (neither silently patched):**
+
+- **Abstention Layer A is mis-specified.** The rule "abstain at and beyond the first bucket where
+  v1 stops beating the bar" assumed skill decays with horizon. Ours fails only at the *shortest*
+  bucket, so b* = 0-1s and the literal rule abstains on **100% of the holdout** — absurd. The
+  defect: the rule conflates "no skill" with "no improvement over the anchor". At 0-1s we have
+  excellent accuracy (0.68 m) and merely nothing to add. **Proposed restatement, to be approved by
+  the supervisor before it is used for any claim:** where v1 does not beat the anchor, *defer* to
+  the anchor (emit its prediction, labelled) rather than abstain; abstention is reserved for
+  Layer B (uncertainty too wide). Literal-rule and restated-rule outcomes are both reported in
+  results/B4_MODEL_V1.md (restated variant asserts 92.0%, RMSE 8.38 vs bar 11.89).
+- **Provenance mismatch:** `VOTE_HALFLIFE_S = 10.0` in code contradicts the 0.04 s that produced
+  the frozen bar (and its own "selected on TRAIN" comment). The bar is correct and reproducible at
+  0.04 s; the constant needs fixing. Related honest note: shorter half-life is monotonically better
+  to the grid edge — at our optimum the published "EMA role offset" is not an EMA.
+
+**TRANSFER RISK — the finding that outranks the win.** v1 places 14.9% of predictions inside the
+visible band where a hidden player cannot be (anchor 18.7%, truth 11.5%): it has partly learned the
+*simulator's rectangular camera window*. Holdout numbers therefore may not transfer to real
+broadcast footage. **M3 (transfer validation on SkillCorner + our own tracks) is promoted ahead of
+any model stretch work** — no B4 number ships into a scouting report until it survives that.
+
 **THE GATE-1 BAR IS THEREFORE B7, HOLDOUT (Game 2 H2), per horizon:**
 
 | 0-1s | 1-3s | 3-5s | 5-10s | 10-30s | 30s+ | ALL |
