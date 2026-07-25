@@ -61,9 +61,10 @@ ALPHAS = (0.5, 0.1)
 B7_BAR_DOC = (0.66, 2.09, 4.37, 7.55, 14.91, 15.16)
 B7_BAR_DOC_ALL = 11.46
 # Provenance of that bar, recovered 2026-07-25 by sweeping the one free parameter: it is B7 with
-# a vote EMA half-life of 0.04 s (one frame), NOT the 10.0 s left in ``VOTE_HALFLIFE_S`` (which
-# reproduces 12.54 m ALL). We anchor v1 on the bar's own configuration so anchor == bar, as the
-# plan requires. See results/B4_MODEL_V1.md "Bar provenance" for the full sweep.
+# a vote EMA half-life of 0.04 s (one frame). ``VOTE_HALFLIFE_S`` read 10.0 s at the time (which
+# reproduces 12.54 m ALL) and was corrected to 0.04 s on 2026-07-25; the two now agree. We anchor
+# v1 on the bar's own configuration so anchor == bar, as the plan requires. See
+# results/B4_MODEL_V1.md "Bar provenance" for the full sweep.
 BAR_HALFLIFE_S = 0.04
 SWEEP = (
     {"max_iter": 200, "learning_rate": 0.06, "max_leaf_nodes": 31, "min_samples_leaf": 100,
@@ -396,9 +397,9 @@ def main() -> None:
     out("B4 MODEL v1 -- quantile-GBM residual correction on the frozen B7 anchor")
     out("TRAIN = Game 1 (full) | CALIB = Game 2 H1 | HOLDOUT = Game 2 H2  [splits frozen 07-24]")
     out("=" * 100)
-    out(f"vote EMA half-life = {hl:.2f}s (bar-provenance value; VOTE_HALFLIFE_S in code is 10.0s")
-    out("and reproduces 12.54 m ALL instead of the frozen 11.46 m -- see report section 'Bar")
-    out("provenance'. Anchor and bar must be the same object, so we use the bar's own setting.)")
+    out(f"vote EMA half-life = {hl:.2f}s (bar-provenance value; VOTE_HALFLIFE_S read 10.0s until")
+    out("2026-07-25, which reproduces 12.54 m ALL instead of the frozen 11.46 m -- see report")
+    out("section 'Bar provenance'. The constant now matches; anchor and bar are the same object.)")
     g1, half_w, coeffs, f1, s1 = _prep("Sample_Game_1", None, halflife=hl)
     tau, tau_rmse = fit_decay_tau(s1)
     w5 = fit_blend(s1, tau)

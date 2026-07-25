@@ -34,7 +34,14 @@ from synthesizer.imputation import (
 )
 
 CENTRE = np.array([PITCH_L / 2.0, PITCH_W / 2.0])
-VOTE_HALFLIFE_S = 10.0  # EMA half-life for role offsets; selected on TRAIN (Game 1) only.
+# EMA half-life for the role offsets, seconds. Selected on TRAIN (Game 1) by the grid in
+# ``tools/imputation_b4_week1.py --halflife-grid``, and this is the value that produced the frozen
+# gate-1 bar (B7 holdout ALL 11.46 m). 0.04 s is ONE FRAME at 25 fps: shorter was monotonically
+# better across three orders of magnitude, so at our optimum the published "EMA role offset" of
+# arXiv 2607.11548 is not an EMA at all -- it is just the player's last observed offset. The
+# constant read 10.0 until 2026-07-25, which contradicted the frozen bar (it reproduces 12.54 m);
+# see results/B4_MODEL_V1.md "Bar provenance" for the full sweep.
+VOTE_HALFLIFE_S = 0.04
 WIDTH_FLOOR_M = 0.25  # plan 3.1 step 2: floor the per-axis half-width so the score is finite.
 
 
