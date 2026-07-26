@@ -1,0 +1,816 @@
+{
+  "schema_version": 1,
+  "generated": "2026-07-26",
+  "claims": [
+    {
+      "id": "proj-001",
+      "statement": "Project scope pivoted to Manchester United, EPL 2024-25; France/WC material becomes reference-only (method calibration).",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["STATUS.md#2026-07-17 SCOPE PIVOT", "CLAUDE.md#Standing constraints"],
+      "method": "user decision (Sid, 2026-07-17)", "n": null,
+      "caveats": ["FIFA PMSR PDFs (WC) stay as method-calibration ground truth only"],
+      "date": "2026-07-17", "supersedes": [], "superseded_by": [], "depends_on": [],
+      "tags": ["scope", "methodology"]
+    },
+    {
+      "id": "proj-002",
+      "statement": "The recommended thesis research question is RQ-D: at what broadcast visibility level do pressing/transition metrics retain the resolution to distinguish one team from another, and does calibrated off-screen imputation move that threshold.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["docs/RESEARCH_QUESTION_OPTIONS.md#3. Candidate research questions", "results/PAPER_READ_SCOOP_CHECK.md#0. VERDICT ON RQ-D"],
+      "method": "adversarial research-question ranking against novelty/feasibility/scoop-distance, then re-checked against two incumbent papers",
+      "n": null,
+      "caveats": ["Narrowed after scoop check: imputation-as-contribution and pitch-control D are dead; pressing/transition metric family + calibrated uncertainty + measured footprint remain unclaimed"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["b4-012", "b4-013", "w1-002"],
+      "tags": ["methodology", "identity", "pressing"]
+    },
+    {
+      "id": "proj-003",
+      "statement": "No external paper/venue submission; December deliverable is a BTP review pack + thesis + live demo only (venue targets dropped).",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["STATUS.md#2026-07-25 B4 model shipped", "docs/BTP_DECEMBER_PLAN.md#B5 -- Thesis assembly"],
+      "method": "supervisor/user decision", "n": null,
+      "caveats": [], "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": [],
+      "tags": ["methodology"]
+    },
+
+    {
+      "id": "cv-001",
+      "statement": "Usable-geometry yield over the whole broadcast (uniform 1-in-5 frame grid, no exclusions) is 26.4%.",
+      "value": 26.4, "unit": "pct", "status": "confirmed",
+      "evidence": ["results/CLAIMS_AUDIT.md#C-1", "docs/REVIEW_CRIB.md#Numbers to have cold"],
+      "method": "recomputed from outputs/brighton_manutd/final/match_aligned.parquet frame intersection with live_play grid",
+      "n": 29849, "caveats": ["This is the only defensible \"whole broadcast\" denominator"],
+      "date": "2026-07-21", "supersedes": ["cv-001b"], "superseded_by": [], "depends_on": [],
+      "tags": ["methodology", "cv-pipeline"]
+    },
+    {
+      "id": "cv-001b",
+      "statement": "\"~37% of the broadcast yields usable geometry\" -- a conditional-on-detection number mislabeled as a whole-broadcast yield.",
+      "value": 37, "unit": "pct", "status": "retracted",
+      "evidence": ["results/CLAIMS_AUDIT.md#C-1", "docs/REVIEW_CRIB.md#Numbers to have cold"],
+      "method": "prior single-verifier claim, re-derived and found mislabeled", "n": null,
+      "caveats": ["The excluded 26.7% of the grid is the real zero-detection bucket (close-ups, celebrations, graphics), not noise"],
+      "date": "2026-07-21", "supersedes": [], "superseded_by": ["cv-001", "cv-002"], "depends_on": [],
+      "tags": ["methodology", "cv-pipeline"]
+    },
+    {
+      "id": "cv-002",
+      "statement": "Usable-geometry yield of frames where the detector saw at least one player (detection-conditional) is 36.1%.",
+      "value": 36.1, "unit": "pct", "status": "confirmed",
+      "evidence": ["results/CLAIMS_AUDIT.md#C-1"],
+      "method": "recomputed from match_aligned.parquet / match_dense.parquet frame counts", "n": 21880,
+      "caveats": ["Correct denominator for the pose-borrowing ceiling argument, not for whole-broadcast claims"],
+      "date": "2026-07-21", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["cv-pipeline"]
+    },
+    {
+      "id": "cv-003",
+      "statement": "Of live wide-camera frames, 80.5% yield usable player geometry (live-wide conditional yield).",
+      "value": 80.5, "unit": "pct", "status": "confirmed",
+      "evidence": ["results/CLAIMS_AUDIT.md#C-1", "results/live_play_probe.md"],
+      "method": "intersection of geometry-yield frames with live_play classifier's live_wide bucket", "n": 9647,
+      "caveats": [], "date": "2026-07-21", "supersedes": [], "superseded_by": [], "depends_on": [],
+      "tags": ["cv-pipeline"]
+    },
+    {
+      "id": "cv-004",
+      "statement": "98.4% of all usable-geometry frames come from live wide-camera play (7,766 of 7,891).",
+      "value": 98.4, "unit": "pct", "status": "confirmed",
+      "evidence": ["results/CLAIMS_AUDIT.md#C-1", "docs/REVIEW_CRIB.md#Numbers to have cold"],
+      "method": "set intersection, brighton_manutd", "n": 7891,
+      "caveats": [], "date": "2026-07-21", "supersedes": [], "superseded_by": [], "depends_on": ["cv-003"],
+      "tags": ["cv-pipeline"]
+    },
+    {
+      "id": "cv-005",
+      "statement": "A trusted frame carries ~11.8 of 22 players with a pitch position (mean 11.75 players/frame over 7,887 qualifying frames, brighton_manutd).",
+      "value": 11.75, "unit": "players/22", "status": "confirmed",
+      "evidence": ["results/CLAIMS_AUDIT.md#B -- REVIEW_CRIB \"12.76/22\"", "docs/REVIEW_CRIB.md#Numbers to have cold"],
+      "method": "mean players per trusted frame from match_aligned.parquet", "n": 7887,
+      "caveats": ["Whole-broadcast figure (incl. graphics/close-ups) is lower, ~7.4/22 (docs/BTP_DECEMBER_PLAN.md)"],
+      "date": "2026-07-21", "supersedes": ["cv-005b"], "superseded_by": [], "depends_on": [],
+      "tags": ["cv-pipeline", "imputation"]
+    },
+    {
+      "id": "cv-005b",
+      "statement": "\"12.76 of 22 players visible\" -- a category error; 12.76 m is a compactness value, not a player count.",
+      "value": 12.76, "unit": "players/22", "status": "retracted",
+      "evidence": ["results/CLAIMS_AUDIT.md#B"],
+      "method": "REVIEW_CRIB relabeling of results/brighton_cv_vs_oracle.md compactness figure", "n": null,
+      "caveats": [], "date": "2026-07-21", "supersedes": [], "superseded_by": ["cv-005"], "depends_on": [],
+      "tags": ["cv-pipeline"]
+    },
+
+    {
+      "id": "ball-001",
+      "statement": "Post-link_ball usable ball coverage ranges 32-52% of sampled frames across the 12-match corpus.",
+      "value": null, "unit": "pct range", "status": "confirmed",
+      "evidence": ["STATUS.md#2026-07-22 reverse-fixture chain", "results/MANUTD_IDENTITY_PROFILE.md#Evidence appendix"],
+      "method": "post-link_ball track coverage per match, registry-driven", "n": 12,
+      "caveats": ["The only ball-coverage number that counts is post-link_ball; pre-link detection/projection counts must never be quoted as coverage (ball-metric lesson, cost a retraction)"],
+      "date": "2026-07-22", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["ball", "cv-pipeline"]
+    },
+    {
+      "id": "ball-002",
+      "statement": "Temporal homography carry-over lifted post-link ball coverage +18.0pp pooled (20.8% -> 38.8%) on the PL probe, LOO-validated at median 0.33 m.",
+      "value": 18.0, "unit": "pp", "status": "confirmed",
+      "evidence": ["STATUS.md#COVERAGE LEVER PROVEN"],
+      "method": "leave-one-out cross-validation of carried projections vs own-frame ball positions", "n": 656,
+      "caveats": ["Flag-gated, default OFF for WC path; adopted for PL ingestion"],
+      "date": "2026-07-16", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["ball", "cv-pipeline"]
+    },
+    {
+      "id": "ball-003",
+      "statement": "Ball-coverage lesson: only the post-link_ball usable track counts as coverage; an earlier claim of a ~2x coverage lift from raw projected-frame counts was retracted end-to-end.",
+      "value": null, "unit": null, "status": "retracted",
+      "evidence": ["STATUS.md#BALL-COVERAGE: attempted a fix, RETRACTED it"],
+      "method": "end-to-end regeneration exposed that the claim measured raw detections, not post-link output", "n": null,
+      "caveats": ["Standing rule now in CLAUDE.md"], "date": null, "supersedes": [], "superseded_by": ["ball-001"], "depends_on": [],
+      "tags": ["ball", "methodology"]
+    },
+
+    {
+      "id": "line-001",
+      "statement": "Raw (uncorrected) defensive line height reads 16.4 m mean absolute deviation from FIFA per-phase truth (France matches).",
+      "value": 16.4, "unit": "m", "status": "confirmed",
+      "evidence": ["STATUS.md#P2 OFF-SCREEN VALIDITY FIX DONE", "docs/REVIEW_CRIB.md#Numbers to have cold"],
+      "method": "line = mean of deepest-4 outfielders vs FIFA PMSR per-phase line height, pooled over 3 France matches",
+      "n": 3, "caveats": [], "date": "2026-07-14", "supersedes": [], "superseded_by": [], "depends_on": [],
+      "tags": ["line-height", "imputation"]
+    },
+    {
+      "id": "line-002",
+      "statement": "De-biased line height reads 5.5 m mean abs error vs FIFA, but this figure is IN-SAMPLE (de-bias slope fit on all processed matches including the 3 FIFA validation matches).",
+      "value": 5.5, "unit": "m", "status": "superseded",
+      "evidence": ["STATUS.md#AUDIT VERIFIED"],
+      "method": "de-biased rearmost-outfielder line, global slope fit on n_back visibility",
+      "n": 3, "caveats": ["Contamination found by external-LLM audit: slope fit included the 3 FIFA validation matches"],
+      "date": "2026-07-14", "supersedes": [], "superseded_by": ["line-003"], "depends_on": [], "tags": ["line-height"]
+    },
+    {
+      "id": "line-003",
+      "statement": "De-biased line height, held-out refit (club matches only, excluding FIFA validation matches from the slope fit), reads ~7.2 m mean abs error vs FIFA -- the number to quote first.",
+      "value": 7.2, "unit": "m", "status": "confirmed",
+      "evidence": ["STATUS.md#AUDIT VERIFIED", "docs/REVIEW_CRIB.md#Numbers to have cold", "docs/BTP_DECEMBER_PLAN.md#2. Where we stand"],
+      "method": "held-out refit of the de-bias slope, contamination cost measured at +1.7 m over the in-sample number", "n": 3,
+      "caveats": ["LOMO slope stable at -5.9..-5.0; club-only slope sits outside that envelope (broadcast-domain difference, not noise)", "Say \"held-out\" first, label 5.5 m explicitly in-sample if quoted"],
+      "date": "2026-07-14", "supersedes": ["line-002"], "superseded_by": [], "depends_on": [], "tags": ["line-height"]
+    },
+    {
+      "id": "line-004",
+      "statement": "Block-height/de-biased-line absolute values still lack a hand-annotated Gate 1 validation; the corpus reads carry ~7 m held-out scale uncertainty plus a broadcast forward-framing bias -- treat orderings as usable, absolute metres as not certified.",
+      "value": null, "unit": null, "status": "pending",
+      "evidence": ["results/BLOCK_AND_STYLE_v1.md#Gate status", "results/MANUTD_IDENTITY_PROFILE.md#3. How they defend"],
+      "method": "declared gate, not yet run", "n": null,
+      "caveats": [], "date": "2026-07-23", "supersedes": [], "superseded_by": [], "depends_on": ["line-003"],
+      "tags": ["line-height", "block-height", "pending"]
+    },
+
+    {
+      "id": "teammap-001",
+      "statement": "tottenham_manutd registry team order was FLIPPED (kit-degeneracy bug); corrected order is [Man Utd, Tottenham].",
+      "value": null, "unit": null, "status": "retracted",
+      "evidence": ["results/PAIR_ANALYSIS_v1.md#VERDICT 2", "STATUS.md#2026-07-23 (night) LOUD RETRACTION"],
+      "method": "two independent oracles agree: possession-link majority vs Sofascore possession majority, and goal-direction via keeper-end evidence",
+      "n": null, "caveats": ["Flagged by the kit-degeneracy warning; caught before shipping downstream artifacts"],
+      "date": "2026-07-23", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "methodology"]
+    },
+    {
+      "id": "teammap-002",
+      "statement": "southampton_manutd registry team order was FLIPPED and was NOT flagged by the automated kit-degeneracy warning -- caught only by a whole-corpus possession-vs-oracle screen; corrected order is [Man Utd, Southampton].",
+      "value": null, "unit": null, "status": "retracted",
+      "evidence": ["results/PAIR_ANALYSIS_v1.md#VERDICT 3", "STATUS.md#2026-07-23 (night) LOUD RETRACTION"],
+      "method": "possession-link majority + goal direction (all 3 goals), both independently agree",
+      "n": null, "caveats": ["In the corpus since matchweek 4, never flagged"],
+      "date": "2026-07-23", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "methodology"]
+    },
+    {
+      "id": "teammap-003",
+      "statement": "\"Southampton pressed high (37.4 m) and lost 0-3\" is FALSE -- the 37.4 m high line is Man Utd's own (their highest line in the corpus, in the 0-3 AWAY WIN); Southampton actually sat at 24.0 m. Corrected: all 11 opponents sit low/mid vs Man Utd, no high-press exception.",
+      "value": 37.4, "unit": "m", "status": "retracted",
+      "evidence": ["results/PAIR_ANALYSIS_v1.md#Task 5", "results/BLOCK_AND_STYLE_v1.md#2026-07-23 CORRECTION", "STATUS.md#2026-07-23 (night)"],
+      "method": "recomputed block_height on corrected team mapping (teammap-002)", "n": null,
+      "caveats": [], "date": "2026-07-23", "supersedes": [], "superseded_by": ["block-001"], "depends_on": ["teammap-002"],
+      "tags": ["block-height", "retraction"]
+    },
+    {
+      "id": "teammap-004",
+      "statement": "\"Wins = deeper block\" (both Man Utd wins defended deepest) is RETRACTED -- corrected, the Southampton win is Man Utd's HIGHEST level-state block (53.7 m) and most territorial performance of the six; no repeatable win-shape at level state survives.",
+      "value": null, "unit": null, "status": "retracted",
+      "evidence": ["results/WINS_VS_LOSSES.md", "STATUS.md#2026-07-23 (night)"],
+      "method": "level-state (0-0) re-bucketing recomputed on corrected team mapping", "n": 6,
+      "caveats": ["Two wins now sit at opposite ends of the block-height range; press, regain, territory all fail to separate wins from losses too"],
+      "date": "2026-07-23", "supersedes": [], "superseded_by": [], "depends_on": ["teammap-002"],
+      "tags": ["block-height", "pressing", "retraction"]
+    },
+    {
+      "id": "teammap-005",
+      "statement": "A permanent automated screen (tools/verify_team_mapping.py) was added: possession-links-by-cluster vs Sofascore majority; >8pp opposite-majority disagreement fires a loud WARNING + flag file. 12/12 matches pass post-fix; the tool's demo asserts it catches both pre-fix flips.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["STATUS.md#2026-07-23 (night)"],
+      "method": "code + self-test", "n": 12, "caveats": [], "date": "2026-07-23",
+      "supersedes": [], "superseded_by": [], "depends_on": ["teammap-001", "teammap-002"],
+      "tags": ["methodology", "identity"]
+    },
+    {
+      "id": "teammap-006",
+      "statement": "Possession-link share is the one repeatable team fingerprint across the corpus: cross-leg correlation r = +0.83 (n=6 pairs), surviving the mapping corrections.",
+      "value": 0.83, "unit": "pearson r", "status": "confirmed",
+      "evidence": ["results/PAIR_ANALYSIS_v1.md#Task 3", "docs/PROJECT_DEFINITION.md#3. The three contributions"],
+      "method": "cross-leg correlation of possession-link share across 6 home/away pairs, corrected mapping", "n": 6,
+      "caveats": ["95% CI is wide at n=6 (Fisher-z CI approx [0.06, 0.98] per docs/RESEARCH_QUESTION_OPTIONS.md) -- a proof-of-signal, not a significance claim"],
+      "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["teammap-001", "teammap-002"],
+      "tags": ["identity", "pairwise", "forecasting"]
+    },
+
+    {
+      "id": "poss-001",
+      "statement": "Ball-tracked possession share is a biased-by-construction estimator (trackable-frame possession share); three pre-registered corrections were tried and all rejected -- missingness is informative in every pitch zone.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["STATUS.md#POSSESSION DE-BIAS PROBE"],
+      "method": "leave-one-match-out validation vs 4 oracle matches; zone post-stratification, chunk-time weighting, spell gap-extrapolation all rejected",
+      "n": 4, "caveats": ["Renamed \"trackable-frame possession share\"; kept as a caveated descriptive metric, out of gates"],
+      "date": null, "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["possession", "negative-result"]
+    },
+    {
+      "id": "poss-002",
+      "statement": "Our ball-tracked possession share for Man Utd (44.2%) inverts the Sofascore oracle share (52%) on the brighton_manutd pilot -- genuine trackability bias toward settled build-up over direct/transition play.",
+      "value": 44.2, "unit": "pct", "status": "confirmed",
+      "evidence": ["STATUS.md#BRIGHTON PILOT COMPLETE", "docs/REVIEW_CRIB.md#Numbers to have cold"],
+      "method": "possession diagnosis probe; carry-over lever ruled out as the cause (contributes zero possession samples)", "n": 1,
+      "caveats": [], "date": null, "supersedes": [], "superseded_by": [], "depends_on": ["poss-001"], "tags": ["possession"]
+    },
+
+    {
+      "id": "block-001",
+      "statement": "Corrected: opponents sit low-to-mid block against Man Utd in all 11/12 fixtures (19.9-29.7 m); no high-press exception exists in the corpus.",
+      "value": null, "unit": "m range", "status": "confirmed",
+      "evidence": ["results/BLOCK_AND_STYLE_v1.md#Man Utd vs opponents", "results/MANUTD_IDENTITY_PROFILE.md#3. How they defend"],
+      "method": "de-biased rearmost-outfielder line per out-of-possession spell, corrected team mapping", "n": 12,
+      "caveats": ["Absolute metres uncertified (Gate 1 pending)"], "date": "2026-07-23",
+      "supersedes": [], "superseded_by": [], "depends_on": ["teammap-003"], "tags": ["block-height"]
+    },
+    {
+      "id": "block-002",
+      "statement": "Broadcast bias in block-height sampling is real: median +5.2 m, mean +4.7 m across 22 team-matches -- the block is preferentially sampled when the ball is further forward, biasing observed block height deeper/lower than true.",
+      "value": 5.2, "unit": "m median", "status": "confirmed",
+      "evidence": ["results/BLOCK_AND_STYLE_v1.md#Coverage and the broadcast-bias disclosure"],
+      "method": "mean ball advancement on usable-geometry frames minus missing-geometry frames", "n": 22,
+      "caveats": ["Coverage is high (~0.95) only within ball-observed defensive time; missing sample per match is small (37-367 frames), per-match bias is noisy"],
+      "date": "2026-07-23", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["block-height"]
+    },
+    {
+      "id": "block-003",
+      "statement": "Man Utd's defensive block height is NOT rigid: between-match SD 4.25 m on a mean of 28.3 m (CV 15.0%), 16.6 m spread lowest-highest across 12 matches, cross-leg correlation -0.40.",
+      "value": 4.25, "unit": "m SD", "status": "confirmed",
+      "evidence": ["results/MANUTD_IDENTITY_PROFILE.md#4. Are they rigid?", "results/PAIR_ANALYSIS_v1.md#Task 3"],
+      "method": "between-match SD of the de-biased block line", "n": 12,
+      "caveats": ["Pooled opponent set SD (3.09 m) is not statistically distinguishable from Man Utd's at this n (F=1.89, p=0.305)"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["block-001"], "tags": ["block-height", "identity"]
+    },
+    {
+      "id": "block-004",
+      "statement": "Block front-to-back compactness (6.17 +/- 0.39 m) does NOT separate Man Utd from the pooled opponent set (5.93 +/- 0.29 m, F=1.81, p=0.34) -- declined as an identity claim; it is a league-level constant, not a team fingerprint.",
+      "value": 6.17, "unit": "m", "status": "refuted_externally",
+      "evidence": ["results/MANUTD_IDENTITY_PROFILE.md#4. Are they rigid?"],
+      "method": "compactness comparison, Man Utd vs pooled 6-opponent set across 12 matches", "n": 12,
+      "caveats": ["\"Refuted\" here means the candidate identity claim was tested and rejected by the project's own measurement, not by an external paper"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["block-height", "identity", "negative-result"]
+    },
+    {
+      "id": "block-005",
+      "statement": "After the team-mapping correction, ten Hag's Man Utd reads higher block / more possession than Amorim's (29.7 vs 26.5 m; 56.2 vs 49.9% poss-link) -- reversing the pre-correction \"similar depth, Amorim deeper\" read, but this swing is driven largely by the one corrected leg (southampton_manutd), so it is a fragile direction, not a manager law.",
+      "value": null, "unit": null, "status": "pending",
+      "evidence": ["results/BLOCK_AND_STYLE_v1.md#Man Utd block by manager regime", "results/PAIR_ANALYSIS_v1.md#Task 4"],
+      "method": "pooled 2x2 venue x manager design, n=3 opponents/cell", "n": 6,
+      "caveats": ["Block metric does not cleanly separate the two managers either way"],
+      "date": "2026-07-23", "supersedes": [], "superseded_by": [], "depends_on": ["teammap-002"], "tags": ["block-height", "identity"]
+    },
+
+    {
+      "id": "ident-001",
+      "statement": "Pre-jersey-identity GS-HOTA baseline on the SoccerNet-GSR valid split (58 sequences, official evaluator) is 14.76.",
+      "value": 14.76, "unit": "GS-HOTA", "status": "confirmed",
+      "evidence": ["STATUS.md#GS-HOTA EXTERNAL BENCHMARK SHIPPED", "docs/REVIEW_CRIB.md#Numbers to have cold"],
+      "method": "official sn-trackeval 0.4.0 evaluator, GT-copy sanity = 100.0", "n": 58,
+      "caveats": ["GS-HOTA is a pre-Layer-2 floor by construction (jersey=null makes every numbered GT player unmatchable)"],
+      "date": "2026-07-16", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "gs-hota"]
+    },
+    {
+      "id": "ident-002",
+      "statement": "Adding the Koshkina jersey layer lifted GS-HOTA 14.76 -> 19.83 (+34%), zero of 58 sequences hurt (abstention discipline: a wrong number never attaches).",
+      "value": 19.83, "unit": "GS-HOTA", "status": "confirmed",
+      "evidence": ["STATUS.md#EXTERNAL LIFT MEASURED", "docs/REVIEW_CRIB.md#Q3"],
+      "method": "per-track tracklet jersey vote patched into attributes.jersey only; all other fields byte-identical", "n": 58,
+      "caveats": ["Read coverage only 8.7% of tracks (91.3% abstain)"], "date": "2026-07-17",
+      "supersedes": [], "superseded_by": [], "depends_on": ["ident-001"], "tags": ["identity", "gs-hota"]
+    },
+    {
+      "id": "ident-003",
+      "statement": "Adding PRTreID track-relink on top of the jersey layer lifted GS-HOTA 19.83 -> 20.65 (+4%), but hurt 15/58 sequences (association gain, not detection).",
+      "value": 20.65, "unit": "GS-HOTA", "status": "confirmed",
+      "evidence": ["STATUS.md#GS-HOTA + PRTreID RELINK", "docs/REVIEW_CRIB.md#Q3"],
+      "method": "official re-score with PRTreID-relinked ids at threshold 0.960", "n": 58,
+      "caveats": ["Diagnosis: association was NOT the binding constraint -- jersey gate held DetA at 9.89 with 91.3% of tracks abstaining"],
+      "date": "2026-07-20", "supersedes": [], "superseded_by": [], "depends_on": ["ident-002"], "tags": ["identity", "gs-hota"]
+    },
+    {
+      "id": "ident-004",
+      "statement": "Adding jersey-number propagation (fill abstaining fragments from validated same-player merges, zero free parameters) lifted GS-HOTA 20.65 -> 22.85 (+15.2% over the shipped jersey-only arm), and REPAIRED relink's regressions from 15/58 hurt down to 1/58 hurt. First intervention ever to move DetA (9.89 -> 11.12).",
+      "value": 22.85, "unit": "GS-HOTA", "status": "confirmed",
+      "evidence": ["STATUS.md#JERSEY PROPAGATION", "docs/REVIEW_CRIB.md#Q3"],
+      "method": "propagate names within a 0.960 merge group only to previously-abstaining members; drop the whole group on any numbered disagreement", "n": 58,
+      "caveats": ["Propagation precision (GT-audited) 80.1%; the zero-onto-GT-unnumbered rate is load-bearing", "Honest ceiling: ~85% of the remaining DetA gap needs real reads, not more redistribution"],
+      "date": "2026-07-20", "supersedes": [], "superseded_by": [], "depends_on": ["ident-003"], "tags": ["identity", "gs-hota"]
+    },
+    {
+      "id": "ident-005",
+      "statement": "PRTreID is the first embedder ever to clear the 80% same-kit merge-precision bar: 84.7% (658/777) at threshold 0.965, pre-committed on a pilot; OSNet variants never clear 80% at any usable yield.",
+      "value": 84.7, "unit": "pct precision", "status": "confirmed",
+      "evidence": ["STATUS.md#THE SAME-KIT ReID WALL IS BROKEN"],
+      "method": "held-out 55 non-pilot GSR sequences, threshold pre-committed on a 3-seq pilot", "n": 55,
+      "caveats": ["\"pre-committed on the pilot\" is strictly true only of 0.965; the recommended 0.960 arm should be described as \"validated held-out at ~81%\", per the 2026-07-21 adversarial review"],
+      "date": "2026-07-20", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity"]
+    },
+    {
+      "id": "ident-006",
+      "statement": "Local reproduction of the Koshkina jersey-number pipeline reaches 86.13% tracklet accuracy (1043/1211) on the SoccerNet jersey-2023 test split, vs the paper's 87.45%, with two disclosed substitutions (KeypointRCNN pose instead of ViTPose; no Centroid-ReID outlier filter).",
+      "value": 86.13, "unit": "pct", "status": "confirmed",
+      "evidence": ["STATUS.md#KOSHKINA REPRODUCED LOCALLY", "results/CLAIMS_AUDIT.md#What Sid can say"],
+      "method": "full SoccerNet jersey-2023 test split, official eval convention", "n": 1211,
+      "caveats": ["An earlier \"0.42% local baseline\" number was a broken run, not a pipeline property, and was retracted"],
+      "date": "2026-07-17", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity"]
+    },
+    {
+      "id": "ident-007",
+      "statement": "The identity precision spot-check numbers (\"39/40\", \"40/40\", \"40/40\" for brighton/liverpool/tottenham montages) are unpersisted eyeball verdicts -- levers_stats.json ships verdict:\"\" for all three; only two 39/40 verdict sets are actually saved on disk anywhere, on two different readers, and the described \"miss\" was mis-attributed between them.",
+      "value": null, "unit": null, "status": "pending",
+      "evidence": ["results/CLAIMS_AUDIT.md#C-3", "results/CLAIMS_AUDIT.md#C-4"],
+      "method": "adversarial re-derivation checking artifact provenance for stored verdict fields", "n": 40,
+      "caveats": ["Do not present as \"measured precision\" in a review without re-running the spot-check with verdict capture"],
+      "date": "2026-07-21", "supersedes": [], "superseded_by": [], "depends_on": ["ident-002"], "tags": ["identity", "methodology"]
+    },
+    {
+      "id": "ident-008",
+      "statement": "Per-player event attribution is dead: only 1.0-4.2% of Man Utd's attributed passes carry a named player (2-5 per match); pooling across all 9 identity matches leaves the busiest player at 6 attributed passes against a 20-pass floor needed for a defensible claim.",
+      "value": 4.2, "unit": "pct max", "status": "confirmed",
+      "evidence": ["results/PLAYER_ANALYSIS_v2.md#Named-pass involvement pooled", "results/MANUTD_IDENTITY_PROFILE.md#What this profile cannot tell you", "docs/PROJECT_DEFINITION.md#What we deliberately do NOT claim"],
+      "method": "attributed-pass counts vs Poisson-noise floor (>=20 for SE < 22%)", "n": 9,
+      "caveats": ["Pooling across 9 matches does NOT rescue the event layer"], "date": "2026-07-24",
+      "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "negative-result"]
+    },
+    {
+      "id": "ident-009",
+      "statement": "Player-level passing networks are not viable at current identity coverage: named->named consecutive edges are near-zero across all 12 matches (named pass rate 0.0-3.9%); only per-player pass VOLUME (node strength) has real support, not who-passes-to-whom structure.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/PASS_NETWORKS_v1.md#Honest limits"],
+      "method": "directed passing networks from validated BAS pass stream + event-ledger carrier attribution", "n": 12,
+      "caveats": ["Mean intra-ManU cross-match player pass-volume cosine 0.21 over 3 identity matches (structural identifiability not computable at this coverage)"],
+      "date": null, "supersedes": [], "superseded_by": [], "depends_on": ["ident-008"], "tags": ["identity", "negative-result"]
+    },
+
+    {
+      "id": "event-001",
+      "statement": "Zero-shot E2E-Spot goal detection: 13/13 real goals found (100% recall) across 6 matches; at the documented operating point (thresh 0.30, 30s NMS) there are 16 peaks = 3 false positives, precision 81.3% -- corrected from an earlier STATUS claim of \"1 FP\".",
+      "value": 81.3, "unit": "pct precision", "status": "confirmed",
+      "evidence": ["results/CLAIMS_AUDIT.md#C-2", "docs/REVIEW_CRIB.md#Numbers to have cold"],
+      "method": "re-ran the probe's own peak picker at documented defaults over cached per-chunk score npz files", "n": 6,
+      "caveats": ["The two brighton FPs were disclosed in results/action_spotting_probe.md but omitted from the STATUS six-match rollup", "The proposed \"replay-window fix\" is post-hoc and unimplemented"],
+      "date": "2026-07-21", "supersedes": ["event-001b"], "superseded_by": [], "depends_on": [], "tags": ["events", "methodology"]
+    },
+    {
+      "id": "event-001b",
+      "statement": "\"13/13 real goals detected across 6 matches, 1 FP\" -- the FP count is wrong at the documented operating point.",
+      "value": 1, "unit": "false positive count", "status": "retracted",
+      "evidence": ["STATUS.md#2026-07-19 CORPUS x2 IN A DAY", "results/CLAIMS_AUDIT.md#C-2"],
+      "method": "original 6-match rollup, disclosed FPs undercounted", "n": 6,
+      "caveats": [], "date": "2026-07-19", "supersedes": [], "superseded_by": ["event-001"], "depends_on": [], "tags": ["events"]
+    },
+    {
+      "id": "event-002",
+      "statement": "BAS-derived pass counts land within 0.97-1.09x of official Sofascore totals on 10 of 12 matches, on a threshold (conf>=0.40, 1s dedup) frozen at the first match (brighton-h1) and never retuned.",
+      "value": null, "unit": "ratio band", "status": "confirmed",
+      "evidence": ["docs/PROJECT_DEFINITION.md#1. Engineering", "results/W1_FEASIBILITY_CHECKS.md#W1-A"],
+      "method": "lRomul 2023-winner ball-action-spotting model, single frozen operating point", "n": 12,
+      "caveats": ["fulham_manutd and manutd_palace fall outside the band (1.091x, 1.108x)"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["events", "methodology"]
+    },
+    {
+      "id": "event-003",
+      "statement": "Of PPDA's numerator classes, only Foul is usable (1.069x pooled vs Sofascore, inside the 0.97-1.09x band); Clearance is not usable (0.265x pooled).",
+      "value": 1.069, "unit": "ratio", "status": "confirmed",
+      "evidence": ["results/W1_FEASIBILITY_CHECKS.md#W1-B"],
+      "method": "E2E-Spot peaks re-picked at multiple (threshold, NMS) settings vs Sofascore whole-match totals", "n": 12,
+      "caveats": ["Foul detection carries no team attribution and is not validated against event timestamps, only whole-match counts"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["events", "pressing"]
+    },
+    {
+      "id": "event-004",
+      "statement": "PPDA as Opta defines it is NOT broadcast-estimable: tackles and interceptions (74% of the PPDA denominator) have no corresponding class in the E2E-Spot 17-class SoccerNet-v2 vocabulary at all -- structural, not a tuning failure.",
+      "value": 74, "unit": "pct of denominator invisible", "status": "refuted_externally",
+      "evidence": ["results/W1_FEASIBILITY_CHECKS.md#W1-B", "results/MANUTD_IDENTITY_PROFILE.md#What this profile cannot tell you"],
+      "method": "checked the detector's own label space against Sofascore PPDA components", "n": 12,
+      "caveats": ["A possession-change-based pressing rate over-detects Sofascore ballRecovery by 2.03x pooled, spread 0.96-2.75x -- usable as a rate after calibration, not a drop-in count"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["events", "pressing", "negative-result"]
+    },
+
+    {
+      "id": "b4-001",
+      "statement": "B4 gate-1 bar amendment: the imputation model's pass/fail line is scored against the best CAUSAL baseline (a training-free anchor), with offline linear interpolation reported alongside only as an oracle ceiling -- supervisor-approved 2026-07-24.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["docs/B4_IMPUTATION_PLAN.md#Gate-1 amendment", "docs/B4_MODEL_PLAN.md#1. The decision"],
+      "method": "supervisor ruling, option (b), delegated decision", "n": null,
+      "caveats": ["Rationale: offline linear interpolation uses the future re-sighting a causal imputer never has"],
+      "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["imputation", "methodology"]
+    },
+    {
+      "id": "b4-004",
+      "statement": "The published training-free role-anchored centroid-vote baseline (B6_vote) on its own LOSES to the blended causal baseline B5_blend: ALL RMSE 15.64 vs 13.24, only ahead at 10-30s -- reported as a negative result, not buried.",
+      "value": 15.64, "unit": "m RMSE ALL", "status": "confirmed",
+      "evidence": ["docs/B4_IMPUTATION_PLAN.md#BAR RE-FROZEN"],
+      "method": "measured on Metrica Game 2 second-half holdout", "n": null,
+      "caveats": [], "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["imputation", "negative-result"]
+    },
+    {
+      "id": "b4-005",
+      "statement": "B7 = veldecay blended with the vote field (replacing B5's weakest component, the slot-OLS prior) beats B5_blend in 5/6 buckets with non-overlapping CIs on both CALIB and HOLDOUT; B7, holdout ALL 11.46 m, becomes the re-frozen gate-1 bar.",
+      "value": 11.46, "unit": "m RMSE ALL", "status": "confirmed",
+      "evidence": ["docs/B4_IMPUTATION_PLAN.md#BAR RE-FROZEN", "docs/B4_MODEL_PLAN.md#1. The decision"],
+      "method": "same frozen tau=4.75s, blend weights refit on TRAIN only", "n": null,
+      "caveats": [], "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["b4-004"], "tags": ["imputation"]
+    },
+    {
+      "id": "b4-002",
+      "statement": "B4 v1 (quantile-GBM residual correction on the frozen B7 anchor) PASSES gate 1: holdout ALL 8.10 m vs the 11.46 m bar [95% CI -4.27, -2.53], beats 5/6 buckets, statistical tie at 0-1s. Independently re-derived and confirmed exactly by a separate reviewer pass.",
+      "value": 8.10, "unit": "m RMSE ALL", "status": "confirmed",
+      "evidence": ["results/B4_MODEL_V1.md#2. Gate 1", "STATUS.md#2026-07-25"],
+      "method": "frozen holdout run, Metrica Game 2 H2, run once", "n": 644792,
+      "caveats": ["Literal \"<= in every bucket\" reading fails by 0.02 m at 0-1s (0-1s is a statistical tie, CI straddles zero)", "v1 places 14.9% of predictions inside the band where a hidden player cannot be -- a transfer-risk flag resolved by b4-008/b4-009"],
+      "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["b4-005", "b4-001"], "tags": ["imputation"]
+    },
+    {
+      "id": "b4-003",
+      "statement": "B4 v1 gate-2 PASSES calibration coverage 6/6 buckets at both 50% and 90% nominal (PICP 45.5-50.9 / 89.2-90.6); the pre-declared ACI remedy was not needed.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/B4_MODEL_V1.md#3. Gate 2"],
+      "method": "per-sample quantile widths, per-bucket split conformal, 1-minute block bootstrap CIs", "n": 644792,
+      "caveats": [], "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["b4-002"], "tags": ["imputation"]
+    },
+    {
+      "id": "b4-006",
+      "statement": "B4's pre-registered abstention layer A is mis-specified: the rule \"abstain at and beyond the first bucket where v1 doesn't beat the bar\" assumes skill decays with horizon; ours fails only at the shortest bucket (0-1s), so the literal rule abstains on 100% of the holdout.",
+      "value": 100, "unit": "pct abstained (literal rule)", "status": "retracted",
+      "evidence": ["results/B4_ABSTENTION_POLICY.md#1. The defect", "results/B4_MODEL_V1.md#4. Abstention"],
+      "method": "disclosed on CALIB before the holdout was opened", "n": null,
+      "caveats": ["Root cause: the rule conflates \"no skill\" with \"no improvement over the anchor\""],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": ["b4-007"], "depends_on": ["b4-002"], "tags": ["imputation", "negative-result"]
+    },
+    {
+      "id": "b4-007",
+      "statement": "Adopted remedy: P2 (defer-to-anchor) -- assert v1's point except where it has no edge over the anchor (0-1s), where the anchor's own point+region is emitted instead; abstention becomes layer B's job alone. Measured cost is free: -0.0001 m [-0.0003, +0.0000] RMSE vs unrestricted v1 over all rows, and buys 7.9pp more asserted coverage (92.0% -> 99.9%).",
+      "value": -0.0001, "unit": "m RMSE delta", "status": "confirmed",
+      "evidence": ["results/B4_ABSTENTION_POLICY.md#3. Does P2 cost accuracy?", "results/B4_ABSTENTION_POLICY.md#5. Decision"],
+      "method": "block-bootstrap comparison of P2 vs unrestricted v1 and vs P1 (strict per-bucket abstain), on the frozen holdout array", "n": 644792,
+      "caveats": ["Layer B (SGR reject) is nearly inactive under P2 (0.07% of samples) -- a genuine remaining weakness flagged for a supervisor-approved re-threshold"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["b4-006"], "tags": ["imputation"]
+    },
+    {
+      "id": "b4-008",
+      "statement": "B4 M3 transfer: under a SkillCorner-measured real broadcast footprint (+camera lag, +feathered edge), v1 keeps 105-112% of its training-geometry margin over B7, winning 5/6 buckets with non-overlapping CIs -- the gain is real broadcast physics, not a simulator artifact.",
+      "value": 108, "unit": "pct margin kept (range 105-112)", "status": "confirmed",
+      "evidence": ["results/B4_TRANSFER_M3.md#1. Task 1", "STATUS.md#2026-07-25"],
+      "method": "the frozen v1/B7 pair re-scored under 9 alternative censoring geometries, paired 1-minute block bootstrap", "n": null,
+      "caveats": [], "date": "2026-07-25", "supersedes": [], "superseded_by": [], "depends_on": ["b4-002"], "tags": ["imputation"]
+    },
+    {
+      "id": "b4-009",
+      "statement": "The v1 margin over B7 is aspect-dependent: window aspect 0.50 keeps 100%, 0.86 -> 60%, 3.67 -> not significant (statistical tie). Real censoring is measured to be genuinely geometric: 98.4% of detected players inside the SkillCorner footprint, 94.7% of undetected ones outside, ~2m soft edge.",
+      "value": null, "unit": null, "status": "pending",
+      "evidence": ["results/B4_TRANSFER_M3.md#0. What a real broadcast camera window", "results/B4_TRANSFER_M3.md#Diagnosis"],
+      "method": "geometry sweep across 9 censoring shapes", "n": null,
+      "caveats": ["Not validated on tactical-cam or vertical-crop footage; standing caveat for any B4 claim"],
+      "date": "2026-07-25", "supersedes": [], "superseded_by": [], "depends_on": ["b4-008"], "tags": ["imputation", "pending"]
+    },
+    {
+      "id": "b4-010",
+      "statement": "v1.1 (train-time camera-shape randomised model) was TESTED but NOT adopted: it repairs the aspect_15 collapse (statistical tie -> significant -2.36 m win) but loses 6-10% of margin on the broadcast-shaped geometries we actually have, and has no calibrated uncertainty or abstention re-derived yet.",
+      "value": null, "unit": null, "status": "pending",
+      "evidence": ["results/B4_TRANSFER_M3.md#4. Task 4", "results/B4_TRANSFER_M3.md#5. Verdict"],
+      "method": "domain-randomised retraining, same architecture/features, TRAIN censored 4 ways instead of 1", "n": null,
+      "caveats": ["Held in reserve as the pre-tested remedy for non-standard-broadcast footage (tactical-cam, vertical crop)"],
+      "date": "2026-07-25", "supersedes": [], "superseded_by": [], "depends_on": ["b4-009"], "tags": ["imputation"]
+    },
+    {
+      "id": "b4-011",
+      "statement": "On our own footage, v1's positional predictions are physically plausible (0.2-0.3% off-pitch, sane speeds/shapes), but the real transfer obstacle is our own tracker: ~10 trusted players on ~25% of frames with heavy re-id churn, so a \"hidden player\" is often a dead track of someone still on screen. B2 identity must be applied before any B4 number reaches a scouting report.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/B4_TRANSFER_M3.md#3. Task 3", "STATUS.md#2026-07-25"],
+      "method": "distributional smell-test on brighton_manutd / manutd_liverpool (no ground truth exists off-camera on our footage)", "n": 2,
+      "caveats": ["No accuracy is claimed here -- distributional plausibility only"],
+      "date": "2026-07-25", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["imputation", "negative-result"]
+    },
+    {
+      "id": "b4-012",
+      "statement": "Choi (arXiv:2607.11548, 2026) scoops the imputation model as a research contribution: same problem framing, same evaluation protocol (simulated viewport over Metrica open tracking), same method family (role-anchored centroid voting), same causal baseline ladder, position error in metres with a viewport sweep, occlusion-duration stratification, and \"imputation changes a downstream verdict\" as a motivating result. Imputation-as-novelty is dead; it must be reframed as a validated instrument.",
+      "value": null, "unit": null, "status": "refuted_externally",
+      "evidence": ["results/PAPER_READ_SCOOP_CHECK.md#Scoop verdict on Sid's imputation work"],
+      "method": "harsh full-text read of the incumbent paper", "n": null,
+      "caveats": ["Choi's own B4 method is the same family as our B6/B7 anchor v1 sits on"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["imputation", "scoop"]
+    },
+    {
+      "id": "b4-013",
+      "statement": "What survives the Choi scoop check: calibrated predictive regions with verified coverage (Choi has zero of this -- only a bootstrap CI on an aggregate error statistic, no per-sample interval, no coverage test, no abstention), and a MEASURED (not simulated-rectangle) real broadcast footprint. Neither paper touches pressing/transition metrics at all.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/PAPER_READ_SCOOP_CHECK.md#0. VERDICT ON RQ-D", "results/PAPER_READ_SCOOP_CHECK.md#3. Why RQ-D is still standing"],
+      "method": "checklist comparison of RQ-D's components against Choi 2026 and Theiner 2021", "n": null,
+      "caveats": ["Theiner et al. 2021 (WACV 2022) is zero-overlap with RQ-D: it computes no tactical metric anywhere and defines invisible players out of its own evaluation by discarding frames"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["b4-012"], "tags": ["imputation", "pressing", "scoop"]
+    },
+
+    {
+      "id": "forecast-001",
+      "statement": "Possession rematch forecast: persisting the leg-1 poss-link share verbatim gives MAE 7.92pp, beating the uninformative 50% baseline (10.63pp) and an Elo-only fit (12.18pp), over 6 rematch pairs.",
+      "value": 7.92, "unit": "pp MAE", "status": "confirmed",
+      "evidence": ["results/FORECAST_V0.md#(a) Possession", "docs/PROJECT_DEFINITION.md#3. The three contributions"],
+      "method": "pre-registered protocol, leave-one-pair-out interval calibration", "n": 6,
+      "caveats": ["n=6 = proof-of-signal, not significance; every pair confounds venue and manager change"],
+      "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["teammap-006"], "tags": ["forecasting", "possession"]
+    },
+    {
+      "id": "forecast-002",
+      "statement": "Result rematch forecast: persisting the leg-1 RESULT alone (RPS 0.1494) clearly beats Elo-only (0.2445) and flat (0.2500), and beats the pre-registered 0.5-Elo/0.5-leg-1 blend (0.1882) -- the pre-registered equal-weight blend was a wrong call, honestly reported.",
+      "value": 0.1494, "unit": "mean RPS (persistence)", "status": "confirmed",
+      "evidence": ["results/FORECAST_V0.md#(b) Result"],
+      "method": "pre-registered protocol, 6 rematches", "n": 6,
+      "caveats": ["4/6 pairs keep the exact same result across venue/manager change"], "date": "2026-07-24",
+      "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["forecasting"]
+    },
+    {
+      "id": "forecast-003",
+      "statement": "Attack-direction (more/less direct than leg 1) forecast scores at chance under honest leave-one-pair-out holdout: 3/6 hit rate; the in-sample 4/6 \"Amorim more direct\" figure is circular (it reuses the pooled tendency these same pairs define).",
+      "value": 3, "unit": "hits of 6 (LOPO)", "status": "refuted_externally",
+      "evidence": ["results/FORECAST_V0.md#(c) Attack direction"],
+      "method": "leave-one-pair-out regime-sign forecast", "n": 6,
+      "caveats": ["3-way coverage per leg is too low to forecast direction reliably (n3 as small as 3)"], "date": "2026-07-24",
+      "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["forecasting", "negative-result"]
+    },
+    {
+      "id": "forecast-004",
+      "statement": "C5 today is explanatory (opponent depth explains tendency variance, LOMO +43-48% over team-average), NOT a deployable pre-match forecast -- honestly conceded the day it was verified. Upgrade path (predict opponent depth from THEIR prior matches) is scheduled, mechanical, not yet built.",
+      "value": null, "unit": null, "status": "pending",
+      "evidence": ["docs/REVIEW_CRIB.md#Q6", "docs/BTP_DECEMBER_PLAN.md#B1 -- External benchmark"],
+      "method": "leave-one-match-out backtest on n=8 team-matches", "n": 8,
+      "caveats": ["n=8 stays a proof-of-signal, never significance"], "date": "2026-07-15",
+      "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["forecasting", "pending"]
+    },
+
+    {
+      "id": "player-001",
+      "statement": "The named-player positional structure does NOT show the expected 3-4-3 wing-back signature under Amorim: defensive line reads deeper (not higher), and the recurring full-backs do not push higher (Mazraoui markedly deeper, Dalot flat) -- reported as a negative result, not forced into the tactical narrative.",
+      "value": null, "unit": null, "status": "refuted_externally",
+      "evidence": ["results/PLAYER_ANALYSIS_v2.md#Line composition x manager", "results/MANUTD_IDENTITY_PROFILE.md#5. What the manager change did"],
+      "method": "named-player line-band centroid comparison, ten Hag vs Amorim eras", "n": 9,
+      "caveats": ["7-11 named players/match cannot distinguish a 4-2-3-1 from a 3-4-3 as a shape"], "date": "2026-07-24",
+      "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["player", "identity", "negative-result"]
+    },
+    {
+      "id": "player-002",
+      "statement": "7 of 9 players tracked in both manager eras sit higher up the pitch under Amorim; Garnacho moves the most (+15.1 m). Directional read on small n; venue and manager flip together in every pair, so nothing here separates the two causes.",
+      "value": 7, "unit": "of 9 players", "status": "pending",
+      "evidence": ["results/PLAYER_ANALYSIS_v2.md#Manager-split player table", "results/MANUTD_IDENTITY_PROFILE.md#5. What the manager change did", "docs/PROJECT_DEFINITION.md#3. The three contributions"],
+      "method": "per-player mean advance, trusted (>=25 frame) positions, split by era", "n": 9,
+      "caveats": ["Confounded with opponent, scoreline, venue, and no opponent is measured twice under both managers"],
+      "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["player", "identity"]
+    },
+    {
+      "id": "player-003",
+      "statement": "Even pooling attributed passes across all 9 identity matches, the busiest named player reaches only 6 attributed passes -- below the 20-pass floor needed before Poisson noise drops under ~22% relative SE. Pooling does NOT rescue the event layer.",
+      "value": 6, "unit": "pooled attributed passes (max)", "status": "confirmed",
+      "evidence": ["results/PLAYER_ANALYSIS_v2.md#Named-pass involvement pooled"],
+      "method": "pooled attributed-pass count per named player across 9 matches", "n": 9,
+      "caveats": [], "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["ident-008"], "tags": ["player", "negative-result"]
+    },
+    {
+      "id": "player-004",
+      "statement": "The central-to-wide attacking funnel (46.9% central in own third -> 23.9% central in final third) is Premier League geometry, not a Man Utd trait: the same 12 broadcasts' opposition shows an identical funnel in 12/12 legs, finishing marginally MORE wide-heavy than Man Utd.",
+      "value": null, "unit": null, "status": "refuted_externally",
+      "evidence": ["results/MANUTD_IDENTITY_PROFILE.md#1. How they build"],
+      "method": "sign test on paired per-match differences, both sides of the same 12 broadcasts", "n": 12,
+      "caveats": ["United's version is significant in 11/12 matches (p=0.0063); the opposition's is significant in 12/12 (p=0.0005) -- the pattern is real but not distinctively United's"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "negative-result"]
+    },
+    {
+      "id": "player-005",
+      "statement": "There is no favoured attacking flank for Man Utd: pooled final-third split looks left-leaning (39.9% vs 36.2%) but match-by-match it is 5 leaning left / 7 leaning right (sign test p=0.7744) -- declined as an identity claim.",
+      "value": 0.7744, "unit": "sign-test p", "status": "refuted_externally",
+      "evidence": ["results/MANUTD_IDENTITY_PROFILE.md#1. How they build"],
+      "method": "exact sign test over 12 matches", "n": 12, "caveats": [], "date": "2026-07-26",
+      "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "negative-result"]
+    },
+
+    {
+      "id": "style-001",
+      "statement": "The single-team OT sliced-Wasserstein style-embedding \"fingerprint\" separation from the rest of the league decays monotonically as more matches are added: 2.0 (n=3) -> 0.74 (n=5) -> 0.09 (n=6, uncorrected). Diagnosed (docs/RESEARCH_QUESTION_OPTIONS.md) as an artifact of the marginal-occupancy construct, not a discovery about football.",
+      "value": 0.09, "unit": "separation index at n=6", "status": "confirmed",
+      "evidence": ["docs/PROJECT_DEFINITION.md#3. The three contributions", "STATUS.md#2026-07-20 n=6 SCOPING", "docs/RESEARCH_QUESTION_OPTIONS.md#2. The identity-measurement critique"],
+      "method": "cross-match Wasserstein style distance, style_fingerprint_v1/v2/v3", "n": 6,
+      "caveats": ["The n=6 value rests partly on one inverted (mislabelled) leg, per the 2026-07-23 team-mapping correction; the correlation-decay DIRECTION still stands"],
+      "date": "2026-07-20", "supersedes": [], "superseded_by": [], "depends_on": ["teammap-002"], "tags": ["identity", "negative-result"]
+    },
+    {
+      "id": "style-002",
+      "statement": "Lucey-style entropy-map team-identification is NOT viable on this corpus: 7-class leave-one-out accuracy 0.208 (below the permutation null mean of 0.256); only 1 of 90 declared parameter settings clears p<0.05 (4.5 expected by chance, family-wise p=0.86). No signal to report.",
+      "value": 0.208, "unit": "7-class LOO accuracy", "status": "refuted_externally",
+      "evidence": ["results/ENTROPY_MAP_FEASIBILITY.md#4. Identity test"],
+      "method": "leave-one-out 1-NN over entropy maps at 90 declared parameter settings, permutation nulls per test", "n": 24,
+      "caveats": [], "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "negative-result"]
+    },
+    {
+      "id": "style-003",
+      "statement": "The entropy-map failure is NOT a camera field-of-view problem (a calibrated broadcast-camera censor costs only 0.005 bits on Metrica full-pitch truth); it IS a frame-level tracking-continuity problem: 47.4% of 1Hz ball samples carry no calibration-trusted player row at that frame at all, collapsing possession-string length from Metrica's 8s median to our 3s median.",
+      "value": 47.4, "unit": "pct 1Hz samples with no trusted player row", "status": "confirmed",
+      "evidence": ["results/ENTROPY_MAP_FEASIBILITY.md#7. Verdict", "results/ENTROPY_MAP_FEASIBILITY.md#6. Degradation control"],
+      "method": "Metrica full-pitch truth run through the identical camera-censored pipeline as our real data (a degradation control)", "n": null,
+      "caveats": ["Fix has a stated acceptance criterion: median possession string >= 8s, a continuity/calibration engineering target"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["style-002"], "tags": ["identity", "methodology"]
+    },
+
+    {
+      "id": "w1-001",
+      "statement": "Under a strict 5-second-continuous window, per-match transition/counterpress metrics FAIL: at N>=5 pressing-team players visible throughout, pooled 71 usable windows over 12 matches, median 5/match (below the 10/match floor); at N>=7, 21 pooled, median 1/match.",
+      "value": null, "unit": null, "status": "superseded",
+      "evidence": ["results/W1_FEASIBILITY_CHECKS.md#W1-A -- turnover-window census", "results/W1_FEASIBILITY_CHECKS.md#What dies on this evidence"],
+      "method": "pre-declared threshold census (>=30/match viable, 10-30 pooled-only, <10 dead) on the shipped possession-state-change detector", "n": 12,
+      "caveats": ["Binding constraint is geometry (only ~11 players tracked, split across two teams), not the ball"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": ["w1-002"], "depends_on": [], "tags": ["pressing", "methodology", "negative-result"]
+    },
+    {
+      "id": "w1-002",
+      "statement": "Retracted for the correct window: the Bauer & Anzer counterpress construct only needs the ball tracked and pressers visible at 3 discrete instants inside a 2-second window (not 26 continuous slots over 5s). At the corrected 2s window, N>=3 and N>=5 PASS (median 67/match and 34/match respectively, both >=30); only N>=7 stays marginal.",
+      "value": 67, "unit": "median usable windows/match at N>=3", "status": "confirmed",
+      "evidence": ["results/W1B_WINDOW_AND_SAMPLING.md#1. Task 1", "results/W1B_WINDOW_AND_SAMPLING.md#4. Verdicts"],
+      "method": "re-census using the literature's actual instant-sampled requirement instead of an invented continuous-window requirement", "n": 12,
+      "caveats": ["The success (regain-within-5s) label is right-censored in 49% of even the N>=3-usable turnovers, and the censoring is INFORMATIVE (a naive rate among decided cases would read ~2.5x the true rate)"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["w1-001"], "tags": ["pressing", "methodology"]
+    },
+    {
+      "id": "w1-003",
+      "statement": "Counterpress-success censoring is informative, not random: among the 653 decided turnovers, 88.4% are regains, against the literature's true regain-within-5s rate of 30.2-36.2% -- the event that breaks the ball track is exactly the event that implies no regain, so the decided-cases subset over-represents successes ~2.5x.",
+      "value": 88.4, "unit": "pct regains among decided cases", "status": "confirmed",
+      "evidence": ["results/W1B_WINDOW_AND_SAMPLING.md#1. Task 1"],
+      "method": "comparison against Bauer & Anzer's published 5s regain rate on a labelled 97-match corpus", "n": 653,
+      "caveats": ["The label needs a survival estimator with a stated, non-random censoring mechanism, not a naive rate"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["w1-002"], "tags": ["pressing", "negative-result"]
+    },
+    {
+      "id": "w1-004",
+      "statement": "Team-level counterpress-rate metrics (%CP, CP+/T, %CP+) need 58-90 matches to separate two teams even with perfect tracking and zero measurement error -- our 12-match corpus is 5-8x too small before broadcast censoring is even considered; this is a sample-size bound, not a broadcast-quality bound.",
+      "value": 58, "unit": "matches needed (lower bound of range)", "status": "confirmed",
+      "evidence": ["results/W1B_WINDOW_AND_SAMPLING.md#2. Task 2", "results/MANUTD_IDENTITY_PROFILE.md#What this profile cannot tell you"],
+      "method": "irreducible binomial/Poisson noise floor derived from Bauer & Anzer's own published between-team and season variance tables", "n": 12,
+      "caveats": ["By contrast turnovers-per-match (T/M) is broadcast-bound, not sample-bound: our own corpus shows its between-team component truncated to 0.00 (F<1, p=0.54), consistent with a 30% per-match calibration CV against a 4% between-team CV"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["w1-002"], "tags": ["pressing", "negative-result"]
+    },
+
+    {
+      "id": "rq-001",
+      "statement": "RQ-D survives the Choi/Theiner scoop check, narrowed to: under measured (not simulated) broadcast visibility, which PRESSING and TRANSITION metrics retain enough resolution to distinguish one team from another, and does calibrated off-screen imputation move that threshold. The word doing the work is \"calibrated\"; the metric family doing the work is pressing/transition.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/PAPER_READ_SCOOP_CHECK.md#0. VERDICT ON RQ-D"],
+      "method": "adversarial paper read of the two closest incumbent works", "n": null,
+      "caveats": [], "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["b4-012", "b4-013"],
+      "tags": ["methodology", "pressing"]
+    },
+    {
+      "id": "rq-002",
+      "statement": "The two-week de-risking check for RQ-D (turnover-window census + PPDA numerator check + a one-metric end-to-end dry run) came back PASS/MARGINAL, not FAIL: the transition family reopens under the corrected 2s window, and the study design is answerable with instruments already on disk (no new CV work, no new data needed).",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["docs/RESEARCH_QUESTION_OPTIONS.md#5. First two weeks", "results/W1B_WINDOW_AND_SAMPLING.md#4. Verdicts"],
+      "method": "W1-A/W1-B/W1B census, pre-committed pass/marginal/fail thresholds", "n": 12,
+      "caveats": ["Counterpress RATE metrics remain sample-size-dead at n=12 (w1-004); the battery must be scoped to instantaneous/local features and structure metrics, not team-level rate comparisons"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["w1-002", "w1-004"], "tags": ["methodology", "pressing"]
+    },
+
+    {
+      "id": "audit-001",
+      "statement": "Claims audit (2026-07-21): 41 prior claims VERIFIED by a single-verifier pass (not panel-confirmed, quota-interrupted); 5 CONTRADICTED claims found and corrected (2 already fixed, 3 confirmed contradicted by this pass), 1 amended.",
+      "value": 41, "unit": "verified count", "status": "confirmed",
+      "evidence": ["results/CLAIMS_AUDIT.md#Verdict summary"],
+      "method": "adversarial re-derivation of headline numbers from raw artifacts, not from the documents that assert them", "n": 47,
+      "caveats": ["A single-verifier VERIFIED should be read as \"no defect found by one pass\", not \"panel-confirmed\" -- re-derive before quoting in a review"],
+      "date": "2026-07-21", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["methodology"]
+    },
+    {
+      "id": "audit-002",
+      "statement": "STATUS.md transcribed the BAS pass-count ratios for southampton_manutd and tottenham_manutd swapped (southampton is 0.996, not 1.047; tottenham is 1.047, not 0.996); results/bas_validation.md was always correct. Fixed in STATUS, annotated.",
+      "value": null, "unit": null, "status": "retracted",
+      "evidence": ["results/CLAIMS_AUDIT.md#A -- STATUS BAS pass-ratios", "STATUS.md#2026-07-20"],
+      "method": "cross-check against outputs/oracle/sofascore", "n": null, "caveats": ["Aggregate stats (mean |dev| 2.9%, 5/6 within 5%) unaffected"],
+      "date": "2026-07-20", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["methodology", "events"]
+    },
+
+    {
+      "id": "storage-001",
+      "statement": "Repo storage audit (pre-fsck): 136.4 GB total, of which video is 82% (111.4 GB) not the ~90 GB-non-video the user believed; every Man Utd match is stored TWICE (51.2 GB root .mp4 duplicated byte-for-byte in matches/<id>/ chunks via lossless stream-copy).",
+      "value": 82, "unit": "pct video", "status": "confirmed",
+      "evidence": ["results/STORAGE_AUDIT_2026-07-24.md#1. Headline numbers", "results/STORAGE_AUDIT_2026-07-24.md#5.1 Every ManU match is stored TWICE"],
+      "method": "read-only Get-ChildItem + git count-objects audit, no deletions performed by the audit itself", "n": null,
+      "caveats": [], "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["storage"]
+    },
+    {
+      "id": "storage-002",
+      "statement": "The storage audit's own recommendation to delete matches/fra_sen/ wholesale was WRONG and is retracted: two of its clips (chunk_004/005.mp4 at 30fps) are LIVE, non-reproducible inputs to the ball fine-tune that produced the shipped tracknetv2_v5/v6 production weights, cited by data/ball_annotations/manifest.csv, and NOT regenerable from matches/france_senegal/ (different fps, different encode, different cut points).",
+      "value": null, "unit": null, "status": "retracted",
+      "evidence": ["results/DELETION_VERIFICATION_2026-07-24.md#5. matches/fra_sen -- the audit's ... call is WRONG"],
+      "method": "reference audit of every code path touching matches/fra_sen, cross-checked against data/ball_annotations/manifest.csv and holdout_split.csv", "n": null,
+      "caveats": ["Correction: safe-to-delete scope is narrowed to only matches/fra_sen/chunks/ (1.909 GiB, unannotated warm-up material), keeping matches/fra_sen/play/ entirely"],
+      "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["storage-001"], "tags": ["storage", "methodology"]
+    },
+    {
+      "id": "storage-003",
+      "statement": "All 12 repo-root .mp4 full-match replays (51.2 GB) are independently verified SAFE TO DELETE: frame-complete, byte-parity-consistent, codec-identical, pixel-identical at boundaries vs their matches/<id>/ chunk sets, and every chunk has already been decoded end-to-end by the CV pipeline.",
+      "value": 51.2, "unit": "GB reclaimable", "status": "confirmed",
+      "evidence": ["results/DELETION_VERIFICATION_2026-07-24.md#6. (a) Root .mp4 paths PROVEN safe to delete"],
+      "method": "five independent evidence lines per fixture: container/stream probe, frame arithmetic, container-box byte walk, boundary pixel-identity md5, halftime-seam overlap check", "n": 12,
+      "caveats": ["Standing condition: back up matches/ to external media first -- these chunks become the only copy of non-redownloadable footage"],
+      "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["storage-002"], "tags": ["storage"]
+    },
+    {
+      "id": "storage-004",
+      "statement": "56.6 GB was reclaimed by the storage audit + deletion verification arc after per-fixture proof; free space moved 5.1 GB -> 61.7 GB.",
+      "value": 56.6, "unit": "GB reclaimed", "status": "confirmed",
+      "evidence": ["STATUS.md#Last updated"],
+      "method": "verified deletion of the 12 root .mp4s + .git orphans + 10 MD5-verified duplicate clips", "n": null,
+      "caveats": [], "date": "2026-07-25", "supersedes": [], "superseded_by": [], "depends_on": ["storage-003"], "tags": ["storage"]
+    },
+
+    {
+      "id": "scouting-001",
+      "statement": "Scouting-pack demo design: the Brighton pair (opponent manager stable across both legs) is the primary demo; the Southampton pair (opponent changed its OWN manager between legs, has zero identity, and its gate tier sits at ABSTAIN) is deliberately re-cast as the honest stress/negative case, not a second success story.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["docs/SCOUTING_PACK_PLAN.md#1. FEASIBILITY VERDICT", "docs/SCOUTING_PACK_PLAN.md#The resulting decision"],
+      "method": "pre-registered plan, dated 2026-07-26", "n": 2,
+      "caveats": ["Promoted back to a full demo only if S2 identity work lands >=6 Southampton players named at >=0.75 confidence AND the gate tier lifts off abstain"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["scouting-pack", "identity"]
+    },
+    {
+      "id": "scouting-002",
+      "statement": "Scouting-pack review found the pre-match cut-off protocol was declared but NOT mechanically enforced in code: the identity layer's oracle is the actual match team sheet, and season style factors (FBref PCA coordinates) are full-season 2024-25 aggregates including matches played AFTER the fixture being forecast -- a leak that would be the finding a December examiner lands on hardest.",
+      "value": null, "unit": null, "status": "pending",
+      "evidence": ["docs/SCOUTING_PACK_PLAN.md#The loud part"],
+      "method": "code-path audit of FORECAST_V0's protocol claims against the actual repo", "n": null,
+      "caveats": ["Fix specified: a mechanical as-of-date filter enforced in code, not a verbal claim, before any pack is generated"],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["scouting-pack", "methodology"]
+    },
+    {
+      "id": "scouting-003",
+      "statement": "The scouting pack excludes absolute defensive line heights in metres (comparative shares only), set pieces (corner counts only exist), any shot/xG claim as ours (no CV shot detector exists; FIFA benchmark finds broadcast save detection at F1 0.00 in every configuration), per-player pass networks, goalscorer identification, and any positional assertion about a named player at a named moment.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["docs/SCOUTING_PACK_PLAN.md#3. WHAT MUST NOT GO IN IT"],
+      "method": "pre-registered exclusion list, cross-referenced against measured coverage ceilings for each family", "n": null,
+      "caveats": [], "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["ident-008", "event-004"], "tags": ["scouting-pack", "methodology"]
+    },
+
+    {
+      "id": "paper-001",
+      "statement": "Bauer & Anzer (2021) define the counterpressing detector's feature window as 2 seconds after the ball loss (BPC + {0,1,2}s), not 5 seconds; the 5s window in their paper appears ONLY in the success LABEL (was the ball regained), and 20s only in the outcome label (shot/goal) -- the detector itself never needs 5s of continuous observation. This directly corrected our own W1 census's mistaken 5s-continuous requirement.",
+      "value": 2, "unit": "seconds", "status": "confirmed",
+      "evidence": ["results/PAPER_READ_METRICS.md#1.3 The time window", "results/W1B_WINDOW_AND_SAMPLING.md#1. Task 1"],
+      "method": "full-text read of Bauer & Anzer, Data Mining and Knowledge Discovery 35:2009-2049, Sect 2.2.2 p.2016", "n": null,
+      "caveats": [], "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["pressing", "methodology"]
+    },
+    {
+      "id": "paper-002",
+      "statement": "The naive \"defender within 5 yards of the ball carrier\" (StatsBomb-style radius) counterpressing rule scores AUC 0.602 and precision 0.31 against Bauer & Anzer's human-labelled ground truth -- barely above chance, and it labels 72.41% of ALL turnovers as counterpressing. Any battery implementing a bare radius rule as \"counterpressing\" is implementing a near-chance detector.",
+      "value": 0.602, "unit": "AUC", "status": "confirmed",
+      "evidence": ["results/PAPER_READ_METRICS.md#1.6 Model and performance"],
+      "method": "quoted from Bauer & Anzer Table 3, row 5", "n": null, "caveats": [], "date": "2026-07-26",
+      "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["pressing", "methodology"]
+    },
+
+    {
+      "id": "pair-001",
+      "statement": "Corpus design is a repeat-measurement study: 12 Man Utd matches = 6 same-opponent home/away pairs straddling the ten Hag -> Amorim managerial change, forming a balanced 2x2 (venue x manager) at n=3 opponents/cell -- estimable direction-only for the pooled manager and venue main effects, not the interaction or any single pair's decomposition.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/PAIR_ANALYSIS_v1.md#Task 4", "docs/PROJECT_DEFINITION.md#Why that question is defensible"],
+      "method": "design analysis of the corpus's venue x manager balance", "n": 6, "caveats": [],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "methodology"]
+    },
+    {
+      "id": "pair-002",
+      "statement": "Results are opponent-determined, not venue- or manager-determined: 4/6 pairs share the exact result across both legs (beat Fulham and Southampton twice, lost to Brighton and Tottenham twice); no pair flips win<->loss.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/PAIR_ANALYSIS_v1.md#Task 5", "docs/PROJECT_DEFINITION.md#3. The three contributions"],
+      "method": "pair-by-pair result comparison, corrected team mapping", "n": 6, "caveats": [],
+      "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["teammap-001", "teammap-002"], "tags": ["identity"]
+    },
+    {
+      "id": "pair-003",
+      "statement": "Venue has a near-null pooled effect on Man Utd's shape and possession: home block 27.6 m / possession 53.2% vs away 28.9 m / 52.9% -- essentially flat; the opponent, not venue, sets the observed territory pattern.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/PAIR_ANALYSIS_v1.md#Task 4"],
+      "method": "pooled venue main-effect estimate (manager-balanced), corrected team mapping", "n": 12,
+      "caveats": [], "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["teammap-001", "teammap-002"], "tags": ["identity"]
+    }
+  ]
+}
