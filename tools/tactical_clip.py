@@ -16,9 +16,11 @@ Three visual states, and they are the argument:
 state            how it is drawn
 ===============  ================================================================================
 observed         solid team-coloured disc; this frame projected it through a fitted homography
-imputed          hollow diamond inside two nested ellipses = the frozen B4 v1 model's calibrated
+imputed          hollow diamond inside two nested ellipses = the frozen B4 v1 model's NOMINAL
                  50% / 90% predictive regions (``synthesizer.imputation_v1.emit`` -> ``source``
                  ``"v1"`` or ``"anchor"``). Tight blob at short occlusion, wide smear at long.
+                 Their MEASURED coverage on our own broadcast is 20.5% / 55.3%, not 50 / 90
+                 (:data:`PICP50_MEASURED`); the panel says so on every frame.
 abstained        faded ghost at the last-seen position with "last seen N s ago" -- the model
                  declined to assert (region wider than the frozen SGR threshold ``R_MAX``)
 ===============  ================================================================================
@@ -28,8 +30,10 @@ Honesty constraints enforced in code, not in prose:
 * the imputation model is the **frozen** B4 v1 (Metrica-trained; ``results/B4_MODEL_V1.md``) with
   the frozen CALIB conformal multipliers and the adopted P2 defer-to-anchor policy
   (``results/B4_ABSTENTION_POLICY.md``). Nothing here refits anything.
-* it has **no ground truth on broadcast footage** -- ``results/B4_TRANSFER_M3.md`` calls the
-  application to our own tracks a smell test. The banner on every frame says so.
+* the regions are **not calibrated on broadcast**. ``results/FULL_MATCH_RECONSTRUCTION.md``
+  measured them against 1 259 real re-appearances on ``tottenham_manutd``: 20.5% coverage where
+  they promise 50% and 55.3% where they promise 90%, failing 0/4 testable buckets. The legend and
+  the footer on every frame carry those measured numbers, not the nominal ones.
 * a passage below :data:`MIN_PLAYERS` gated players/frame or :data:`MIN_BALL_COV` ball coverage is
   **refused**, with the numbers that failed.
 
@@ -89,6 +93,15 @@ K50_ANC = np.array([0.431, 0.827, 0.918, 0.985, 1.307, 1.639])
 K90_ANC = np.array([1.351, 1.792, 1.864, 1.995, 2.699, 2.871])
 R_MAX = 30.4339                      # frozen SGR threshold (layer B), metres
 SKILL_BUCKETS = (1, 2, 3, 4, 5)      # buckets where v1 beat the anchor on CALIB; 0-1s defers
+
+# ---- MEASURED coverage of those regions on OUR footage (results/FULL_MATCH_RECONSTRUCTION.md) ----
+# 1 259 liveness-guarded re-appearances on tottenham_manutd, frozen regions, P2 emitted policy.
+# The regions pass 6/6 on Metrica simulation and fail 0/4 testable buckets here, so nothing drawn
+# below may be labelled "calibrated": the panel prints these numbers instead.
+PICP50_MEASURED = 20.5
+PICP90_MEASURED = 55.3
+PICP_N = 1259
+PICP_SOURCE = "tottenham_manutd"
 
 # ---- render / selection knobs -------------------------------------------------------------------
 FPS = 25.0
@@ -240,7 +253,7 @@ class Mark:
 
 @dataclass
 class Ghost:
-    """One un-observed player: the frozen v1's emitted position plus its calibrated regions."""
+    """One un-observed player: the frozen v1's emitted position plus its nominal 50/90% regions."""
 
     tid: int
     team: int
@@ -529,12 +542,20 @@ class Passage:
         artifacts of ``results/B4_MODEL_V1.md``; the emit policy is the adopted P2 defer-to-anchor
         of ``results/B4_ABSTENTION_POLICY.md``. Nothing is fitted here.
 
+        ``load_ours`` ghosts a track only *after* its final sighting, so until
+        ``full_match_reconstruction.fill_internal_gaps`` is applied this panel could only ever
+        draw dead re-identification fragments -- never a live player who dropped out for two
+        seconds and came back, which is the case the imputer exists for. The fill is a
+        data-assembly step (the placeholder is read by nothing but the decision of which
+        slot-frames get a prediction), not a model change.
+
         Returns:
             ``({source frame: [Ghost, ...]}, note)`` -- the note is the on-screen provenance line.
         """
         from synthesizer.imputation import collect_samples, slot_prediction, visible_centroid
         from synthesizer.imputation_features import build_features, bucket_of, derive_fields
         from synthesizer.imputation_v1 import b7_position, emit, sample_signs, v1_prediction
+        from tools.full_match_reconstruction import fill_internal_gaps
         from tools.imputation_b4_external import (
             BAR_HALFLIFE_S, depth_rank, fit_frozen_v1, load_ours, remap_slot_coeffs,
         )
@@ -544,6 +565,7 @@ class Passage:
         heads, coeffs, tau, w7, g1 = fit_frozen_v1(CACHE_DIR, out)
         train_order = depth_rank(g1["truth"], g1["visible"], g1["period"], g1["ranges"])
         bundle = load_ours(self.match.id, 0, chunks=[self.chunk])
+        fill_internal_gaps(bundle)   # or the panel only ever draws dead re-id fragments
         ext_order = depth_rank(bundle["truth"], bundle["visible"], bundle["period"],
                                bundle["ranges"])
         coeffs_ext = remap_slot_coeffs(coeffs, train_order, ext_order)
@@ -569,11 +591,17 @@ class Passage:
         src_frame = f0 + (samples["frame"].astype(int) - off) * step
         keep = ((src_frame >= self.f_lo) & (src_frame <= self.f_hi)
                 & (samples["tsls"] <= MAX_IMPUTE_S))
+        vis = bundle["visible"]
+        seen = vis.any(axis=0)
+        last_vis = np.where(seen, vis.shape[0] - 1 - np.argmax(vis[::-1], axis=0), -1)
         ghosts: dict[int, list[Ghost]] = {}
+        n_gap = 0
         for i in np.flatnonzero(keep):
-            tid = slot_track.get(int(samples["slot_id"][i]))
+            slot = int(samples["slot_id"][i])
+            tid = slot_track.get(slot)
             if tid is None or tid not in team_of:
                 continue
+            n_gap += int(samples["frame"][i] < last_vis[slot])  # live track, genuinely occluded
             b = int(bkt[i])
             v1 = ems["source"][i] == "v1"
             k50 = (K50_V1 if v1 else K50_ANC)[b]
@@ -585,8 +613,8 @@ class Passage:
                 semi90=(k90 * float(halfw[i, 0]), k90 * float(halfw[i, 1])),
                 source=str(ems["source"][i]), tsls=float(samples["tsls"][i])))
         n = sum(len(v) for v in ghosts.values())
-        note = (f"frozen B4 v1 (Metrica-trained, no broadcast truth): {n} imputed samples over "
-                f"{len(ghosts)} frames")
+        note = (f"frozen B4 v1: {n} ghosts / {len(ghosts)} frames, "
+                f"{100 * n_gap / max(n, 1):.0f}% live-track occlusions")
         return ghosts, note
 
     def ghosts_at(self, frame: int) -> list[Ghost]:
@@ -714,10 +742,13 @@ def draw_board(td: md.TopDown, marks: list[Mark], ghosts: list[Ghost], st: md.Fr
 
 LEGEND = (
     ("obs", "OBSERVED", "detected + projected this frame"),
-    ("imp", "IMPUTED", "frozen B4 v1: 50% / 90% region"),
+    ("imp", "IMPUTED", "model region: NOMINAL 50% / 90%"),
     ("abs", "ABSTAINED", "model declined; last-seen ghost"),
     ("ball", "BALL", "solid = detected, ring = carried"),
 )
+# Drawn under the key, in amber, on every frame: the region is nominal, the coverage is measured.
+COVERAGE_WARN = (f"regions NOT calibrated here: measured {PICP50_MEASURED:.1f}% / "
+                 f"{PICP90_MEASURED:.1f}% coverage")
 
 
 def draw_legend(canvas: np.ndarray, x: int, y: int, w: int, note: str) -> None:
@@ -740,6 +771,8 @@ def draw_legend(canvas: np.ndarray, x: int, y: int, w: int, note: str) -> None:
             cv2.circle(canvas, (cx, cy - 4), 6, C_WHITE, -1, cv2.LINE_AA)
         md.text(canvas, name, (x + 52, cy), 0.5, C_WHITE, 1)
         md.text(canvas, desc, (x + 158, cy), 0.46, (205, 205, 215), 1)
+        if kind == "imp":
+            md.text(canvas, COVERAGE_WARN, (x + 158, cy + 15), 0.42, C_AMBER, 1)
     md.text(canvas, note[:64], (x + 14, y + 168), 0.42, (185, 190, 210), 1)
 
 
@@ -812,8 +845,13 @@ def compose(frame: np.ndarray, st: md.FrameState | None, pas: Passage, td: md.To
     draw_legend(canvas, px_, py_ + td.h + 26, td.w, pas.impute_note)
     md.text(canvas, "Names shown only where >= 3 close-up reads agree; otherwise the role band.",
             (px_, py_ + td.h + 224), 0.46, (185, 190, 210), 1)
-    md.text(canvas, "Imputed positions have no broadcast ground truth (smell test only).",
-            (px_, py_ + td.h + 250), 0.46, (185, 190, 210), 1)
+    md.text(canvas, "Regions are the model's NOMINAL 50/90%. MEASURED on our broadcast:",
+            (px_, py_ + td.h + 250), 0.46, C_AMBER, 1)
+    md.text(canvas, f"{PICP50_MEASURED:.1f}% / {PICP90_MEASURED:.1f}% over {PICP_N} "
+            f"re-appearances ({PICP_SOURCE}) -- not calibrated.",
+            (px_, py_ + td.h + 274), 0.46, C_AMBER, 1)
+    md.text(canvas, "See results/FULL_MATCH_RECONSTRUCTION.md.",
+            (px_, py_ + td.h + 298), 0.46, (185, 190, 210), 1)
     return canvas
 
 
@@ -1110,6 +1148,10 @@ def _self_check() -> None:
     assert Quality(players=20, **ok).refusal() is None
     # frozen conformal tables: 90% regions must be wider than 50% in every bucket, both sources.
     assert (K90_V1 > K50_V1).all() and (K90_ANC > K50_ANC).all()
+    # honesty: nothing drawn may be called "calibrated", and the measured coverage must be on screen
+    key = " ".join(d for _, _, d in LEGEND) + " " + COVERAGE_WARN
+    assert "calibrated" not in key.replace("NOT calibrated", ""), key
+    assert f"{PICP50_MEASURED:.1f}%" in COVERAGE_WARN and f"{PICP90_MEASURED:.1f}%" in COVERAGE_WARN
     assert LOW_BLOCK_MAX_M < HIGH_BLOCK_MIN_M
     # --auto must show variety, not four copies of the same situation type.
     sl = pd.DataFrame([
