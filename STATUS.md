@@ -1,6 +1,52 @@
 # STATUS
 
-**Last updated:** 2026-07-25 (B4 COMPLETE through M3: v1 gated, transfer-validated; 56.6 GB reclaimed)
+**Last updated:** 2026-07-27 (RETRACTION: the 50/90% regions are not calibrated on real broadcast)
+
+## 2026-07-27 — RETRACTION: "calibrated predictive regions" does not hold on our own footage
+
+**What was claimed:** the B4 imputation model emits 50%/90% predictive regions that are calibrated
+(passed 6/6 buckets on Metrica). This was treated as one of the project's genuine contributions and
+was printed on every frame of the tactical-clip demo.
+
+**What is true:** on real broadcast the regions cover **21.2%** where they promise 50% and **55.4%**
+where they promise 90%. Measured against **4,900 liveness-guarded re-appearances across four
+matches**; **14/14 testable buckets fail at both levels**, spread only 1.4 / 6.4 points between
+matches. Not a one-match artifact.
+
+**How it was found — the method is itself the contribution.** When an occluded player walks back
+into frame, his re-appearance position is a MEASURED answer to the prediction just made. That is
+free ground truth on real footage, and it is the first calibration check of an imputation model
+outside simulation in this literature — DeepMind's Graph Imputer, Choi 2026 and our own B4 are all
+simulator-only. Simulation flatters the model.
+
+**Diagnosis, including what does NOT explain it:** a measured observation-noise floor
+(pooled sigma 0.541 m/axis, n=240,611) is real but insufficient — widening by it recovers the 50%
+level (55.0%) and leaves the 90% still 20 points short (70.4%) — and sigma varies 2.2x across
+matches while coverage does not move with it. Selection bias is real (re-appearing players move
+2-3x less than a Metrica occlusion at the same horizon) and the failure survives it: a
+displacement-matched Metrica subset still covers 52-59 / 92-95.
+
+**Honest limit of the method:** the tracker's association buffer caps guarded gaps at ~10.8 s, so
+occlusions beyond 10 s are UNTESTABLE on this footage. Four extra matches added zero evidence there.
+
+**Corrected claim (replaces the retracted one):** *the regions are conformally calibrated on Metrica
+simulated censoring, where they pass 6/6; on real broadcast they are NOT calibrated, covering 21.2%
+against a nominal 50% and 55.4% against a nominal 90%.*
+
+**Fixed same day:** the demo legend now states the measured numbers, and a self-check asserts no
+on-screen string can say "calibrated" without "NOT". A root-cause defect shipped with it — the
+renderer only ghosted tracks after their FINAL sighting, so it had only ever drawn dead fragments;
+with the fix, live-track occlusions went 0% -> 56% on the flagship passage. Grep confirms the demo
+was the only place the project asserted broadcast calibration.
+
+**Also this session:** faces closed by measurement (0 of 1095 carrier moments clear 50 px; median
+face 9.9 px against a geometric ceiling of 16.8 px — the pixels are not there); cross-match gallery
+lifts reachability 0.719 -> 0.800 but produces zero discordant predictions, so the gain is wiser
+abstention, not better sight; StatsBomb 360 has no truth behind its censoring and cannot validate
+anything, but its 1.3M visible-area polygons disagree with our footprint across the pitch
+(55-59 m tapered vs our flat 68 m) and should replace it before any bias table; and the scope was
+restored to team-level geometric tactics after the unit-of-analysis correction — describing one
+match (unit = frame) is a far lower bar than discriminating between teams (unit = match).
 
 ## 2026-07-25 — B4 model shipped and transfer-validated; supervisor gates settled
 
