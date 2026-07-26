@@ -452,8 +452,8 @@
       "statement": "B4 v1 gate-2 PASSES calibration coverage 6/6 buckets at both 50% and 90% nominal (PICP 45.5-50.9 / 89.2-90.6); the pre-declared ACI remedy was not needed.",
       "value": null, "unit": null, "status": "confirmed",
       "evidence": ["results/B4_MODEL_V1.md#3. Gate 2"],
-      "method": "per-sample quantile widths, per-bucket split conformal, 1-minute block bootstrap CIs", "n": 644792,
-      "caveats": [], "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["b4-002"], "tags": ["imputation"]
+      "method": "per-sample quantile widths, per-bucket split conformal, 1-minute block bootstrap CIs, Metrica Game 2 simulated censoring", "n": 644792,
+      "caveats": ["Scope: Metrica simulated censoring only. Do not read this as calibration on real broadcast footage -- on real broadcast the same frozen regions FAIL 14/14 testable buckets (b4-014, b4-015; results/CALIBRATION_REPLICATION.md)."], "date": "2026-07-24", "supersedes": [], "superseded_by": [], "depends_on": ["b4-002"], "tags": ["imputation"]
     },
     {
       "id": "b4-006",
@@ -811,6 +811,127 @@
       "evidence": ["results/PAIR_ANALYSIS_v1.md#Task 4"],
       "method": "pooled venue main-effect estimate (manager-balanced), corrected team mapping", "n": 12,
       "caveats": [], "date": "2026-07-26", "supersedes": [], "superseded_by": [], "depends_on": ["teammap-001", "teammap-002"], "tags": ["identity"]
+    },
+
+    {
+      "id": "b4-014",
+      "statement": "RETRACTED assumption: that B4 v1's Metrica-calibrated 50%/90% predictive regions (b4-003) generalise to real broadcast footage. This was asserted in prose and printed on every frame of the tactical-clip demo (`tools/tactical_clip.py`) without ever being independently checked against broadcast ground truth.",
+      "value": null, "unit": null, "status": "retracted",
+      "evidence": ["STATUS.md#2026-07-27", "results/FULL_MATCH_RECONSTRUCTION.md#2.4"],
+      "method": "the claim was never a measured result -- it was an unverified extrapolation from the Metrica gate-2 pass (b4-003)", "n": null,
+      "caveats": ["The Metrica-only calibration claim (b4-003) is NOT retracted and remains true; only its extension to broadcast is wrong"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": ["b4-015"], "depends_on": ["b4-003"], "tags": ["imputation", "retraction"]
+    },
+    {
+      "id": "b4-015",
+      "statement": "On real broadcast footage the frozen B4 v1 (P2 policy) predictive regions cover 21.2% where they promise 50% and 55.4% where they promise 90%, pooled over 4900 liveness-guarded re-appearances across 4 matches (tottenham_manutd 20.5/55.3 n=1259; manutd_liverpool 21.9/57.8 n=791; manutd_brighton 21.6/56.3 n=2033; liverpool_manutd 20.7/51.4 n=817); 14 of 14 testable buckets fail at both levels.",
+      "value": 21.2, "unit": "pct PICP50 (pooled; PICP90 55.4)", "status": "confirmed",
+      "evidence": ["results/CALIBRATION_REPLICATION.md#1. Per-match summary", "results/FULL_MATCH_RECONSTRUCTION.md#2.4", "STATUS.md#2026-07-27"],
+      "method": "liveness-guarded within-track re-appearance test (>=4 gated players alive on every gap frame), frozen P2 emit policy, no re-conformalisation, replicated on 4 independent matches", "n": 4900,
+      "caveats": ["Spread across matches is tight: 1.4 points at 50%, 6.4 points at 90% -- not a fixture artefact", "10-30s bucket carries 5 events across 4 matches, 30s+ carries none (see b4-018)"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["b4-014", "b4-007"], "tags": ["imputation", "retraction", "negative-result"]
+    },
+    {
+      "id": "b4-016",
+      "statement": "The pooled observation-noise floor on our own projected broadcast positions (sigma = 0.541 m/axis, 0.765 m radial, n=240611 midpoint triples) is necessary but insufficient to explain the calibration failure: widening the frozen regions in quadrature by it recovers the 50% level (55.0%) but leaves the 90% level 20 points short (70.4%); sigma varies 2.2x across matches (0.278-0.614 m) while coverage does not track it.",
+      "value": 0.541, "unit": "m/axis sigma", "status": "confirmed",
+      "evidence": ["results/CALIBRATION_REPLICATION.md#4. The observation-noise floor"],
+      "method": "midpoint-triple deviation (cancels constant-velocity motion) on consecutive-sighting triples, pooled across 4 matches", "n": 240611,
+      "caveats": ["manutd_liverpool has half the noise of manutd_brighton (0.278 vs 0.614 m) yet near-identical coverage -- noise level does not predict coverage"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["b4-015"], "tags": ["imputation", "negative-result"]
+    },
+    {
+      "id": "b4-017",
+      "statement": "Selection bias is real (re-appearing players displace 2-3x less than a Metrica occlusion at the same horizon, because ByteTrack only re-associates a track that came back near where it left) but does NOT explain the calibration failure: on the displacement-matched Metrica subset (same short movements) the frozen regions still cover 52-59% / 92-95%, while our comparably-easy broadcast events cover only 17-41% / 51-87%.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/CALIBRATION_REPLICATION.md#5. Selection-bias check", "results/FULL_MATCH_RECONSTRUCTION.md#2.5"],
+      "method": "displacement-matched comparison against the Metrica holdout re-scored on only same-displacement samples, per match", "n": null,
+      "caveats": ["This also means the RMSE tie with hold-last in the accuracy tables is a property of the biased test sample, not a measured property of the point model"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["b4-015"], "tags": ["imputation", "negative-result"]
+    },
+    {
+      "id": "b4-018",
+      "statement": "Method limit: ByteTrack's association buffer caps liveness-guarded within-track occlusion gaps at ~10.8 s, so occlusions beyond 10 s are UNTESTABLE on this footage; the 10-30s bucket carries 5 events across 4 matches and 30s+ carries none -- exactly the horizons where B4 v1's entire published Metrica advantage (-5.17 m at 10-30s, -3.92 m at 30s+) lives. This is a structural ceiling of the tracker, not a sampling accident, and does not improve with more matches on this footage.",
+      "value": 10.8, "unit": "s (max liveness-guarded gap observed)", "status": "confirmed",
+      "evidence": ["results/CALIBRATION_REPLICATION.md#2. Census by duration bucket", "results/FULL_MATCH_RECONSTRUCTION.md#2.1", "results/FULL_MATCH_RECONSTRUCTION.md#2.2"],
+      "method": "census of liveness-guarded within-track gap durations across 4 matches", "n": null,
+      "caveats": ["Four extra matches multiplied 0-3s evidence by four and added nothing at 10-30s/30s+; quadrupling the corpus again would not change that -- only an identity layer would"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["b4-015"], "tags": ["imputation", "methodology", "negative-result"]
+    },
+    {
+      "id": "b4-019",
+      "statement": "Re-appearance as free ground truth is a positive methodological contribution: it is the first calibration check of an off-screen player-imputation model on REAL broadcast footage in this literature. DeepMind's Graph Imputer, Choi (arXiv:2607.11548, 2026) and our own frozen B4 v1 gate are all calibrated and evaluated on simulated censoring only.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["STATUS.md#2026-07-27", "results/CALIBRATION_REPLICATION.md", "results/PAPER_READ_SCOOP_CHECK.md#0. VERDICT ON RQ-D"],
+      "method": "literature comparison of calibration-validation methodology against the two closest incumbent papers", "n": null,
+      "caveats": ["The method is a genuine contribution even though the finding it produced is a retraction -- it is the instrument, not this particular verdict, that is novel"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["b4-012", "b4-013", "b4-015"], "tags": ["imputation", "methodology", "scoop"]
+    },
+    {
+      "id": "b4-020",
+      "statement": "`tools/tactical_clip.py` asserted the false 'calibrated' claim on every rendered frame; fixed same day: the legend now reads 'model region: NOMINAL 50%/90%' with the measured coverage printed alongside, and a `--self-check` asserts no on-screen string can say 'calibrated' without 'NOT'. A second, root-cause defect shipped alongside it: `imputation_b4_external.load_ours` ghosted a track only after its FINAL sighting, so the uncertainty panel could only ever draw dead re-identification fragments and never a genuinely occluded live player; `full_match_reconstruction.fill_internal_gaps` fixed the assembly layer and took live-track occlusions from 0% to 56% of the ghost population on the flagship passage.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/CALIBRATION_REPLICATION.md#8. Demo honesty fix", "results/FULL_MATCH_RECONSTRUCTION.md#1.1"],
+      "method": "code fix + re-render, verified by grep that the demo was the only place the project asserted broadcast calibration", "n": null,
+      "caveats": ["Re-rendered: results/tactical_clips/tottenham_manutd_h1_0343s.mp4 (+ _sheet.png)"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["b4-015"], "tags": ["imputation", "methodology"]
+    },
+
+    {
+      "id": "face-001",
+      "statement": "Faces are physically dead for carrier-moment attribution: 0 of 1095 resolvable carrier moments (three labelled matches) clear the ~50 px face-recognition bar. Median face height is 9.9 px against a geometric ceiling of 16.8 px (the tallest carrier in the sample). A real Haar detector finds 17/1093 (1.6%) detections, none at >= 50 px.",
+      "value": 0.0, "unit": "fraction of carrier moments clearing 50 px", "status": "confirmed",
+      "evidence": ["results/CROSS_MATCH_GALLERY.md#Experiment 2 -- face feasibility, measured"],
+      "method": "geometric head/face-height derivation from estimate_player_box (head=1/8 standing height, face=1/9) plus OpenCV Haar cascade detection, 3x upscaled crops", "n": 1095,
+      "caveats": ["Haar is a weak detector and understates detection, but the geometric ceiling (16.8 px, detector-independent) is what the verdict rests on", "Every Haar detection above ~17 px is necessarily a false positive on kit texture or turf"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["identity", "negative-result"]
+    },
+    {
+      "id": "face-002",
+      "statement": "Even on close-up crops (where jersey numbers are read), number-read failures with a usable (>= 50 px) face are only 20 of 3062 (0.65%); the same chunk's jersey reader already produces 508 anchors. Faces would add well under 5% to the anchor supply in exchange for building a face-recognition system and a reference-face database this project does not have. Do not build face recognition.",
+      "value": 20, "unit": "of 3062 failed close-up reads with a usable face", "status": "confirmed",
+      "evidence": ["results/CROSS_MATCH_GALLERY.md#On close-up crops (where jersey numbers are read)"],
+      "method": "row-aligned join of closeup_reads.csv jersey-read outcomes against Haar face detection on the same 3570 crops (brighton_manutd h1_chunk_000)", "n": 3062,
+      "caveats": ["One match/chunk only; multiplied qualitatively, not quantitatively, to the corpus"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["face-001"], "tags": ["identity", "negative-result"]
+    },
+
+    {
+      "id": "gallery-001",
+      "statement": "A cross-match, kit-conditioned pooled gallery lifts REACHABILITY from 0.719 to 0.800 and held-out END-TO-END from 0.400 to 0.522 at unchanged coverage (14.1% of passes) -- but on the 21 held-out moments where both the per-match and pooled galleries assigned a name, the predictions are IDENTICAL (0 discordant pairs, McNemar). The entire gain is 6 moments where the assign/abstain decision flipped, all in the right direction; the dev split shows the opposite sign (0.333 -> 0.312). The gain is wiser abstention, not better identification -- claim no precision gain.",
+      "value": 0.8, "unit": "reachability, pooled_kit (fully pooled)", "status": "confirmed",
+      "evidence": ["results/CROSS_MATCH_GALLERY.md#Verdict first", "results/CROSS_MATCH_GALLERY.md#What actually changed, moment by moment"],
+      "method": "leave-one-track-out pooled PRTreID gallery (club, player) keyed across 9 registry matches, scored at the frozen v1 operating point (min_sim 0.88, min_margin 0.01), paired McNemar analysis on shared held-out moments", "n": 6,
+      "caveats": ["Wilson 95% intervals on held-out end-to-end overlap almost completely (0.234-0.593 vs 0.330-0.708)", "Dev-only re-tuning of the threshold did not transfer (held-out 0.522 -> 0.438)", "Per-player attribution remains not defensible at useful coverage: 0.522 held-out means about half of named passes are wrong"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["ident-008"], "tags": ["identity", "methodology", "negative-result"]
+    },
+    {
+      "id": "naming-001",
+      "statement": "The identity-naming pipeline systematically fails on goalkeepers and centre-backs: Matthijs de Ligt, Andre Onana, Virgil van Dijk and Guglielmo Vicario are named ZERO times across all 1664 named tracks in the entire 9-match corpus, despite being among the highest-volume passers in their matches (26-73 passes each). Goalkeepers are barely tracked at all: 1105 goalkeeper rows against 122732 player rows in one match, because a ball-following broadcast camera rarely frames them. Nine-match cross-match pooling (gallery-001) did not name Onana once -- this is a naming-pipeline defect, not a data-volume defect.",
+      "value": 0, "unit": "times named (4 highest-volume-passer players)", "status": "confirmed",
+      "evidence": ["results/CROSS_MATCH_GALLERY.md#The passing volume that is still unreachable", "results/CROSS_MATCH_GALLERY.md#Verdict on the closure"],
+      "method": "per-player named-track census across the 9-match pooled gallery corpus, cross-checked against Sofascore totalPass oracle", "n": 1664,
+      "caveats": ["The one untried lever is pre-match/warm-up footage with name captions, which the project already owns and has never processed for this purpose"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["gallery-001"], "tags": ["identity", "negative-result"]
+    },
+
+    {
+      "id": "sb-001",
+      "statement": "StatsBomb 360 freeze frames carry no ground truth behind their own censoring: freeze-frame points carry only location plus teammate/actor/keeper flags (only 6.05-6.73% of points -- the actor -- carry a recoverable identity), and there is no location, identity, or even a missing-player flag for anyone not visible. It is a second censored sample of the same broadcast-limited process, not a validation set.",
+      "value": null, "unit": null, "status": "confirmed",
+      "evidence": ["results/STATSBOMB_OPEN_AUDIT.md#2. What a 360 freeze frame actually contains (measured)", "results/STATSBOMB_OPEN_AUDIT.md#(c) Is there any ground truth for the players who are not visible?"],
+      "method": "direct measurement of the freeze_frame schema on 2 fully-measured matches (102402 entries) plus 4 more sampled for visible-count statistics", "n": null,
+      "caveats": ["Both keepers never appear together in any of the 6 measured matches; all 22 players appear together in 1 frame of 18859 measured"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": [], "tags": ["methodology", "negative-result"]
+    },
+    {
+      "id": "sb-002",
+      "statement": "StatsBomb 360's visible-area polygons (426 matches, ~1.3M frames) agree with our simulator's along-pitch censoring window (33.5-35.4 m measured vs our tuned 33.8 m half-width) but disagree on the cross-pitch axis: the real, de-rotated polygons taper to 55-59 m of pitch width, against our flat, full-width 68 m rectangle. This disagreement should be resolved before any bias table is computed from the current rectangular censoring operator.",
+      "value": 57, "unit": "m tapered visible width (range 55-59, vs our flat 68 m)", "status": "confirmed",
+      "evidence": ["results/STATSBOMB_OPEN_AUDIT.md#2.4 The visible-area polygon, quantified", "results/STATSBOMB_OPEN_AUDIT.md#5. Verdict"],
+      "method": "de-rotated visible_area polygon measurement (2 matches deep, x-span at pitch centre and y-extent) compared against synthesizer.imputation.visibility_mask's fitted rectangle", "n": 2,
+      "caveats": ["The along-pitch axis was fitted to hit 11.8 visible players on Metrica and had nothing to do with StatsBomb -- the agreement there is an independent check, not a shared fit"],
+      "date": "2026-07-27", "supersedes": [], "superseded_by": [], "depends_on": ["sb-001"], "tags": ["methodology", "negative-result"]
     }
   ]
 }
