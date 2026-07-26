@@ -32,6 +32,7 @@ import argparse
 import json
 import time
 import warnings
+from collections.abc import Sequence
 
 import numpy as np
 
@@ -305,7 +306,7 @@ def inside_quad(pos: np.ndarray, quad: np.ndarray) -> np.ndarray:
 # --------------------------------------------------------------------------------------
 
 
-def load_ours(match_id: str, n_chunks: int) -> dict:
+def load_ours(match_id: str, n_chunks: int, chunks: Sequence[str] | None = None) -> dict:
     """Build a bundle from our own tracking parquets: tracks become slots, gaps become hidden.
 
     There is no truth off camera, so a dead track is followed for :data:`MAX_GHOST_S` with a
@@ -315,10 +316,14 @@ def load_ours(match_id: str, n_chunks: int) -> dict:
     Args:
         match_id: Registry match id.
         n_chunks: How many chunks to use (each ~10 minutes of broadcast).
+        chunks: Explicit chunk keys to load; overrides ``n_chunks`` when given (used by
+            ``tools.tactical_clip`` to build a bundle for one passage's chunk only).
 
     Returns:
         Bundle dict with the usual fields plus an ``edge`` field marking the samples whose last
-        sighting sat near the image border (a genuine frame exit, not a tracker drop).
+        sighting sat near the image border (a genuine frame exit, not a tracker drop), and the
+        bookkeeping that maps slots back to source tracks: ``slot_track``
+        (``{period: {slot: track_id}}``) and ``frame_map`` (``{period: (offset, f0, step)}``).
     """
     import pandas as pd  # noqa: PLC0415
 
@@ -330,7 +335,7 @@ def load_ours(match_id: str, n_chunks: int) -> dict:
         (df["calib_error_m"] <= 1.0) & df["pitch_x"].notna() & df["pitch_y"].notna()
         & df["team"].isin([0, 1]) & df["role"].isin(["player", "goalkeeper"])
     ]
-    chunks = sorted(df["chunk"].unique())[:n_chunks]
+    chunks = list(chunks) if chunks is not None else sorted(df["chunk"].unique())[:n_chunks]
     img_w = float(df["image_x"].max())
     balls = dict(m.ball_chunks())
     parts = []
@@ -355,6 +360,8 @@ def load_ours(match_id: str, n_chunks: int) -> dict:
     period = np.zeros(n_tot, dtype=int)
     n_tracks = 0
     off = 0
+    slot_track: dict[int, dict[int, int]] = {}
+    frame_map: dict[int, tuple[int, int, int]] = {}
     for ci, (chunk, d, step, fps, team_of) in enumerate(parts):
         f0 = int(d["frame"].min())
         n = int((d["frame"].max() - f0) // step) + 1
@@ -363,6 +370,8 @@ def load_ours(match_id: str, n_chunks: int) -> dict:
             for k, t in enumerate(sorted(team_of[team_of == side].index)):
                 slot[int(t)] = base + k
         n_tracks += len(slot)
+        slot_track[ci + 1] = {int(s): int(t) for t, s in slot.items()}
+        frame_map[ci + 1] = (off, int(d["frame"].min()), int(step))
         rows = d[["frame", "track_id", "pitch_x", "pitch_y", "image_x"]].to_numpy()
         fi = off + ((rows[:, 0] - f0) // step).astype(int)
         si = np.array([slot[int(t)] for t in rows[:, 1]])
@@ -390,6 +399,8 @@ def load_ours(match_id: str, n_chunks: int) -> dict:
         "cam": smooth_camera(ball, fps),
         "vel": estimate_velocity(np.where(visible[:, :, None], truth, np.nan), period, fps),
         "edge": edge,
+        "slot_track": slot_track,
+        "frame_map": frame_map,
         "label": f"{match_id} ({len(chunks)} chunks, {n_tracks} tracks >= {MIN_TRACK_S:.0f}s)",
     }
 
