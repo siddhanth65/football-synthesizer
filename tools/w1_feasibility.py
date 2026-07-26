@@ -197,6 +197,32 @@ def window_stats(frame: int, lost_team: int, ball_frames: set[int],
     }
 
 
+def chunk_inputs(pos_chunk: pd.DataFrame,
+                 ball: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame] | None:
+    """Shared chunk preparation: trusted-geometry players, possession track, turnovers.
+
+    This is the single definition of "what a turnover is" for every W1 census (the 5 s one below
+    and the 2 s re-run in :mod:`tools.w1b_window_sampling`), so the two cannot silently drift apart.
+
+    Args:
+        pos_chunk: this chunk's rows of ``match_aligned.parquet`` (all roles, unfiltered).
+        ball: this chunk's post-``link_ball`` track (``frame, x, y, observed``) in pitch metres.
+
+    Returns:
+        ``(players, possession, turnovers)`` or ``None`` when the chunk yields no turnover.
+    """
+    if ball.empty:
+        return None
+    ok = (pos_chunk["calib_error_m"] <= CALIB_ERROR_MAX_M) & pos_chunk["pitch_x"].notna()
+    calib = pos_chunk[ok]
+    players = calib[calib["role"].isin(["player", "goalkeeper"])]
+    if players.empty:
+        return None
+    poss = assign_possession(ball, players, smooth=True)
+    turnovers = detect_turnovers(poss, ball)
+    return None if turnovers.empty else (players, poss, turnovers)
+
+
 def chunk_census(pos_chunk: pd.DataFrame, ball: pd.DataFrame, fps: float) -> list[dict]:
     """Turnover-window diagnostics for one chunk (empty list when the chunk is unusable).
 
@@ -208,18 +234,10 @@ def chunk_census(pos_chunk: pd.DataFrame, ball: pd.DataFrame, fps: float) -> lis
     Returns:
         One :func:`window_stats` dict per detected turnover.
     """
-    if ball.empty:
+    prepared = chunk_inputs(pos_chunk, ball)
+    if prepared is None:
         return []
-    ok = (pos_chunk["calib_error_m"] <= CALIB_ERROR_MAX_M) & pos_chunk["pitch_x"].notna()
-    calib = pos_chunk[ok]
-    players = calib[calib["role"].isin(["player", "goalkeeper"])]
-    if players.empty:
-        return []
-
-    poss = assign_possession(ball, players, smooth=True)
-    turnovers = detect_turnovers(poss, ball)
-    if turnovers.empty:
-        return []
+    players, _poss, turnovers = prepared
 
     frames = np.sort(ball["frame"].astype(int).unique())
     stride = max(int(np.median(np.diff(frames))) if frames.size > 1 else 1, 1)
