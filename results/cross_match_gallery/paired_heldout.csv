@@ -1,0 +1,6 @@
+mode,n_both_assigned,base_correct,alt_correct,alt_right_base_wrong,base_right_alt_wrong,discordant,heldout_e2e,heldout_n,wilson95
+pooled,19.0,9.0,9.0,0.0,0.0,0.0,,,
+pooled_kit,21.0,10.0,10.0,0.0,0.0,0.0,,,
+per_match,,,,,,,0.4,25.0,"(0.234, 0.593)"
+pooled,,,,,,,0.476,21.0,"(0.283, 0.676)"
+pooled_kit,,,,,,,0.522,23.0,"(0.33, 0.708)"

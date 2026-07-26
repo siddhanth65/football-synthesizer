@@ -1,0 +1,36 @@
+club,player,n_matches,n_crops,within_match,cross_match,cross_same_kit,cross_diff_kit
+Brighton,Danny Welbeck,2,102,0.758,0.7349,,0.7349
+Brighton,Jan Paul van Hecke,2,36,0.7896,0.706,,0.706
+Brighton,Joël Veltman,2,168,0.8412,0.7961,,0.7961
+Brighton,Kaoru Mitoma,2,127,0.8847,0.7967,,0.7967
+Brighton,Lewis Dunk,2,65,0.8079,0.826,,0.826
+Brighton,Yankuba Minteh,2,42,0.7999,0.786,,0.786
+Liverpool,Alexis Mac Allister,2,197,0.777,0.4463,,0.4463
+Liverpool,Andy Robertson,2,206,0.8065,0.425,,0.425
+Liverpool,Darwin Núñez,2,10,0.6527,0.4515,,0.4515
+Liverpool,Diogo Jota,2,133,0.8248,0.4595,,0.4595
+Liverpool,Ibrahima Konaté,2,128,0.793,0.4592,,0.4592
+Liverpool,Luis Díaz,2,93,0.7387,0.5271,,0.5271
+Liverpool,Ryan Gravenberch,2,222,0.8103,0.4413,,0.4413
+Man Utd,Alejandro Garnacho,8,384,0.7555,0.6429,0.6495,0.6386
+Man Utd,Amad Diallo,7,574,0.7625,0.6074,0.6805,0.5714
+Man Utd,Bruno Fernandes,9,887,0.7769,0.6287,0.6168,0.6373
+Man Utd,Casemiro,3,89,0.7265,0.6416,0.712,0.5946
+Man Utd,Christian Eriksen,4,54,0.7407,0.5966,0.5966,
+Man Utd,Diogo Dalot,8,564,0.7894,0.6262,0.604,0.6436
+Man Utd,Harry Maguire,4,99,0.7295,0.6081,0.5999,0.6128
+Man Utd,Kobbie Mainoo,4,78,0.7187,0.5571,0.5203,0.5852
+Man Utd,Leny Yoro,3,96,0.7731,0.7055,0.7055,
+Man Utd,Lisandro Martínez,5,177,0.7869,0.6409,0.6908,0.5913
+Man Utd,Manuel Ugarte,5,250,0.7114,0.5955,0.6059,0.5812
+Man Utd,Marcus Rashford,3,78,0.7804,0.6874,0.7456,0.6707
+Man Utd,Mason Mount,2,18,0.7839,0.6849,,0.6849
+Man Utd,Noussair Mazraoui,9,511,0.7816,0.643,0.6539,0.6352
+Man Utd,Rasmus Højlund,3,64,0.7588,0.5552,0.5552,
+Tottenham,Brennan Johnson,2,123,0.8314,0.7631,,0.7631
+Tottenham,Dejan Kulusevski,2,441,0.7747,0.7072,,0.7072
+Tottenham,Djed Spence,2,171,0.7878,0.7763,,0.7763
+Tottenham,James Maddison,2,342,0.7733,0.7001,,0.7001
+Tottenham,Lucas Bergvall,2,78,0.7545,0.7168,,0.7168
+Tottenham,Pedro Porro,2,241,0.7869,0.739,,0.739
+Tottenham,Rodrigo Bentancur,2,227,0.8087,0.7579,,0.7579

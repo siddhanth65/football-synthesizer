@@ -1,0 +1,26 @@
+match,truth,pred,mode,config,point
+manutd_tottenham,Rodrigo Bentancur,Alejandro Garnacho,per_match,baseline,frozen_v1
+manutd_tottenham,Guglielmo Vicario,Pedro Porro,per_match,baseline,frozen_v1
+manutd_brighton,Toby Collyer,Diogo Dalot,per_match,baseline,frozen_v1
+manutd_brighton,Rasmus Højlund,Bruno Fernandes,per_match,baseline,frozen_v1
+manutd_tottenham,Rodrigo Bentancur,Alejandro Garnacho,per_match,all_hard,frozen_v1
+manutd_tottenham,Guglielmo Vicario,Pedro Porro,per_match,all_hard,frozen_v1
+manutd_brighton,André Onana,Yasin Ayari,per_match,all_hard,frozen_v1
+manutd_brighton,Toby Collyer,Diogo Dalot,per_match,all_hard,frozen_v1
+manutd_brighton,Rasmus Højlund,Bruno Fernandes,per_match,all_hard,frozen_v1
+manutd_tottenham,Rodrigo Bentancur,Alejandro Garnacho,pooled,baseline,frozen_v1
+manutd_tottenham,Guglielmo Vicario,Pedro Porro,pooled,baseline,frozen_v1
+manutd_tottenham,Dejan Kulusevski,Harry Maguire,pooled,baseline,dev_reselected
+manutd_brighton,Yankuba Minteh,Manuel Ugarte,pooled,baseline,dev_reselected
+manutd_tottenham,Rodrigo Bentancur,Alejandro Garnacho,pooled,all_hard,frozen_v1
+manutd_tottenham,Guglielmo Vicario,Pedro Porro,pooled,all_hard,frozen_v1
+manutd_tottenham,Dejan Kulusevski,Harry Maguire,pooled,all_hard,frozen_v1
+manutd_tottenham,Dejan Kulusevski,Harry Maguire,pooled,all_hard,dev_reselected
+manutd_brighton,Yankuba Minteh,Manuel Ugarte,pooled,all_hard,dev_reselected
+manutd_tottenham,Rodrigo Bentancur,Alejandro Garnacho,pooled_kit,baseline,frozen_v1
+manutd_tottenham,Guglielmo Vicario,Pedro Porro,pooled_kit,baseline,frozen_v1
+manutd_brighton,Yankuba Minteh,Manuel Ugarte,pooled_kit,baseline,dev_reselected
+manutd_tottenham,Rodrigo Bentancur,Alejandro Garnacho,pooled_kit,all_hard,frozen_v1
+manutd_tottenham,Guglielmo Vicario,Pedro Porro,pooled_kit,all_hard,frozen_v1
+manutd_brighton,André Onana,Yasin Ayari,pooled_kit,all_hard,frozen_v1
+manutd_brighton,Yankuba Minteh,Manuel Ugarte,pooled_kit,all_hard,dev_reselected
