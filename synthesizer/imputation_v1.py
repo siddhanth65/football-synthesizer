@@ -13,6 +13,8 @@ hyper-parameters and the single holdout run live in ``tools/imputation_b4_v1.py`
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import numpy as np
 from sklearn.ensemble import HistGradientBoostingRegressor
 
@@ -350,31 +352,50 @@ def sgr_threshold(
 def emit(
     samples: dict[str, np.ndarray],
     mu_world: np.ndarray,
+    anchor: np.ndarray,
     r90: np.ndarray,
     bucket: np.ndarray,
-    b_star: int | None,
+    skill_buckets: Sequence[int],
     r_max: float,
+    r90_anchor: np.ndarray | None = None,
 ) -> dict[str, np.ndarray]:
-    """Apply both abstention layers and emit positions with an explicit ``asserted`` flag.
+    """Apply the adopted abstention policy (P2) and label every emitted number by its source.
 
-    On abstain the emitted coordinate is the LAST-SEEN position, flagged ``asserted=False`` --
-    never a silent fallback to hold-last (plan 3.3).
+    Layer A is *defer-to-anchor*, not abstain (``results/B4_ABSTENTION_POLICY.md``): in horizon
+    buckets where v1 does not significantly beat the anchor on CALIB, the anchor's own prediction
+    is emitted and labelled ``source="anchor"``. Abstention is layer B alone -- a calibrated 90%
+    region wider than ``r_max``. On abstain the emitted coordinate is the LAST-SEEN position,
+    flagged ``asserted=False`` and ``source="abstained"`` -- never a silent fallback to hold-last
+    (plan 3.3). Downstream consumers must branch on ``source``, so no caller can mistake an
+    anchor-sourced number for a v1 one.
 
     Args:
         samples: Samples carrying ``hold`` (last-seen position).
         mu_world: v1 point prediction in world metres, shape ``(M, 2)``.
-        r90: Calibrated 90% region radius per sample (metres).
+        anchor: Anchor (B7) point prediction in world metres, shape ``(M, 2)``.
+        r90: Calibrated 90% region radius of the **v1** point per sample (metres).
         bucket: Horizon-bucket index per sample.
-        b_star: Skill horizon from :func:`skill_horizon` (``None`` = no bucket-level abstention).
-        r_max: Frozen SGR threshold.
+        skill_buckets: Bucket indices where v1 significantly beat the anchor on CALIB; every
+            other bucket defers to the anchor. Empty = defer everywhere.
+        r_max: Frozen SGR threshold (layer B), applied to the emitted point's own region.
+        r90_anchor: Region radius calibrated for the **anchor** point (its own CALIB conformal
+            multipliers). Required for correct coverage wherever the anchor is emitted: reusing
+            v1's multipliers there over-covers (0-1s PICP50 59.3% vs 52.4%). ``None`` reuses
+            ``r90``, which is conservative but off-nominal.
 
     Returns:
-        Dict with ``pos`` ``(M, 2)``, ``asserted`` ``(M,)`` bool and ``r90`` ``(M,)``.
+        Dict with ``pos`` ``(M, 2)``, ``asserted`` ``(M,)`` bool, ``source`` ``(M,)`` of
+        ``"v1" | "anchor" | "abstained"`` and ``r90`` ``(M,)`` -- the region of the point that was
+        actually emitted.
     """
-    ok = r90 <= r_max
-    if b_star is not None:
-        ok = ok & (bucket < b_star)
-    return {"pos": np.where(ok[:, None], mu_world, samples["hold"]), "asserted": ok, "r90": r90}
+    use_v1 = np.isin(bucket, np.asarray(list(skill_buckets), dtype=int))
+    r_emit = r90 if r90_anchor is None else np.where(use_v1, r90, r90_anchor)
+    ok = r_emit <= r_max
+    pos = np.where(ok[:, None], np.where(use_v1[:, None], mu_world, anchor), samples["hold"])
+    source = np.full(bucket.shape, "abstained", dtype="<U9")
+    source[ok & use_v1] = "v1"
+    source[ok & ~use_v1] = "anchor"
+    return {"pos": pos, "asserted": ok, "source": source, "r90": r_emit}
 
 
 # --------------------------------------------------------------------------------------

@@ -519,8 +519,8 @@ def main() -> None:
     _worst(err_v1, r90_ho, hold, out)
     _window_diag(hold, mu_ho, anc_ho, g2["cam"], half_w, out)
 
-    ems = emit(hold, mu_ho, r90_ho, bkt_ho, b_star, r_max)
-    a = ems["asserted"]
+    # Literal pre-registered rule (P0), kept for the correction trail: abstain at and beyond b*.
+    a = (r90_ho <= r_max) & (bkt_ho < (b_star if b_star is not None else len(BIN_LABELS)))
     out(f"\nEMITTED (pre-registered rule): {int(a.sum())} of {a.size} holdout positions asserted "
         f"({100 * a.mean():.1f}%); {int((~a).sum())} abstained -> emitted as last-seen, "
         f"asserted=False.")
@@ -528,6 +528,14 @@ def main() -> None:
         out(f"asserted-subset v1 RMSE {_rmse(err_v1[a]):.2f} m vs B7 on the same subset "
             f"{_rmse(err_b7[a]):.2f} m")
     sig = [b for b, r in enumerate(rows_a) if r.get("significant")]
+    # Adopted policy (P2, results/B4_ABSTENTION_POLICY.md): defer to the anchor outside `sig`,
+    # with the anchor's OWN conformal multipliers (CALIB only) for the deferred region.
+    k_anc = conformal_k(anc_ca - calib["target"], bkt_ca, w_ca, ALPHAS)
+    r90_anc = k_anc[bkt_ho, 1] * np.sqrt(w_ho[:, 0] * w_ho[:, 1])
+    ems = emit(hold, mu_ho, anc_ho, r90_ho, bkt_ho, sig, r_max, r90_anc)
+    out(f"ADOPTED POLICY (P2): sources v1 {int((ems['source'] == 'v1').sum())} / anchor "
+        f"{int((ems['source'] == 'anchor').sum())} / abstained "
+        f"{int((ems['source'] == 'abstained').sum())} of {ems['source'].size}.")
     keep = np.isin(bkt_ho, sig) & (r90_ho <= r_max)
     out("\nVARIANT (NOT pre-registered, reported for transparency): abstain only in buckets where")
     out(f"v1 was not significantly better on CALIB. Asserts {100 * keep.mean():.1f}% of holdout; "
