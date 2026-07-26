@@ -1,0 +1,8 @@
+{
+  "min_sim": 0.88,
+  "min_margin": 0.01,
+  "dev_match": "manutd_liverpool",
+  "dev_gallery_precision": 0.812,
+  "dev_gallery_retention": 0.567,
+  "rule": "FALLBACK (primary rule unmeasurable -- carrier tracks are ~1 pass long): max retention s.t. dev-match gallery-LOTO pseudo-truth precision >= 0.8 on >= 50 crops"
+}
