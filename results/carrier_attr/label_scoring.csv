@@ -1,0 +1,79 @@
+id,match,chunk,frame,carrier_dist_m,player_name,confidence_1to3,pred_player,best_sim,margin,assigned,wrong_box,correct,gallery_covered,dist_band
+000_manutd_liverpool_h1_chunk_002_f9620,manutd_liverpool,h1_chunk_002,9620,1.57,Ibrahima Konaté,3,Ibrahima Konaté,0.9577136039733887,0.016869723796844482,True,False,True,True,1-2m
+001_manutd_liverpool_h1_chunk_002_f10405,manutd_liverpool,h1_chunk_002,10405,2.5,Ibrahima Konaté,3,Diogo Jota,0.9112470746040344,0.011247217655181885,True,False,False,True,2-3m
+002_manutd_liverpool_h1_chunk_004_f5690,manutd_liverpool,h1_chunk_004,5690,0.22,Lisandro Martínez,3,Bruno Fernandes,0.8947088718414307,0.024282872676849365,True,False,False,True,0-1m
+003_manutd_liverpool_h1_chunk_004_f11995,manutd_liverpool,h1_chunk_004,11995,1.97,Mohamed Salah,1,,0.8977106213569641,0.004614889621734619,False,False,False,False,1-2m
+004_manutd_liverpool_h1_chunk_004_f11020,manutd_liverpool,h1_chunk_004,11020,1.0,Ibrahima Konaté,3,Ryan Gravenberch,0.9239959120750427,0.013020455837249756,True,False,False,True,1-2m
+005_manutd_liverpool_h1_chunk_000_f405,manutd_liverpool,h1_chunk_000,405,1.19,Bruno Fernandes,3,,0.8592792749404907,0.0045053958892822266,False,False,False,True,1-2m
+006_manutd_liverpool_h1_chunk_001_f3110,manutd_liverpool,h1_chunk_001,3110,2.43,Casemiro,3,Casemiro,0.9158233404159546,0.06432855129241943,True,False,True,True,2-3m
+007_manutd_liverpool_h1_chunk_001_f3225,manutd_liverpool,h1_chunk_001,3225,0.66,Casemiro,3,,0.8640145063400269,0.005820810794830322,False,False,False,True,0-1m
+008_manutd_liverpool_h1_chunk_004_f2280,manutd_liverpool,h1_chunk_004,2280,0.9,Kobbie Mainoo,3,,0.8633384704589844,0.007943272590637207,False,False,False,True,0-1m
+009_manutd_liverpool_h1_chunk_003_f11595,manutd_liverpool,h1_chunk_003,11595,0.26,André Onana,3,,0.849480926990509,0.012106359004974365,False,False,False,False,0-1m
+010_manutd_liverpool_h1_chunk_001_f3185,manutd_liverpool,h1_chunk_001,3185,1.05,Matthijs de Ligt,3,Alejandro Garnacho,0.9032282829284668,0.031489789485931396,True,False,False,False,1-2m
+011_manutd_liverpool_h1_chunk_001_f9030,manutd_liverpool,h1_chunk_001,9030,0.1,Noussair Mazraoui,3,Noussair Mazraoui,0.9110113978385925,0.04059487581253052,True,False,True,True,0-1m
+013_manutd_liverpool_h1_chunk_003_f3195,manutd_liverpool,h1_chunk_003,3195,0.86,Andy Robertson,3,Andy Robertson,0.9573383331298828,0.01016765832901001,True,False,True,True,0-1m
+014_manutd_liverpool_h1_chunk_001_f11760,manutd_liverpool,h1_chunk_001,11760,0.89,Andy Robertson,3,,0.9410297870635986,0.007716655731201172,False,False,False,True,0-1m
+015_manutd_liverpool_h2_chunk_003_f1580,manutd_liverpool,h2_chunk_003,1580,1.8,Andy Robertson,3,Dominik Szoboszlai,0.9129165410995483,0.018416881561279297,True,False,False,True,1-2m
+016_manutd_liverpool_h2_chunk_003_f3950,manutd_liverpool,h2_chunk_003,3950,1.36,Kobbie Mainoo,3,,0.8614110350608826,0.007511794567108154,False,False,False,True,1-2m
+017_manutd_liverpool_h2_chunk_003_f9950,manutd_liverpool,h2_chunk_003,9950,0.21,Noussair Mazraoui,3,Ryan Gravenberch,0.9009907245635986,0.015395164489746094,True,False,False,True,0-1m
+018_manutd_liverpool_h2_chunk_003_f10415,manutd_liverpool,h2_chunk_003,10415,2.05,WRONG_PLAYER_BOXED,3,,0.908920407295227,0.007936835289001465,False,True,False,False,2-3m
+019_manutd_liverpool_h2_chunk_003_f7900,manutd_liverpool,h2_chunk_003,7900,1.01,André Onana,3,,0.8420680165290833,0.01032024621963501,False,False,False,False,1-2m
+020_manutd_liverpool_h2_chunk_001_f10100,manutd_liverpool,h2_chunk_001,10100,1.33,Matthijs de Ligt,3,Bruno Fernandes,0.8993834853172302,0.020249545574188232,True,False,False,False,1-2m
+021_manutd_liverpool_h2_chunk_002_f10080,manutd_liverpool,h2_chunk_002,10080,0.96,Noussair Mazraoui,3,,0.8639185428619385,0.0012673139572143555,False,False,False,True,0-1m
+022_manutd_liverpool_h2_chunk_003_f8645,manutd_liverpool,h2_chunk_003,8645,0.69,André Onana,3,,0.8063572645187378,0.0005810260772705078,False,False,False,False,0-1m
+023_manutd_liverpool_h2_chunk_005_f2150,manutd_liverpool,h2_chunk_005,2150,1.14,Harry Maguire,3,Bruno Fernandes,0.8830652236938477,0.020772278308868408,True,False,False,False,1-2m
+024_manutd_liverpool_h2_chunk_003_f4640,manutd_liverpool,h2_chunk_003,4640,2.04,WRONG_PLAYER_BOXED,3,,0.876580536365509,0.008637607097625732,False,True,False,False,2-3m
+025_manutd_liverpool_h2_chunk_001_f320,manutd_liverpool,h2_chunk_001,320,1.34,Ibrahima Konaté,3,Ibrahima Konaté,0.9515225291252136,0.024500012397766113,True,False,True,True,1-2m
+026_manutd_liverpool_h2_chunk_000_f10955,manutd_liverpool,h2_chunk_000,10955,0.87,Diogo Dalot,3,,0.8686617612838745,0.0005667209625244141,False,False,False,True,0-1m
+027_manutd_liverpool_h2_chunk_002_f11370,manutd_liverpool,h2_chunk_002,11370,0.77,WRONG_PLAYER_BOXED,3,Lisandro Martínez,0.8916482925415039,0.014020264148712158,True,True,False,False,0-1m
+028_manutd_liverpool_h2_chunk_000_f14855,manutd_liverpool,h2_chunk_000,14855,0.52,Ryan Gravenberch,3,,0.9336451292037964,0.0016164779663085938,False,False,False,True,0-1m
+029_manutd_liverpool_h2_chunk_003_f4365,manutd_liverpool,h2_chunk_003,4365,1.64,Conor Bradley,2,Andy Robertson,0.9699442386627197,0.019460439682006836,True,False,False,False,1-2m
+030_manutd_tottenham_h1_chunk_001_f13835,manutd_tottenham,h1_chunk_001,13835,0.68,Cristian Romero,1,,0.9261655807495117,0.0004087090492248535,False,False,False,True,0-1m
+031_manutd_tottenham_h1_chunk_003_f7120,manutd_tottenham,h1_chunk_003,7120,2.81,WRONG_PLAYER_BOXED,3,Brennan Johnson,0.9229350090026855,0.012074053287506104,True,True,False,False,2-3m
+032_manutd_tottenham_h1_chunk_002_f12580,manutd_tottenham,h1_chunk_002,12580,0.77,Cristian Romero,3,,0.8988343477249146,0.004113554954528809,False,False,False,True,0-1m
+033_manutd_tottenham_h1_chunk_004_f1575,manutd_tottenham,h1_chunk_004,1575,1.8,WRONG_PLAYER_BOXED,3,,0.8794679641723633,0.023113012313842773,False,True,False,False,1-2m
+034_manutd_tottenham_h1_chunk_003_f8410,manutd_tottenham,h1_chunk_003,8410,0.69,Guglielmo Vicario,3,,0.4986254870891571,0.008343130350112915,False,False,False,False,0-1m
+035_manutd_tottenham_h1_chunk_004_f11825,manutd_tottenham,h1_chunk_004,11825,0.74,Rodrigo Bentancur,3,Alejandro Garnacho,0.908705472946167,0.023676633834838867,True,False,False,True,0-1m
+036_manutd_tottenham_h1_chunk_001_f6125,manutd_tottenham,h1_chunk_001,6125,2.03,WRONG_PLAYER_BOXED,3,Dejan Kulusevski,0.9421467185020447,0.023211777210235596,True,True,False,False,2-3m
+037_manutd_tottenham_h1_chunk_000_f9695,manutd_tottenham,h1_chunk_000,9695,2.12,WRONG_PLAYER_BOXED,3,Christian Eriksen,0.9226295948028564,0.03161299228668213,True,True,False,False,2-3m
+038_manutd_tottenham_h1_chunk_000_f640,manutd_tottenham,h1_chunk_000,640,1.02,Micky van de Ven,3,,0.9436923265457153,0.0033420920372009277,False,False,False,True,1-2m
+040_manutd_tottenham_h1_chunk_000_f1980,manutd_tottenham,h1_chunk_000,1980,0.88,Micky van de Ven,3,,0.9414957761764526,0.006818532943725586,False,False,False,True,0-1m
+046_manutd_tottenham_h2_chunk_004_f5840,manutd_tottenham,h2_chunk_004,5840,0.49,Noussair Mazraoui,3,Marcus Rashford,0.8868143558502197,0.04122340679168701,True,False,False,True,0-1m
+047_manutd_tottenham_h2_chunk_004_f3570,manutd_tottenham,h2_chunk_004,3570,1.08,Guglielmo Vicario,3,,0.5124710202217102,0.0003782510757446289,False,False,False,False,1-2m
+048_manutd_tottenham_h2_chunk_000_f3960,manutd_tottenham,h2_chunk_000,3960,1.71,WRONG_PLAYER_BOXED,3,Timo Werner,0.9193583726882935,0.010243594646453857,True,True,False,False,1-2m
+049_manutd_tottenham_h2_chunk_002_f4220,manutd_tottenham,h2_chunk_002,4220,0.53,Guglielmo Vicario,3,Pedro Porro,0.9013078212738037,0.011474967002868652,True,False,False,False,0-1m
+050_manutd_tottenham_h2_chunk_000_f4100,manutd_tottenham,h2_chunk_000,4100,0.48,Lisandro Martínez,3,,0.8647851347923279,0.0005723237991333008,False,False,False,True,0-1m
+051_manutd_tottenham_h2_chunk_000_f8055,manutd_tottenham,h2_chunk_000,8055,0.33,Micky van de Ven,3,,0.944085955619812,0.0037120580673217773,False,False,False,True,0-1m
+052_manutd_tottenham_h2_chunk_003_f11015,manutd_tottenham,h2_chunk_003,11015,1.5,WRONG_PLAYER_BOXED,3,Alejandro Garnacho,0.951851487159729,0.06115520000457764,True,True,False,False,1-2m
+053_manutd_tottenham_h2_chunk_001_f5440,manutd_tottenham,h2_chunk_001,5440,1.03,James Maddison,2,,0.9038482308387756,0.005089104175567627,False,False,False,True,1-2m
+055_manutd_tottenham_h2_chunk_002_f11140,manutd_tottenham,h2_chunk_002,11140,0.74,Marcus Rashford,3,Marcus Rashford,0.9315028190612793,0.041681885719299316,True,False,True,True,0-1m
+056_manutd_tottenham_h2_chunk_004_f3650,manutd_tottenham,h2_chunk_004,3650,0.77,Dejan Kulusevski,3,,0.9193168878555298,0.005577743053436279,False,False,False,True,0-1m
+057_manutd_tottenham_h2_chunk_004_f6645,manutd_tottenham,h2_chunk_004,6645,0.7,Alejandro Garnacho,3,Alejandro Garnacho,0.9087589979171753,0.025831520557403564,True,False,True,True,0-1m
+058_manutd_tottenham_h2_chunk_004_f150,manutd_tottenham,h2_chunk_004,150,0.78,Cristian Romero,3,Cristian Romero,0.9359701871871948,0.011873364448547363,True,False,True,True,0-1m
+059_manutd_tottenham_h2_chunk_004_f13820,manutd_tottenham,h2_chunk_004,13820,0.37,Cristian Romero,3,,0.9209579825401306,0.0045424699783325195,False,False,False,True,0-1m
+061_manutd_brighton_h1_chunk_001_f6000,manutd_brighton,h1_chunk_001,6000,1.25,Leny Yoro,3,,0.8941936492919922,0.0013191699981689453,False,False,False,True,1-2m
+062_manutd_brighton_h1_chunk_001_f495,manutd_brighton,h1_chunk_001,495,2.07,Leny Yoro,3,Amad Diallo,0.898650050163269,0.011132478713989258,True,False,False,True,2-3m
+063_manutd_brighton_h1_chunk_001_f12825,manutd_brighton,h1_chunk_001,12825,0.99,Leny Yoro,3,Noussair Mazraoui,0.883232831954956,0.03000330924987793,True,False,False,True,0-1m
+064_manutd_brighton_h1_chunk_001_f14070,manutd_brighton,h1_chunk_001,14070,0.7,WRONG_PLAYER_BOXED,3,Amad Diallo,0.8940026760101318,0.021687746047973633,True,True,False,False,0-1m
+066_manutd_brighton_h1_chunk_001_f9710,manutd_brighton,h1_chunk_001,9710,1.08,Manuel Ugarte,3,Bruno Fernandes,0.9212663769721985,0.027828633785247803,True,False,False,True,1-2m
+067_manutd_brighton_h1_chunk_001_f7630,manutd_brighton,h1_chunk_001,7630,2.83,WRONG_PLAYER_BOXED,3,Bruno Fernandes,0.9141666889190674,0.01021045446395874,True,True,False,False,2-3m
+068_manutd_brighton_h1_chunk_002_f14515,manutd_brighton,h1_chunk_002,14515,0.43,Manuel Ugarte,3,,0.8887410759925842,0.006734609603881836,False,False,False,True,0-1m
+069_manutd_brighton_h1_chunk_002_f5835,manutd_brighton,h1_chunk_002,5835,0.66,Yankuba Minteh,1,,0.9313967823982239,0.005143940448760986,False,False,False,True,0-1m
+070_manutd_brighton_h1_chunk_002_f6790,manutd_brighton,h1_chunk_002,6790,0.25,Carlos Baleba,3,Carlos Baleba,0.9094982147216797,0.013519227504730225,True,False,True,True,0-1m
+071_manutd_brighton_h1_chunk_003_f1625,manutd_brighton,h1_chunk_003,1625,2.22,Lewis Dunk,3,,0.9428154826164246,0.003425896167755127,False,False,False,True,2-3m
+072_manutd_brighton_h1_chunk_001_f13340,manutd_brighton,h1_chunk_001,13340,0.96,WRONG_PLAYER_BOXED,3,,0.9501000642776489,0.007792949676513672,False,True,False,False,0-1m
+073_manutd_brighton_h1_chunk_004_f2415,manutd_brighton,h1_chunk_004,2415,0.71,Lewis Dunk,3,,0.9469643235206604,0.00705265998840332,False,False,False,True,0-1m
+074_manutd_brighton_h1_chunk_000_f14010,manutd_brighton,h1_chunk_000,14010,1.87,Matthijs de Ligt,3,,0.8472775220870972,0.03346282243728638,False,False,False,False,1-2m
+075_manutd_brighton_h2_chunk_001_f10290,manutd_brighton,h2_chunk_001,10290,0.52,Manuel Ugarte,3,Manuel Ugarte,0.9134660363197327,0.01332157850265503,True,False,True,True,0-1m
+076_manutd_brighton_h2_chunk_005_f1015,manutd_brighton,h2_chunk_005,1015,0.64,André Onana,3,,0.8819580078125,0.003510713577270508,False,False,False,False,0-1m
+077_manutd_brighton_h2_chunk_001_f225,manutd_brighton,h2_chunk_001,225,0.76,Lewis Dunk,1,Lewis Dunk,0.9188389778137207,0.019327878952026367,True,False,True,True,0-1m
+078_manutd_brighton_h2_chunk_005_f250,manutd_brighton,h2_chunk_005,250,2.9,Bruno Fernandes,3,,0.9133871793746948,0.005230545997619629,False,False,False,True,2-3m
+079_manutd_brighton_h2_chunk_000_f5450,manutd_brighton,h2_chunk_000,5450,1.07,Lewis Dunk,3,Lewis Dunk,0.96434485912323,0.014375805854797363,True,False,True,True,1-2m
+081_manutd_brighton_h2_chunk_003_f1570,manutd_brighton,h2_chunk_003,1570,0.4,Toby Collyer,3,Diogo Dalot,0.8841859102249146,0.022999048233032227,True,False,False,False,0-1m
+082_manutd_brighton_h2_chunk_000_f6180,manutd_brighton,h2_chunk_000,6180,0.17,Jan Paul van Hecke,3,,0.9216005206108093,0.00889962911605835,False,False,False,True,0-1m
+083_manutd_brighton_h2_chunk_003_f13010,manutd_brighton,h2_chunk_003,13010,0.37,Harry Maguire,3,Manuel Ugarte,0.9345734119415283,0.0243719220161438,True,False,False,True,0-1m
+084_manutd_brighton_h2_chunk_002_f9710,manutd_brighton,h2_chunk_002,9710,0.83,Yasin Ayari,3,,0.9627270698547363,0.00886380672454834,False,False,False,True,0-1m
+085_manutd_brighton_h2_chunk_005_f3595,manutd_brighton,h2_chunk_005,3595,0.52,Joël Veltman,3,Joël Veltman,0.9482131600379944,0.04235970973968506,True,False,True,True,0-1m
+086_manutd_brighton_h2_chunk_005_f3885,manutd_brighton,h2_chunk_005,3885,0.64,Rasmus Højlund,3,Bruno Fernandes,0.9012631773948669,0.014859378337860107,True,False,False,False,0-1m
+087_manutd_brighton_h2_chunk_005_f3930,manutd_brighton,h2_chunk_005,3930,1.43,Bruno Fernandes,3,,0.9241045713424683,0.002934277057647705,False,False,False,True,1-2m
+089_manutd_brighton_h2_chunk_004_f410,manutd_brighton,h2_chunk_004,410,0.86,Carlos Baleba,3,Carlos Baleba,0.9475870132446289,0.023692786693572998,True,False,True,True,0-1m
