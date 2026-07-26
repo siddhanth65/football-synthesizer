@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Carrier labelling</title>
+<style>
+:root { --bg:#14171c; --panel:#1d222a; --line:#2c333e; --fg:#e8edf4; --dim:#8b95a4;
+        --acc:#ffd23f; --ok:#3ddc84; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg);
+       font:13px/1.35 system-ui,Segoe UI,sans-serif; }
+header { display:flex; gap:10px; align-items:center; padding:6px 10px; background:var(--panel);
+         border-bottom:1px solid var(--line); flex-wrap:wrap; }
+header .grow { flex:1; }
+h1 { font-size:14px; margin:0 8px 0 0; }
+button { background:#262d38; color:var(--fg); border:1px solid var(--line); border-radius:5px;
+         padding:4px 8px; cursor:pointer; font:inherit; }
+button:hover { background:#313a47; }
+button.on { background:var(--acc); color:#14171c; border-color:var(--acc); font-weight:600; }
+main { display:flex; gap:8px; padding:8px; align-items:flex-start; }
+#left { flex:1 1 auto; min-width:0; }
+#ctx { width:100%; max-height:66vh; object-fit:contain; background:#000; display:block;
+       border:1px solid var(--line); border-radius:6px; }
+#strip { display:flex; gap:4px; margin-top:5px; }
+#strip button { padding:2px 6px; }
+#right { flex:0 0 430px; display:flex; flex-direction:column; gap:6px; }
+#crop { max-height:150px; image-rendering:pixelated; border:1px solid var(--acc); border-radius:4px;
+        background:#000; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:6px; }
+#answer { font-size:16px; font-weight:600; min-height:22px; }
+#answer .none { color:var(--dim); font-weight:400; }
+.rowbtns { display:flex; gap:5px; flex-wrap:wrap; }
+.teamhead { color:var(--dim); margin:6px 0 3px; font-weight:600; letter-spacing:.4px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:3px; }
+.grid button { text-align:left; padding:3px 5px; font-size:12px; overflow:hidden;
+               text-overflow:ellipsis; white-space:nowrap; }
+.grid button .sh { color:var(--acc); font-weight:600; margin-right:4px; }
+.grid button.off { opacity:.42; }
+.grid button.unused { opacity:.25; text-decoration:line-through; cursor:not-allowed; }
+.grid button.hide { display:none; }
+input[type=text] { width:100%; background:#11141a; color:var(--fg); border:1px solid var(--line);
+                   border-radius:5px; padding:4px 6px; font:inherit; }
+footer { color:var(--dim); padding:4px 10px 10px; }
+kbd { background:#262d38; border:1px solid var(--line); border-radius:3px; padding:0 4px; }
+.done { color:var(--ok); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Carrier labelling</h1>
+  <button id="prev">&#8592; Back</button>
+  <span id="progress"></span>
+  <button id="next">Next &#8594;</button>
+  <span id="meta" style="color:var(--dim)"></span>
+  <span id="warn" style="color:#ff6b6b;font-weight:600"></span>
+  <span class="grow"></span>
+  <button id="resume">Resume</button>
+  <button id="export">Export CSV</button>
+  <button id="importbtn">Import CSV</button>
+  <input type="file" id="import" accept=".csv" style="display:none">
+</header>
+<main>
+  <div id="left">
+    <img id="ctx" alt="context frame">
+    <div id="strip"></div>
+  </div>
+  <div id="right">
+    <div class="card" style="text-align:center">
+      <img id="crop" alt="carrier crop"><div style="color:var(--dim)">crop the model saw</div>
+    </div>
+    <div class="card"><div id="answer"></div></div>
+    <div class="card rowbtns">
+      <button data-sp="UNKNOWN">[U] UNKNOWN</button>
+      <button data-sp="WRONG_PLAYER_BOXED">[W] WRONG BOX</button>
+      <button data-sp="NOT_A_PASS">[X] NOT A PASS</button>
+      <button id="clear">[0] clear</button>
+    </div>
+    <div class="card rowbtns">confidence
+      <button data-cf="1">1</button><button data-cf="2">2</button><button data-cf="3">3</button>
+      <input type="text" id="notes" placeholder="notes [N]" style="flex:1;min-width:120px">
+    </div>
+    <div class="card">
+      <input type="text" id="filter" placeholder="filter players  [/]  Enter picks the only match">
+      <div id="rosters"></div>
+    </div>
+  </div>
+</main>
+<footer>
+<kbd>&#8592;</kbd>/<kbd>&#8594;</kbd> context frame &#183; <kbd>Enter</kbd> save + next &#183;
+<kbd>Backspace</kbd> previous &#183; <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> confidence &#183;
+<kbd>U</kbd> unknown &#183; <kbd>W</kbd> wrong box &#183; <kbd>X</kbd> not a pass &#183;
+<kbd>0</kbd> clear &#183; <kbd>/</kbd> filter players &#183; <kbd>N</kbd> notes &#183;
+<kbd>Esc</kbd> leave a text box &#183; <kbd>G</kbd> jump to first unlabelled.
+Picking a player sets confidence 3 by default -- press 1 or 2 to lower it.
+Greyed = provably off the pitch (unused sub); faded = Sofascore minutes say off at this minute
+(approximate, still clickable).
+</footer>
+<script>
+const DATA = {"columns":["id","match","chunk","frame","team_tracked","carrier_dist_m","player_name","confidence_1to3","notes"],"moments":[{"id":"000_manutd_liverpool_h1_chunk_002_f9620","match":"manutd_liverpool","minute":26,"row":{"id":"000_manutd_liverpool_h1_chunk_002_f9620","match":"manutd_liverpool","chunk":"h1_chunk_002","frame":"9620","team_tracked":"1","carrier_dist_m":"1.57","player_name":"","confidence_1to3":"","notes":""}},{"id":"001_manutd_liverpool_h1_chunk_002_f10405","match":"manutd_liverpool","minute":26,"row":{"id":"001_manutd_liverpool_h1_chunk_002_f10405","match":"manutd_liverpool","chunk":"h1_chunk_002","frame":"10405","team_tracked":"1","carrier_dist_m":"2.5","player_name":"","confidence_1to3":"","notes":""}},{"id":"002_manutd_liverpool_h1_chunk_004_f5690","match":"manutd_liverpool","minute":43,"row":{"id":"002_manutd_liverpool_h1_chunk_004_f5690","match":"manutd_liverpool","chunk":"h1_chunk_004","frame":"5690","team_tracked":"0","carrier_dist_m":"0.22","player_name":"","confidence_1to3":"","notes":""}},{"id":"003_manutd_liverpool_h1_chunk_004_f11995","match":"manutd_liverpool","minute":47,"row":{"id":"003_manutd_liverpool_h1_chunk_004_f11995","match":"manutd_liverpool","chunk":"h1_chunk_004","frame":"11995","team_tracked":"0","carrier_dist_m":"1.97","player_name":"","confidence_1to3":"","notes":""}},{"id":"004_manutd_liverpool_h1_chunk_004_f11020","match":"manutd_liverpool","minute":47,"row":{"id":"004_manutd_liverpool_h1_chunk_004_f11020","match":"manutd_liverpool","chunk":"h1_chunk_004","frame":"11020","team_tracked":"1","carrier_dist_m":"1.0","player_name":"","confidence_1to3":"","notes":""}},{"id":"005_manutd_liverpool_h1_chunk_000_f405","match":"manutd_liverpool","minute":0,"row":{"id":"005_manutd_liverpool_h1_chunk_000_f405","match":"manutd_liverpool","chunk":"h1_chunk_000","frame":"405","team_tracked":"0","carrier_dist_m":"1.19","player_name":"","confidence_1to3":"","notes":""}},{"id":"006_manutd_liverpool_h1_chunk_001_f3110","match":"manutd_liverpool","minute":12,"row":{"id":"006_manutd_liverpool_h1_chunk_001_f3110","match":"manutd_liverpool","chunk":"h1_chunk_001","frame":"3110","team_tracked":"0","carrier_dist_m":"2.43","player_name":"","confidence_1to3":"","notes":""}},{"id":"007_manutd_liverpool_h1_chunk_001_f3225","match":"manutd_liverpool","minute":12,"row":{"id":"007_manutd_liverpool_h1_chunk_001_f3225","match":"manutd_liverpool","chunk":"h1_chunk_001","frame":"3225","team_tracked":"0","carrier_dist_m":"0.66","player_name":"","confidence_1to3":"","notes":""}},{"id":"008_manutd_liverpool_h1_chunk_004_f2280","match":"manutd_liverpool","minute":41,"row":{"id":"008_manutd_liverpool_h1_chunk_004_f2280","match":"manutd_liverpool","chunk":"h1_chunk_004","frame":"2280","team_tracked":"0","carrier_dist_m":"0.9","player_name":"","confidence_1to3":"","notes":""}},{"id":"009_manutd_liverpool_h1_chunk_003_f11595","match":"manutd_liverpool","minute":37,"row":{"id":"009_manutd_liverpool_h1_chunk_003_f11595","match":"manutd_liverpool","chunk":"h1_chunk_003","frame":"11595","team_tracked":"0","carrier_dist_m":"0.26","player_name":"","confidence_1to3":"","notes":""}},{"id":"010_manutd_liverpool_h1_chunk_001_f3185","match":"manutd_liverpool","minute":12,"row":{"id":"010_manutd_liverpool_h1_chunk_001_f3185","match":"manutd_liverpool","chunk":"h1_chunk_001","frame":"3185","team_tracked":"0","carrier_dist_m":"1.05","player_name":"","confidence_1to3":"","notes":""}},{"id":"011_manutd_liverpool_h1_chunk_001_f9030","match":"manutd_liverpool","minute":16,"row":{"id":"011_manutd_liverpool_h1_chunk_001_f9030","match":"manutd_liverpool","chunk":"h1_chunk_001","frame":"9030","team_tracked":"0","carrier_dist_m":"0.1","player_name":"","confidence_1to3":"","notes":""}},{"id":"012_manutd_liverpool_h1_chunk_000_f2345","match":"manutd_liverpool","minute":1,"row":{"id":"012_manutd_liverpool_h1_chunk_000_f2345","match":"manutd_liverpool","chunk":"h1_chunk_000","frame":"2345","team_tracked":"1","carrier_dist_m":"0.7","player_name":"","confidence_1to3":"","notes":""}},{"id":"013_manutd_liverpool_h1_chunk_003_f3195","match":"manutd_liverpool","minute":32,"row":{"id":"013_manutd_liverpool_h1_chunk_003_f3195","match":"manutd_liverpool","chunk":"h1_chunk_003","frame":"3195","team_tracked":"1","carrier_dist_m":"0.86","player_name":"","confidence_1to3":"","notes":""}},{"id":"014_manutd_liverpool_h1_chunk_001_f11760","match":"manutd_liverpool","minute":17,"row":{"id":"014_manutd_liverpool_h1_chunk_001_f11760","match":"manutd_liverpool","chunk":"h1_chunk_001","frame":"11760","team_tracked":"1","carrier_dist_m":"0.89","player_name":"","confidence_1to3":"","notes":""}},{"id":"015_manutd_liverpool_h2_chunk_003_f1580","match":"manutd_liverpool","minute":76,"row":{"id":"015_manutd_liverpool_h2_chunk_003_f1580","match":"manutd_liverpool","chunk":"h2_chunk_003","frame":"1580","team_tracked":"1","carrier_dist_m":"1.8","player_name":"","confidence_1to3":"","notes":""}},{"id":"016_manutd_liverpool_h2_chunk_003_f3950","match":"manutd_liverpool","minute":77,"row":{"id":"016_manutd_liverpool_h2_chunk_003_f3950","match":"manutd_liverpool","chunk":"h2_chunk_003","frame":"3950","team_tracked":"0","carrier_dist_m":"1.36","player_name":"","confidence_1to3":"","notes":""}},{"id":"017_manutd_liverpool_h2_chunk_003_f9950","match":"manutd_liverpool","minute":81,"row":{"id":"017_manutd_liverpool_h2_chunk_003_f9950","match":"manutd_liverpool","chunk":"h2_chunk_003","frame":"9950","team_tracked":"1","carrier_dist_m":"0.21","player_name":"","confidence_1to3":"","notes":""}},{"id":"018_manutd_liverpool_h2_chunk_003_f10415","match":"manutd_liverpool","minute":81,"row":{"id":"018_manutd_liverpool_h2_chunk_003_f10415","match":"manutd_liverpool","chunk":"h2_chunk_003","frame":"10415","team_tracked":"0","carrier_dist_m":"2.05","player_name":"","confidence_1to3":"","notes":""}},{"id":"019_manutd_liverpool_h2_chunk_003_f7900","match":"manutd_liverpool","minute":80,"row":{"id":"019_manutd_liverpool_h2_chunk_003_f7900","match":"manutd_liverpool","chunk":"h2_chunk_003","frame":"7900","team_tracked":"0","carrier_dist_m":"1.01","player_name":"","confidence_1to3":"","notes":""}},{"id":"020_manutd_liverpool_h2_chunk_001_f10100","match":"manutd_liverpool","minute":61,"row":{"id":"020_manutd_liverpool_h2_chunk_001_f10100","match":"manutd_liverpool","chunk":"h2_chunk_001","frame":"10100","team_tracked":"0","carrier_dist_m":"1.33","player_name":"","confidence_1to3":"","notes":""}},{"id":"021_manutd_liverpool_h2_chunk_002_f10080","match":"manutd_liverpool","minute":71,"row":{"id":"021_manutd_liverpool_h2_chunk_002_f10080","match":"manutd_liverpool","chunk":"h2_chunk_002","frame":"10080","team_tracked":"0","carrier_dist_m":"0.96","player_name":"","confidence_1to3":"","notes":""}},{"id":"022_manutd_liverpool_h2_chunk_003_f8645","match":"manutd_liverpool","minute":80,"row":{"id":"022_manutd_liverpool_h2_chunk_003_f8645","match":"manutd_liverpool","chunk":"h2_chunk_003","frame":"8645","team_tracked":"0","carrier_dist_m":"0.69","player_name":"","confidence_1to3":"","notes":""}},{"id":"023_manutd_liverpool_h2_chunk_005_f2150","match":"manutd_liverpool","minute":96,"row":{"id":"023_manutd_liverpool_h2_chunk_005_f2150","match":"manutd_liverpool","chunk":"h2_chunk_005","frame":"2150","team_tracked":"0","carrier_dist_m":"1.14","player_name":"","confidence_1to3":"","notes":""}},{"id":"024_manutd_liverpool_h2_chunk_003_f4640","match":"manutd_liverpool","minute":78,"row":{"id":"024_manutd_liverpool_h2_chunk_003_f4640","match":"manutd_liverpool","chunk":"h2_chunk_003","frame":"4640","team_tracked":"0","carrier_dist_m":"2.04","player_name":"","confidence_1to3":"","notes":""}},{"id":"025_manutd_liverpool_h2_chunk_001_f320","match":"manutd_liverpool","minute":55,"row":{"id":"025_manutd_liverpool_h2_chunk_001_f320","match":"manutd_liverpool","chunk":"h2_chunk_001","frame":"320","team_tracked":"1","carrier_dist_m":"1.34","player_name":"","confidence_1to3":"","notes":""}},{"id":"026_manutd_liverpool_h2_chunk_000_f10955","match":"manutd_liverpool","minute":52,"row":{"id":"026_manutd_liverpool_h2_chunk_000_f10955","match":"manutd_liverpool","chunk":"h2_chunk_000","frame":"10955","team_tracked":"1","carrier_dist_m":"0.87","player_name":"","confidence_1to3":"","notes":""}},{"id":"027_manutd_liverpool_h2_chunk_002_f11370","match":"manutd_liverpool","minute":72,"row":{"id":"027_manutd_liverpool_h2_chunk_002_f11370","match":"manutd_liverpool","chunk":"h2_chunk_002","frame":"11370","team_tracked":"0","carrier_dist_m":"0.77","player_name":"","confidence_1to3":"","notes":""}},{"id":"028_manutd_liverpool_h2_chunk_000_f14855","match":"manutd_liverpool","minute":54,"row":{"id":"028_manutd_liverpool_h2_chunk_000_f14855","match":"manutd_liverpool","chunk":"h2_chunk_000","frame":"14855","team_tracked":"0","carrier_dist_m":"0.52","player_name":"","confidence_1to3":"","notes":""}},{"id":"029_manutd_liverpool_h2_chunk_003_f4365","match":"manutd_liverpool","minute":77,"row":{"id":"029_manutd_liverpool_h2_chunk_003_f4365","match":"manutd_liverpool","chunk":"h2_chunk_003","frame":"4365","team_tracked":"1","carrier_dist_m":"1.64","player_name":"","confidence_1to3":"","notes":""}},{"id":"030_manutd_tottenham_h1_chunk_001_f13835","match":"manutd_tottenham","minute":19,"row":{"id":"030_manutd_tottenham_h1_chunk_001_f13835","match":"manutd_tottenham","chunk":"h1_chunk_001","frame":"13835","team_tracked":"1","carrier_dist_m":"0.68","player_name":"","confidence_1to3":"","notes":""}},{"id":"031_manutd_tottenham_h1_chunk_003_f7120","match":"manutd_tottenham","minute":34,"row":{"id":"031_manutd_tottenham_h1_chunk_003_f7120","match":"manutd_tottenham","chunk":"h1_chunk_003","frame":"7120","team_tracked":"1","carrier_dist_m":"2.81","player_name":"","confidence_1to3":"","notes":""}},{"id":"032_manutd_tottenham_h1_chunk_002_f12580","match":"manutd_tottenham","minute":28,"row":{"id":"032_manutd_tottenham_h1_chunk_002_f12580","match":"manutd_tottenham","chunk":"h1_chunk_002","frame":"12580","team_tracked":"1","carrier_dist_m":"0.77","player_name":"","confidence_1to3":"","notes":""}},{"id":"033_manutd_tottenham_h1_chunk_004_f1575","match":"manutd_tottenham","minute":41,"row":{"id":"033_manutd_tottenham_h1_chunk_004_f1575","match":"manutd_tottenham","chunk":"h1_chunk_004","frame":"1575","team_tracked":"0","carrier_dist_m":"1.8","player_name":"","confidence_1to3":"","notes":""}},{"id":"034_manutd_tottenham_h1_chunk_003_f8410","match":"manutd_tottenham","minute":35,"row":{"id":"034_manutd_tottenham_h1_chunk_003_f8410","match":"manutd_tottenham","chunk":"h1_chunk_003","frame":"8410","team_tracked":"0","carrier_dist_m":"0.69","player_name":"","confidence_1to3":"","notes":""}},{"id":"035_manutd_tottenham_h1_chunk_004_f11825","match":"manutd_tottenham","minute":47,"row":{"id":"035_manutd_tottenham_h1_chunk_004_f11825","match":"manutd_tottenham","chunk":"h1_chunk_004","frame":"11825","team_tracked":"0","carrier_dist_m":"0.74","player_name":"","confidence_1to3":"","notes":""}},{"id":"036_manutd_tottenham_h1_chunk_001_f6125","match":"manutd_tottenham","minute":14,"row":{"id":"036_manutd_tottenham_h1_chunk_001_f6125","match":"manutd_tottenham","chunk":"h1_chunk_001","frame":"6125","team_tracked":"1","carrier_dist_m":"2.03","player_name":"","confidence_1to3":"","notes":""}},{"id":"037_manutd_tottenham_h1_chunk_000_f9695","match":"manutd_tottenham","minute":6,"row":{"id":"037_manutd_tottenham_h1_chunk_000_f9695","match":"manutd_tottenham","chunk":"h1_chunk_000","frame":"9695","team_tracked":"0","carrier_dist_m":"2.12","player_name":"","confidence_1to3":"","notes":""}},{"id":"038_manutd_tottenham_h1_chunk_000_f640","match":"manutd_tottenham","minute":0,"row":{"id":"038_manutd_tottenham_h1_chunk_000_f640","match":"manutd_tottenham","chunk":"h1_chunk_000","frame":"640","team_tracked":"1","carrier_dist_m":"1.02","player_name":"","confidence_1to3":"","notes":""}},{"id":"039_manutd_tottenham_h1_chunk_001_f2485","match":"manutd_tottenham","minute":11,"row":{"id":"039_manutd_tottenham_h1_chunk_001_f2485","match":"manutd_tottenham","chunk":"h1_chunk_001","frame":"2485","team_tracked":"0","carrier_dist_m":"2.48","player_name":"","confidence_1to3":"","notes":""}},{"id":"040_manutd_tottenham_h1_chunk_000_f1980","match":"manutd_tottenham","minute":1,"row":{"id":"040_manutd_tottenham_h1_chunk_000_f1980","match":"manutd_tottenham","chunk":"h1_chunk_000","frame":"1980","team_tracked":"1","carrier_dist_m":"0.88","player_name":"","confidence_1to3":"","notes":""}},{"id":"041_manutd_tottenham_h1_chunk_001_f11975","match":"manutd_tottenham","minute":17,"row":{"id":"041_manutd_tottenham_h1_chunk_001_f11975","match":"manutd_tottenham","chunk":"h1_chunk_001","frame":"11975","team_tracked":"0","carrier_dist_m":"1.17","player_name":"","confidence_1to3":"","notes":""}},{"id":"042_manutd_tottenham_h1_chunk_003_f1435","match":"manutd_tottenham","minute":30,"row":{"id":"042_manutd_tottenham_h1_chunk_003_f1435","match":"manutd_tottenham","chunk":"h1_chunk_003","frame":"1435","team_tracked":"1","carrier_dist_m":"1.63","player_name":"","confidence_1to3":"","notes":""}},{"id":"043_manutd_tottenham_h1_chunk_002_f4175","match":"manutd_tottenham","minute":22,"row":{"id":"043_manutd_tottenham_h1_chunk_002_f4175","match":"manutd_tottenham","chunk":"h1_chunk_002","frame":"4175","team_tracked":"1","carrier_dist_m":"0.73","player_name":"","confidence_1to3":"","notes":""}},{"id":"044_manutd_tottenham_h1_chunk_002_f12075","match":"manutd_tottenham","minute":28,"row":{"id":"044_manutd_tottenham_h1_chunk_002_f12075","match":"manutd_tottenham","chunk":"h1_chunk_002","frame":"12075","team_tracked":"0","carrier_dist_m":"2.51","player_name":"","confidence_1to3":"","notes":""}},{"id":"045_manutd_tottenham_h2_chunk_000_f8415","match":"manutd_tottenham","minute":50,"row":{"id":"045_manutd_tottenham_h2_chunk_000_f8415","match":"manutd_tottenham","chunk":"h2_chunk_000","frame":"8415","team_tracked":"0","carrier_dist_m":"0.8","player_name":"","confidence_1to3":"","notes":""}},{"id":"046_manutd_tottenham_h2_chunk_004_f5840","match":"manutd_tottenham","minute":88,"row":{"id":"046_manutd_tottenham_h2_chunk_004_f5840","match":"manutd_tottenham","chunk":"h2_chunk_004","frame":"5840","team_tracked":"0","carrier_dist_m":"0.49","player_name":"","confidence_1to3":"","notes":""}},{"id":"047_manutd_tottenham_h2_chunk_004_f3570","match":"manutd_tottenham","minute":87,"row":{"id":"047_manutd_tottenham_h2_chunk_004_f3570","match":"manutd_tottenham","chunk":"h2_chunk_004","frame":"3570","team_tracked":"0","carrier_dist_m":"1.08","player_name":"","confidence_1to3":"","notes":""}},{"id":"048_manutd_tottenham_h2_chunk_000_f3960","match":"manutd_tottenham","minute":47,"row":{"id":"048_manutd_tottenham_h2_chunk_000_f3960","match":"manutd_tottenham","chunk":"h2_chunk_000","frame":"3960","team_tracked":"1","carrier_dist_m":"1.71","player_name":"","confidence_1to3":"","notes":""}},{"id":"049_manutd_tottenham_h2_chunk_002_f4220","match":"manutd_tottenham","minute":67,"row":{"id":"049_manutd_tottenham_h2_chunk_002_f4220","match":"manutd_tottenham","chunk":"h2_chunk_002","frame":"4220","team_tracked":"1","carrier_dist_m":"0.53","player_name":"","confidence_1to3":"","notes":""}},{"id":"050_manutd_tottenham_h2_chunk_000_f4100","match":"manutd_tottenham","minute":47,"row":{"id":"050_manutd_tottenham_h2_chunk_000_f4100","match":"manutd_tottenham","chunk":"h2_chunk_000","frame":"4100","team_tracked":"0","carrier_dist_m":"0.48","player_name":"","confidence_1to3":"","notes":""}},{"id":"051_manutd_tottenham_h2_chunk_000_f8055","match":"manutd_tottenham","minute":50,"row":{"id":"051_manutd_tottenham_h2_chunk_000_f8055","match":"manutd_tottenham","chunk":"h2_chunk_000","frame":"8055","team_tracked":"1","carrier_dist_m":"0.33","player_name":"","confidence_1to3":"","notes":""}},{"id":"052_manutd_tottenham_h2_chunk_003_f11015","match":"manutd_tottenham","minute":82,"row":{"id":"052_manutd_tottenham_h2_chunk_003_f11015","match":"manutd_tottenham","chunk":"h2_chunk_003","frame":"11015","team_tracked":"0","carrier_dist_m":"1.5","player_name":"","confidence_1to3":"","notes":""}},{"id":"053_manutd_tottenham_h2_chunk_001_f5440","match":"manutd_tottenham","minute":58,"row":{"id":"053_manutd_tottenham_h2_chunk_001_f5440","match":"manutd_tottenham","chunk":"h2_chunk_001","frame":"5440","team_tracked":"1","carrier_dist_m":"1.03","player_name":"","confidence_1to3":"","notes":""}},{"id":"054_manutd_tottenham_h2_chunk_002_f5940","match":"manutd_tottenham","minute":68,"row":{"id":"054_manutd_tottenham_h2_chunk_002_f5940","match":"manutd_tottenham","chunk":"h2_chunk_002","frame":"5940","team_tracked":"0","carrier_dist_m":"2.88","player_name":"","confidence_1to3":"","notes":""}},{"id":"055_manutd_tottenham_h2_chunk_002_f11140","match":"manutd_tottenham","minute":72,"row":{"id":"055_manutd_tottenham_h2_chunk_002_f11140","match":"manutd_tottenham","chunk":"h2_chunk_002","frame":"11140","team_tracked":"0","carrier_dist_m":"0.74","player_name":"","confidence_1to3":"","notes":""}},{"id":"056_manutd_tottenham_h2_chunk_004_f3650","match":"manutd_tottenham","minute":87,"row":{"id":"056_manutd_tottenham_h2_chunk_004_f3650","match":"manutd_tottenham","chunk":"h2_chunk_004","frame":"3650","team_tracked":"0","carrier_dist_m":"0.77","player_name":"","confidence_1to3":"","notes":""}},{"id":"057_manutd_tottenham_h2_chunk_004_f6645","match":"manutd_tottenham","minute":89,"row":{"id":"057_manutd_tottenham_h2_chunk_004_f6645","match":"manutd_tottenham","chunk":"h2_chunk_004","frame":"6645","team_tracked":"0","carrier_dist_m":"0.7","player_name":"","confidence_1to3":"","notes":""}},{"id":"058_manutd_tottenham_h2_chunk_004_f150","match":"manutd_tottenham","minute":85,"row":{"id":"058_manutd_tottenham_h2_chunk_004_f150","match":"manutd_tottenham","chunk":"h2_chunk_004","frame":"150","team_tracked":"1","carrier_dist_m":"0.78","player_name":"","confidence_1to3":"","notes":""}},{"id":"059_manutd_tottenham_h2_chunk_004_f13820","match":"manutd_tottenham","minute":94,"row":{"id":"059_manutd_tottenham_h2_chunk_004_f13820","match":"manutd_tottenham","chunk":"h2_chunk_004","frame":"13820","team_tracked":"1","carrier_dist_m":"0.37","player_name":"","confidence_1to3":"","notes":""}},{"id":"060_manutd_brighton_h1_chunk_003_f1230","match":"manutd_brighton","minute":30,"row":{"id":"060_manutd_brighton_h1_chunk_003_f1230","match":"manutd_brighton","chunk":"h1_chunk_003","frame":"1230","team_tracked":"1","carrier_dist_m":"0.62","player_name":"","confidence_1to3":"","notes":""}},{"id":"061_manutd_brighton_h1_chunk_001_f6000","match":"manutd_brighton","minute":14,"row":{"id":"061_manutd_brighton_h1_chunk_001_f6000","match":"manutd_brighton","chunk":"h1_chunk_001","frame":"6000","team_tracked":"0","carrier_dist_m":"1.25","player_name":"","confidence_1to3":"","notes":""}},{"id":"062_manutd_brighton_h1_chunk_001_f495","match":"manutd_brighton","minute":10,"row":{"id":"062_manutd_brighton_h1_chunk_001_f495","match":"manutd_brighton","chunk":"h1_chunk_001","frame":"495","team_tracked":"0","carrier_dist_m":"2.07","player_name":"","confidence_1to3":"","notes":""}},{"id":"063_manutd_brighton_h1_chunk_001_f12825","match":"manutd_brighton","minute":18,"row":{"id":"063_manutd_brighton_h1_chunk_001_f12825","match":"manutd_brighton","chunk":"h1_chunk_001","frame":"12825","team_tracked":"0","carrier_dist_m":"0.99","player_name":"","confidence_1to3":"","notes":""}},{"id":"064_manutd_brighton_h1_chunk_001_f14070","match":"manutd_brighton","minute":19,"row":{"id":"064_manutd_brighton_h1_chunk_001_f14070","match":"manutd_brighton","chunk":"h1_chunk_001","frame":"14070","team_tracked":"0","carrier_dist_m":"0.7","player_name":"","confidence_1to3":"","notes":""}},{"id":"065_manutd_brighton_h1_chunk_004_f10125","match":"manutd_brighton","minute":46,"row":{"id":"065_manutd_brighton_h1_chunk_004_f10125","match":"manutd_brighton","chunk":"h1_chunk_004","frame":"10125","team_tracked":"0","carrier_dist_m":"0.87","player_name":"","confidence_1to3":"","notes":""}},{"id":"066_manutd_brighton_h1_chunk_001_f9710","match":"manutd_brighton","minute":16,"row":{"id":"066_manutd_brighton_h1_chunk_001_f9710","match":"manutd_brighton","chunk":"h1_chunk_001","frame":"9710","team_tracked":"0","carrier_dist_m":"1.08","player_name":"","confidence_1to3":"","notes":""}},{"id":"067_manutd_brighton_h1_chunk_001_f7630","match":"manutd_brighton","minute":15,"row":{"id":"067_manutd_brighton_h1_chunk_001_f7630","match":"manutd_brighton","chunk":"h1_chunk_001","frame":"7630","team_tracked":"0","carrier_dist_m":"2.83","player_name":"","confidence_1to3":"","notes":""}},{"id":"068_manutd_brighton_h1_chunk_002_f14515","match":"manutd_brighton","minute":29,"row":{"id":"068_manutd_brighton_h1_chunk_002_f14515","match":"manutd_brighton","chunk":"h1_chunk_002","frame":"14515","team_tracked":"0","carrier_dist_m":"0.43","player_name":"","confidence_1to3":"","notes":""}},{"id":"069_manutd_brighton_h1_chunk_002_f5835","match":"manutd_brighton","minute":23,"row":{"id":"069_manutd_brighton_h1_chunk_002_f5835","match":"manutd_brighton","chunk":"h1_chunk_002","frame":"5835","team_tracked":"0","carrier_dist_m":"0.66","player_name":"","confidence_1to3":"","notes":""}},{"id":"070_manutd_brighton_h1_chunk_002_f6790","match":"manutd_brighton","minute":24,"row":{"id":"070_manutd_brighton_h1_chunk_002_f6790","match":"manutd_brighton","chunk":"h1_chunk_002","frame":"6790","team_tracked":"1","carrier_dist_m":"0.25","player_name":"","confidence_1to3":"","notes":""}},{"id":"071_manutd_brighton_h1_chunk_003_f1625","match":"manutd_brighton","minute":31,"row":{"id":"071_manutd_brighton_h1_chunk_003_f1625","match":"manutd_brighton","chunk":"h1_chunk_003","frame":"1625","team_tracked":"1","carrier_dist_m":"2.22","player_name":"","confidence_1to3":"","notes":""}},{"id":"072_manutd_brighton_h1_chunk_001_f13340","match":"manutd_brighton","minute":18,"row":{"id":"072_manutd_brighton_h1_chunk_001_f13340","match":"manutd_brighton","chunk":"h1_chunk_001","frame":"13340","team_tracked":"1","carrier_dist_m":"0.96","player_name":"","confidence_1to3":"","notes":""}},{"id":"073_manutd_brighton_h1_chunk_004_f2415","match":"manutd_brighton","minute":41,"row":{"id":"073_manutd_brighton_h1_chunk_004_f2415","match":"manutd_brighton","chunk":"h1_chunk_004","frame":"2415","team_tracked":"1","carrier_dist_m":"0.71","player_name":"","confidence_1to3":"","notes":""}},{"id":"074_manutd_brighton_h1_chunk_000_f14010","match":"manutd_brighton","minute":9,"row":{"id":"074_manutd_brighton_h1_chunk_000_f14010","match":"manutd_brighton","chunk":"h1_chunk_000","frame":"14010","team_tracked":"0","carrier_dist_m":"1.87","player_name":"","confidence_1to3":"","notes":""}},{"id":"075_manutd_brighton_h2_chunk_001_f10290","match":"manutd_brighton","minute":61,"row":{"id":"075_manutd_brighton_h2_chunk_001_f10290","match":"manutd_brighton","chunk":"h2_chunk_001","frame":"10290","team_tracked":"0","carrier_dist_m":"0.52","player_name":"","confidence_1to3":"","notes":""}},{"id":"076_manutd_brighton_h2_chunk_005_f1015","match":"manutd_brighton","minute":95,"row":{"id":"076_manutd_brighton_h2_chunk_005_f1015","match":"manutd_brighton","chunk":"h2_chunk_005","frame":"1015","team_tracked":"1","carrier_dist_m":"0.64","player_name":"","confidence_1to3":"","notes":""}},{"id":"077_manutd_brighton_h2_chunk_001_f225","match":"manutd_brighton","minute":55,"row":{"id":"077_manutd_brighton_h2_chunk_001_f225","match":"manutd_brighton","chunk":"h2_chunk_001","frame":"225","team_tracked":"1","carrier_dist_m":"0.76","player_name":"","confidence_1to3":"","notes":""}},{"id":"078_manutd_brighton_h2_chunk_005_f250","match":"manutd_brighton","minute":95,"row":{"id":"078_manutd_brighton_h2_chunk_005_f250","match":"manutd_brighton","chunk":"h2_chunk_005","frame":"250","team_tracked":"0","carrier_dist_m":"2.9","player_name":"","confidence_1to3":"","notes":""}},{"id":"079_manutd_brighton_h2_chunk_000_f5450","match":"manutd_brighton","minute":48,"row":{"id":"079_manutd_brighton_h2_chunk_000_f5450","match":"manutd_brighton","chunk":"h2_chunk_000","frame":"5450","team_tracked":"1","carrier_dist_m":"1.07","player_name":"","confidence_1to3":"","notes":""}},{"id":"080_manutd_brighton_h2_chunk_004_f9700","match":"manutd_brighton","minute":91,"row":{"id":"080_manutd_brighton_h2_chunk_004_f9700","match":"manutd_brighton","chunk":"h2_chunk_004","frame":"9700","team_tracked":"1","carrier_dist_m":"0.53","player_name":"","confidence_1to3":"","notes":""}},{"id":"081_manutd_brighton_h2_chunk_003_f1570","match":"manutd_brighton","minute":76,"row":{"id":"081_manutd_brighton_h2_chunk_003_f1570","match":"manutd_brighton","chunk":"h2_chunk_003","frame":"1570","team_tracked":"0","carrier_dist_m":"0.4","player_name":"","confidence_1to3":"","notes":""}},{"id":"082_manutd_brighton_h2_chunk_000_f6180","match":"manutd_brighton","minute":49,"row":{"id":"082_manutd_brighton_h2_chunk_000_f6180","match":"manutd_brighton","chunk":"h2_chunk_000","frame":"6180","team_tracked":"1","carrier_dist_m":"0.17","player_name":"","confidence_1to3":"","notes":""}},{"id":"083_manutd_brighton_h2_chunk_003_f13010","match":"manutd_brighton","minute":83,"row":{"id":"083_manutd_brighton_h2_chunk_003_f13010","match":"manutd_brighton","chunk":"h2_chunk_003","frame":"13010","team_tracked":"0","carrier_dist_m":"0.37","player_name":"","confidence_1to3":"","notes":""}},{"id":"084_manutd_brighton_h2_chunk_002_f9710","match":"manutd_brighton","minute":71,"row":{"id":"084_manutd_brighton_h2_chunk_002_f9710","match":"manutd_brighton","chunk":"h2_chunk_002","frame":"9710","team_tracked":"1","carrier_dist_m":"0.83","player_name":"","confidence_1to3":"","notes":""}},{"id":"085_manutd_brighton_h2_chunk_005_f3595","match":"manutd_brighton","minute":97,"row":{"id":"085_manutd_brighton_h2_chunk_005_f3595","match":"manutd_brighton","chunk":"h2_chunk_005","frame":"3595","team_tracked":"1","carrier_dist_m":"0.52","player_name":"","confidence_1to3":"","notes":""}},{"id":"086_manutd_brighton_h2_chunk_005_f3885","match":"manutd_brighton","minute":97,"row":{"id":"086_manutd_brighton_h2_chunk_005_f3885","match":"manutd_brighton","chunk":"h2_chunk_005","frame":"3885","team_tracked":"0","carrier_dist_m":"0.64","player_name":"","confidence_1to3":"","notes":""}},{"id":"087_manutd_brighton_h2_chunk_005_f3930","match":"manutd_brighton","minute":97,"row":{"id":"087_manutd_brighton_h2_chunk_005_f3930","match":"manutd_brighton","chunk":"h2_chunk_005","frame":"3930","team_tracked":"0","carrier_dist_m":"1.43","player_name":"","confidence_1to3":"","notes":""}},{"id":"088_manutd_brighton_h2_chunk_004_f12750","match":"manutd_brighton","minute":93,"row":{"id":"088_manutd_brighton_h2_chunk_004_f12750","match":"manutd_brighton","chunk":"h2_chunk_004","frame":"12750","team_tracked":"0","carrier_dist_m":"1.13","player_name":"","confidence_1to3":"","notes":""}},{"id":"089_manutd_brighton_h2_chunk_004_f410","match":"manutd_brighton","minute":85,"row":{"id":"089_manutd_brighton_h2_chunk_004_f410","match":"manutd_brighton","chunk":"h2_chunk_004","frame":"410","team_tracked":"1","carrier_dist_m":"0.86","player_name":"","confidence_1to3":"","notes":""}}],"rosters":{"manutd_brighton":{"teams":["Man Utd","Brighton"],"players":[{"name":"André Onana","shirt":24,"pos":"G","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Matthijs de Ligt","shirt":4,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Harry Maguire","shirt":5,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Leny Yoro","shirt":15,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Noussair Mazraoui","shirt":3,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":84},{"name":"Manuel Ugarte","shirt":25,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":64},{"name":"Kobbie Mainoo","shirt":37,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":64},{"name":"Diogo Dalot","shirt":20,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Amad Diallo","shirt":16,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Bruno Fernandes","shirt":8,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Joshua Zirkzee","shirt":11,"pos":"F","team":0,"sub":false,"unused":false,"on_from":0,"on_to":84},{"name":"Toby Collyer","shirt":43,"pos":"M","team":0,"sub":true,"unused":false,"on_from":64,"on_to":999},{"name":"Alejandro Garnacho","shirt":17,"pos":"F","team":0,"sub":true,"unused":false,"on_from":64,"on_to":999},{"name":"Antony","shirt":21,"pos":"M","team":0,"sub":true,"unused":false,"on_from":75,"on_to":999},{"name":"Rasmus Højlund","shirt":9,"pos":"F","team":0,"sub":true,"unused":false,"on_from":75,"on_to":999},{"name":"Altay Bayındır","shirt":1,"pos":"G","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Lisandro Martínez","shirt":6,"pos":"D","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Tyrell Malacia","shirt":12,"pos":"D","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Casemiro","shirt":18,"pos":"M","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Christian Eriksen","shirt":14,"pos":"M","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Bart Verbruggen","shirt":1,"pos":"G","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Joël Veltman","shirt":34,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Jan Paul van Hecke","shirt":29,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Lewis Dunk","shirt":5,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Pervis Estupiñán","shirt":30,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":84},{"name":"Yankuba Minteh","shirt":17,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":69},{"name":"Carlos Baleba","shirt":20,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":89},{"name":"Yasin Ayari","shirt":26,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Kaoru Mitoma","shirt":22,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"João Pedro","shirt":9,"pos":"F","team":1,"sub":false,"unused":false,"on_from":0,"on_to":89},{"name":"Danny Welbeck","shirt":18,"pos":"F","team":1,"sub":false,"unused":false,"on_from":0,"on_to":69},{"name":"Solly March","shirt":7,"pos":"M","team":1,"sub":true,"unused":false,"on_from":69,"on_to":999},{"name":"Georginio Rutter","shirt":14,"pos":"M","team":1,"sub":true,"unused":false,"on_from":69,"on_to":999},{"name":"Tariq Lamptey","shirt":2,"pos":"D","team":1,"sub":true,"unused":false,"on_from":75,"on_to":999},{"name":"Julio Enciso","shirt":10,"pos":"M","team":1,"sub":true,"unused":false,"on_from":89,"on_to":999},{"name":"Diego Gómez","shirt":25,"pos":"M","team":1,"sub":true,"unused":false,"on_from":89,"on_to":999},{"name":"Jason Steele","shirt":23,"pos":"G","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Adam Webster","shirt":4,"pos":"D","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Ruairi McConville","shirt":44,"pos":"D","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Simon Adingra","shirt":11,"pos":"M","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0}]},"manutd_liverpool":{"teams":["Man Utd","Liverpool"],"players":[{"name":"André Onana","shirt":24,"pos":"G","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Noussair Mazraoui","shirt":3,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Matthijs de Ligt","shirt":4,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":69},{"name":"Lisandro Martínez","shirt":6,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Diogo Dalot","shirt":20,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Casemiro","shirt":18,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":45},{"name":"Kobbie Mainoo","shirt":37,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Alejandro Garnacho","shirt":17,"pos":"F","team":0,"sub":false,"unused":false,"on_from":0,"on_to":69},{"name":"Bruno Fernandes","shirt":8,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Marcus Rashford","shirt":10,"pos":"F","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Joshua Zirkzee","shirt":11,"pos":"F","team":0,"sub":false,"unused":false,"on_from":0,"on_to":86},{"name":"Toby Collyer","shirt":43,"pos":"M","team":0,"sub":true,"unused":false,"on_from":45,"on_to":999},{"name":"Harry Maguire","shirt":5,"pos":"D","team":0,"sub":true,"unused":false,"on_from":69,"on_to":999},{"name":"Amad Diallo","shirt":16,"pos":"M","team":0,"sub":true,"unused":false,"on_from":69,"on_to":999},{"name":"Christian Eriksen","shirt":14,"pos":"M","team":0,"sub":true,"unused":false,"on_from":80,"on_to":999},{"name":"Tom Heaton","shirt":22,"pos":"G","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Altay Bayındır","shirt":1,"pos":"G","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Jonny Evans","shirt":35,"pos":"D","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Antony","shirt":21,"pos":"M","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Ethan Wheatley","shirt":36,"pos":"F","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Alisson","shirt":1,"pos":"G","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Trent Alexander-Arnold","shirt":66,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":76},{"name":"Ibrahima Konaté","shirt":5,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Virgil van Dijk","shirt":4,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Andy Robertson","shirt":26,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":83},{"name":"Ryan Gravenberch","shirt":38,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Alexis Mac Allister","shirt":10,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Mohamed Salah","shirt":11,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Dominik Szoboszlai","shirt":8,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Luis Díaz","shirt":7,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":66},{"name":"Diogo Jota","shirt":20,"pos":"F","team":1,"sub":false,"unused":false,"on_from":0,"on_to":76},{"name":"Cody Gakpo","shirt":18,"pos":"M","team":1,"sub":true,"unused":false,"on_from":66,"on_to":999},{"name":"Conor Bradley","shirt":84,"pos":"D","team":1,"sub":true,"unused":false,"on_from":76,"on_to":999},{"name":"Darwin Núñez","shirt":9,"pos":"F","team":1,"sub":true,"unused":false,"on_from":76,"on_to":999},{"name":"Kostas Tsimikas","shirt":21,"pos":"D","team":1,"sub":true,"unused":false,"on_from":77,"on_to":999},{"name":"Caoimhin Kelleher","shirt":62,"pos":"G","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Joe Gomez","shirt":2,"pos":"D","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Jarell Quansah","shirt":78,"pos":"D","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Wataru Endo","shirt":3,"pos":"M","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Harvey Elliott","shirt":19,"pos":"M","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0}]},"manutd_tottenham":{"teams":["Man Utd","Tottenham"],"players":[{"name":"André Onana","shirt":24,"pos":"G","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Noussair Mazraoui","shirt":3,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Matthijs de Ligt","shirt":4,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Lisandro Martínez","shirt":6,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Diogo Dalot","shirt":20,"pos":"D","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Kobbie Mainoo","shirt":37,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":45},{"name":"Manuel Ugarte","shirt":25,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":72},{"name":"Alejandro Garnacho","shirt":17,"pos":"F","team":0,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Bruno Fernandes","shirt":8,"pos":"M","team":0,"sub":false,"unused":false,"on_from":0,"on_to":42},{"name":"Marcus Rashford","shirt":10,"pos":"F","team":0,"sub":false,"unused":false,"on_from":0,"on_to":73},{"name":"Joshua Zirkzee","shirt":11,"pos":"F","team":0,"sub":false,"unused":false,"on_from":0,"on_to":45},{"name":"Mason Mount","shirt":7,"pos":"F","team":0,"sub":true,"unused":false,"on_from":50,"on_to":999},{"name":"Casemiro","shirt":18,"pos":"M","team":0,"sub":true,"unused":false,"on_from":45,"on_to":999},{"name":"Christian Eriksen","shirt":14,"pos":"M","team":0,"sub":true,"unused":false,"on_from":72,"on_to":999},{"name":"Rasmus Højlund","shirt":9,"pos":"F","team":0,"sub":true,"unused":false,"on_from":73,"on_to":999},{"name":"Amad Diallo","shirt":16,"pos":"M","team":0,"sub":true,"unused":false,"on_from":78,"on_to":999},{"name":"Altay Bayındır","shirt":1,"pos":"G","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Jonny Evans","shirt":35,"pos":"D","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Victor Lindelöf","shirt":2,"pos":"D","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Antony","shirt":21,"pos":"M","team":0,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Guglielmo Vicario","shirt":1,"pos":"G","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Pedro Porro","shirt":23,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Cristian Romero","shirt":17,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Micky van de Ven","shirt":37,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":81},{"name":"Destiny Udogie","shirt":13,"pos":"D","team":1,"sub":false,"unused":false,"on_from":0,"on_to":45},{"name":"Dejan Kulusevski","shirt":21,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Rodrigo Bentancur","shirt":30,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"James Maddison","shirt":10,"pos":"M","team":1,"sub":false,"unused":false,"on_from":0,"on_to":77},{"name":"Brennan Johnson","shirt":22,"pos":"F","team":1,"sub":false,"unused":false,"on_from":0,"on_to":76},{"name":"Dominic Solanke","shirt":19,"pos":"F","team":1,"sub":false,"unused":false,"on_from":0,"on_to":999},{"name":"Timo Werner","shirt":16,"pos":"F","team":1,"sub":false,"unused":false,"on_from":0,"on_to":77},{"name":"Djed Spence","shirt":24,"pos":"D","team":1,"sub":true,"unused":false,"on_from":45,"on_to":999},{"name":"Mikey Moore","shirt":47,"pos":"F","team":1,"sub":true,"unused":false,"on_from":76,"on_to":999},{"name":"Lucas Bergvall","shirt":15,"pos":"M","team":1,"sub":true,"unused":false,"on_from":77,"on_to":999},{"name":"Pape Matar Sarr","shirt":29,"pos":"M","team":1,"sub":true,"unused":false,"on_from":77,"on_to":999},{"name":"Radu Drăguşin","shirt":6,"pos":"D","team":1,"sub":true,"unused":false,"on_from":81,"on_to":999},{"name":"Fraser Forster","shirt":20,"pos":"G","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Archie Gray","shirt":14,"pos":"M","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Yves Bissouma","shirt":8,"pos":"M","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0},{"name":"Will Lankshear","shirt":42,"pos":"F","team":1,"sub":true,"unused":true,"on_from":0,"on_to":0}]}}};
+const KEY = "carrier_labels_v1";
+const OFFSETS = [-2,-1,0,1,2];
+const SPECIAL = ["UNKNOWN","WRONG_PLAYER_BOXED","NOT_A_PASS"];
+
+// Some browsers refuse localStorage on file:// -- degrade to memory and say so loudly.
+const $ = id => document.getElementById(id);
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { warn(); return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { warn(); } }
+function warn() {
+  $("warn").textContent = "storage blocked -- EXPORT CSV before closing this tab!";
+}
+
+let store = JSON.parse(lsGet(KEY) || "{}");
+let idx = Math.min(+(lsGet(KEY+"_idx") || 0), DATA.moments.length-1);
+let ctxOff = 2;
+
+const cur = () => DATA.moments[idx];
+const rec = () => store[cur().id] || {};
+
+function persist() { lsSet(KEY, JSON.stringify(store)); }
+
+function save(patch) {
+  const m = cur();
+  store[m.id] = Object.assign({player_name:"",confidence_1to3:"",notes:""}, store[m.id], patch);
+  persist();
+  render();
+}
+
+function labelled() {
+  return DATA.moments.filter(m => (store[m.id]||{}).player_name).length;
+}
+
+function onPitch(p, minute) {
+  if (p.unused) return false;
+  return minute >= p.on_from - 5 && minute <= p.on_to + 5;
+}
+
+function renderRoster() {
+  const m = cur(), R = DATA.rosters[m.match], box = $("rosters");
+  box.innerHTML = "";
+  R.teams.forEach((tname, ti) => {
+    const h = document.createElement("div");
+    h.className = "teamhead"; h.textContent = tname;
+    box.appendChild(h);
+    const g = document.createElement("div");
+    g.className = "grid";
+    R.players.filter(p => p.team === ti).forEach(p => {
+      const b = document.createElement("button");
+      b.innerHTML = '<span class="sh">' + (p.shirt||"-") + "</span>";
+      b.appendChild(document.createTextNode(p.name));
+      b.dataset.name = p.name;
+      b.title = p.name + " (" + p.pos + ")" +
+        (p.unused ? " -- unused substitute" :
+         p.sub ? " -- came on about " + p.on_from + "'" :
+         p.on_to < 999 ? " -- off about " + p.on_to + "'" : " -- played the full match");
+      if (p.unused) { b.className = "unused"; b.disabled = true; }
+      else if (!onPitch(p, m.minute)) b.className = "off";
+      if (rec().player_name === p.name) b.classList.add("on");
+      b.onclick = () => pick(p.name);
+      g.appendChild(b);
+    });
+    box.appendChild(g);
+  });
+  applyFilter();
+}
+
+function pick(name) {
+  const r = rec();
+  save({player_name:name, confidence_1to3: r.confidence_1to3 || "3"});
+}
+
+function render() {
+  const m = cur(), r = rec();
+  $("progress").innerHTML = "<b>" + (idx+1) + "</b> of " + DATA.moments.length +
+    ' &#183; <span class="' + (labelled()===DATA.moments.length ? "done" : "") + '">' +
+    labelled() + " labelled</span>";
+  $("meta").textContent = m.match + "  " + m.id.slice(0,3) + "  ~" + m.minute + "'";
+  $("ctx").src = m.id + "_ctx" + (OFFSETS[ctxOff] >= 0 ? "+" : "") + OFFSETS[ctxOff] + ".jpg";
+  $("crop").src = m.id + "_crop.jpg";
+  $("strip").innerHTML = "";
+  OFFSETS.forEach((o,i) => {
+    const b = document.createElement("button");
+    b.textContent = (o>0?"+":"") + o + (o===0 ? " (kick)" : "");
+    if (i === ctxOff) b.className = "on";
+    b.onclick = () => { ctxOff = i; render(); };
+    $("strip").appendChild(b);
+  });
+  $("answer").innerHTML = r.player_name
+    ? r.player_name + ' <span style="color:var(--dim)">conf ' + (r.confidence_1to3||"-") + "</span>"
+    : '<span class="none">not labelled yet</span>';
+  document.querySelectorAll("[data-sp]").forEach(b =>
+    b.classList.toggle("on", b.dataset.sp === r.player_name));
+  document.querySelectorAll("[data-cf]").forEach(b =>
+    b.classList.toggle("on", b.dataset.cf === (r.confidence_1to3||"")));
+  if ($("notes") !== document.activeElement) $("notes").value = r.notes || "";
+  renderRoster();
+  lsSet(KEY+"_idx", idx);
+  const nx = DATA.moments[idx+1];
+  if (nx) OFFSETS.forEach(o => {
+    (new Image()).src = nx.id + "_ctx" + (o>=0?"+":"") + o + ".jpg";
+  });
+}
+
+function go(d) {
+  idx = Math.max(0, Math.min(DATA.moments.length-1, idx+d));
+  ctxOff = 2;
+  $("filter").value = "";
+  render();
+}
+
+function applyFilter() {
+  const q = $("filter").value.trim().toLowerCase();
+  document.querySelectorAll("#rosters .grid button").forEach(b =>
+    b.classList.toggle("hide", q !== "" && !b.dataset.name.toLowerCase().includes(q)));
+}
+
+// --- csv ------------------------------------------------------------------
+function csvCell(v) {
+  v = (v === undefined || v === null) ? "" : String(v);
+  return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+
+function exportCsv() {
+  const cols = DATA.columns;
+  const lines = [cols.join(",")];
+  DATA.moments.forEach(m => {
+    const r = Object.assign({}, m.row, store[m.id] || {});
+    lines.push(cols.map(c => csvCell(r[c])).join(","));
+  });
+  const blob = new Blob(["\uFEFF" + lines.join("\r\n") + "\r\n"],
+                        {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "labels_filled.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [], cell = "", q = false;
+  text = text.replace(/^\uFEFF/, "");
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"' && text[i+1] === '"') { cell += '"'; i++; }
+      else if (c === '"') q = false;
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; }
+    else if (c !== "\r") cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+function importCsv(text) {
+  const rows = parseCsv(text).filter(r => r.length > 1);
+  if (!rows.length) return;
+  const head = rows[0];
+  if (head.indexOf("id") < 0) { alert("no id column found"); return; }
+  let n = 0;
+  rows.slice(1).forEach(r => {
+    const o = {};
+    head.forEach((h,i) => o[h] = r[i]);
+    if (!o.id || !o.player_name) return;
+    store[o.id] = {player_name:o.player_name, confidence_1to3:o.confidence_1to3||"",
+                   notes:o.notes||""};
+    n++;
+  });
+  persist();
+  alert("imported " + n + " labels");
+  render();
+}
+
+// --- wiring ---------------------------------------------------------------
+$("prev").onclick = () => go(-1);
+$("next").onclick = () => go(1);
+$("clear").onclick = () => { delete store[cur().id]; persist(); render(); };
+$("export").onclick = exportCsv;
+$("importbtn").onclick = () => $("import").click();
+$("import").onchange = e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => importCsv(fr.result);
+  fr.readAsText(f, "utf-8");
+  e.target.value = "";
+};
+$("resume").onclick = () => {
+  const i = DATA.moments.findIndex(m => !(store[m.id]||{}).player_name);
+  idx = i < 0 ? DATA.moments.length-1 : i;
+  ctxOff = 2; render();
+};
+document.querySelectorAll("[data-sp]").forEach(b =>
+  b.onclick = () => save({player_name:b.dataset.sp, confidence_1to3:rec().confidence_1to3||"3"}));
+document.querySelectorAll("[data-cf]").forEach(b =>
+  b.onclick = () => save({confidence_1to3:b.dataset.cf}));
+$("notes").oninput = () => save({notes:$("notes").value});
+$("filter").oninput = applyFilter;
+$("filter").onkeydown = e => {
+  if (e.key === "Escape") { $("filter").value = ""; applyFilter(); $("filter").blur(); }
+  if (e.key === "Enter") {
+    const vis = [...document.querySelectorAll("#rosters .grid button")]
+      .filter(b => !b.classList.contains("hide") && !b.disabled);
+    if (vis.length === 1) { pick(vis[0].dataset.name); $("filter").value = ""; applyFilter(); }
+    e.preventDefault();
+  }
+};
+$("notes").onkeydown = e => { if (e.key === "Escape" || e.key === "Enter") $("notes").blur(); };
+
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  const k = e.key.toLowerCase();
+  if (e.key === "ArrowLeft")  { ctxOff = Math.max(0, ctxOff-1); render(); }
+  else if (e.key === "ArrowRight") { ctxOff = Math.min(OFFSETS.length-1, ctxOff+1); render(); }
+  else if (e.key === "Enter") go(1);
+  else if (e.key === "Backspace") go(-1);
+  else if (k === "1" || k === "2" || k === "3") save({confidence_1to3:k});
+  else if (k === "u") save({player_name:SPECIAL[0], confidence_1to3:rec().confidence_1to3||"3"});
+  else if (k === "w") save({player_name:SPECIAL[1], confidence_1to3:rec().confidence_1to3||"3"});
+  else if (k === "x") save({player_name:SPECIAL[2], confidence_1to3:rec().confidence_1to3||"3"});
+  else if (k === "0") { delete store[cur().id]; persist(); render(); }
+  else if (k === "/") { $("filter").focus(); }
+  else if (k === "n") { $("notes").focus(); }
+  else if (k === "g") { $("resume").click(); }
+  else return;
+  e.preventDefault();
+});
+render();
+</script>
+</body>
+</html>

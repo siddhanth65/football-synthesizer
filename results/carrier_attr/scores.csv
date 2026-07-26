@@ -1,0 +1,4 @@
+match,n_pass,resolvable,assigned,coverage,abstain_rate,gallery_players,gallery_pass_share,gallery_loto_precision,spearman,n_join,top5_overlap,consistency,n_consistency_tracks,off_roster
+manutd_liverpool,981,355,122,0.1244,0.656,18,0.639,0.812,0.534,15,3,1.0,1,0
+manutd_tottenham,1079,338,125,0.1158,0.63,24,0.859,0.794,0.374,20,1,0.0,1,0
+manutd_brighton,960,402,147,0.1531,0.634,20,0.786,0.752,0.304,18,2,1.0,1,0

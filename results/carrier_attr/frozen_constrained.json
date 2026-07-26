@@ -1,0 +1,15 @@
+{
+  "subwindow": true,
+  "exclusion": true,
+  "kinematic": true,
+  "w_territory": 0.0,
+  "territory_floor": null,
+  "w_hubness": 1.0,
+  "joint": false,
+  "min_sim": 0.88,
+  "min_margin": 0.01,
+  "dev_match": "manutd_liverpool",
+  "dev_e2e": 0.5,
+  "dev_n_assigned": 10,
+  "rule": "max dev end-to-end precision s.t. n_assigned >= 8; hard constraints always on; ties -> more assignments"
+}

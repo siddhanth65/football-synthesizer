@@ -1,0 +1,4 @@
+match,n_pass,ball_found,resolvable,resolvable_rate,median_dist_m,named_tracks,gallery_crops,gallery_players
+manutd_liverpool,981,475,355,0.362,0.91,221,1277,18
+manutd_tottenham,1079,468,338,0.313,1.0,282,1623,24
+manutd_brighton,960,600,402,0.419,1.04,166,977,20
