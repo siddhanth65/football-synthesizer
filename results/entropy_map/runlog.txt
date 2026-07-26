@@ -1,0 +1,297 @@
+matches: 12; 1 Hz rows cached: 26365
+
+== CENSUS A: 1 Hz supply per match (gap policy not yet applied) ==
+match                 mgr       chk  span_s  ball_s  ballcov  linkobs  poss_s  posscov
+manutd_fulham         ten_hag    10    5488    1927    0.351    0.746     580    0.301
+brighton_manutd       ten_hag    11    5817    2529    0.435    0.809     915    0.362
+manutd_liverpool      ten_hag    11    5737    1994    0.348    0.781     573    0.287
+southampton_manutd    ten_hag    11    5670    2132    0.376    0.726     677    0.318
+palace_manutd         ten_hag    10    5356    1735    0.324    0.782     468    0.270
+manutd_tottenham      ten_hag    11    5752    1999    0.348    0.775     575    0.288
+liverpool_manutd      amorim     10    5476    1754    0.320    0.744     516    0.294
+manutd_southampton    amorim     10    5783    2377    0.411    0.669     655    0.276
+manutd_brighton       amorim     11    5915    2473    0.418    0.729    1012    0.409
+fulham_manutd         amorim     10    5725    2731    0.477    0.742     972    0.356
+manutd_palace         amorim     11    5746    2248    0.391    0.695     703    0.313
+tottenham_manutd      amorim     11    5501    2466    0.448    0.730     647    0.262
+POOLED                          127   67966   26365    0.388    0.744    8293    0.315
+  ball_cov = 1 Hz seconds with a ball position / chunk span; link_obs = share of those
+  samples link_ball marked observed; poss_cov = share of ball seconds with a carrier.
+
+== CENSUS B: possession strings, gap policy G=0 s ==
+match                  strings   secs   med   p90   max    obs  pfill    T3str    T3seg    T3MU    T5str    T5seg    T5MU    T8str    T8seg    T8MU
+manutd_fulham              105    301   2.0   4.0    10  0.777  0.000       49       91      46       10       23       9        1        3       0
+brighton_manutd            192    558   2.0   5.0    11  0.875  0.000       83      174      66       23       53      16        6       10       2
+manutd_liverpool           110    327   2.0   5.0     9  0.872  0.000       50      107      58       18       32      19        2        3       2
+southampton_manutd         129    353   2.0   4.0    11  0.785  0.000       44       95      56       10       33      21        3       11       8
+palace_manutd               95    283   2.0   4.6    13  0.876  0.000       43       93      77       10       29      27        3        8       8
+manutd_tottenham           112    321   2.0   5.0     8  0.832  0.000       50       97      15       15       27       3        1        1       0
+liverpool_manutd            94    272   2.0   4.0    10  0.827  0.000       39       84      26        9       27       7        3        6       1
+manutd_southampton         135    366   2.0   4.0     9  0.790  0.000       47       96      40       10       28       8        5        7       1
+manutd_brighton            223    627   2.0   4.0    11  0.821  0.000       99      181      61       21       39       7        2        6       0
+fulham_manutd              188    581   2.0   5.0    15  0.855  0.000       91      205     107       21       69      31        7       25      13
+manutd_palace              139    390   2.0   5.0    11  0.836  0.000       50      112      87       15       34      28        2        6       6
+tottenham_manutd           125    339   2.0   4.0    12  0.799  0.000       44       89      12       10       28       0        2        9       0
+POOLED                    1647   4718                    0.829  0.000      689     1424     651      172      422     176       37       95      41
+
+== CENSUS B: possession strings, gap policy G=1 s ==
+match                  strings   secs   med   p90   max    obs  pfill    T3str    T3seg    T3MU    T5str    T5seg    T5MU    T8str    T8seg    T8MU
+manutd_fulham              113    399   3.0   6.0    11  0.749  0.018       72      173      90       22       63      30        6       14       8
+brighton_manutd            201    687   3.0   6.0    14  0.849  0.009      113      285     112       41      116      42       13       33      10
+manutd_liverpool           113    396   3.0   6.0     9  0.843  0.005       69      170      99       29       59      39        4        5       4
+southampton_manutd         139    473   3.0   5.0    32  0.744  0.036       74      195     105       20       86      43        7       48      18
+palace_manutd               93    337   3.0   6.0    14  0.852  0.000       55      151     111       18       62      47        6       25      18
+manutd_tottenham           118    401   3.0   6.0    11  0.798  0.012       68      165      22       28       62       5        4        7       0
+liverpool_manutd           101    347   3.0   6.0    11  0.775  0.009       58      145      58       20       55      20        4       10       1
+manutd_southampton         141    470   3.0   6.0    14  0.755  0.011       71      188      80       25       76      27        8       19       3
+manutd_brighton            229    821   3.0   6.0    14  0.778  0.013      146      363     122       52      139      33       12       35       4
+fulham_manutd              208    783   3.0   7.0    15  0.815  0.009      137      367     194       50      151      76       11       46      24
+manutd_palace              150    527   3.0   7.0    13  0.799  0.017       83      227     141       28       94      61       13       27      16
+tottenham_manutd           135    439   3.0   5.0    12  0.786  0.009       71      169      32       23       59       4        6       16       0
+POOLED                    1741   6080                    0.795  0.012     1017     2598    1166      356     1022     427       94      285     106
+
+== CENSUS B: possession strings, gap policy G=2 s ==
+match                  strings   secs   med   p90   max    obs  pfill    T3str    T3seg    T3MU    T5str    T5seg    T5MU    T8str    T8seg    T8MU
+manutd_fulham              112    452   3.0   7.0    14  0.726  0.029       78      228     132       31      102      66       10       32      26
+brighton_manutd            202    808   3.0   8.0    19  0.837  0.012      129      404     163       59      195      80       22       73      32
+manutd_liverpool           110    456   3.0   7.1    14  0.825  0.015       74      236     142       38      109      74       11       28      24
+southampton_manutd         146    585   3.0   6.0    32  0.718  0.074       97      293     150       39      135      69       12       59      25
+palace_manutd               94    389   3.0   7.0    15  0.810  0.013       63      201     142       27       92      67        8       35      26
+manutd_tottenham           124    473   3.0   7.0    11  0.784  0.019       78      225      43       34       98      13       11       21       1
+liverpool_manutd           101    440   4.0   7.0    13  0.745  0.034       70      238      85       37      115      38        9       31       6
+manutd_southampton         138    536   3.0   7.0    27  0.733  0.024       81      260     105       37      125      45       12       43       7
+manutd_brighton            229    929   3.0   8.0    15  0.749  0.029      158      471     162       67      216      55       24       66      14
+fulham_manutd              210    920   3.5   7.0    21  0.791  0.022      157      500     263       74      238     127       20       78      51
+manutd_palace              154    609   3.0   8.0    19  0.755  0.033       94      301     182       36      144      91       19       57      39
+tottenham_manutd           140    555   3.0   7.1    12  0.764  0.014       90      275      59       42      123      16       14       33       1
+POOLED                    1760   7152                    0.770  0.027     1169     3632    1628      521     1692     741      172      556     252
+
+== CENSUS B: possession strings, gap policy G=3 s ==
+match                  strings   secs   med   p90   max    obs  pfill    T3str    T3seg    T3MU    T5str    T5seg    T5MU    T8str    T8seg    T8MU
+manutd_fulham              106    514   3.5   9.0    21  0.708  0.047       77      302     171       40      172     105       16       73      48
+brighton_manutd            200    926   3.0   9.1    19  0.814  0.032      135      526     210       76      298     115       29      134      52
+manutd_liverpool           114    536   4.0   8.0    16  0.808  0.035       83      308     181       51      160     104       16       52      40
+southampton_manutd         148    643   3.0   7.0    32  0.720  0.084      104      347     184       50      172      97       14       74      40
+palace_manutd               95    414   4.0   7.6    15  0.802  0.019       66      224     157       31      108      77       10       39      28
+manutd_tottenham           126    551   3.0   8.0    14  0.777  0.029       83      299      74       47      155      37       17       48      10
+liverpool_manutd           100    483   4.0   9.1    13  0.714  0.054       75      283     105       45      148      53       14       44      12
+manutd_southampton         140    610   3.0   8.0    27  0.703  0.044       89      330     142       51      175      75       16       65      24
+manutd_brighton            226   1054   4.0   8.0    27  0.731  0.048      165      602     231       89      323     108       32      125      44
+fulham_manutd              206   1024   4.0   9.0    21  0.764  0.029      162      612     329       87      332     180       30      133      78
+manutd_palace              154    701   3.0   8.7    28  0.726  0.053      101      393     241       48      220     145       23      106      82
+tottenham_manutd           131    642   4.0  10.0    19  0.732  0.040       93      380      89       56      214      43       21       83      17
+POOLED                    1746   8098                    0.750  0.043     1233     4606    2114      671     2477    1139      238      976     475
+
+== CENSUS B: possession strings, gap policy G=5 s ==
+match                  strings   secs   med   p90   max    obs  pfill    T3str    T3seg    T3MU    T5str    T5seg    T5MU    T8str    T8seg    T8MU
+manutd_fulham              111    672   5.0  12.0    27  0.653  0.106       89      450     259       59      290     174       32      135      81
+brighton_manutd            206   1093   4.0  10.5    22  0.790  0.055      144      681     274       92      428     166       42      208      74
+manutd_liverpool           113    660   5.0  11.0    27  0.770  0.056       86      434     254       60      278     177       25      136     100
+southampton_manutd         145    802   4.0   9.6    41  0.686  0.125      109      512     280       65      319     180       28      172      94
+palace_manutd               92    456   4.0   9.0    32  0.774  0.050       64      272     199       32      159     122       12       87      70
+manutd_tottenham           118    689   5.0  12.0    30  0.734  0.073       88      453      99       61      292      56       29      143      18
+liverpool_manutd            98    571   5.0  11.0    32  0.697  0.088       76      375     136       53      236      76       23      104      23
+manutd_southampton         142    776   4.0  10.0    27  0.653  0.090      100      492     231       66      313     155       29      149      78
+manutd_brighton            214   1215   4.0  11.0    27  0.698  0.084      163      787     319       98      504     195       54      260     102
+fulham_manutd              195   1224   5.0  13.0    29  0.741  0.051      161      834     442      102      546     288       50      291     157
+manutd_palace              159    882   4.0  10.0    36  0.689  0.084      116      564     339       74      355     227       41      162     124
+tottenham_manutd           132    811   5.0  11.0    28  0.708  0.054      102      547     135       70      359      83       35      185      44
+POOLED                    1725   9851                    0.716  0.076     1298     6401    2967      832     4079    1899      400     2032     965
+
+== CENSUS B: possession strings, gap policy G=10 s ==
+match                  strings   secs   med   p90   max    obs  pfill    T3str    T3seg    T3MU    T5str    T5seg    T5MU    T8str    T8seg    T8MU
+manutd_fulham              106    973   7.0  17.5    44  0.606  0.193       89      761     422       69      594     339       52      401     238
+brighton_manutd            209   1331   5.0  13.2    38  0.748  0.095      152      913     365      109      636     246       65      357     126
+manutd_liverpool           114    898   6.0  14.4    68  0.665  0.156       94      670     420       71      497     334       39      320     235
+southampton_manutd         150   1107   5.0  15.0    41  0.625  0.197      120      807     460       84      587     347       52      380     233
+palace_manutd               90    692   4.0  17.0    41  0.678  0.163       69      512     369       43      385     284       28      272     203
+manutd_tottenham           117   1003   7.0  16.0    32  0.650  0.160       97      769     163       76      586     110       54      376      54
+liverpool_manutd           102    820   6.0  16.9    42  0.611  0.198       82      616     248       63      461     180       40      295     111
+manutd_southampton         142   1032   6.0  15.0    36  0.600  0.149      106      748     336       81      548     252       49      333     153
+manutd_brighton            201   1589   5.0  15.0    44  0.622  0.181      165     1187     506      113      891     373       78      594     254
+fulham_manutd              191   1465   6.0  16.0    53  0.695  0.095      165     1083     567      113      785     407       69      489     252
+manutd_palace              156   1252   6.5  17.5    36  0.597  0.186      124      940     487       92      710     371       69      455     247
+tottenham_manutd           125   1071   6.0  19.0    45  0.663  0.103      102      821     226       78      629     160       49      423      95
+POOLED                    1703  13233                    0.647  0.156     1365     9827    4569      992     7309    3403      644     4695    2201
+
+== MAPS  G=2 T=3 grid=4x3 min_n=5 ==
+map                                 n_seg  hit  val  tot  medN  Hmean   Hmax
+manutd_fulham:Man Utd                 132   10    7   12  14.0  1.082  2.001
+manutd_fulham:Fulham                   96   11    9   12   9.0  1.055  2.156
+brighton_manutd:Man Utd               163   12   10   12  16.0  1.315  2.061
+brighton_manutd:Brighton              241   12   10   12  18.5  1.512  2.459
+manutd_liverpool:Man Utd              142   12    8   12   9.0  1.325  2.187
+manutd_liverpool:Liverpool             94   11    8   12   6.0  1.112  2.082
+southampton_manutd:Man Utd            150   11   10   12  10.0  0.879  1.571
+southampton_manutd:Southampton        143   11   10   12   9.0  1.032  1.627
+palace_manutd:Crystal Palace           59    9    6   12   6.0  0.797  1.522
+palace_manutd:Man Utd                 142   10    7   12  11.5  0.810  2.063
+manutd_tottenham:Man Utd               43    8    4   12   4.5  1.077  1.522
+manutd_tottenham:Tottenham            182   12    6   12   8.0  1.212  1.361
+liverpool_manutd:Liverpool            153   12   11   12   8.5  1.325  1.792
+liverpool_manutd:Man Utd               85   11    9   12   7.0  1.103  1.522
+manutd_southampton:Man Utd            105   12    9   12   6.0  1.019  2.139
+manutd_southampton:Southampton        155   12    8   12   8.0  1.173  1.977
+manutd_brighton:Man Utd               162   12   10   12  12.5  1.302  1.961
+manutd_brighton:Brighton              309   11   11   12  30.0  1.126  1.741
+fulham_manutd:Fulham                  237   12   10   12  15.0  1.483  2.156
+fulham_manutd:Man Utd                 263   12   11   12  20.5  1.248  1.746
+manutd_palace:Man Utd                 182   11    9   12  10.0  1.229  1.835
+manutd_palace:Crystal Palace          119   11    9   12   8.0  1.114  1.551
+tottenham_manutd:Man Utd               59   11    4   12   3.0  1.221  1.846
+tottenham_manutd:Tottenham            216   12   10   12  16.5  1.195  2.041
+
+  aggregate Man Utd: n_seg=1628 valid=12/12 H_mean=1.485
+  entropy grid (rows = y bands top..bottom, cols = x bands, attacking ->):
+    1.17  1.54  1.24  1.49   n=   69  135  215   80
+    1.77  2.14  1.72  1.40   n=   45  148  372  142
+    1.04  1.36  1.51  1.44   n=   49  170  149   54
+
+== IDENTITY  G=2 T=3 grid=4x3 min_n=5  (24 maps, segments/map min=43 med=146) ==
+  [entropy] 7-class LOO 1-NN over all 24 maps: acc=0.208 (majority=0.500, null mean=0.256 p95=0.417, p=0.731)
+      balanced acc=0.060 (null mean=0.104 p95=0.214, p=0.802)
+      6-class opponent-only (12 maps): acc=0.000 (chance=1/11=0.091, null mean=0.089 p=1.000)
+      same-opponent other-leg retrieval: top1=0.000 (chance=0.091) mean rank=7.75 of n=12
+  [occupancy] 7-class LOO 1-NN over all 24 maps: acc=0.292 (majority=0.500, null mean=0.263 p95=0.417, p=0.477)
+      balanced acc=0.083 (null mean=0.107 p95=0.238, p=0.598)
+      6-class opponent-only (12 maps): acc=0.000 (chance=1/11=0.091, null mean=0.092 p=1.000)
+      same-opponent other-leg retrieval: top1=0.000 (chance=0.091) mean rank=7.67 of n=12
+
+== IDENTITY SENSITIVITY (entropy feature) ==
+  G  T    grid  segmed    acc    bal  p_acc  oppacc  pair1
+  0  3     4x3      57  0.125  0.036  0.948   0.000  0.000
+  0  3     6x4      57  0.167  0.048  0.816   0.000  0.000
+  0  3     8x6      57  0.083  0.024  0.958   0.000  0.000
+  0  3    10x8      57  0.125  0.036  0.894   0.000  0.000
+  0  3   20x16      57  0.000  0.000  1.000   0.000  0.083
+  0  5     4x3      18  0.125  0.036  0.762   0.000  0.000
+  0  5     6x4      18  0.083  0.024  0.906   0.000  0.000
+  0  5     8x6      18  0.042  0.012  0.711   0.000  0.000
+  0  5    10x8      18  0.000  0.000  1.000   0.000  0.083
+  0  5   20x16      18  0.000  0.000  1.000   0.000  0.083
+  0  8     4x3       2  0.083  0.024  0.289   0.000  0.083
+  0  8     6x4       2  0.000  0.000  1.000   0.000  0.083
+  0  8     8x6       2  0.000  0.000  1.000   0.000  0.083
+  0  8    10x8       2  0.000  0.000  1.000   0.000  0.083
+  0  8   20x16       2  0.000  0.000  1.000   0.000  0.083
+  1  3     4x3     102  0.208  0.060  0.782   0.000  0.000
+  1  3     6x4     102  0.250  0.071  0.671   0.083  0.083
+  1  3     8x6     102  0.375  0.226  0.150   0.167  0.167
+  1  3    10x8     102  0.125  0.036  0.938   0.000  0.000
+  1  3   20x16     102  0.042  0.012  0.958   0.000  0.000
+  1  5     4x3      40  0.250  0.369  0.477   0.500  0.500
+  1  5     6x4      40  0.083  0.024  0.980   0.000  0.000
+  1  5     8x6      40  0.208  0.119  0.489   0.167  0.167
+  1  5    10x8      40  0.125  0.036  0.772   0.000  0.000
+  1  5   20x16      40  0.000  0.000  1.000   0.000  0.083
+  1  8     4x3      10  0.042  0.012  0.924   0.000  0.000
+  1  8     6x4      10  0.000  0.000  1.000   0.000  0.000
+  1  8     8x6      10  0.083  0.024  0.455   0.000  0.083
+  1  8    10x8      10  0.000  0.000  1.000   0.000  0.083
+  1  8   20x16      10  0.000  0.000  1.000   0.000  0.083
+  2  3     4x3     146  0.208  0.060  0.723   0.000  0.000
+  2  3     6x4     146  0.250  0.071  0.645   0.083  0.083
+  2  3     8x6     146  0.375  0.167  0.154   0.250  0.250
+  2  3    10x8     146  0.250  0.131  0.645   0.167  0.167
+  2  3   20x16     146  0.042  0.012  0.974   0.000  0.000
+  2  5     4x3      68  0.292  0.202  0.477   0.250  0.250
+  2  5     6x4      68  0.167  0.048  0.854   0.083  0.083
+  2  5     8x6      68  0.083  0.083  0.950   0.250  0.250
+  2  5    10x8      68  0.250  0.071  0.479   0.000  0.000
+  2  5   20x16      68  0.000  0.000  1.000   0.000  0.083
+  2  8     4x3      25  0.125  0.155  0.824   0.167  0.167
+  2  8     6x4      25  0.167  0.048  0.687   0.083  0.083
+  2  8     8x6      25  0.042  0.012  0.964   0.000  0.083
+  2  8    10x8      25  0.000  0.000  1.000   0.000  0.083
+  2  8   20x16      25  0.000  0.000  1.000   0.000  0.083
+  3  3     4x3     180  0.125  0.036  0.964   0.000  0.000
+  3  3     6x4     180  0.292  0.143  0.463   0.083  0.083
+  3  3     8x6     180  0.375  0.107  0.180   0.000  0.000
+  3  3    10x8     180  0.250  0.071  0.587   0.000  0.000
+  3  3   20x16     180  0.083  0.024  0.952   0.083  0.083
+  3  5     4x3      98  0.292  0.083  0.461   0.000  0.000
+  3  5     6x4      98  0.083  0.024  0.994   0.000  0.000
+  3  5     8x6      98  0.000  0.000  1.000   0.000  0.000
+  3  5    10x8      98  0.250  0.071  0.549   0.000  0.000
+  3  5   20x16      98  0.042  0.012  0.852   0.000  0.000
+  3  8     4x3      39  0.250  0.190  0.457   0.167  0.167
+  3  8     6x4      39  0.292  0.083  0.353   0.000  0.000
+  3  8     8x6      39  0.250  0.190  0.361   0.167  0.167
+  3  8    10x8      39  0.208  0.060  0.363   0.000  0.083
+  3  8   20x16      39  0.000  0.000  1.000   0.000  0.083
+  5  3     4x3     256  0.125  0.036  0.960   0.167  0.167
+  5  3     6x4     256  0.208  0.119  0.786   0.083  0.083
+  5  3     8x6     256  0.375  0.286  0.146   0.333  0.333
+  5  3    10x8     256  0.500  0.262  0.022   0.250  0.250
+  5  3   20x16     256  0.208  0.119  0.697   0.167  0.167
+  5  5     4x3     163  0.333  0.214  0.329   0.167  0.167
+  5  5     6x4     163  0.250  0.071  0.663   0.083  0.083
+  5  5     8x6     163  0.333  0.214  0.240   0.167  0.167
+  5  5    10x8     163  0.250  0.131  0.603   0.167  0.167
+  5  5   20x16     163  0.208  0.179  0.525   0.250  0.250
+  5  8     4x3      80  0.292  0.143  0.415   0.167  0.167
+  5  8     6x4      80  0.250  0.071  0.579   0.000  0.000
+  5  8     8x6      80  0.208  0.179  0.685   0.167  0.167
+  5  8    10x8      80  0.125  0.036  0.948   0.000  0.000
+  5  8   20x16      80  0.000  0.000  1.000   0.000  0.083
+ 10  3     4x3     416  0.250  0.071  0.639   0.000  0.000
+ 10  3     6x4     416  0.375  0.286  0.172   0.250  0.250
+ 10  3     8x6     416  0.375  0.107  0.180   0.000  0.000
+ 10  3    10x8     416  0.250  0.071  0.639   0.167  0.167
+ 10  3   20x16     416  0.250  0.131  0.603   0.250  0.250
+ 10  5     4x3     315  0.250  0.071  0.613   0.000  0.000
+ 10  5     6x4     315  0.333  0.214  0.267   0.250  0.250
+ 10  5     8x6     315  0.292  0.083  0.453   0.167  0.167
+ 10  5    10x8     315  0.208  0.060  0.778   0.083  0.083
+ 10  5   20x16     315  0.292  0.083  0.415   0.167  0.167
+ 10  8     4x3     206  0.167  0.048  0.902   0.000  0.000
+ 10  8     6x4     206  0.208  0.060  0.816   0.083  0.083
+ 10  8     8x6     206  0.125  0.095  0.974   0.417  0.417
+ 10  8    10x8     206  0.167  0.048  0.864   0.000  0.000
+ 10  8   20x16     206  0.250  0.071  0.505   0.167  0.167
+
+== DEVIATION from Man Utd LOO-aggregate  G=2 T=3 grid=4x3 ==
+match                 opp             V  mgr res      n_seg cells   d_agg  nullmed  nullp95  p_dev      z  Hmean
+palace_manutd         Crystal Palace  A  TH  D 0-0      142     7   0.818    0.376    0.562  0.002   2.24  0.810
+southampton_manutd    Southampton     A  TH  W 3-0      150    10   0.656    0.378    0.552  0.005   1.10  0.879
+manutd_fulham         Fulham          H  TH  W 1-0      132     7   0.587    0.391    0.573  0.040   0.62  1.082
+manutd_southampton    Southampton     H  AM  W 3-1      105     9   0.557    0.426    0.616  0.140   0.41  1.019
+tottenham_manutd      Tottenham       A  AM  L 0-1       59     4   0.500    0.477    0.800  0.469   0.00  1.221
+manutd_tottenham      Tottenham       H  TH  L 0-3       43     4   0.493    0.508    0.941  0.529  -0.05  1.077
+manutd_palace         Crystal Palace  H  AM  L 0-2      182     9   0.446    0.329    0.457  0.075  -0.37  1.229
+fulham_manutd         Fulham          A  AM  W 1-0      263    11   0.434    0.286    0.413  0.037  -0.46  1.248
+brighton_manutd       Brighton        A  TH  L 1-2      163    10   0.430    0.344    0.494  0.180  -0.49  1.315
+liverpool_manutd      Liverpool       A  AM  D 2-2       85     9   0.417    0.454    0.675  0.618  -0.58  1.103
+manutd_brighton       Brighton        H  AM  L 1-3      162    10   0.383    0.337    0.481  0.312  -0.82  1.302
+manutd_liverpool      Liverpool       H  TH  L 0-3      142     8   0.270    0.364    0.516  0.858  -1.61  1.325
+
+== METRICA degradation control (ball_mask from our 12 matches: 0.388 of seconds present, 67966 s) ==
+  Sample_Game_1 [full        ] 1Hz s=3531 labelled=2359 (0.668) strings=247 med_len=8 p90=25
+      team0: segs= 1217 valid=12/12 H_mean=1.707
+      team1: segs= 1119 valid=12/12 H_mean=1.799
+  Sample_Game_1 [camera      ] 1Hz s=3531 labelled=2358 (0.668) strings=247 med_len=8 p90=25
+      team0: segs= 1217 valid=12/12 H_mean=1.707
+      team1: segs= 1118 valid=12/12 H_mean=1.794
+  Sample_Game_1 [camera+drop ] 1Hz s=1504 labelled=970 (0.645) strings=178 med_len=4 p90=13
+      team0: segs=  363 valid=12/12 H_mean=1.572
+      team1: segs=  410 valid=12/12 H_mean=1.574
+  Sample_Game_2 [full        ] 1Hz s=3334 labelled=2245 (0.673) strings=237 med_len=8 p90=26
+      team0: segs= 1236 valid=12/12 H_mean=1.764
+      team1: segs= 1080 valid=12/12 H_mean=1.813
+  Sample_Game_2 [camera      ] 1Hz s=3334 labelled=2245 (0.673) strings=237 med_len=8 p90=26
+      team0: segs= 1236 valid=12/12 H_mean=1.764
+      team1: segs= 1080 valid=12/12 H_mean=1.813
+  Sample_Game_2 [camera+drop ] 1Hz s=1579 labelled=1054 (0.668) strings=194 med_len=5 p90=12
+      team0: segs=  456 valid=11/12 H_mean=1.705
+      team1: segs=  414 valid=11/12 H_mean=1.676
+
+  distances (mean |dH| over commonly valid cells):
+    Sample_Game_1 team0: d(full, camera      ) = 0.000   vs d(full team0, full team1) = 0.253   ratio=0.00
+    Sample_Game_1 team0: d(full, camera+drop ) = 0.236   vs d(full team0, full team1) = 0.253   ratio=0.93
+    Sample_Game_1 team1: d(full, camera      ) = 0.005   vs d(full team1, full team0) = 0.253   ratio=0.02
+    Sample_Game_1 team1: d(full, camera+drop ) = 0.309   vs d(full team1, full team0) = 0.253   ratio=1.22
+    Sample_Game_2 team0: d(full, camera      ) = 0.000   vs d(full team0, full team1) = 0.258   ratio=0.00
+    Sample_Game_2 team0: d(full, camera+drop ) = 0.194   vs d(full team0, full team1) = 0.258   ratio=0.75
+    Sample_Game_2 team1: d(full, camera      ) = 0.000   vs d(full team1, full team0) = 0.258   ratio=0.00
+    Sample_Game_2 team1: d(full, camera+drop ) = 0.161   vs d(full team1, full team0) = 0.258   ratio=0.62
+  censored -> full retrieval of the same team-game: 3/4 (chance 1/4)

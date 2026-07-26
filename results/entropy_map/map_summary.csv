@@ -1,0 +1,25 @@
+map,team,match,n_seg,cells_hit,cells_valid,cells_total,med_cell_n,H_mean,H_max
+manutd_fulham:Man Utd,Man Utd,manutd_fulham,132,10,7,12,14.0,1.0815055512317024,2.0010581560227845
+manutd_fulham:Fulham,Fulham,manutd_fulham,96,11,9,12,9.0,1.0552950871860187,2.1556390622295662
+brighton_manutd:Man Utd,Man Utd,brighton_manutd,163,12,10,12,16.0,1.3146029470278913,2.0609640474436812
+brighton_manutd:Brighton,Brighton,brighton_manutd,241,12,10,12,18.5,1.5116312055775287,2.4591479170272446
+manutd_liverpool:Man Utd,Man Utd,manutd_liverpool,142,12,8,12,9.0,1.3249210850994801,2.1867043459100244
+manutd_liverpool:Liverpool,Liverpool,manutd_liverpool,94,11,8,12,6.0,1.111689771831036,2.082292189082415
+southampton_manutd:Man Utd,Man Utd,southampton_manutd,150,11,10,12,10.0,0.879319636850173,1.5709505944546687
+southampton_manutd:Southampton,Southampton,southampton_manutd,143,11,10,12,9.0,1.0323127669426488,1.626688849701832
+palace_manutd:Crystal Palace,Crystal Palace,palace_manutd,59,9,6,12,6.0,0.7971128023745478,1.5219280948873621
+palace_manutd:Man Utd,Man Utd,palace_manutd,142,10,7,12,11.5,0.8100017080434804,2.062656348037272
+manutd_tottenham:Man Utd,Man Utd,manutd_tottenham,43,8,4,12,4.5,1.0766695297249853,1.5219280948873621
+manutd_tottenham:Tottenham,Tottenham,manutd_tottenham,182,12,6,12,8.0,1.211984760225538,1.361009271066386
+liverpool_manutd:Liverpool,Liverpool,liverpool_manutd,153,12,11,12,8.5,1.3246216324885622,1.7924812503605778
+liverpool_manutd:Man Utd,Man Utd,liverpool_manutd,85,11,9,12,7.0,1.103293786770076,1.5219280948873621
+manutd_southampton:Man Utd,Man Utd,manutd_southampton,105,12,9,12,6.0,1.0188958409529163,2.139097655573916
+manutd_southampton:Southampton,Southampton,manutd_southampton,155,12,8,12,8.0,1.1731688848566653,1.9766480916739717
+manutd_brighton:Man Utd,Man Utd,manutd_brighton,162,12,10,12,12.5,1.3017147662256439,1.9605898459737487
+manutd_brighton:Brighton,Brighton,manutd_brighton,309,11,11,12,30.0,1.1255756407176498,1.7414014510669928
+fulham_manutd:Fulham,Fulham,fulham_manutd,237,12,10,12,15.0,1.4827476732555993,2.1556390622295662
+fulham_manutd:Man Utd,Man Utd,fulham_manutd,263,12,11,12,20.5,1.2483525016535664,1.7461034137898075
+manutd_palace:Man Utd,Man Utd,manutd_palace,182,11,9,12,10.0,1.229208515280495,1.8352377453121176
+manutd_palace:Crystal Palace,Crystal Palace,manutd_palace,119,11,9,12,8.0,1.113794557874421,1.5510981710072647
+tottenham_manutd:Man Utd,Man Utd,tottenham_manutd,59,11,4,12,3.0,1.2211301568652726,1.8464393446710154
+tottenham_manutd:Tottenham,Tottenham,tottenham_manutd,216,12,10,12,16.5,1.1950838652911633,2.0414460711655216
