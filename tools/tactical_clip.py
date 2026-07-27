@@ -19,7 +19,7 @@ observed         solid team-coloured disc; this frame projected it through a fit
 imputed          hollow diamond inside two nested ellipses = the frozen B4 v1 model's NOMINAL
                  50% / 90% predictive regions (``synthesizer.imputation_v1.emit`` -> ``source``
                  ``"v1"`` or ``"anchor"``). Tight blob at short occlusion, wide smear at long.
-                 Their MEASURED coverage on our own broadcast is 20.5% / 55.3%, not 50 / 90
+                 Their MEASURED coverage on our own broadcast is 21.2% / 55.4%, not 50 / 90
                  (:data:`PICP50_MEASURED`); the panel says so on every frame.
 abstained        faded ghost at the last-seen position with "last seen N s ago" -- the model
                  declined to assert (region wider than the frozen SGR threshold ``R_MAX``)
@@ -30,10 +30,10 @@ Honesty constraints enforced in code, not in prose:
 * the imputation model is the **frozen** B4 v1 (Metrica-trained; ``results/B4_MODEL_V1.md``) with
   the frozen CALIB conformal multipliers and the adopted P2 defer-to-anchor policy
   (``results/B4_ABSTENTION_POLICY.md``). Nothing here refits anything.
-* the regions are **not calibrated on broadcast**. ``results/FULL_MATCH_RECONSTRUCTION.md``
-  measured them against 1 259 real re-appearances on ``tottenham_manutd``: 20.5% coverage where
-  they promise 50% and 55.3% where they promise 90%, failing 0/4 testable buckets. The legend and
-  the footer on every frame carry those measured numbers, not the nominal ones.
+* the regions are **not calibrated on broadcast**. ``results/CALIBRATION_REPLICATION.md`` measured
+  them against 4 900 real re-appearances across four matches: 21.2% coverage where they promise 50%
+  and 55.4% where they promise 90%, failing 14/14 testable buckets. The legend and the footer on
+  every frame carry those measured numbers, not the nominal ones.
 * a passage below :data:`MIN_PLAYERS` gated players/frame or :data:`MIN_BALL_COV` ball coverage is
   **refused**, with the numbers that failed.
 
@@ -82,6 +82,8 @@ from fingerprint.theory_metrics import complete_directions  # noqa: E402
 OUT_ROOT = Path("results/tactical_clips")
 CACHE_DIR = "data/imputation/cache"
 IDENTITY_ROOT = Path("outputs/identity")
+GOAL_PROBE = Path("results/action_spotting_probe")   # tools/action_spot_probe.py output
+GOAL_THRESH = 0.30                                   # that probe's documented operating point
 CALIB_MAX_M = 1.0  # trusted-geometry gate; identical to report/facts and fingerprint.block_height
 
 # ---- frozen B4 v1 constants (results/B4_MODEL_V1_runlog.md + B4_ABSTENTION_runlog.md) ------------
@@ -94,14 +96,16 @@ K90_ANC = np.array([1.351, 1.792, 1.864, 1.995, 2.699, 2.871])
 R_MAX = 30.4339                      # frozen SGR threshold (layer B), metres
 SKILL_BUCKETS = (1, 2, 3, 4, 5)      # buckets where v1 beat the anchor on CALIB; 0-1s defers
 
-# ---- MEASURED coverage of those regions on OUR footage (results/FULL_MATCH_RECONSTRUCTION.md) ----
-# 1 259 liveness-guarded re-appearances on tottenham_manutd, frozen regions, P2 emitted policy.
-# The regions pass 6/6 on Metrica simulation and fail 0/4 testable buckets here, so nothing drawn
-# below may be labelled "calibrated": the panel prints these numbers instead.
-PICP50_MEASURED = 20.5
-PICP90_MEASURED = 55.3
-PICP_N = 1259
-PICP_SOURCE = "tottenham_manutd"
+# ---- MEASURED coverage of those regions on OUR footage (results/CALIBRATION_REPLICATION.md) ------
+# 4 900 liveness-guarded re-appearances pooled over FOUR matches (tottenham_manutd 20.5/55.3 n=1259,
+# manutd_liverpool 21.9/57.8 n=791, manutd_brighton 21.6/56.3 n=2033, liverpool_manutd 20.7/51.4
+# n=817), frozen regions, P2 emitted policy. The regions pass 6/6 on Metrica simulation and fail
+# 14/14 testable buckets here, so nothing drawn below may be labelled "calibrated": the panel prints
+# these numbers instead (knowledge base: b4-014 retracted, b4-015 confirmed).
+PICP50_MEASURED = 21.2
+PICP90_MEASURED = 55.4
+PICP_N = 4900
+PICP_SOURCE = "4 matches"
 
 # ---- render / selection knobs -------------------------------------------------------------------
 FPS = 25.0
@@ -116,6 +120,8 @@ SQUAD = 11              # observed + imputed markers per team are capped at a le
 DUP_M = 6.0             # a ghost this close to a live same-team track is that track, re-identified
 WIN_S = 14.0            # shortlist window length
 STRIDE_S = 7.0          # shortlist window stride
+MIN_ISLAND_S = 18.0     # shortest gate-passing run worth cutting to in a stitched clip
+MAX_ISLAND_S = 40.0     # longest run to search for; the gate never holds this long on our footage
 
 C_TEAM = md.C_TEAM
 C_WHITE, C_BLACK, C_YELLOW = md.C_WHITE, md.C_BLACK, md.C_YELLOW
@@ -407,6 +413,7 @@ class Passage:
         self.names = load_names(match)
         self.states = self._states()
         self.keys = np.array(sorted(self.states), int)
+        self._index_states()
         self.quality = self._quality()
         self.situation = self._situation()
         self.ghosts: dict[int, list[Ghost]] = {}
@@ -486,23 +493,43 @@ class Passage:
         return out
 
     # -- quality + situation -----------------------------------------------------------------
-    def _quality(self) -> Quality:
-        """Measure the four gate numbers, all against the frames the passage *should* have."""
-        expect = max(int((self.f_hi - self.f_lo) // self.step) + 1, 1)
-        sampled = sorted(f for f in self.states if self.f_lo <= f <= self.f_hi
-                         and self.states[f].calibrated)
-        if not sampled:
+    def _index_states(self) -> None:
+        """Cache the per-frame arrays :meth:`_quality` reads, so a window costs two searchsorteds.
+
+        Scoring every candidate sub-window of a chunk (:func:`islands`) and scoring the one passage
+        the renderer was asked for must use the *same* arithmetic, or a window could be selected and
+        then refused. Both go through :meth:`_quality`; this just stops it re-walking the state dict.
+        """
+        cal = np.array(sorted(f for f, s in self.states.items() if s.calibrated), int)
+        self._cal = cal
+        self._npl = np.array([len(self.states[f].players) for f in cal], int)
+        self._n0 = np.array([sum(1 for p in self.states[f].players if p["team"] == 0) for f in cal],
+                            int)
+        self._ball_fr = np.sort(self.ball["frame"].to_numpy())
+
+    def _quality(self, f_lo: int | None = None, f_hi: int | None = None) -> Quality:
+        """Measure the four gate numbers, all against the frames the window *should* have.
+
+        Args:
+            f_lo: Window start in source frames; defaults to the passage's own start.
+            f_hi: Window end in source frames; defaults to the passage's own end.
+
+        Returns:
+            The window's :class:`Quality`; all zeros when no frame in it yields geometry.
+        """
+        lo = self.f_lo if f_lo is None else int(f_lo)
+        hi = self.f_hi if f_hi is None else int(f_hi)
+        expect = max((hi - lo) // self.step + 1, 1)
+        i0 = int(np.searchsorted(self._cal, lo, side="left"))
+        i1 = int(np.searchsorted(self._cal, hi, side="right"))
+        if i1 <= i0:
             return Quality()
-        counts, both = [], 0
-        for f in sampled:
-            st = self.states[f]
-            counts.append(len(st.players))
-            n0 = sum(1 for p in st.players if p["team"] == 0)
-            both += int(n0 >= 4 and len(st.players) - n0 >= 4)
-        b = self.ball
-        n_ball = int(((b["frame"] >= self.f_lo) & (b["frame"] <= self.f_hi)).sum())
-        return Quality(players=float(np.mean(counts)), both_teams=both / expect,
-                       ball_cov=min(n_ball / expect, 1.0), frame_cov=len(sampled) / expect)
+        npl, n0 = self._npl[i0:i1], self._n0[i0:i1]
+        both = int(np.count_nonzero((n0 >= 4) & (npl - n0 >= 4)))
+        n_ball = int(np.searchsorted(self._ball_fr, hi, side="right")
+                     - np.searchsorted(self._ball_fr, lo, side="left"))
+        return Quality(players=float(npl.mean()), both_teams=both / expect,
+                       ball_cov=min(n_ball / expect, 1.0), frame_cov=(i1 - i0) / expect)
 
     def _situation(self, blocks: pd.DataFrame | None = None) -> Situation:
         """Label the passage from the shipped detectors (possession, block class, zone, events)."""
@@ -850,7 +877,7 @@ def compose(frame: np.ndarray, st: md.FrameState | None, pas: Passage, td: md.To
     md.text(canvas, f"{PICP50_MEASURED:.1f}% / {PICP90_MEASURED:.1f}% over {PICP_N} "
             f"re-appearances ({PICP_SOURCE}) -- not calibrated.",
             (px_, py_ + td.h + 274), 0.46, C_AMBER, 1)
-    md.text(canvas, "See results/FULL_MATCH_RECONSTRUCTION.md.",
+    md.text(canvas, "See results/CALIBRATION_REPLICATION.md (14/14 buckets fail).",
             (px_, py_ + td.h + 298), 0.46, (185, 190, 210), 1)
     return canvas
 
@@ -1002,10 +1029,149 @@ def shortlist_many(match_ids: list[str], *, top: int = 12, per_match: int = 4) -
 
 
 # --------------------------------------------------------------------------------------------------
+# Islands: the passages of a half that a two-minute cut can actually be built from
+# --------------------------------------------------------------------------------------------------
+def islands(match: registry.Match, half: str, *, min_len_s: float = MIN_ISLAND_S,
+            max_len_s: float = MAX_ISLAND_S, coarse_s: float = 2.0) -> pd.DataFrame:
+    """Every maximal passage of a half that clears :meth:`Quality.refusal`, longest first.
+
+    A broadcast does not hand you two continuous minutes of trackable football: it cuts to replays,
+    close-ups and the crowd, and each cut destroys the pitch geometry. So the unit that exists is
+    the **island** -- a run of frames long enough to be worth showing that still passes the shipped
+    gate end to end. This is a greedy, non-overlapping search: take the longest passing window in
+    the chunk, remove it, repeat until nothing passes.
+
+    Windows are scored with :meth:`Passage._quality`, the same method the renderer's refusal gate
+    reads, so anything returned here is guaranteed to render.
+
+    Args:
+        match: Registry match.
+        half: ``"h1"`` or ``"h2"``.
+        min_len_s: Shortest island worth cutting to.
+        max_len_s: Longest island to look for (beyond this the gate never holds on our footage).
+        coarse_s: Search stride in seconds for both window start and window length.
+
+    Returns:
+        Frame with ``match, half, chunk, start_s, end_s, len_s, clock, players, ball_cov,
+        frame_cov, both_teams``, in chronological order. Empty when the half has no island.
+    """
+    idx = chunk_index(match, half)
+    rows: list[dict] = []
+    for i, ck in enumerate(idx.keys):
+        c_lo, fps = idx.starts[i], idx.fps[i]
+        pas = Passage(match, half, c_lo + 0.5, c_lo + idx.durations[i] - 1.0, impute=False)
+        taken: list[tuple[int, int]] = []
+        while True:
+            best: tuple[tuple, int, int, Quality, float] | None = None
+            for length in np.arange(max_len_s, min_len_s - 1e-6, -coarse_s):
+                span = int(round(length * fps))
+                for lo in range(pas.f_lo, pas.f_hi - span + 1, int(round(coarse_s * fps))):
+                    hi = lo + span
+                    if any(not (hi <= a or lo >= b) for a, b in taken):
+                        continue
+                    q = pas._quality(lo, hi)
+                    if q.refusal():
+                        continue
+                    key = (q.frame_cov, q.players)
+                    if best is None or key > best[0]:
+                        best = (key, lo, hi, q, float(length))
+                if best is not None:
+                    break  # longest length that yields anything at all wins
+            if best is None:
+                break
+            _, lo, hi, q, length = best
+            taken.append((lo, hi))
+            rows.append({
+                "match": match.id, "half": half, "chunk": ck,
+                "start_s": round(c_lo + lo / fps, 1), "end_s": round(c_lo + hi / fps, 1),
+                "len_s": length, "clock": _clock(c_lo + lo / fps),
+                "players": round(q.players, 2), "ball_cov": round(q.ball_cov, 3),
+                "frame_cov": round(q.frame_cov, 3), "both_teams": round(q.both_teams, 3)})
+        print(f"[clip] {match.id} {half} {ck}: "
+              f"{len([r for r in rows if r['chunk'] == ck])} island(s)")
+    return pd.DataFrame(rows).sort_values("start_s").reset_index(drop=True) if rows \
+        else pd.DataFrame()
+
+
+def goal_windows(match_ids: list[str], *, lengths: tuple[float, ...] = (120.0, 90.0, 60.0, 30.0),
+                 lead_s: float = 15.0, coarse_s: float = 2.0) -> pd.DataFrame:
+    """Best passage of each length ending at each detected goal, and whether the gate accepts it.
+
+    A goal is the passage everyone asks for and the worst one a broadcast supplies: it is followed
+    immediately by a replay, a close-up and the crowd, and each of those cuts destroys the pitch
+    geometry the measurement rests on. This scan quantifies that instead of asserting it -- for
+    every Goal peak the action-spotting probe emitted at its documented operating point
+    (``--thresh 0.30``), it finds the best-scoring window of each length whose end sits within
+    ``lead_s`` of the goal, and records :meth:`Quality.refusal` verbatim.
+
+    Args:
+        match_ids: Registry ids to scan; ids with no probe output or no aligned parquet are skipped.
+        lengths: Window lengths to try, seconds.
+        lead_s: How far past the goal a window may end.
+        coarse_s: Search stride for the window start, seconds.
+
+    Returns:
+        One row per (goal, length) with the four quality numbers, the refusal string (empty when the
+        window would render) and the goal's own detector score.
+    """
+    import json  # noqa: PLC0415  (only this scan reads the probe summaries)
+
+    rows: list[dict] = []
+    for mid in match_ids:
+        summary = GOAL_PROBE / mid / "summary.json"
+        m = registry.get(mid)
+        if not summary.exists() or not m.processed:
+            print(f"[clip] skip {mid}: no goal probe or no aligned parquet")
+            continue
+        peaks = [p for p in json.loads(summary.read_text(encoding="utf-8"))["goal_peaks_top"]
+                 if p["score"] >= GOAL_THRESH]
+        print(f"[clip] {mid}: {len(peaks)} goal peak(s) >= {GOAL_THRESH}")
+        cache: dict[tuple[str, str], Passage] = {}
+        for pk in peaks:
+            half, gt = str(pk["half"]), float(pk["t_s"])
+            try:
+                idx = chunk_index(m, half)
+            except SystemExit as exc:
+                print(f"[clip] skip {mid} {half}: {exc}")
+                continue
+            ci, _ = idx.locate(gt)
+            c_lo, fps = idx.starts[ci], idx.fps[ci]
+            key = (half, idx.keys[ci])
+            if key not in cache:
+                cache[key] = Passage(m, half, c_lo + 0.5, c_lo + idx.durations[ci] - 1.0,
+                                     impute=False)
+            pas = cache[key]
+            for length in lengths:
+                span = int(round(length * fps))
+                lo_hi = int((gt - c_lo + lead_s) * fps) - span      # latest allowed start
+                lo_lo = int((gt - c_lo - length) * fps)             # earliest: window ends at goal
+                best: tuple[tuple, dict] | None = None
+                for lo in range(max(lo_lo, pas.f_lo), min(lo_hi, pas.f_hi - span) + 1,
+                                int(round(coarse_s * fps))):
+                    q = pas._quality(lo, lo + span)
+                    sc = (0.30 * min(q.players / 18.0, 1.0) + 0.25 * q.ball_cov
+                          + 0.20 * q.frame_cov + 0.05 * q.both_teams)
+                    row = {"match": mid, "half": half, "goal_clock": pk["t"],
+                           "goal_score": pk["score"], "len_s": length,
+                           "start_s": round(c_lo + lo / fps, 1),
+                           "end_s": round(c_lo + (lo + span) / fps, 1),
+                           "players": round(q.players, 2), "ball_cov": round(q.ball_cov, 3),
+                           "frame_cov": round(q.frame_cov, 3),
+                           "both_teams": round(q.both_teams, 3),
+                           "refusal": q.refusal() or "", "score": round(sc, 4)}
+                    key2 = (q.refusal() is None, sc)
+                    if best is None or key2 > best[0]:
+                        best = (key2, row)
+                if best is not None:
+                    rows.append(best[1])
+    return pd.DataFrame(rows)
+
+
+# --------------------------------------------------------------------------------------------------
 # Render
 # --------------------------------------------------------------------------------------------------
 def render(match: registry.Match, half: str, start_s: float, end_s: float, *, out_dir: Path,
-           height: int = 1080, crf: int = 20, impute: bool = True) -> dict:
+           height: int = 1080, crf: int = 20, impute: bool = True, stride: int = 1) -> dict:
     """Render one passage to mp4 + a contact-sheet png, refusing poor-quality passages.
 
     Args:
@@ -1017,6 +1183,9 @@ def render(match: registry.Match, half: str, start_s: float, end_s: float, *, ou
         height: Output height.
         crf: x264 quality.
         impute: Run the frozen v1 imputation panel.
+        stride: Compose every ``stride``-th source frame and lower the output frame rate to match,
+            so the clip stays real-time. The tracker itself samples 1 frame in 5, so a stride of 2
+            (12.5 fps out) still renders more output frames than there are tracked samples.
 
     Returns:
         Summary dict; ``{"refused": reason}`` when the passage fails the quality gate.
@@ -1041,7 +1210,8 @@ def render(match: registry.Match, half: str, start_s: float, end_s: float, *, ou
     stem = f"{match.id}_{half}_{int(pas.start_s):04d}s"
     mp4, png = out_dir / f"{stem}.mp4", out_dir / f"{stem}_sheet.png"
     tmp = mp4.with_suffix(".raw.mp4")
-    writer = cv2.VideoWriter(str(tmp), cv2.VideoWriter_fourcc(*"mp4v"), FPS, (W, H))
+    out_fps = (pas.fps or FPS) / max(stride, 1)
+    writer = cv2.VideoWriter(str(tmp), cv2.VideoWriter_fourcc(*"mp4v"), out_fps, (W, H))
     if not writer.isOpened():
         raise RuntimeError(f"cannot open VideoWriter at {tmp}")
     td = md.TopDown(width=690)
@@ -1050,10 +1220,12 @@ def render(match: registry.Match, half: str, start_s: float, end_s: float, *, ou
     sheet_at = np.linspace(pas.f_lo, pas.f_hi, 6).astype(int)
     sheet: list[np.ndarray] = []
     n = 0
-    for fr in range(pas.f_lo, pas.f_hi + 1):
+    for i, fr in enumerate(range(pas.f_lo, pas.f_hi + 1)):
         ok, frame = cap.read()
         if not ok:
             break
+        if i % max(stride, 1):
+            continue
         canvas = compose(frame, pas.at(fr), pas, td, fr)
         writer.write(canvas)
         if fr in sheet_at:
@@ -1077,14 +1249,133 @@ def render(match: registry.Match, half: str, start_s: float, end_s: float, *, ou
     else:
         print("[clip] WARNING: ffmpeg not found -> shipping the mp4v render")
         shutil.move(str(tmp), str(mp4))
-    info = {"mp4": str(mp4), "png": str(png), "frames": n, "seconds": n / FPS,
-            "size_mb": round(mp4.stat().st_size / 1e6, 2), "half": half,
+    info = {"mp4": str(mp4), "png": str(png), "frames": n, "seconds": n / out_fps,
+            "fps": round(out_fps, 2), "size_mb": round(mp4.stat().st_size / 1e6, 2), "half": half,
             "start_s": round(pas.start_s, 1), "end_s": round(pas.end_s, 1),
             "players": round(q.players, 1), "ball_cov": round(q.ball_cov, 2),
             "wall_s": round(time.time() - t0, 1)}
     print(f"[clip] wrote {mp4} ({info['seconds']:.1f} s, {info['size_mb']} MB) and {png} "
           f"in {info['wall_s']} s")
     return info
+
+
+GATE_LINE = (f"gate: >= {MIN_FRAME_COV:.0%} of frames with trusted pitch geometry, "
+             f">= {MIN_PLAYERS:.0f} tracked players/frame, >= {MIN_BALL_COV:.0%} ball coverage, "
+             "both teams on screen")
+
+
+def card(title: str, lines: list[str], *, accent: tuple[int, int, int] = C_AMBER) -> np.ndarray:
+    """A full-frame caption used between stitched passages.
+
+    Args:
+        title: Headline, drawn in the accent colour.
+        lines: Body lines, drawn below it.
+        accent: Title colour.
+
+    Returns:
+        A ``H x W`` BGR frame.
+    """
+    canvas = np.full((H, W, 3), C_BG, np.uint8)
+    cv2.line(canvas, (120, 300), (W - 120, 300), (70, 70, 80), 2, cv2.LINE_AA)
+    md.text(canvas, title, (120, 268), 1.25, accent, 3, FONT_T)
+    for i, ln in enumerate(lines):
+        md.text(canvas, ln, (120, 372 + i * 58), 0.82, (220, 222, 232) if i == 0 else (175, 180, 198),
+                2 if i == 0 else 1)
+    return canvas
+
+
+def _card_clip(frame: np.ndarray, path: Path, seconds: float, fps: float, height: int,
+               crf: int) -> Path:
+    """Write a still frame out as a short mp4 segment with the same codec as the passages."""
+    png = path.with_suffix(".png")
+    cv2.imwrite(str(png), frame)
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        raise RuntimeError("stitching needs ffmpeg on PATH")
+    subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-loop", "1", "-t", f"{seconds:.2f}",
+                    "-i", str(png), "-vf", f"scale=-2:{height},fps={fps}", "-c:v", "libx264",
+                    "-preset", "medium", "-crf", str(crf), "-pix_fmt", "yuv420p", str(path)],
+                   check=True)
+    png.unlink(missing_ok=True)
+    return path
+
+
+def stitch(match: registry.Match, half: str, sel: pd.DataFrame, *, out_dir: Path,
+           height: int = 1080, crf: int = 20, stride: int = 2, card_s: float = 2.4,
+           lead_s: float = 4.5) -> dict:
+    """Render every island in ``sel`` and join them with cards naming what was left out.
+
+    The cards are the honest part. A two-minute cut of a broadcast half is not two continuous
+    minutes of measurement: it is a handful of islands with several minutes of unmeasurable football
+    between them, and the clip says so on screen each time it jumps.
+
+    Args:
+        match: Registry match.
+        half: ``"h1"`` or ``"h2"``.
+        sel: Islands to use, chronological (as returned by :func:`islands`).
+        out_dir: Output directory.
+        height: Output height.
+        crf: x264 quality.
+        stride: Source-frame stride (see :func:`render`).
+        card_s: Seconds per gap card.
+        lead_s: Seconds for the opening card.
+
+    Returns:
+        Summary dict with the stitched mp4, the per-island infos and the skipped seconds.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    rows = sel.to_dict("records")
+    shown = sum(r["end_s"] - r["start_s"] for r in rows)
+    span = rows[-1]["end_s"] - rows[0]["start_s"]
+    parts: list[Path] = []
+    infos: list[dict] = []
+    fps = 25.0 / max(stride, 1)
+    lead = card(f"{match.teams[0]} v {match.teams[1]}", [
+        f"{getattr(match, 'date', '')}  --  {half.upper()}, from {_clock(rows[0]['start_s'])} "
+        f"to {_clock(rows[-1]['end_s'])}",
+        f"Every passage in that span that runs >= {MIN_ISLAND_S:.0f} s and clears the tracking gate:"
+        f"  {len(rows)} of them, {shown:.0f} s of {span:.0f} s.",
+        GATE_LINE,
+        "Nothing else from the half is shown. The cuts between them say what was left out and why.",
+    ], accent=C_YELLOW)
+    parts.append(_card_clip(lead, out_dir / "seg_00_lead.mp4", lead_s, fps, height, crf))
+
+    for i, r in enumerate(rows):
+        if i:
+            gap = r["start_s"] - rows[i - 1]["end_s"]
+            frame = card("NOT SHOWN", [
+                f"{int(gap) // 60} min {int(gap) % 60:02d} s of football "
+                f"({_clock(rows[i - 1]['end_s'])} -> {_clock(r['start_s'])})",
+                f"No run of {MIN_ISLAND_S:.0f} s or more inside it clears the gate.",
+                GATE_LINE,
+            ])
+            parts.append(_card_clip(frame, out_dir / f"seg_{2 * i:02d}_gap.mp4", card_s, fps,
+                                    height, crf))
+        info = render(match, half, r["start_s"], r["end_s"], out_dir=out_dir, height=height,
+                      crf=crf, stride=stride)
+        if "refused" in info:  # cannot happen: islands() scores with the same gate
+            raise RuntimeError(f"island {r['clock']} refused after selection: {info['refused']}")
+        infos.append(info)
+        parts.append(Path(info["mp4"]))
+
+    listing = out_dir / f"{match.id}_{half}_concat.txt"
+    listing.write_text("".join(f"file '{p.resolve().as_posix()}'\n" for p in parts),
+                       encoding="utf-8")
+    final = out_dir / f"{match.id}_{half}_stitch.mp4"
+    subprocess.run([shutil.which("ffmpeg"), "-y", "-loglevel", "error", "-f", "concat", "-safe",
+                    "0", "-i", str(listing), "-c:v", "libx264", "-preset", "medium", "-crf",
+                    str(crf), "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(final)],
+                   check=True)
+    poster = out_dir / f"{match.id}_{half}_poster.jpg"
+    subprocess.run([shutil.which("ffmpeg"), "-y", "-loglevel", "error", "-ss",
+                    f"{lead_s + 6.0:.1f}", "-i", str(final), "-frames:v", "1", "-q:v", "3",
+                    str(poster)], check=True)
+    total = sum(i["seconds"] for i in infos) + lead_s + card_s * (len(rows) - 1)
+    print(f"[clip] stitched {len(rows)} island(s) -> {final} "
+          f"({total:.0f} s at {fps:.2f} fps, {final.stat().st_size / 1e6:.1f} MB)")
+    print(f"[clip] shown {shown:.0f} s of a {span:.0f} s span; skipped {span - shown:.0f} s")
+    return {"mp4": str(final), "poster": str(poster), "islands": infos, "shown_s": shown,
+            "span_s": span, "skipped_s": span - shown, "fps": fps, "seconds": total}
 
 
 def _spread(sl: pd.DataFrame, n: int) -> list[dict]:
@@ -1146,6 +1437,25 @@ def _self_check() -> None:
     assert Quality(players=20, **{**ok, "both_teams": 0.1}).refusal().startswith("only one team")
     assert Quality(players=20, **{**ok, "frame_cov": 0.5}).refusal().startswith("broken passage")
     assert Quality(players=20, **ok).refusal() is None
+    # windowed _quality must agree with a hand count, or islands() could select what render refuses.
+    pas = object.__new__(Passage)
+    pas.step, pas.f_lo, pas.f_hi = 5, 0, 100
+    pas.states = {}
+    for f in range(0, 101, 5):
+        st = md.FrameState()
+        st.calibrated = f <= 50            # first half of the window has geometry, second has none
+        st.players = [{"team": int(k >= 7)} for k in range(14)]  # 7 v 7 -> both teams on screen
+        pas.states[f] = st
+    pas.ball = pd.DataFrame({"frame": list(range(0, 101, 5))})
+    pas._index_states()
+    q_all, q_lo = pas._quality(), pas._quality(0, 50)
+    assert abs(q_all.frame_cov - 11 / 21) < 1e-9, q_all.frame_cov     # 11 of 21 expected samples
+    assert q_lo.frame_cov == 1.0 and q_lo.players == 14.0, q_lo
+    assert q_lo.both_teams == 1.0 and q_lo.ball_cov == 1.0, q_lo
+    assert q_all.refusal().startswith("broken passage") and q_lo.refusal() is None
+    assert pas._quality(60, 100).frame_cov == 0.0                      # no geometry at all
+    # the stitch cards must carry the gate they enforce, in numbers
+    assert f"{MIN_FRAME_COV:.0%}" in GATE_LINE and f"{MIN_BALL_COV:.0%}" in GATE_LINE
     # frozen conformal tables: 90% regions must be wider than 50% in every bucket, both sources.
     assert (K90_V1 > K50_V1).all() and (K90_ANC > K50_ANC).all()
     # honesty: nothing drawn may be called "calibrated", and the measured coverage must be on screen
@@ -1175,6 +1485,16 @@ def main() -> None:
     ap.add_argument("--start", type=float, help="seconds into the half")
     ap.add_argument("--end", type=float, help="seconds into the half")
     ap.add_argument("--shortlist", action="store_true", help="rank candidate passages, render none")
+    ap.add_argument("--islands", action="store_true",
+                    help="list every gate-passing passage of --half, render none")
+    ap.add_argument("--goal-scan", action="store_true",
+                    help="score windows ending at every detected goal against the gate, render none")
+    ap.add_argument("--stitch", action="store_true",
+                    help="render those islands into one clip with cards naming what was skipped")
+    ap.add_argument("--min-island", type=float, default=MIN_ISLAND_S,
+                    help="shortest island to keep, seconds")
+    ap.add_argument("--stride", type=int, default=1,
+                    help="compose every Nth source frame; output fps drops to match")
     ap.add_argument("--auto", type=int, default=0, help="render the top N shortlisted passages")
     ap.add_argument("--top", type=int, default=10, help="shortlist length")
     ap.add_argument("--out", default=str(OUT_ROOT))
@@ -1190,6 +1510,41 @@ def main() -> None:
     ids = ([m.id for m in registry.matches(processed_only=True)] if args.match == "all"
            else [s.strip() for s in args.match.split(",") if s.strip()])
 
+    if args.goal_scan:
+        gw = goal_windows(ids)
+        if gw.empty:
+            print("[clip] no detected goal in any of those matches")
+            return
+        out_dir.mkdir(parents=True, exist_ok=True)
+        csv = out_dir / "goal_window_scan.csv"
+        gw.to_csv(csv, index=False, encoding="utf-8")
+        ok = gw[gw["refusal"] == ""]
+        n_peaks = len(gw.groupby(["match", "half", "goal_clock"]))
+        print(f"\n[clip] {len(gw)} (goal, length) windows over {n_peaks} goal peaks; "
+              f"{len(ok)} clear the gate")
+        print(gw.groupby("len_s")[["players", "ball_cov", "frame_cov"]].max().to_string())
+        print(f"[clip] wrote {csv}")
+        return
+
+    if args.islands or args.stitch:
+        if len(ids) != 1:
+            raise SystemExit("a single --match is required for --islands / --stitch")
+        match = registry.get(ids[0])
+        isl = islands(match, args.half, min_len_s=args.min_island)
+        if isl.empty:
+            print(f"[clip] no gate-passing island in {match.id} {args.half}")
+            return
+        out_dir.mkdir(parents=True, exist_ok=True)
+        csv = out_dir / f"{match.id}_{args.half}_islands.csv"
+        isl.to_csv(csv, index=False, encoding="utf-8")
+        print(f"\n[clip] {len(isl)} island(s), {isl['len_s'].sum():.0f} s total")
+        print(isl.to_string(index=False))
+        print(f"[clip] wrote {csv}")
+        if args.stitch:
+            stitch(match, args.half, isl, out_dir=out_dir, height=args.height, crf=args.crf,
+                   stride=max(args.stride, 1))
+        return
+
     if args.shortlist or args.auto:
         sl = shortlist_many(ids, top=max(args.top, args.auto))
         if sl.empty:
@@ -1203,7 +1558,8 @@ def main() -> None:
         print(f"[clip] wrote {out_dir / f'{tag}_shortlist.csv'}")
         for r in _spread(sl, args.auto):
             render(registry.get(r["match"]), r["half"], r["start_s"], r["end_s"], out_dir=out_dir,
-                   height=args.height, crf=args.crf, impute=not args.no_impute)
+                   height=args.height, crf=args.crf, impute=not args.no_impute,
+                   stride=max(args.stride, 1))
         return
 
     if len(ids) != 1:
@@ -1214,7 +1570,7 @@ def main() -> None:
     if args.start is None or args.end is None:
         raise SystemExit("give --start/--end (seconds into the half), or --shortlist / --auto N")
     render(match, args.half, args.start, args.end, out_dir=out_dir, height=args.height,
-           crf=args.crf, impute=not args.no_impute)
+           crf=args.crf, impute=not args.no_impute, stride=max(args.stride, 1))
 
 
 if __name__ == "__main__":

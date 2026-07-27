@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>football-synthesizer &mdash; measuring what a broadcast supports</title>
+<style>
+  :root {
+    --bg:#0b0d12; --panel:#141821; --panel2:#11141c; --line:#252b39;
+    --ink:#e9ecf4; --dim:#98a2b8; --faint:#6f7a91;
+    --amber:#f2b134; --cyan:#5cc8dd; --green:#59c98a; --red:#e2685f; --violet:#a48bd8;
+    --mono:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --sans:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    margin:0; background:var(--bg); color:var(--ink);
+    font:400 19px/1.65 var(--sans); -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 40px; }
+  section { padding:78px 0; border-top:1px solid var(--line); }
+  section:first-of-type { border-top:none; }
+
+  h1 { font-size:64px; line-height:1.06; letter-spacing:-0.025em; margin:0 0 28px; font-weight:700; }
+  h2 { font-size:38px; line-height:1.15; letter-spacing:-0.018em; margin:0 0 10px; font-weight:650; }
+  h3 { font-size:23px; margin:40px 0 12px; font-weight:600; letter-spacing:-0.01em; }
+  p { margin:0 0 20px; max-width:78ch; }
+  a { color:var(--cyan); text-decoration:none; border-bottom:1px solid rgba(92,200,221,.32); }
+  a:hover { border-bottom-color:var(--cyan); }
+  code, .mono { font-family:var(--mono); font-size:.86em; }
+  code { background:#1b2130; padding:2px 7px; border-radius:4px; color:#c9d4e8; }
+
+  .eyebrow {
+    font:600 13px/1 var(--mono); letter-spacing:.19em; text-transform:uppercase;
+    color:var(--faint); margin:0 0 22px; max-width:none;
+  }
+  .kicker { color:var(--amber); }
+  .thesis {
+    font-size:28px; line-height:1.45; font-weight:500; color:var(--ink);
+    border-left:3px solid var(--amber); padding-left:26px; margin:0 0 34px; max-width:32ch;
+  }
+  .lede { font-size:21px; color:#cfd6e6; max-width:74ch; }
+  .dim { color:var(--dim); }
+  .small { font-size:16px; line-height:1.6; color:var(--dim); }
+  .src {
+    font-family:var(--mono); font-size:13.5px; color:var(--faint); line-height:1.55;
+  }
+  .src b { color:var(--dim); font-weight:600; }
+
+  header.hero { padding:104px 0 70px; }
+  .meta-row {
+    display:flex; flex-wrap:wrap; gap:12px; margin-top:34px;
+  }
+  .pill {
+    font:600 13px/1 var(--mono); letter-spacing:.05em; padding:9px 14px; border-radius:999px;
+    border:1px solid var(--line); color:var(--dim); background:var(--panel2);
+  }
+
+  /* ---- pipeline ---- */
+  .diagram { background:var(--panel2); border:1px solid var(--line); border-radius:10px;
+             padding:26px 20px; margin:34px 0 8px; overflow-x:auto; }
+  .diagram svg { display:block; width:100%; height:auto; min-width:900px; }
+  .stages { list-style:none; padding:0; margin:34px 0 0; }
+  .stages li {
+    display:grid; grid-template-columns:210px 1fr; gap:26px;
+    padding:20px 0; border-top:1px solid var(--line);
+  }
+  .stages li > div:first-child {
+    font:600 15px/1.4 var(--mono); letter-spacing:.02em; color:var(--ink);
+  }
+  .stages .acc { color:var(--green); font-family:var(--mono); font-size:15px; }
+  .stages .noacc { color:var(--amber); font-family:var(--mono); font-size:15px; }
+
+  /* ---- clip ---- */
+  figure { margin:0; }
+  video {
+    width:100%; display:block; border-radius:10px; border:1px solid var(--line);
+    background:#000;
+  }
+  .clipmeta {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line);
+    border:1px solid var(--line); border-radius:10px; overflow:hidden; margin:26px 0 40px;
+  }
+  .clipmeta div { background:var(--panel); padding:18px 20px; }
+  .clipmeta b { display:block; font:700 27px/1.2 var(--mono); color:var(--amber); }
+  .clipmeta span { font-size:14px; color:var(--dim); }
+
+  .legend { display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:20px;
+            margin:26px 0 0; }
+  .legend div { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+                padding:20px 22px; }
+  .legend h4 { margin:0 0 8px; font-size:17px; letter-spacing:.01em; }
+  .legend p { font-size:16px; line-height:1.55; color:var(--dim); margin:0; }
+  .swatch { display:inline-block; width:13px; height:13px; border-radius:50%; margin-right:9px;
+            vertical-align:baseline; }
+
+  /* ---- tables ---- */
+  table { width:100%; border-collapse:collapse; margin:26px 0 10px; font-size:17px; }
+  th, td { text-align:left; padding:15px 16px 15px 0; border-bottom:1px solid var(--line);
+           vertical-align:top; }
+  th { font:600 13px/1.3 var(--mono); letter-spacing:.13em; text-transform:uppercase;
+       color:var(--faint); border-bottom-color:#39415a; }
+  td.num { font-family:var(--mono); font-size:16px; white-space:nowrap; }
+  td.srccell { font-family:var(--mono); font-size:13.5px; color:var(--faint); line-height:1.5; }
+  table.grid4 { table-layout:fixed; }
+  table.grid4 th:nth-child(1), table.grid4 td:nth-child(1) { width:22%; padding-right:26px; }
+  table.grid4 th:nth-child(2), table.grid4 td:nth-child(2) { width:17%; padding-right:26px; }
+  table.grid4 th:nth-child(3), table.grid4 td:nth-child(3) { width:36%; padding-right:26px; }
+  table.grid4 th:nth-child(4), table.grid4 td:nth-child(4) { width:25%; }
+  table.grid4 td.num { white-space:normal; }
+  table.layout td:nth-child(1) { width:17%; color:var(--cyan); }
+  .ok { color:var(--green); }
+  .no { color:var(--red); }
+
+  .banner {
+    border-left:3px solid var(--red); background:rgba(226,104,95,.06);
+    padding:22px 26px; border-radius:0 8px 8px 0; margin:0 0 34px;
+  }
+  .banner.good { border-left-color:var(--green); background:rgba(89,201,138,.06); }
+  .banner.warn { border-left-color:var(--amber); background:rgba(242,177,52,.06); }
+  .banner p:last-child { margin-bottom:0; }
+
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(430px,1fr)); gap:24px;
+           margin:30px 0 0; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+          padding:26px 26px 22px; }
+  .card h4 { margin:0 0 12px; font-size:19px; }
+  .card p { font-size:16.5px; line-height:1.6; color:var(--dim); margin:0 0 14px; max-width:none; }
+  .card .src { margin-top:auto; }
+
+  pre { background:var(--panel2); border:1px solid var(--line); border-radius:8px;
+        padding:20px 22px; overflow-x:auto; font-family:var(--mono); font-size:15px;
+        line-height:1.7; color:#c9d4e8; }
+  footer { padding:60px 0 90px; color:var(--faint); font-size:15px; }
+  @media (max-width:820px) {
+    .wrap { padding:0 22px; }
+    h1 { font-size:42px; } h2 { font-size:30px; } body { font-size:18px; }
+    .stages li { grid-template-columns:1fr; gap:6px; }
+    .clipmeta { grid-template-columns:repeat(2,1fr); }
+    td.srccell { width:auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ a. TITLE + THESIS ============================ -->
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">football&#8209;synthesizer &middot; broadcast video to validated tactical measurement</p>
+    <h1>Measure exactly what a<br>broadcast supports.</h1>
+    <p class="thesis">Prove where it stops, and report nothing that cannot be grounded.</p>
+    <p class="lede">
+      Twelve Premier League broadcasts, one computer&#8209;vision pipeline, and a written rule that a
+      number does not ship until something outside this project has checked it. Half of what follows
+      is what we measured. The other half &mdash; given equal space, on purpose &mdash; is what we
+      refused to claim, and the arithmetic that forced the refusal.
+    </p>
+    <div class="meta-row">
+      <span class="pill">Manchester United &middot; EPL 2024&#8209;25</span>
+      <span class="pill">12 matches &middot; 6 opponents &middot; both legs</span>
+      <span class="pill">No paid tracking data</span>
+      <span class="pill">102 logged claims &middot; 12 retracted</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================ b. WHAT THIS IS ============================ -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">What this is</p>
+    <h2>Ordinary television in, measured football out.</h2>
+    <p class="lede">
+      The input is the same match replay anyone can watch: one moving camera, replays, close&#8209;ups,
+      crowd shots. The pipeline detects and tracks every player, recovers the camera&#8209;to&#8209;pitch
+      geometry frame by frame, puts the ball and the players onto a 105&nbsp;&times;&nbsp;68&nbsp;m
+      board in metres, spots events, and attaches a name only where the identity evidence is strong
+      enough to survive a gate.
+    </p>
+    <p>
+      Everything downstream of that &mdash; block heights, phases, territory maps, the
+      opponent&#8209;conditioned model, the written report &mdash; reads from those coordinates and
+      nothing else. There is no vendor tracking feed, no paid event data, no hand&#8209;annotation of
+      the matches themselves. Where a broadcast cannot support a measurement, the correct output is
+      a refusal, and the system is built to emit one.
+    </p>
+  </div>
+</section>
+
+<!-- ============================ c. THE PIPELINE ============================ -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">The pipeline</p>
+    <h2>Six stages, each with a number attached to it.</h2>
+
+    <div class="diagram">
+      <svg viewBox="0 0 1180 250" role="img" aria-label="Pipeline: video to detection and tracking to pitch coordinates to events to identity to a gated report">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                  orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="#4d566d"/>
+          </marker>
+          <marker id="arRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
+                  orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="#e2685f"/>
+          </marker>
+        </defs>
+        <g font-family="JetBrains Mono, Consolas, monospace">
+          <!-- boxes -->
+          <g>
+            <rect x="10"   y="66" width="150" height="76" rx="7" fill="#171c27" stroke="#2c3345"/>
+            <text x="85"  y="98"  fill="#e9ecf4" font-size="16" text-anchor="middle">video</text>
+            <text x="85"  y="120" fill="#7e8aa3" font-size="12.5" text-anchor="middle">1080p replay</text>
+          </g>
+          <g>
+            <rect x="200"  y="66" width="164" height="76" rx="7" fill="#171c27" stroke="#2c3345"/>
+            <text x="282" y="93"  fill="#e9ecf4" font-size="16" text-anchor="middle">detect + track</text>
+            <text x="282" y="115" fill="#7e8aa3" font-size="12.5" text-anchor="middle">YOLO + BoT-SORT</text>
+            <text x="282" y="132" fill="#59c98a" font-size="12.5" text-anchor="middle">GS-HOTA 22.85</text>
+          </g>
+          <g>
+            <rect x="404"  y="66" width="164" height="76" rx="7" fill="#171c27" stroke="#2c3345"/>
+            <text x="486" y="93"  fill="#e9ecf4" font-size="16" text-anchor="middle">pitch metres</text>
+            <text x="486" y="115" fill="#7e8aa3" font-size="12.5" text-anchor="middle">homography/frame</text>
+            <text x="486" y="132" fill="#59c98a" font-size="12.5" text-anchor="middle">26.4% of frames</text>
+          </g>
+          <g>
+            <rect x="608"  y="66" width="164" height="76" rx="7" fill="#171c27" stroke="#2c3345"/>
+            <text x="690" y="93"  fill="#e9ecf4" font-size="16" text-anchor="middle">events</text>
+            <text x="690" y="115" fill="#7e8aa3" font-size="12.5" text-anchor="middle">passes, goals</text>
+            <text x="690" y="132" fill="#59c98a" font-size="12.5" text-anchor="middle">0.97-1.09x official</text>
+          </g>
+          <g>
+            <rect x="812"  y="66" width="164" height="76" rx="7" fill="#171c27" stroke="#e2685f"/>
+            <text x="894" y="93"  fill="#e9ecf4" font-size="16" text-anchor="middle">identity</text>
+            <text x="894" y="115" fill="#7e8aa3" font-size="12.5" text-anchor="middle">jersey + re-ID</text>
+            <text x="894" y="132" fill="#e2685f" font-size="12.5" text-anchor="middle">1-4% of passes</text>
+          </g>
+          <g>
+            <rect x="1016" y="66" width="154" height="76" rx="7" fill="#171c27" stroke="#f2b134"/>
+            <text x="1093" y="98"  fill="#e9ecf4" font-size="16" text-anchor="middle">gated report</text>
+            <text x="1093" y="120" fill="#f2b134" font-size="12.5" text-anchor="middle">or a refusal</text>
+          </g>
+          <!-- arrows -->
+          <line x1="162" y1="104" x2="196" y2="104" stroke="#4d566d" stroke-width="1.6" marker-end="url(#ar)"/>
+          <line x1="366" y1="104" x2="400" y2="104" stroke="#4d566d" stroke-width="1.6" marker-end="url(#ar)"/>
+          <line x1="570" y1="104" x2="604" y2="104" stroke="#4d566d" stroke-width="1.6" marker-end="url(#ar)"/>
+          <line x1="774" y1="104" x2="808" y2="104" stroke="#4d566d" stroke-width="1.6" marker-end="url(#ar)"/>
+          <line x1="978" y1="104" x2="1012" y2="104" stroke="#4d566d" stroke-width="1.6" marker-end="url(#ar)"/>
+          <!-- gate returns -->
+          <path d="M282 148 L282 196 L1093 196 L1093 150" fill="none" stroke="#e2685f"
+                stroke-width="1.4" stroke-dasharray="5 5" marker-end="url(#arRed)"/>
+          <text x="640" y="218" fill="#e2685f" font-size="12.5" text-anchor="middle">
+            every stage can veto the sentence downstream of it
+          </text>
+          <text x="86" y="42" fill="#6f7a91" font-size="12.5">no vendor tracking, no paid event feed, no hand annotation of these matches</text>
+        </g>
+      </svg>
+    </div>
+
+    <ul class="stages">
+      <li>
+        <div>1 &middot; video</div>
+        <div>
+          Full&#8209;match replays supplied by the user, chunked into ten&#8209;minute segments and
+          registered once in <code>data/matches.yaml</code>. Nothing in the codebase hard&#8209;codes a
+          path to a match.
+        </div>
+      </li>
+      <li>
+        <div>2 &middot; detect + track</div>
+        <div>
+          Player detection and multi&#8209;object tracking, then a jersey&#8209;number layer and a
+          re&#8209;identification relink on top.
+          <span class="acc">GS&#8209;HOTA 14.76 &rarr; 22.85</span> on the public SoccerNet&#8209;GSR
+          validation split, 58 sequences, scored by the official evaluator &mdash; not by us.
+        </div>
+      </li>
+      <li>
+        <div>3 &middot; pitch metres</div>
+        <div>
+          A homography is fitted per frame and rejected when its residual exceeds 1&nbsp;m, so a
+          player only gets a coordinate when the geometry is trustworthy.
+          <span class="acc">26.4% of the whole broadcast</span> yields usable geometry on a uniform
+          1&#8209;in&#8209;5 frame grid &mdash; and <span class="acc">80.5% of live wide&#8209;camera
+          frames</span>. The gap between those two numbers is the entire honesty problem of this
+          project.
+        </div>
+      </li>
+      <li>
+        <div>4 &middot; ball + events</div>
+        <div>
+          Ball detection, then a linking pass that is the only coverage number we allow ourselves to
+          quote: <span class="acc">32&ndash;52% post&#8209;link usable ball track</span> across the
+          twelve matches. On top of it, pass events
+          (<span class="acc">0.97&ndash;1.09&times; official totals on 10 of 12 matches</span>) and
+          goals (<span class="acc">100% recall, 81.3% precision</span>).
+        </div>
+      </li>
+      <li>
+        <div>5 &middot; identity</div>
+        <div>
+          Jersey numbers read from close&#8209;up crops, propagated across re&#8209;ID merge groups,
+          checked against the team sheet. It works, and it does not work often enough:
+          <span class="noacc">1.0&ndash;4.2% of United&rsquo;s attributed passes</span> carry a named
+          player. That measurement is why there are no per&#8209;player statistics anywhere in this
+          project.
+        </div>
+      </li>
+      <li>
+        <div>6 &middot; gated report</div>
+        <div>
+          Team&#8209;level metrics assembled into a fact store, narrated, and passed through a numeric
+          guardrail that refuses any sentence carrying a number the fact store does not contain.
+          Claims live in a version&#8209;controlled knowledge base with a status field, so a retraction
+          is a state change, not a deletion.
+        </div>
+      </li>
+    </ul>
+    <p class="src" style="margin-top:26px">
+      <b>Sources.</b> GS&#8209;HOTA <code>knowledge/claims.json</code> ident&#8209;001, ident&#8209;004 &middot;
+      geometry yield cv&#8209;001, cv&#8209;003 (<code>results/CLAIMS_AUDIT.md#C-1</code>) &middot;
+      ball coverage ball&#8209;001 &middot; passes event&#8209;002 &middot; goals event&#8209;001
+      (<code>results/CLAIMS_AUDIT.md#C-2</code>) &middot; naming ident&#8209;008
+      (<code>results/PLAYER_ANALYSIS_v2.md</code>).
+    </p>
+  </div>
+</section>
+
+<!-- ============================ d. THE CLIP ============================ -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">The clip &middot; Fulham v Manchester United, 26 January 2025, second half</p>
+    <h2>Two minutes of a half &mdash; and the thirty&#8209;one minutes it was cut from.</h2>
+    <p class="lede">
+      This is not a highlights package. It is <em>every</em> passage of a half of football that runs
+      at least eighteen seconds and clears the tracking gate, in order, with a card at each jump
+      naming exactly how much football was left out and why. Six passages. 122 seconds of measurement
+      out of a 1,852&#8209;second span.
+    </p>
+
+    <figure>
+      <video controls preload="metadata"
+             poster="../results/tactical_clips/fulham_manutd_h2_poster.jpg">
+        <source src="../results/tactical_clips/fulham_manutd_h2_stitch.mp4" type="video/mp4">
+        Your browser cannot play this file. It is at
+        <span class="mono">results/tactical_clips/fulham_manutd_h2_stitch.mp4</span>.
+      </video>
+    </figure>
+
+    <div class="clipmeta">
+      <div><b>6</b><span>gate&#8209;passing passages in the half</span></div>
+      <div><b>122 s</b><span>shown, of a 1,852 s span</span></div>
+      <div><b>28 s</b><span>longest unbroken passage anywhere in it</span></div>
+      <div><b>12.5 fps</b><span>output rate; the tracker samples 5 fps</span></div>
+    </div>
+
+    <h3>Why this passage, and not a goal</h3>
+    <p>
+      The obvious choice was a goal, so that is where we started &mdash; and the scan came back
+      against the premise. We took every Goal peak the event detector emits at its documented
+      operating point across the corpus (<strong>30 peaks in 10 matches</strong>) and scored the best
+      window of 120, 90, 60 and 30 seconds ending at each one against the shipped quality gate:
+      &ge;&nbsp;85% of frames yielding trusted geometry, &ge;&nbsp;12 tracked players per frame,
+      &ge;&nbsp;60% ball coverage, both teams on screen.
+    </p>
+    <div class="banner">
+      <p>
+        <strong>112 windows scored. Zero cleared the gate</strong> &mdash; and all 112 failed on the
+        same clause, geometry, never on players or ball. The best two&#8209;minute window at any goal
+        in the corpus reaches <strong>50.9%</strong> frame coverage against a required 85%; the best
+        ninety&#8209;second window 48.6%, the best sixty 59.5%, the best thirty 79.5%. A two&#8209;minute
+        continuous tracked passage around a goal does not exist in this footage.
+      </p>
+    </div>
+    <p>
+      The reason is not a weakness of the tracker. It is what a broadcast <em>is</em>: a goal is
+      immediately followed by a replay, a close&#8209;up of the scorer, the bench, the crowd &mdash;
+      and every one of those cuts destroys the pitch geometry that the measurement rests on. Goals
+      are the least measurable moments in a football broadcast, which is an inconvenient thing to
+      discover when you are building a demo and a useful thing to know if you are buying one.
+    </p>
+    <p>
+      So we picked on measured quality instead, and let the passage be a passage rather than a goal.
+      Fulham&nbsp;v&nbsp;Man&nbsp;Utd carries the <strong>highest post&#8209;link ball coverage in the
+      corpus</strong> &mdash; 0.561 of sampled frames against a corpus median of 0.465 &mdash; and its
+      second half yields six gate&#8209;passing passages of 18&nbsp;seconds or more, 122 seconds in
+      total. One of them ends twenty&#8209;four seconds before the only goal peak of the entire match,
+      which is as close to a goal as this material honestly gets.
+    </p>
+
+    <h3>What happens in it</h3>
+    <p>
+      Craven Cottage, second half, and this is a half of football in which nobody wants to hold the
+      ball anywhere interesting. Watch United at 10:36. They are playing out from their own
+      goal line and they never leave the touchline: the ball travels from 3&nbsp;m to 24&nbsp;m up the
+      pitch and from y&nbsp;=&nbsp;3&nbsp;m to y&nbsp;=&nbsp;2&nbsp;m across it &mdash; two metres of a
+      sixty&#8209;eight metre pitch, hugging the whitewash the whole way. Ninety&#8209;six per cent of
+      the possession, and the only man on the field the identity layer is willing to name is Joshua
+      Zirkzee. It is less build&#8209;up than escape.
+    </p>
+    <p>
+      At 18:20 Fulham do the thing that fills a highlight reel and no scoresheet. Ninety&#8209;four per
+      cent of the ball, Calvin Bassey the one name the identity gate lets onto the board, and the
+      ball swung the entire width of the pitch &mdash;
+      y&nbsp;61&nbsp;m to y&nbsp;1&nbsp;m &mdash; touching 64&nbsp;m of advancement at its furthest and
+      finishing the passage at 30&nbsp;m. Nineteen metres <em>backwards</em> from where it started, in
+      front of a block reading low. Possession as pastime.
+    </p>
+    <p>
+      Then 29:21, and the game finally has a pulse. It is the densest passage of the half &mdash;
+      17.3 tracked players a frame, both teams on screen 88% of the time, the ball contested and
+      neither side holding it for long, the defensive line pushed up to a high read. Twenty&#8209;four
+      seconds after this passage ends, the goal detector puts up the only peak it produces in the
+      entire match: 0.847, second half, 30:05. The official record for this fixture has exactly one
+      goal, in the second half, to Manchester United.
+    </p>
+    <div class="banner warn">
+      <p>
+        <strong>And we do not show you it.</strong> The goal is on the other side of a cut. The moment
+        the ball goes in, the camera goes to the celebration and the pitch geometry dies, so the gate
+        refuses the passage and the clip jumps to a card instead. That is the honest output, and it is
+        the same output the system would give a coach: <em>we cannot measure this, here is how far
+        short it fell.</em>
+      </p>
+    </div>
+    <p class="src">
+      <b>Sources.</b> Goal&#8209;window scan:
+      <code>results/tactical_clips/goal_window_scan.csv</code> (112 rows, refusal string per row),
+      produced by <code>python tools/tactical_clip.py --goal-scan --match &lt;all&#8209;12&gt;</code>.
+      Scope note: <code>palace_manutd</code> is the 0&ndash;0 negative control and emits no peak, and
+      <code>fulham_manutd</code>&rsquo;s own peak lands five seconds after a chunk boundary so no window
+      of any tested length fits inside a single chunk &mdash; hence 30 peaks over 10 matches.
+      Passage selection and quality numbers:
+      <code>results/tactical_clips/fulham_manutd_h2_islands.csv</code>, produced by
+      <code>python tools/tactical_clip.py --match fulham_manutd --half h2 --stitch --stride 2</code>.
+      Possession share, phase, ball zone and block class are the shipped detectors&rsquo; own output,
+      printed on every frame. Goal peak 0.847 at h2 30:05:
+      <code>results/action_spotting_probe/fulham_manutd/summary.json</code> at the documented
+      operating point (threshold 0.30, 30&nbsp;s NMS) &mdash; exactly one peak in the match. Match
+      result and half of the goal:
+      <code>outputs/oracle/sofascore/match_dicts_England_Premier_League_24_25.json</code>. Ball
+      coverage 0.561: <code>results/MANUTD_IDENTITY_PROFILE.md#Per-match evidence</code>.
+    </p>
+    <div class="banner">
+      <p>
+        <strong>One caution on that fixture.</strong> Fulham&nbsp;v&nbsp;Man&nbsp;Utd is <em>not</em>
+        one of the six matches in the validated goal set (<code>results/CLAIMS_AUDIT.md#C-2</code>).
+        Its peak count and half agree with the official record, and 0.847 sits inside the 0.75&ndash;0.96
+        band that every one of the thirteen validated true goals occupied &mdash; but it has not been
+        adjudicated goal by goal, so we call it a peak, not a goal.
+      </p>
+    </div>
+
+    <h3>The three marker states, in plain words</h3>
+    <div class="legend">
+      <div>
+        <h4><span class="swatch" style="background:#e2685f"></span>Observed</h4>
+        <p>
+          A solid disc. The detector found this player in this frame and a trusted homography put him
+          on the board in metres. This is the only state that is a measurement.
+        </p>
+      </div>
+      <div>
+        <h4><span class="swatch" style="background:#5cc8dd;border-radius:2px;transform:rotate(45deg)"></span>Imputed</h4>
+        <p>
+          A diamond inside two soft rings. We could not see him; a frozen model says he is probably
+          about here, and the rings are its own claimed 50% and 90% regions. On real broadcast footage
+          those rings actually contain the player <strong>21.2%</strong> and <strong>55.4%</strong> of
+          the time. Read the haze as &ldquo;roughly here&rdquo;, never as a probability.
+        </p>
+      </div>
+      <div>
+        <h4><span class="swatch" style="background:#8b93a8"></span>Abstained</h4>
+        <p>
+          A faded cross with a countdown. The model declined: the region it would have had to draw was
+          wider than the threshold it was frozen with, so instead of a guess you get the last place he
+          was actually seen and how long ago that was.
+        </p>
+      </div>
+      <div>
+        <h4><span class="swatch" style="background:#e9ecf4"></span>Ball, and names</h4>
+        <p>
+          A filled ball marker means detected in this frame; a hollow ring means carried from a nearby
+          frame. A player&rsquo;s <em>name</em> appears only where at least three close&#8209;up jersey
+          reads agree and the name is on the team sheet. Everyone else keeps a role band.
+        </p>
+      </div>
+    </div>
+    <p class="src" style="margin-top:24px">
+      <b>Sources.</b> 21.2% / 55.4% measured coverage over 4,900 liveness&#8209;guarded re&#8209;appearances
+      across four matches, 14 of 14 testable buckets failing:
+      <code>results/CALIBRATION_REPLICATION.md</code>, knowledge base b4&#8209;015. Those numbers are
+      printed on <em>every frame</em> of the clip, beside the nominal ones. Naming gate:
+      <code>tools/tactical_clip.py</code> <code>MIN_ANCHORS = 3</code> plus the lineup check.
+    </p>
+
+    <figure style="margin-top:44px">
+      <img src="../results/tactical_clips/fulham_manutd_h2_still_uncertainty.jpg" alt="A frame from the clip in which eight players are observed and fourteen are imputed, drawn as diamonds inside large overlapping uncertainty regions on the tactics board." style="width:100%;display:block;border-radius:10px;border:1px solid var(--line)">
+      <figcaption class="small" style="margin-top:14px">
+        18:36 into the half, and the frame is mostly what we cannot see: <span class="mono">observed 8,
+        imputed 14</span>. The tactics board fills with overlapping haze because fourteen of the
+        twenty&#8209;two are off camera or unresolved. A dashboard that drew twenty&#8209;two confident
+        dots here would be lying in a way that no one watching could detect.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================ e. WHAT WE VALIDATED ============================ -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Validated</p>
+    <h2>Checked by something outside this project.</h2>
+    <p class="lede">
+      Every row below was scored against an external reference &mdash; an official statistics feed, a
+      public benchmark with its own evaluator, FIFA&rsquo;s own match reports, or a pre&#8209;registered
+      bar fixed before the run. Nothing here was tuned until it passed.
+    </p>
+
+    <table class="grid4">
+      <thead>
+        <tr><th>Measurement</th><th>Result</th><th>Checked against</th><th>Source</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Pass counts per match</td>
+          <td class="num ok">0.97&ndash;1.09&times; official<br><span class="dim">on 10 of 12</span></td>
+          <td>Official match statistics, per match. Operating point (confidence &ge;&nbsp;0.40, 1&nbsp;s
+              dedup) frozen on the <em>first</em> match and never retuned. The two misses are named:
+              fulham_manutd 1.091&times;, manutd_palace 1.108&times;.</td>
+          <td class="srccell">event&#8209;002<br>docs/PROJECT_DEFINITION.md#1<br>results/W1_FEASIBILITY_CHECKS.md#W1-A</td>
+        </tr>
+        <tr>
+          <td>Goal detection, zero&#8209;shot</td>
+          <td class="num ok">13/13 recall<br><span class="dim">81.3% precision</span></td>
+          <td>Six matches with an official goal oracle including a 0&ndash;0 negative control that
+              fired zero peaks. Every true goal is the top&#8209;scoring peak in its match
+              (0.75&ndash;0.96); the three false positives are replay windows and sit strictly below
+              (0.34&ndash;0.58). All half&#8209;splits match.</td>
+          <td class="srccell">event&#8209;001<br>results/CLAIMS_AUDIT.md#C-2<br>results/action_spotting_probe.md</td>
+        </tr>
+        <tr>
+          <td>Tracking + identity</td>
+          <td class="num ok">GS&#8209;HOTA 14.76 &rarr; 22.85</td>
+          <td>SoccerNet&#8209;GSR public validation split, 58 sequences, scored by the official
+              sn&#8209;trackeval evaluator (GT&#8209;copy sanity 100.0). The final step also repaired
+              the relink&rsquo;s regressions from 15 of 58 sequences hurt down to 1.</td>
+          <td class="srccell">ident&#8209;001, ident&#8209;002, ident&#8209;003, ident&#8209;004</td>
+        </tr>
+        <tr>
+          <td>Off&#8209;screen player imputation</td>
+          <td class="num ok">8.10 m vs an 11.46 m bar</td>
+          <td>A causal baseline bar pre&#8209;registered before the model was run. Holdout RMSE 8.10&nbsp;m,
+              95% CI on the margin [&minus;4.27, &minus;2.53], n&nbsp;=&nbsp;644,792, beating the bar in
+              5 of 6 horizon buckets with a statistical tie at the shortest.</td>
+          <td class="srccell">b4&#8209;002<br>results/B4_MODEL_V1.md#2. Gate 1</td>
+        </tr>
+        <tr>
+          <td>Jersey&#8209;number reading</td>
+          <td class="num ok">86.13% vs the paper&rsquo;s 87.45%</td>
+          <td>Independent local reproduction of a published pipeline on the SoccerNet jersey&#8209;2023
+              test split (1,043 of 1,211 tracklets), with both substitutions disclosed.</td>
+          <td class="srccell">ident&#8209;006</td>
+        </tr>
+        <tr>
+          <td>Defensive line height</td>
+          <td class="num ok">~7.2 m mean abs. error</td>
+          <td>FIFA&rsquo;s own post&#8209;match reports for three World Cup fixtures, on a held&#8209;out
+              refit that excludes those fixtures from the de&#8209;bias slope. Quoted as the ordering
+              being usable; the absolute metre label is not certified.</td>
+          <td class="srccell">line&#8209;003, line&#8209;004 (pending)</td>
+        </tr>
+        <tr>
+          <td>Ball coverage</td>
+          <td class="num ok">32&ndash;52% of sampled frames</td>
+          <td>Post&#8209;<code>link_ball</code> usable track, the only ball&#8209;coverage denominator
+              this project permits. A pre&#8209;link number was once quoted as coverage; that claim was
+              retracted end to end.</td>
+          <td class="srccell">ball&#8209;001, ball&#8209;003 (retracted)</td>
+        </tr>
+        <tr>
+          <td>Team mapping</td>
+          <td class="num ok">12/12 pass a standing screen</td>
+          <td>Possession links by kit cluster versus the official majority; a disagreement above
+              8&nbsp;percentage points fires a hard warning. Two matches were found flipped by it;
+              four claims &mdash; the two mappings and two tactical reads built on them &mdash; are
+              marked retracted in the knowledge base as a result.</td>
+          <td class="srccell">teammap&#8209;005<br>teammap&#8209;001&ndash;004 (retracted)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="src">
+      Claim identifiers refer to <code>knowledge/claims.json</code>; each entry there carries the
+      method, the sample size, the caveats and the evidence paths.
+    </p>
+  </div>
+</section>
+
+<!-- ============================ f. WHAT WE REFUSE TO CLAIM ============================ -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Refused</p>
+    <h2>What we will not claim, and the arithmetic that stops us.</h2>
+    <p class="lede">
+      This section is the same size as the one above it because it cost the same amount of work.
+      Each refusal is a measurement, not a disclaimer &mdash; we built the thing, measured it, and
+      then declined to ship it.
+    </p>
+
+    <table class="grid4">
+      <thead>
+        <tr><th>The claim we will not make</th><th>What we measured</th><th>Why that settles it</th><th>Source</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>&ldquo;This player made N passes.&rdquo;</strong><br>
+              <span class="small">Any per&#8209;player event volume, involvement count, ranking or
+              plus&#8209;minus.</span></td>
+          <td class="num no">1.0&ndash;4.2% attribution<br>0.35&ndash;0.40 precision</td>
+          <td>Only 1&ndash;4% of United&rsquo;s attributed passes carry a named player &mdash; two to
+              five a match. Pooling all nine identity matches leaves the busiest player on
+              <strong>6</strong> attributed passes against a floor of 20. And on 90 hand labels, the
+              end&#8209;to&#8209;end precision of naming the man on the ball is 0.360 for the baseline
+              and 0.400 for the best constrained variant (95% CI 0.23&ndash;0.59) &mdash; a difference
+              of one moment. A rebuilt constrained&#8209;assignment version did not beat it.</td>
+          <td class="srccell">ident&#8209;008, ident&#8209;009<br>results/CARRIER_CONSTRAINED_v2.md<br>results/PLAYER_ANALYSIS_v2.md</td>
+        </tr>
+        <tr>
+          <td><strong>&ldquo;United press more than X.&rdquo;</strong><br>
+              <span class="small">Any team&#8209;versus&#8209;team comparison of a rate metric.</span></td>
+          <td class="num no">58&ndash;90 matches needed</td>
+          <td>Derived from the published between&#8209;team and season variance of counter&#8209;press
+              rate metrics, separating two teams needs 58&ndash;90 matches <em>with perfect tracking and
+              zero measurement error</em>. We have twelve: five to eight times too few before broadcast
+              censoring is even considered. This is a sample&#8209;size bound, so no improvement to the
+              vision pipeline can rescue it.</td>
+          <td class="srccell">w1&#8209;004<br>results/W1B_WINDOW_AND_SAMPLING.md#2</td>
+        </tr>
+        <tr>
+          <td><strong>&ldquo;We can recognise faces.&rdquo;</strong><br>
+              <span class="small">Face recognition as an identity source.</span></td>
+          <td class="num no">0 of 1,095 moments</td>
+          <td>Across three labelled matches, <strong>zero</strong> of 1,095 resolvable ball&#8209;carrier
+              moments produce a face reaching the ~50&nbsp;px that recognition needs. Median face height
+              is <strong>9.9&nbsp;px</strong>; the tallest carrier in the whole sample gives a geometric
+              ceiling of 16.8&nbsp;px. A real detector run finds 17 faces in 1,093 crops (1.6%), none of
+              them large enough. This is optics, not engineering: no model fixes it.</td>
+          <td class="srccell">face&#8209;001, face&#8209;002<br>results/CROSS_MATCH_GALLERY.md</td>
+        </tr>
+        <tr>
+          <td><strong>&ldquo;Our uncertainty regions are calibrated.&rdquo;</strong><br>
+              <span class="small">Retracted 2026&#8209;07&#8209;27. It had been printed on every frame of
+              an earlier version of the clip above.</span></td>
+          <td class="num no">21.2% vs 50%<br>55.4% vs 90%</td>
+          <td>The imputation model&rsquo;s regions pass calibration 6 of 6 buckets on simulated
+              censoring &mdash; and on real broadcast they cover 21.2% where they promise 50% and 55.4%
+              where they promise 90%, over <strong>4,900</strong> re&#8209;appearances across four
+              matches, failing <strong>14 of 14</strong> testable buckets. Two candidate excuses were
+              tested and rejected: our own position noise recovers the 50% level but leaves the 90%
+              level 20 points short, and a displacement&#8209;matched control shows it is not selection
+              bias either.</td>
+          <td class="srccell">b4&#8209;014 (retracted)<br>b4&#8209;015, b4&#8209;016, b4&#8209;017<br>results/CALIBRATION_REPLICATION.md</td>
+        </tr>
+        <tr>
+          <td><strong>&ldquo;Here is the goalkeeper&rsquo;s and the centre&#8209;backs&rsquo; contribution.&rdquo;</strong></td>
+          <td class="num no">0 names in 1,664 tracks</td>
+          <td>Four of the highest&#8209;volume passers in the corpus &mdash; two goalkeepers and two
+              centre&#8209;backs &mdash; are named <em>zero</em> times across all 1,664 named tracks in
+              the nine&#8209;match identity corpus, despite 26&ndash;73 passes each. The naming pipeline
+              fails structurally on exactly the players who touch the ball most.</td>
+          <td class="srccell">naming&#8209;001<br>results/CROSS_MATCH_GALLERY.md</td>
+        </tr>
+        <tr>
+          <td><strong>&ldquo;United have a tactical fingerprint you can identify them by.&rdquo;</strong></td>
+          <td class="num no">LOO accuracy 0.208<br><span class="dim">null mean 0.256</span></td>
+          <td>A published entropy&#8209;map team&#8209;identification method scores <em>below</em> its own
+              permutation null on this corpus; 1 of 90 declared parameter settings clears p&nbsp;&lt;&nbsp;0.05
+              when 4.5 are expected by chance. Separately, a sliced&#8209;Wasserstein style separation
+              decayed monotonically as matches were added (2.0 at n=3 &rarr; 0.09 at n=6) &mdash;
+              diagnosed as an artifact of the construct, not a discovery.</td>
+          <td class="srccell">style&#8209;002, style&#8209;001, style&#8209;003<br>results/ENTROPY_MAP_FEASIBILITY.md</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="banner">
+      <p>
+        <strong>The retraction that hurt.</strong> The calibration row above was not caught by a
+        reviewer. It was caught by us, after the clip had already been built with
+        &ldquo;calibrated&nbsp;50/90%&rdquo; printed on every frame. The fix was not to soften the
+        wording: it was to measure the regions against 4,900 real re&#8209;appearances, publish the
+        failure, mark the claim <span class="mono">retracted</span> in the knowledge base, and change
+        the renderer so the <em>measured</em> numbers are burned into every frame beside the nominal
+        ones. The clip you watched above carries them.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ g. WHAT WE FOUND ============================ -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Found</p>
+    <h2>Four results. Three of them delete a claim &mdash; two of ours, one of the field&rsquo;s.</h2>
+
+    <div class="cards">
+      <div class="card">
+        <h4>1 &middot; The opponent control that dissolved the identity</h4>
+        <p>
+          United build through the middle and finish down the sides: 46.9% of their own&#8209;third ball
+          time is central, 23.9% of their final&#8209;third ball time is. The swing repeats in
+          <strong>11 of 12</strong> matches (sign test p&nbsp;=&nbsp;0.0063). It looks exactly like a
+          team identity.
+        </p>
+        <p>
+          Then we ran the same measurement on the <em>opposition</em> in the same twelve broadcasts.
+          They do it in <strong>12 of 12</strong> (p&nbsp;=&nbsp;0.0005), and finish marginally
+          <em>wider</em> than United do (22.6% central against 23.9%). It is Premier League geometry,
+          not a Manchester United trait. The same control killed the &ldquo;rigid block&rdquo; claim
+          (compactness 6.17&nbsp;&plusmn;&nbsp;0.39&nbsp;m for United, 5.93&nbsp;&plusmn;&nbsp;0.29&nbsp;m
+          for the opponents, F&nbsp;=&nbsp;1.81, p&nbsp;=&nbsp;0.34) and the favoured&#8209;flank claim
+          (5 of 12 lean left, p&nbsp;=&nbsp;0.7744).
+        </p>
+        <p class="src">player&#8209;004, player&#8209;005, block&#8209;004 &middot;
+          results/MANUTD_IDENTITY_PROFILE.md</p>
+      </div>
+
+      <div class="card">
+        <h4>2 &middot; Informative censoring inflates the naive rate ~2.5&times;</h4>
+        <p>
+          Counter&#8209;pressing success looks encouraging if you count only the cases you can decide:
+          among 653 decided turnovers in our corpus, <strong>88.4%</strong> end in a regain. The
+          published human&#8209;labelled rate on a 97&#8209;match corpus is
+          <strong>30.2&ndash;36.2%</strong>.
+        </p>
+        <p>
+          The gap is not skill, it is the censoring mechanism. The event that breaks the ball track
+          &mdash; the ball leaving the frame, going long, being cleared &mdash; is exactly the event
+          that implies <em>no</em> regain. So the decided subset over&#8209;represents successes by
+          roughly two and a half times. Any pipeline that reports a naive recovery rate off broadcast
+          tracking is reporting this artifact. The label needs a survival estimator with a stated
+          censoring mechanism, and we say so instead of publishing the 88.4%.
+        </p>
+        <p class="src">w1&#8209;003 &middot; results/W1B_WINDOW_AND_SAMPLING.md#1</p>
+      </div>
+
+      <div class="card">
+        <h4>3 &middot; Re&#8209;appearance as free ground truth</h4>
+        <p>
+          When a tracked player goes off camera and the tracker later re&#8209;associates the same id,
+          the position he re&#8209;appears at is ground truth for what an imputation model should have
+          predicted while he was hidden &mdash; free, unlabelled, and on the real footage rather than a
+          simulation.
+        </p>
+        <p>
+          Every comparable model in this literature &mdash; DeepMind&rsquo;s Graph Imputer, a 2026
+          arXiv preprint on the same problem, and our own frozen model &mdash; is calibrated and
+          evaluated on <em>simulated</em> censoring only. Applying this check is, as far as our reading
+          goes, the first calibration test of an off&#8209;screen imputation model on real broadcast
+          footage. Its first result was to demolish our own claim, which is the strongest evidence that
+          the check works.
+        </p>
+        <p class="src">b4&#8209;019 &middot; results/CALIBRATION_REPLICATION.md &middot;
+          results/PAPER_READ_SCOOP_CHECK.md</p>
+      </div>
+
+      <div class="card">
+        <h4>4 &middot; Goals are the least measurable moments in a broadcast</h4>
+        <p>
+          Found while building the clip on this page, and reported because it went against the plan.
+          Across 30 detected goals in 10 matches, <strong>none</strong> of 112 candidate windows of
+          120, 90, 60 or 30 seconds ending at a goal clears the tracking gate &mdash; every one of
+          them fails on pitch geometry, never on player count or ball coverage.
+        </p>
+        <p>
+          The implication is practical: any product that shows you a confident two&#8209;minute
+          tactical animation of a goal, built from a single broadcast feed, is showing you far more
+          model than measurement. The measurable football is in the quiet passages between the
+          highlights, which is exactly the football nobody clips.
+        </p>
+        <p class="src">results/tactical_clips/goal_window_scan.csv &middot;
+          tools/tactical_clip.py <code>--goal-scan</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ h. HOW TO CHECK ============================ -->
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Verification</p>
+    <h2>How to check any sentence on this page.</h2>
+    <p class="lede">
+      Every number above carries a claim identifier or a file path. The knowledge base is queryable
+      from the command line, and it keeps retractions rather than deleting them, so the correction
+      trail is part of the artifact.
+    </p>
+
+    <h3>The knowledge base</h3>
+    <pre>python -m tools.kb list --status retracted     # the 12 claims we withdrew, and why
+python -m tools.kb list --status refuted_externally
+python -m tools.kb show b4-015                 # method, n, caveats, evidence paths</pre>
+    <p class="small">
+      102 claims logged: 72 confirmed, 12 retracted, 8 refuted by an external control, 8 pending,
+      2 superseded. A claim record carries its statement, its status, the method that produced it,
+      the sample size, its caveats and the files that evidence it.
+    </p>
+
+    <h3>The repository</h3>
+    <table class="layout">
+      <tbody>
+        <tr><td class="num">core/</td><td>The match registry &mdash; every path comes from
+            <code>data/matches.yaml</code>, nothing is hard&#8209;coded &mdash; and the pitch constants,
+            with a metrics version that is bumped whenever a metric changes.</td></tr>
+        <tr><td class="num">generator/</td><td>The vision pipeline: extraction, calibration, ball
+            linking, team anchoring, imputation, post&#8209;processing.</td></tr>
+        <tr><td class="num">fingerprint/</td><td>The metric engine: block height, phases, transitions,
+            expected threat, roles, structural metrics.</td></tr>
+        <tr><td class="num">synthesizer/</td><td>The opponent&#8209;conditioned model and the frozen
+            imputation model used in the clip.</td></tr>
+        <tr><td class="num">report/</td><td>The fact store, the pundit template, the narration and the
+            numeric guardrail that refuses ungrounded sentences.</td></tr>
+        <tr><td class="num">tools/</td><td>Runnable analyses and validators, including
+            <code>tactical_clip.py</code> which produced the clip above.</td></tr>
+        <tr><td class="num">results/</td><td>One markdown deliverable per investigation, including the
+            negative ones. Nothing on this page is asserted that is not written up there.</td></tr>
+        <tr><td class="num">tests/</td><td>461 tests, green.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The clip</h3>
+    <pre>python tools/tactical_clip.py --goal-scan --match &lt;comma-separated ids&gt;
+python tools/tactical_clip.py --match fulham_manutd --half h2 --islands
+python tools/tactical_clip.py --match fulham_manutd --half h2 --stitch --stride 2 --crf 23
+python tools/tactical_clip.py --self-check</pre>
+    <p class="small">
+      The first reproduces the 112&#8209;window goal scan; the second prints the six passages and their
+      measured quality and writes them to CSV; the third renders exactly what is embedded above,
+      including the cards. The self&#8209;check asserts, among other
+      things, that the window scoring used to <em>select</em> a passage is the same arithmetic used to
+      <em>refuse</em> one, and that the measured coverage numbers appear in the on&#8209;screen legend.
+    </p>
+
+    <div class="banner good">
+      <p>
+        <strong>The standing rule.</strong> No metric ships without a validator: an official statistic,
+        a public benchmark with its own evaluator, a pre&#8209;registered bar, or annotated ground
+        truth. When end&#8209;to&#8209;end verification fails, the claim is retracted loudly and the
+        retraction stays in the record. Twelve of the 102 claims on file are retractions of our own
+        work.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>
+      football&#8209;synthesizer &middot; Manchester United, Premier League 2024&#8209;25 &middot; twelve
+      broadcasts &middot; built on a 4&nbsp;GB laptop GPU with no paid data sources.
+    </p>
+    <p class="small">
+      Video: <span class="mono">results/tactical_clips/fulham_manutd_h2_stitch.mp4</span> &middot;
+      selection: <span class="mono">results/tactical_clips/fulham_manutd_h2_islands.csv</span> &middot;
+      claims: <span class="mono">knowledge/claims.json</span>.
+      Broadcast footage is used for research measurement and is not redistributed.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
