@@ -1,0 +1,563 @@
+{
+  "stride 5 (shipped)": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 2023,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.487587370450711,
+    "trk_over_det": 0.4996295381575698,
+    "wilson95": [
+      0.47239619048872056,
+      0.5028015151015912
+    ],
+    "config": {
+      "stride": 5
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 356,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.524300441826215
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 1376,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.5477707006369427
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 291,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.3037578288100209
+      }
+    },
+    "fragments_per_player_window": 1.5393258426966292,
+    "n_player_windows": 178,
+    "n_tracks": 239,
+    "contaminated_track_frac": 0.14225941422594143
+  },
+  "stride 2": {
+    "n_gt": 2073,
+    "n_det": 2023,
+    "n_trk": 1799,
+    "det_recall": 0.9758803666184274,
+    "trk_recall": 0.8678244090689822,
+    "trk_over_det": 0.889273356401384,
+    "wilson95": [
+      0.8525619621063981,
+      0.8817261030016967
+    ],
+    "config": {
+      "stride": 2
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 340,
+        "n_det": 340,
+        "n_trk": 319,
+        "det_recall": 1.0,
+        "trk_recall": 0.9382352941176471
+      },
+      "game_24": {
+        "n_gt": 1244,
+        "n_det": 1222,
+        "n_trk": 1108,
+        "det_recall": 0.9823151125401929,
+        "trk_recall": 0.8906752411575563
+      },
+      "game_47": {
+        "n_gt": 489,
+        "n_det": 461,
+        "n_trk": 372,
+        "det_recall": 0.9427402862985685,
+        "trk_recall": 0.7607361963190185
+      }
+    },
+    "fragments_per_player_window": 1.3058252427184467,
+    "n_player_windows": 206,
+    "n_tracks": 247,
+    "contaminated_track_frac": 0.08906882591093117
+  },
+  "stride 1": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 3968,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.9563750301277416,
+    "trk_over_det": 0.9799950605087676,
+    "wilson95": [
+      0.9497260500222215,
+      0.9621796677398042
+    ],
+    "config": {
+      "stride": 1
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 672,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.9896907216494846
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 2427,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.9661624203821656
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 869,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.907098121085595
+      }
+    },
+    "fragments_per_player_window": 1.1578947368421053,
+    "n_player_windows": 209,
+    "n_tracks": 224,
+    "contaminated_track_frac": 0.07589285714285714
+  },
+  "stride 5, min_hits=2": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 2405,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.5796577488551459,
+    "trk_over_det": 0.5939738206964683,
+    "wilson95": [
+      0.5645707680231244,
+      0.5945973543536116
+    ],
+    "config": {
+      "stride": 5,
+      "min_hits": 2
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 393,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.5787923416789397
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 1583,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.6301751592356688
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 429,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.44780793319415446
+      }
+    },
+    "fragments_per_player_window": 1.859375,
+    "n_player_windows": 192,
+    "n_tracks": 308,
+    "contaminated_track_frac": 0.1525974025974026
+  },
+  "stride 5, min_hits=1": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 2861,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.6895637503012774,
+    "trk_over_det": 0.7065942207952581,
+    "wilson95": [
+      0.6753152691812149,
+      0.7034615182599434
+    ],
+    "config": {
+      "stride": 5,
+      "min_hits": 1
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 481,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.7083946980854198
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 1834,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.7300955414012739
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 546,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.569937369519833
+      }
+    },
+    "fragments_per_player_window": 2.094059405940594,
+    "n_player_windows": 202,
+    "n_tracks": 368,
+    "contaminated_track_frac": 0.14673913043478262
+  },
+  "stride 5, matching=0.9": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 2294,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.5529043142926007,
+    "trk_over_det": 0.5665596443566313,
+    "wilson95": [
+      0.5377333172587272,
+      0.5679774327010113
+    ],
+    "config": {
+      "stride": 5,
+      "matching": 0.9
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 392,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.5773195876288659
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 1528,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.60828025477707
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 374,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.3903966597077244
+      }
+    },
+    "fragments_per_player_window": 1.559782608695652,
+    "n_player_windows": 184,
+    "n_tracks": 239,
+    "contaminated_track_frac": 0.18410041841004185
+  },
+  "stride 5, lost_buffer=150": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 2023,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.487587370450711,
+    "trk_over_det": 0.4996295381575698,
+    "wilson95": [
+      0.47239619048872056,
+      0.5028015151015912
+    ],
+    "config": {
+      "stride": 5,
+      "lost_buffer": 150
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 356,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.524300441826215
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 1376,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.5477707006369427
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 291,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.3037578288100209
+      }
+    },
+    "fragments_per_player_window": 1.5393258426966292,
+    "n_player_windows": 178,
+    "n_tracks": 239,
+    "contaminated_track_frac": 0.14225941422594143
+  },
+  "stride 5, activation=0.10": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 2025,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.4880694143167028,
+    "trk_over_det": 0.5001234872808101,
+    "wilson95": [
+      0.47287743176183344,
+      0.5032834697278837
+    ],
+    "config": {
+      "stride": 5,
+      "activation": 0.1
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 356,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.524300441826215
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 1379,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.5489649681528662
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 290,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.302713987473904
+      }
+    },
+    "fragments_per_player_window": 1.5363128491620113,
+    "n_player_windows": 179,
+    "n_tracks": 240,
+    "contaminated_track_frac": 0.14166666666666666
+  },
+  "stride 5, det_conf=0.10": {
+    "n_gt": 4149,
+    "n_det": 4061,
+    "n_trk": 2025,
+    "det_recall": 0.9787900698963605,
+    "trk_recall": 0.4880694143167028,
+    "trk_over_det": 0.4986456537798572,
+    "wilson95": [
+      0.47287743176183344,
+      0.5032834697278837
+    ],
+    "config": {
+      "stride": 5,
+      "min_conf": 0.1
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 356,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.524300441826215
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2469,
+        "n_trk": 1378,
+        "det_recall": 0.9828821656050956,
+        "trk_recall": 0.5485668789808917
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 915,
+        "n_trk": 291,
+        "det_recall": 0.9551148225469729,
+        "trk_recall": 0.3037578288100209
+      }
+    },
+    "fragments_per_player_window": 1.5393258426966292,
+    "n_player_windows": 178,
+    "n_tracks": 239,
+    "contaminated_track_frac": 0.14225941422594143
+  },
+  "stride 5, min_hits=1 + matching=0.9": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 3101,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.747409014220294,
+    "trk_over_det": 0.7658681155840948,
+    "wilson95": [
+      0.7339630348599073,
+      0.7603972605098944
+    ],
+    "config": {
+      "stride": 5,
+      "min_hits": 1,
+      "matching": 0.9
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 534,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.7864506627393225
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 1958,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.7794585987261147
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 609,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.6356993736951984
+      }
+    },
+    "fragments_per_player_window": 1.941747572815534,
+    "n_player_windows": 206,
+    "n_tracks": 329,
+    "contaminated_track_frac": 0.2006079027355623
+  },
+  "stride 5, min_hits=1 + matching=0.9 + det_conf=0.10": {
+    "n_gt": 4149,
+    "n_det": 4061,
+    "n_trk": 3105,
+    "det_recall": 0.9787900698963605,
+    "trk_recall": 0.7483731019522777,
+    "trk_over_det": 0.7645900024624477,
+    "wilson95": [
+      0.734942952461225,
+      0.7613437347073875
+    ],
+    "config": {
+      "stride": 5,
+      "min_hits": 1,
+      "matching": 0.9,
+      "min_conf": 0.1
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 534,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.7864506627393225
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2469,
+        "n_trk": 1960,
+        "det_recall": 0.9828821656050956,
+        "trk_recall": 0.7802547770700637
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 915,
+        "n_trk": 611,
+        "det_recall": 0.9551148225469729,
+        "trk_recall": 0.6377870563674322
+      }
+    },
+    "fragments_per_player_window": 1.946341463414634,
+    "n_player_windows": 205,
+    "n_tracks": 328,
+    "contaminated_track_frac": 0.20121951219512196
+  },
+  "stride 2, min_hits=1 + matching=0.9": {
+    "n_gt": 2073,
+    "n_det": 2023,
+    "n_trk": 1963,
+    "det_recall": 0.9758803666184274,
+    "trk_recall": 0.9469368065605402,
+    "trk_over_det": 0.9703410776075136,
+    "wilson95": [
+      0.9364339454450801,
+      0.9557862412075754
+    ],
+    "config": {
+      "stride": 2,
+      "min_hits": 1,
+      "matching": 0.9
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 340,
+        "n_det": 340,
+        "n_trk": 336,
+        "det_recall": 1.0,
+        "trk_recall": 0.9882352941176471
+      },
+      "game_24": {
+        "n_gt": 1244,
+        "n_det": 1222,
+        "n_trk": 1190,
+        "det_recall": 0.9823151125401929,
+        "trk_recall": 0.9565916398713826
+      },
+      "game_47": {
+        "n_gt": 489,
+        "n_det": 461,
+        "n_trk": 437,
+        "det_recall": 0.9427402862985685,
+        "trk_recall": 0.8936605316973415
+      }
+    },
+    "fragments_per_player_window": 1.2932692307692308,
+    "n_player_windows": 208,
+    "n_tracks": 246,
+    "contaminated_track_frac": 0.09349593495934959
+  },
+  "stride 1, min_hits=1 + matching=0.9": {
+    "n_gt": 4149,
+    "n_det": 4049,
+    "n_trk": 4024,
+    "det_recall": 0.9758978067004097,
+    "trk_recall": 0.9698722583755122,
+    "trk_over_det": 0.9938256359594961,
+    "wilson95": [
+      0.9642204143453268,
+      0.9746547886000491
+    ],
+    "config": {
+      "stride": 1,
+      "min_hits": 1,
+      "matching": 0.9
+    },
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 677,
+        "n_trk": 675,
+        "det_recall": 0.9970544918998527,
+        "trk_recall": 0.9941089837997055
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2465,
+        "n_trk": 2455,
+        "det_recall": 0.9812898089171974,
+        "trk_recall": 0.9773089171974523
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 907,
+        "n_trk": 894,
+        "det_recall": 0.9467640918580376,
+        "trk_recall": 0.9331941544885177
+      }
+    },
+    "fragments_per_player_window": 1.2333333333333334,
+    "n_player_windows": 210,
+    "n_tracks": 239,
+    "contaminated_track_frac": 0.07531380753138076
+  }
+}

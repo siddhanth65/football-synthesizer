@@ -1,0 +1,17 @@
+{
+  "device": "cuda",
+  "video": "matches\\footpass_game_18\\h1\\chunk_000.mp4",
+  "stride": 2,
+  "n_source": 1500,
+  "bytetrack": {
+    "sampled_frames_timed": 690,
+    "s_per_sampled_frame": 0.035482837497324185
+  },
+  "botsort": {
+    "sampled_frames_timed": 690,
+    "s_per_sampled_frame": 0.090605352235877
+  },
+  "delta_s_per_sampled_frame": 0.055122514738552814,
+  "projected_3game_overhead_h": 3.557507574463476,
+  "sampled_frames_3games": 232337.5
+}

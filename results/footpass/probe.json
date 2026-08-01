@@ -1,0 +1,68 @@
+{
+  "game_18": {
+    "game": "game_18",
+    "nb_frames": 149650,
+    "fps": 25.0,
+    "start_time": 0.022969,
+    "size": [
+      1920,
+      1080
+    ],
+    "annotated_frames": {
+      "h1": [
+        32,
+        75307
+      ],
+      "h2": [
+        75525,
+        149181
+      ]
+    },
+    "last_annotated_frame": 149181,
+    "unannotated_tail_frames": 468
+  },
+  "game_24": {
+    "game": "game_24",
+    "nb_frames": 162075,
+    "fps": 25.0,
+    "start_time": 0.0,
+    "size": [
+      1920,
+      1080
+    ],
+    "annotated_frames": {
+      "h1": [
+        5397,
+        77221
+      ],
+      "h2": [
+        79189,
+        157023
+      ]
+    },
+    "last_annotated_frame": 157023,
+    "unannotated_tail_frames": 5051
+  },
+  "game_47": {
+    "game": "game_47",
+    "nb_frames": 152950,
+    "fps": 25.0,
+    "start_time": 0.022969,
+    "size": [
+      1920,
+      1080
+    ],
+    "annotated_frames": {
+      "h1": [
+        53,
+        73804
+      ],
+      "h2": [
+        74088,
+        152903
+      ]
+    },
+    "last_annotated_frame": 152903,
+    "unannotated_tail_frames": 46
+  }
+}

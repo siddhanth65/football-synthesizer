@@ -1,0 +1,86 @@
+{
+  "botsort tuned (as shipped), stride 5": {
+    "n_gt": 4149,
+    "n_det": 3204,
+    "n_trk": 3184,
+    "det_recall": 0.7722342733188721,
+    "trk_recall": 0.767413834658954,
+    "wilson95": [
+      0.754314465987708,
+      0.7800184592074161
+    ],
+    "per_game": {
+      "game_18": {
+        "n_gt": 679,
+        "n_det": 519,
+        "n_trk": 519,
+        "det_recall": 0.7643593519882179,
+        "trk_recall": 0.7643593519882179
+      },
+      "game_24": {
+        "n_gt": 2512,
+        "n_det": 2090,
+        "n_trk": 2078,
+        "det_recall": 0.8320063694267515,
+        "trk_recall": 0.8272292993630573
+      },
+      "game_47": {
+        "n_gt": 958,
+        "n_det": 595,
+        "n_trk": 587,
+        "det_recall": 0.6210855949895616,
+        "trk_recall": 0.6127348643006263
+      }
+    },
+    "config": {
+      "stride": 5
+    },
+    "fragments_per_player_window": 1.6519607843137254,
+    "n_player_windows": 204,
+    "n_tracks": 295,
+    "contaminated_track_frac": 0.12203389830508475,
+    "wall_s": 333.2
+  },
+  "botsort tuned (as shipped), stride 2": {
+    "n_gt": 2073,
+    "n_det": 1963,
+    "n_trk": 1963,
+    "det_recall": 0.9469368065605402,
+    "trk_recall": 0.9469368065605402,
+    "wilson95": [
+      0.9364339454450801,
+      0.9557862412075754
+    ],
+    "per_game": {
+      "game_18": {
+        "n_gt": 340,
+        "n_det": 337,
+        "n_trk": 337,
+        "det_recall": 0.9911764705882353,
+        "trk_recall": 0.9911764705882353
+      },
+      "game_24": {
+        "n_gt": 1244,
+        "n_det": 1205,
+        "n_trk": 1205,
+        "det_recall": 0.9686495176848875,
+        "trk_recall": 0.9686495176848875
+      },
+      "game_47": {
+        "n_gt": 489,
+        "n_det": 421,
+        "n_trk": 421,
+        "det_recall": 0.8609406952965235,
+        "trk_recall": 0.8609406952965235
+      }
+    },
+    "config": {
+      "stride": 2
+    },
+    "fragments_per_player_window": 1.077294685990338,
+    "n_player_windows": 207,
+    "n_tracks": 215,
+    "contaminated_track_frac": 0.037209302325581395,
+    "wall_s": 841.9
+  }
+}
