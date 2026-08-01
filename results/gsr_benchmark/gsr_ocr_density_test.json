@@ -1,0 +1,154 @@
+{
+  "version": "ocr-percrop-1.0",
+  "sequences": [
+    "SNGS-022",
+    "SNGS-023",
+    "SNGS-025",
+    "SNGS-026",
+    "SNGS-028",
+    "SNGS-029",
+    "SNGS-031",
+    "SNGS-032",
+    "SNGS-034",
+    "SNGS-035",
+    "SNGS-037",
+    "SNGS-038",
+    "SNGS-040",
+    "SNGS-041",
+    "SNGS-043",
+    "SNGS-044",
+    "SNGS-046",
+    "SNGS-047",
+    "SNGS-049",
+    "SNGS-050",
+    "SNGS-052",
+    "SNGS-053",
+    "SNGS-055",
+    "SNGS-056",
+    "SNGS-058",
+    "SNGS-059",
+    "SNGS-079",
+    "SNGS-080",
+    "SNGS-082",
+    "SNGS-083",
+    "SNGS-085",
+    "SNGS-086",
+    "SNGS-088",
+    "SNGS-089",
+    "SNGS-091",
+    "SNGS-092",
+    "SNGS-094",
+    "SNGS-095"
+  ],
+  "primary_floor": "0.80",
+  "arms": {
+    "0.80": {
+      "full": {
+        "rule": {
+          "min_crop_conf": 0.9,
+          "min_votes": 3,
+          "min_legibility": 0.5,
+          "emit_all": false
+        },
+        "max_crops": null,
+        "n_tracks": 3274,
+        "n_tracks_read": 946,
+        "d": 0.2889431887599267,
+        "n_reads": 946,
+        "n_reads_auditable": 857,
+        "read_precision": 0.7992998833138857,
+        "n_tracks_auditable": 857,
+        "track_precision": 0.7992998833138857
+      },
+      "matched_volume_20": {
+        "rule": {
+          "min_crop_conf": 0.9,
+          "min_votes": 3,
+          "min_legibility": 0.5,
+          "emit_all": false
+        },
+        "max_crops": 20,
+        "n_tracks": 3274,
+        "n_tracks_read": 703,
+        "d": 0.21472205253512522,
+        "n_reads": 703,
+        "n_reads_auditable": 635,
+        "read_precision": 0.8456692913385827,
+        "n_tracks_auditable": 635,
+        "track_precision": 0.8456692913385827
+      }
+    },
+    "0.85": {
+      "full": {
+        "rule": {
+          "min_crop_conf": 0.99,
+          "min_votes": 5,
+          "min_legibility": 0.5,
+          "emit_all": false
+        },
+        "max_crops": null,
+        "n_tracks": 3274,
+        "n_tracks_read": 682,
+        "d": 0.20830788026878436,
+        "n_reads": 682,
+        "n_reads_auditable": 626,
+        "read_precision": 0.8578274760383386,
+        "n_tracks_auditable": 626,
+        "track_precision": 0.8578274760383386
+      },
+      "matched_volume_20": {
+        "rule": {
+          "min_crop_conf": 0.99,
+          "min_votes": 5,
+          "min_legibility": 0.5,
+          "emit_all": false
+        },
+        "max_crops": 20,
+        "n_tracks": 3274,
+        "n_tracks_read": 395,
+        "d": 0.12064752596212584,
+        "n_reads": 395,
+        "n_reads_auditable": 356,
+        "read_precision": 0.9213483146067416,
+        "n_tracks_auditable": 356,
+        "track_precision": 0.9213483146067416
+      }
+    },
+    "0.87": {
+      "full": {
+        "rule": {
+          "min_crop_conf": 0.99,
+          "min_votes": 5,
+          "min_legibility": 0.9,
+          "emit_all": false
+        },
+        "max_crops": null,
+        "n_tracks": 3274,
+        "n_tracks_read": 586,
+        "d": 0.17898594990836897,
+        "n_reads": 586,
+        "n_reads_auditable": 537,
+        "read_precision": 0.8584729981378026,
+        "n_tracks_auditable": 537,
+        "track_precision": 0.8584729981378026
+      },
+      "matched_volume_20": {
+        "rule": {
+          "min_crop_conf": 0.99,
+          "min_votes": 5,
+          "min_legibility": 0.9,
+          "emit_all": false
+        },
+        "max_crops": 20,
+        "n_tracks": 3274,
+        "n_tracks_read": 321,
+        "d": 0.09804520464263898,
+        "n_reads": 321,
+        "n_reads_auditable": 289,
+        "read_precision": 0.9204152249134948,
+        "n_tracks_auditable": 289,
+        "track_precision": 0.9204152249134948
+      }
+    }
+  }
+}

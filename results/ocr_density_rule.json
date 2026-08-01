@@ -1,0 +1,33 @@
+{
+  "version": "ocr-percrop-1.0",
+  "floors": [
+    0.8,
+    0.85,
+    0.87
+  ],
+  "primary_floor": 0.8,
+  "rules": {
+    "0.80": {
+      "min_crop_conf": 0.9,
+      "min_votes": 3,
+      "min_legibility": 0.5,
+      "emit_all": false
+    },
+    "0.85": {
+      "min_crop_conf": 0.99,
+      "min_votes": 5,
+      "min_legibility": 0.5,
+      "emit_all": false
+    },
+    "0.87": {
+      "min_crop_conf": 0.99,
+      "min_votes": 5,
+      "min_legibility": 0.9,
+      "emit_all": false
+    }
+  },
+  "min_crop_conf": 0.9,
+  "min_votes": 3,
+  "min_legibility": 0.5,
+  "emit_all": false
+}

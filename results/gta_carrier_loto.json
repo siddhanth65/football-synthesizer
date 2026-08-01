@@ -1,0 +1,56 @@
+{
+  "version": "gta-link-1.0",
+  "unpaired": {
+    "baseline": {
+      "correct": 2421,
+      "n": 3877,
+      "p": 0.6244518957957184
+    },
+    "tau0.000": {
+      "correct": 2226,
+      "n": 3528,
+      "p": 0.6309523809523809
+    },
+    "tau0.040": {
+      "correct": 2273,
+      "n": 3671,
+      "p": 0.6191773358757832
+    },
+    "tau0.050": {
+      "correct": 2273,
+      "n": 3752,
+      "p": 0.6058102345415778
+    },
+    "tau0.060": {
+      "correct": 2270,
+      "n": 3726,
+      "p": 0.6092324208266238
+    }
+  },
+  "paired_vs_resample_control": {
+    "tau0.040": {
+      "n_paired": 2232,
+      "control_p": 0.6366487455197133,
+      "arm_p": 0.6232078853046595,
+      "control_only_right": 207,
+      "arm_only_right": 177,
+      "mcnemar_p": 0.13879798335783133
+    },
+    "tau0.050": {
+      "n_paired": 2074,
+      "control_p": 0.6345226615236258,
+      "arm_p": 0.6084860173577628,
+      "control_only_right": 232,
+      "arm_only_right": 178,
+      "mcnemar_p": 0.008777148281168622
+    },
+    "tau0.060": {
+      "n_paired": 1956,
+      "control_p": 0.6503067484662577,
+      "arm_p": 0.6201431492842536,
+      "control_only_right": 219,
+      "arm_only_right": 160,
+      "mcnemar_p": 0.002840770622978357
+    }
+  }
+}

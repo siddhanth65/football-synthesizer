@@ -1,0 +1,46 @@
+{
+  "version": "identity-solve-1.0",
+  "percrop": true,
+  "floor": "0.85",
+  "percrop_variant": "_w125",
+  "min_votes": null,
+  "config": {
+    "p_correct": 0.8837209302325582,
+    "app_gain": 10.0,
+    "sim_none": 0.92,
+    "topk": 3,
+    "pi_none": 0.7,
+    "r_abstain": 0.0,
+    "team_eps": 0.02,
+    "role_eps": 0.05,
+    "max_concurrent": 11,
+    "use_confusion": true,
+    "use_ocr": true,
+    "use_app": true,
+    "use_mutex": true
+  },
+  "matches": {
+    "footpass_game_18": {
+      "solver": {
+        "tracklets": 6470,
+        "named": 6017,
+        "gk_tracklets": 63,
+        "gk_named": 62,
+        "keepers_in_lineup": [
+          "T1#1",
+          "T2#16"
+        ],
+        "keepers_named": [
+          "T1#1",
+          "T2#16"
+        ],
+        "n_keepers_named": 2,
+        "n_gk_role_tracks_named_with_a_keeper": 70,
+        "n_gk_role_tracks": 163,
+        "n_gk_role_tracks_named": 129,
+        "n_named_tracks": 9387
+      },
+      "baseline": null
+    }
+  }
+}

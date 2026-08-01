@@ -39,7 +39,8 @@ an integration exercise: **every layer is graded against an external source**, a
 **abstains** when the evidence is thin instead of guessing.
 - Pass counts from the event model: within **0.97-1.09x official** on 10 of 12 matches, on a
   threshold frozen at the first match and never retuned.
-- Goals: 14/16 detected at the right time, every half-boundary independently confirmed.
+- Goals: 13/13 recall at 81.3% precision (16 peaks, 3 false positives; kb event-001), every
+  half-boundary independently confirmed.
 - Player identity on a public benchmark (SoccerNet GS-HOTA): **14.76 -> 22.85**, externally graded.
 
 **2. Method — validated off-screen player imputation (the novel module).**

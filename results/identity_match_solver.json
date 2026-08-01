@@ -1,0 +1,131 @@
+{
+  "version": "identity-solve-1.0",
+  "config": {
+    "p_correct": 0.8837209302325582,
+    "app_gain": 10.0,
+    "sim_none": 0.92,
+    "topk": 3,
+    "pi_none": 0.7,
+    "r_abstain": 0.0,
+    "team_eps": 0.02,
+    "role_eps": 0.05,
+    "max_concurrent": 11,
+    "use_confusion": true,
+    "use_ocr": true,
+    "use_app": true,
+    "use_mutex": true
+  },
+  "matches": {
+    "manutd_liverpool": {
+      "solver": {
+        "tracklets": 5621,
+        "named": 5324,
+        "gk_tracklets": 56,
+        "gk_named": 53,
+        "keepers_in_lineup": [
+          "Alisson",
+          "Altay Bay\u0131nd\u0131r",
+          "Andr\u00e9 Onana",
+          "Caoimhin Kelleher"
+        ],
+        "keepers_named": [
+          "Alisson",
+          "Andr\u00e9 Onana"
+        ],
+        "n_keepers_named": 2,
+        "n_gk_role_tracks_named_with_a_keeper": 67,
+        "n_gk_role_tracks": 182,
+        "n_gk_role_tracks_named": 166,
+        "n_named_tracks": 7398
+      },
+      "baseline": {
+        "keepers_in_lineup": [
+          "Alisson",
+          "Altay Bay\u0131nd\u0131r",
+          "Andr\u00e9 Onana",
+          "Caoimhin Kelleher"
+        ],
+        "keepers_named": [],
+        "n_keepers_named": 0,
+        "n_gk_role_tracks_named_with_a_keeper": 0,
+        "n_gk_role_tracks": 182,
+        "n_gk_role_tracks_named": 7,
+        "n_named_tracks": 934
+      }
+    },
+    "manutd_tottenham": {
+      "solver": {
+        "tracklets": 6466,
+        "named": 6181,
+        "gk_tracklets": 53,
+        "gk_named": 53,
+        "keepers_in_lineup": [
+          "Andr\u00e9 Onana",
+          "Anton\u00edn Kinsk\u00fd",
+          "Elyh Harrison",
+          "Guglielmo Vicario"
+        ],
+        "keepers_named": [
+          "Andr\u00e9 Onana",
+          "Guglielmo Vicario"
+        ],
+        "n_keepers_named": 2,
+        "n_gk_role_tracks_named_with_a_keeper": 59,
+        "n_gk_role_tracks": 186,
+        "n_gk_role_tracks_named": 169,
+        "n_named_tracks": 8095
+      },
+      "baseline": {
+        "keepers_in_lineup": [
+          "Andr\u00e9 Onana",
+          "Anton\u00edn Kinsk\u00fd",
+          "Elyh Harrison",
+          "Guglielmo Vicario"
+        ],
+        "keepers_named": [],
+        "n_keepers_named": 0,
+        "n_gk_role_tracks_named_with_a_keeper": 0,
+        "n_gk_role_tracks": 186,
+        "n_gk_role_tracks_named": 7,
+        "n_named_tracks": 867
+      }
+    },
+    "manutd_brighton": {
+      "solver": {
+        "tracklets": 5284,
+        "named": 4893,
+        "gk_tracklets": 72,
+        "gk_named": 72,
+        "keepers_in_lineup": [
+          "Altay Bay\u0131nd\u0131r",
+          "Andr\u00e9 Onana",
+          "Bart Verbruggen",
+          "Jason Steele"
+        ],
+        "keepers_named": [
+          "Andr\u00e9 Onana",
+          "Bart Verbruggen"
+        ],
+        "n_keepers_named": 2,
+        "n_gk_role_tracks_named_with_a_keeper": 118,
+        "n_gk_role_tracks": 280,
+        "n_gk_role_tracks_named": 237,
+        "n_named_tracks": 7690
+      },
+      "baseline": {
+        "keepers_in_lineup": [
+          "Altay Bay\u0131nd\u0131r",
+          "Andr\u00e9 Onana",
+          "Bart Verbruggen",
+          "Jason Steele"
+        ],
+        "keepers_named": [],
+        "n_keepers_named": 0,
+        "n_gk_role_tracks_named_with_a_keeper": 0,
+        "n_gk_role_tracks": 280,
+        "n_gk_role_tracks_named": 3,
+        "n_named_tracks": 873
+      }
+    }
+  }
+}

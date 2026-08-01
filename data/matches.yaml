@@ -202,3 +202,40 @@ matches:
     competition: ENG-Premier League 2024-2025
     home_team: Tottenham
     away_team: Man Utd
+  # ------------------------------------------------------------------------------------------
+  # FOOTPASS / SN-PCBAS-2026 VAL split (3 games) -- the end-to-end from-pixels validation slice.
+  # NOT ManU, NOT EPL: this is the labelled corpus that grades player-event attribution against
+  # 6,070 annotated (frame, team, jersey, action) tuples. Teams are ANONYMISED by the dataset
+  # (player_id // 100 in {1, 2}); there are no club names and none are invented here. The
+  # FOOTPASS-team <-> kit-anchor-team-id mapping is MEASURED, not declared -- see
+  # `tools/footpass_prep.py --stage teammap` (writes results/footpass/team_map.json) and
+  # `eval/footpass_score.resolve_team_map`. Video: data/footpass/video/<game>.mp4 (gitignored,
+  # SoccerNet NDA); chunks: matches/footpass_game_N/h{1,2}/ with the GLOBAL segment index kept in
+  # the filename and the measured per-chunk frame offsets in outputs/<id>/chunk_offsets.json
+  # (one mp4 spans both halves, half-time removed; the annotation frame index runs continuously).
+  # No FIFA PMSR, no roster json -- the roster comes from the annotations themselves
+  # (outputs/identity/<id>_lineup_assign.parquet, written by footpass_prep --stage lineup).
+  footpass_game_18:
+    teams: [FOOTPASS team 1, FOOTPASS team 2]   # placeholder order; kit-anchor mapping measured
+    date: null
+    aligned: outputs/footpass_game_18/final/match_aligned.parquet
+    ball_dir: outputs/footpass_game_18/final/ball
+    pmsr: null
+    roster: false
+    competition: FOOTPASS SN-PCBAS-2026 VAL
+  footpass_game_24:
+    teams: [FOOTPASS team 1, FOOTPASS team 2]
+    date: null
+    aligned: outputs/footpass_game_24/final/match_aligned.parquet
+    ball_dir: outputs/footpass_game_24/final/ball
+    pmsr: null
+    roster: false
+    competition: FOOTPASS SN-PCBAS-2026 VAL
+  footpass_game_47:
+    teams: [FOOTPASS team 1, FOOTPASS team 2]
+    date: null
+    aligned: outputs/footpass_game_47/final/match_aligned.parquet
+    ball_dir: outputs/footpass_game_47/final/ball
+    pmsr: null
+    roster: false
+    competition: FOOTPASS SN-PCBAS-2026 VAL

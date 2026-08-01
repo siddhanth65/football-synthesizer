@@ -10,6 +10,7 @@ from generator.postprocess import (
     clamp_to_pitch,
     derive_actor,
     derive_keeper,
+    fill_calibration_gaps,
     postprocess,
     reject_implausible_frames,
     smooth_tracks,
@@ -162,3 +163,41 @@ def test_postprocess_chain_adds_both_flags_and_sorts():
     assert out["pitch_x"].notna().any()  # plausible frame survived the gate
     assert out["is_actor"].sum() == 1
     assert out["is_keeper"].sum() == 2  # one per team
+
+
+def _calib_clip(n_frames=12, n_players=12, blank=(4, 5, 6, 7)):
+    """A clip under one known homography, with ``blank`` frames NaN'd as the calibrator would."""
+    h = np.array([[0.08, 0.005, -12.0], [0.001, 0.05, -4.0], [1e-5, 3e-4, 1.0]])
+    rng = np.random.default_rng(0)
+    img = rng.uniform([200, 300], [1700, 900], size=(n_players, 2))
+    rows = []
+    for f in range(n_frames):
+        for i, (ix, iy) in enumerate(img):
+            p = np.array([ix, iy, 1.0]) @ h.T
+            px, py = p[0] / p[2], p[1] / p[2]
+            nan = f in blank
+            rows.append({"frame": f, "track_id": i, "role": "player", "team": i % 2,
+                         "pitch_x": np.nan if nan else px, "pitch_y": np.nan if nan else py,
+                         "image_x": ix, "image_y": iy})
+    return pd.DataFrame(rows), h
+
+
+def test_fill_calibration_gaps_recovers_dropped_frames():
+    """A frame the calibrator dropped is re-projected from its neighbours' homography."""
+    df, _h = _calib_clip()
+    truth = _calib_clip(blank=())[0]
+    out = fill_calibration_gaps(df)
+    assert out["pitch_x"].notna().all(), "every blanked frame should be recoverable"
+    err = np.hypot(out["pitch_x"] - truth["pitch_x"], out["pitch_y"] - truth["pitch_y"])
+    assert err.max() < 0.05, f"recovered positions off by {err.max():.3f} m"
+
+
+def test_fill_calibration_gaps_respects_max_gap_and_finite_values():
+    """``max_gap`` refuses distant donors, and an already-projected coordinate is never touched."""
+    df, _h = _calib_clip(blank=(4, 5, 6, 7))
+    out = fill_calibration_gaps(df, max_gap=1)
+    filled = out.groupby("frame")["pitch_x"].apply(lambda s: s.notna().all())
+    assert bool(filled[4]) and bool(filled[7])  # 1 frame from a donor
+    assert not bool(filled[5]) and not bool(filled[6])  # 2+ frames away: refused
+    df.loc[df["frame"] == 0, "pitch_x"] = 99.0
+    assert (fill_calibration_gaps(df).query("frame == 0")["pitch_x"] == 99.0).all()

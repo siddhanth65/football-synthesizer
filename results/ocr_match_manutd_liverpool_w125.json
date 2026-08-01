@@ -1,0 +1,39 @@
+{
+  "match": "manutd_liverpool",
+  "rule": {
+    "min_crop_conf": 0.99,
+    "min_votes": 5,
+    "min_legibility": 0.5,
+    "emit_all": false
+  },
+  "ocr_version": "ocr-percrop-1.1",
+  "variant": "_w125",
+  "chunks": [
+    "h1_chunk_000",
+    "h1_chunk_001",
+    "h1_chunk_002",
+    "h1_chunk_003",
+    "h1_chunk_004",
+    "h2_chunk_000",
+    "h2_chunk_001",
+    "h2_chunk_002",
+    "h2_chunk_003",
+    "h2_chunk_004",
+    "h2_chunk_005"
+  ],
+  "n_chunks_total": 11,
+  "n_tracks": 8345,
+  "n_gk_tracks": 182,
+  "n_crops": 94244,
+  "n_reads": 1256,
+  "d_before_closeup_anchors": 0.026482923906530856,
+  "d_after_percrop": 0.1505092869982025,
+  "n_tracks_before": 221,
+  "n_tracks_after": 1256,
+  "gk_tracks_read_before": 3,
+  "gk_tracks_read_after": 13,
+  "overlap_before_after": 142,
+  "n_anchor_graded": 142,
+  "n_anchor_agree": 133,
+  "agreement_with_anchor": 0.9366197183098591
+}

@@ -1,0 +1,73 @@
+{
+  "title": "Confirmatory retest of the per-crop identity arm on real-match LOTO",
+  "written_utc": "2026-07-29T10:16:11.852630+00:00",
+  "written_local": "2026-07-29T15:46:11.852640+05:30",
+  "status": "PRE-REGISTERED -- written before any real-match computation for this arm",
+  "arm": {
+    "name": "solver_retest",
+    "description": "Stage-2 identity MILP (generator.identity_solve) consuming per-crop OCR evidence at the frozen 0.85-floor rule, at the DEV-tuned abstention regime.",
+    "config_path": "results\\identity_solver_config_retest.json",
+    "config_sha256": "8da5cddd8992222f477d6a5c55ce7640001559b4f58fe85769b08a0bc4fd86f4",
+    "reopened_on_dev": {
+      "sim_none": 0.92,
+      "r_abstain": 0.05
+    },
+    "everything_else_frozen_from": "results/identity_solver_config_percrop.json",
+    "evidence": "outputs/<match>/final/ocr_percrop/*.parquet via tools.identity_match.percrop_reads, floor '0.85'",
+    "partition": "GTA connector, splitter OFF, tau = 0.040",
+    "build_commands": [
+      "python -m tools.identity_match --percrop --config results/identity_solver_config_retest.json --names-dir outputs/identity/solver_retest --out results/identity_match_solver_retest.json",
+      "python -m tools.identity_carrier --arm solver --names-dir outputs/identity/solver_retest --out-root outputs/identity_carrier_retest --json-out results/identity_carrier_retest.json",
+      "python -m tools.gta_carrier --loto --taus 0.04 --extra retest=outputs/identity_carrier_retest/solver --controls tau0.040 --json-out results/retest_loto.json"
+    ]
+  },
+  "dev_selection": {
+    "data": "SoccerNet-GSR DEV-20 (eval.gsr_identity.split_sequences -> sorted(seqs)[::3]); TEST-38 not touched",
+    "criterion": "maximise the arm's OWN named-row coverage subject to its OWN row-weighted jersey precision >= 0.85; the arm's own operating point is used (not a post-hoc posterior threshold) because a real match carries no ground truth with which to calibrate a threshold",
+    "grid": {
+      "r_abstain": [
+        0.0,
+        0.02,
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.3,
+        0.5
+      ],
+      "sim_none": [
+        0.85,
+        0.92
+      ]
+    },
+    "frontier_artifact": "results/gsr_benchmark/retest_dev_frontier.json",
+    "selected": {
+      "arm": "solver",
+      "sim_none": 0.92,
+      "r_abstain": 0.05,
+      "dev_coverage": 0.3447,
+      "dev_precision": 0.8572,
+      "dev_named_tracklets": 247,
+      "dev_coverage_at_0.60": 0.3447
+    },
+    "greedy_vs_solver": "greedy Stage-1 rule on the same per-crop evidence and the same DEV bundles scores coverage 0.3675 at precision 0.8425 -- higher coverage but BELOW the 0.85 floor, so it does not qualify and the solver arm is registered. The margin is 0.0075 of precision: a knife-edge, recorded as such."
+  },
+  "hypothesis": "The registered arm (Stage-2 solver, per-crop evidence, sim_none 0.92, r_abstain 0.05) achieves HIGHER paired leave-one-group-out top-1 gallery accuracy than the tau = 0.040 Stage-1 connector control, on the three labelled matches (manutd_liverpool, manutd_tottenham, manutd_brighton), graded by the anchor-truth grader of tools.gta_carrier.loto_query_hits.",
+  "test": {
+    "statistic": "exact McNemar (binomial test on discordant pairs, p0 = 0.5)",
+    "sidedness": "ONE-SIDED, alternative = arm_only_right > control_only_right",
+    "alpha": 0.05,
+    "multiplicity": "none -- this is a single pre-registered comparison. Any other arm or control the same driver emits (baseline, tau0.000) is reference only and no verdict is read off it.",
+    "control": "tau0.040 (outputs/gta_carrier/tau0.040), unchanged on record",
+    "grader": "tools.gta_carrier.loto_query_hits UNMODIFIED: queries are gallery crops whose SOURCE tracklet carries a close-up-anchor OCR read, graded against that anchor's player name -- never the name the arm assigned."
+  },
+  "denominator_rule": "Paired on the exact query keys (match, chunk, src_track, frame) present in BOTH the arm's and the control's hit dictionaries. The test denominator is the number of DISCORDANT pairs (control_only_right + arm_only_right) among those shared keys; concordant pairs are dropped, as McNemar requires. Unpaired per-arm rates are reported but are NOT the test.",
+  "stopping_rule": "ONE run. The verdict is read once, from the p-value of the single comparison above. No second attempt, no re-tuning after seeing the result. If it fails, the failure is the finding.",
+  "declared_bias": "The control labels its gallery from the same close-up anchor chain that defines the truth; the registered arm's names come from per-crop OCR + the MILP and never see the anchor chain. The test is therefore biased AGAINST the registered arm, as in results/OCR_REALMATCH.md section 0.",
+  "report_only_no_claims": [
+    "the 78-moment carrier factorisation for the registered arm (23 usable naming moments; GTA_LINK_STAGE1 A4 pre-declared it cannot resolve anything below ~0.25)",
+    "named-track coverage on the three matches (no per-track ground truth exists, so no precision)",
+    "goalkeeper slots filled per match"
+  ],
+  "ordering_evidence": "At the moment this file was written, no artifact for the registered arm existed: outputs/identity/solver_retest/, outputs/identity_carrier_retest/, results/identity_match_solver_retest.json, results/identity_carrier_retest.json and results/retest_loto.json are all absent. Their mtimes will postdate this file."
+}

@@ -27,6 +27,14 @@ from torchvision.models import ResNet18_Weights, resnet18
 NUM_CLASSES = 100
 """Class ``0`` = illegible/no-number (gt ``-1``); classes ``1..99`` = jersey number."""
 
+OCR_PERCROP_VERSION = "ocr-percrop-1.1"
+"""Stamp for the persisted per-crop OCR evidence (see :meth:`KoshkinaRecognizer.crop_reads`).
+
+``1.1`` adds the crop geometry to the run: ``tools.ocr_match`` can widen the foot-point box before
+cutting (``--crop-scale``, ``results/OCR_DOMAIN_SHIFT.md`` §7). The schema is unchanged; the stamp
+moves because the *evidence* a parquet holds depends on the geometry it was cut at.
+"""
+
 ILLEGIBLE = 0
 INPUT_H = 224
 INPUT_W = 112
@@ -341,6 +349,43 @@ def aggregate_votes(
     return decide(tracklet_mean(probs, weighted=weighted), min_conf=min_conf, mask=mask)
 
 
+def percrop_votes(
+    probs: np.ndarray, *, min_crop_conf: float = 0.50, min_votes: int = 1, emit_all: bool = False,
+) -> list[tuple[int, float]]:
+    """Tracklet reads from per-crop distributions, counting only crops that actually read a number.
+
+    This is the densifying alternative to :func:`aggregate_votes`. ``aggregate_votes`` pools *every*
+    crop, and :meth:`KoshkinaRecognizer.crop_probs` hands an illegible crop a one-hot on
+    :data:`ILLEGIBLE` whose peak is ``1.0`` -- the maximum weight :func:`tracklet_mean` can give a
+    row. A tracklet therefore has to be *majority* legible-and-agreeing before the mean's argmax
+    stops being ``ILLEGIBLE``, so three confident reads among sixteen crops abstain. Here crops that
+    read nothing simply do not vote, which is the aggregation the Koshkina pipeline's own legibility
+    filter implies.
+
+    Args:
+        probs: ``[n_crops, NUM_CLASSES]`` per-crop distributions for one tracklet.
+        min_crop_conf: Floor on a single crop's winning-number mass for it to vote.
+        min_votes: Minimum number of agreeing crops before a number is emitted.
+        emit_all: Emit every number clearing ``min_votes`` (disagreement is preserved for a solver
+            with a confusion prior); otherwise only the highest-mass number.
+
+    Returns:
+        ``[(number, mean_crop_confidence), ...]`` ordered by total mass, empty when nothing clears.
+    """
+    if probs.size == 0:
+        return []
+    best = probs[:, 1:].argmax(axis=1) + 1
+    conf = probs[np.arange(probs.shape[0]), best]
+    keep = (conf >= min_crop_conf) & (probs.argmax(axis=1) != ILLEGIBLE)
+    tally: dict[int, list[float]] = {}
+    for num, c in zip(best[keep], conf[keep]):
+        tally.setdefault(int(num), []).append(float(c))
+    out = [(n, float(np.mean(cs)), float(np.sum(cs)))
+           for n, cs in tally.items() if len(cs) >= min_votes]
+    out.sort(key=lambda r: -r[2])
+    return [(n, c) for n, c, _m in (out if emit_all else out[:1])]
+
+
 class JerseyRecognizer:
     """Loaded jersey model + Stage-2 inference contract (crop paths -> number + confidence)."""
 
@@ -597,8 +642,9 @@ class KoshkinaRecognizer:
         return model.to(self.device).eval(), weights.transforms()
 
     @torch.no_grad()
-    def _legible_indices(self, paths: Sequence[str | Path]) -> list[int]:
-        """Return the input indices whose crop passes the ResNet34 legibility gate."""
+    def _legibility_scores(self, paths: Sequence[str | Path]) -> np.ndarray:
+        """Per-crop ResNet34 legibility sigmoid score (``NaN`` where the file is unreadable)."""
+        out = np.full(len(paths), np.nan, dtype=np.float32)
         tensors: list[torch.Tensor] = []
         idxs: list[int] = []
         for i, p in enumerate(paths):
@@ -607,16 +653,19 @@ class KoshkinaRecognizer:
                 idxs.append(i)
             except (OSError, ValueError):
                 continue
-        legible: list[int] = []
         use_amp = self.device == "cuda"
         for s in range(0, len(tensors), self.leg_batch):
             xb = torch.stack(tensors[s : s + self.leg_batch]).to(self.device)
             with torch.amp.autocast(self.device, enabled=use_amp):
                 scores = self._leg(xb).float().squeeze(1).cpu().numpy()
             for j, sc in enumerate(scores):
-                if sc > self.leg_thresh:
-                    legible.append(idxs[s + j])
-        return legible
+                out[idxs[s + j]] = float(sc)
+        return out
+
+    def _legible_indices(self, paths: Sequence[str | Path]) -> list[int]:
+        """Return the input indices whose crop passes the ResNet34 legibility gate."""
+        scores = self._legibility_scores(paths)
+        return [i for i, sc in enumerate(scores) if np.isfinite(sc) and sc > self.leg_thresh]
 
     @torch.no_grad()
     def _write_torso_crops(
@@ -671,6 +720,52 @@ class KoshkinaRecognizer:
             cwd=str(self.parseq_repo),
         )
 
+    def crop_reads(
+        self, paths: Sequence[str | Path]
+    ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+        """Run the chain and return both the folded softmax rows and the raw per-crop evidence.
+
+        :meth:`crop_probs` throws the per-crop evidence away (it folds straight into a tracklet
+        vote), which is what made the digit-confusion prior unfittable in Stage 2. This variant
+        keeps it, so callers can persist ``(legibility, torso, PARSeq positional softmax)`` per crop
+        and re-aggregate offline without a second GPU pass.
+
+        Args:
+            paths: Person-crop image paths, aligned 1:1 with every returned array's first axis.
+
+        Returns:
+            ``(probs, detail)`` where ``probs`` is ``[n, NUM_CLASSES]`` (see :meth:`crop_probs`) and
+            ``detail`` holds ``leg`` ``[n]`` legibility sigmoid (``NaN`` = unreadable file),
+            ``torso`` ``[n]`` bool (a pose torso RoI was produced), and ``p0`` / ``p1``
+            ``[n, 11]`` PARSeq positional softmaxes (all-``NaN`` rows where no read happened).
+        """
+        n = len(paths)
+        out = np.zeros((n, NUM_CLASSES), dtype=np.float32)
+        out[:, ILLEGIBLE] = 1.0
+        detail = {"leg": np.full(n, np.nan, np.float32), "torso": np.zeros(n, bool),
+                  "p0": np.full((n, 11), np.nan, np.float32),
+                  "p1": np.full((n, 11), np.nan, np.float32)}
+        if n == 0:
+            return out, detail
+        detail["leg"] = self._legibility_scores(paths)
+        legible_idx = [i for i, sc in enumerate(detail["leg"])
+                       if np.isfinite(sc) and sc > self.leg_thresh]
+        torso_map = self._write_torso_crops(legible_idx, paths)
+        self._call += 1
+        if self.device == "cuda":
+            torch.cuda.empty_cache()
+        if torso_map:
+            self._run_sidecar()
+            positions = json.loads(self.parseq_json.read_text(encoding="utf-8"))
+            for name, i in torso_map.items():
+                detail["torso"][i] = True
+                entry = positions.get(name)
+                if entry is not None:
+                    detail["p0"][i] = entry["p0"]
+                    detail["p1"][i] = entry["p1"]
+                    out[i] = parseq_positions_to_probs(entry["p0"], entry["p1"])
+        return out, detail
+
     def crop_probs(self, paths: Sequence[str | Path], batch_size: int = 256) -> np.ndarray:
         """Softmax rows for each crop via the Koshkina chain (illegible one-hot when no read).
 
@@ -682,21 +777,4 @@ class KoshkinaRecognizer:
             ``[len(paths), NUM_CLASSES]`` softmax rows. A crop that fails legibility, has no pose, or
             gets no PARSeq read reads illegible (mass on :data:`ILLEGIBLE`).
         """
-        n = len(paths)
-        out = np.zeros((n, NUM_CLASSES), dtype=np.float32)
-        out[:, ILLEGIBLE] = 1.0
-        if n == 0:
-            return out
-        legible_idx = self._legible_indices(paths)
-        torso_map = self._write_torso_crops(legible_idx, paths)
-        self._call += 1
-        if self.device == "cuda":
-            torch.cuda.empty_cache()
-        if torso_map:
-            self._run_sidecar()
-            positions = json.loads(self.parseq_json.read_text(encoding="utf-8"))
-            for name, i in torso_map.items():
-                entry = positions.get(name)
-                if entry is not None:
-                    out[i] = parseq_positions_to_probs(entry["p0"], entry["p1"])
-        return out
+        return self.crop_reads(paths)[0]

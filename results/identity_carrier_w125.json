@@ -1,0 +1,251 @@
+{
+  "version": "identity-solve-1.0",
+  "note": "spot-check, not a gate; 23 usable naming moments",
+  "arms": {
+    "baseline": {
+      "factors": {
+        "gate_hit": {
+          "n": 66,
+          "d": 78,
+          "p": 0.8461538461538461,
+          "wilson95": [
+            0.7500653094405397,
+            0.9097458379466081
+          ]
+        },
+        "team": {
+          "n": 23,
+          "d": 32,
+          "p": 0.71875,
+          "wilson95": [
+            0.5462516306188822,
+            0.8443559315435213
+          ]
+        },
+        "naming": {
+          "n": 14,
+          "d": 23,
+          "p": 0.6086956521739131,
+          "wilson95": [
+            0.40785179603745997,
+            0.7784262201761787
+          ]
+        },
+        "n_judged": 78,
+        "n_assigned_good_box": 32,
+        "n_in_cand": 23,
+        "identification_precision": 0.438,
+        "end_to_end_precision": 0.35,
+        "n_assigned_all": 40,
+        "abstain_rate": 0.487,
+        "per_match": {
+          "manutd_liverpool": {
+            "gate_hit": {
+              "n": 26,
+              "d": 29,
+              "p": 0.896551724137931
+            },
+            "team": {
+              "n": 9,
+              "d": 14,
+              "p": 0.6428571428571429
+            },
+            "naming": {
+              "n": 5,
+              "d": 9,
+              "p": 0.5555555555555556
+            },
+            "n_judged": 29,
+            "n_assigned_good_box": 14
+          },
+          "manutd_tottenham": {
+            "gate_hit": {
+              "n": 17,
+              "d": 23,
+              "p": 0.7391304347826086
+            },
+            "team": {
+              "n": 4,
+              "d": 6,
+              "p": 0.6666666666666666
+            },
+            "naming": {
+              "n": 3,
+              "d": 4,
+              "p": 0.75
+            },
+            "n_judged": 23,
+            "n_assigned_good_box": 6
+          },
+          "manutd_brighton": {
+            "gate_hit": {
+              "n": 23,
+              "d": 26,
+              "p": 0.8846153846153846
+            },
+            "team": {
+              "n": 10,
+              "d": 12,
+              "p": 0.8333333333333334
+            },
+            "naming": {
+              "n": 6,
+              "d": 10,
+              "p": 0.6
+            },
+            "n_judged": 26,
+            "n_assigned_good_box": 12
+          }
+        }
+      },
+      "repair": {}
+    },
+    "percrop_names": {
+      "factors": {
+        "gate_hit": {
+          "n": 66,
+          "d": 78,
+          "p": 0.8461538461538461,
+          "wilson95": [
+            0.7500653094405397,
+            0.9097458379466081
+          ]
+        },
+        "team": {
+          "n": 21,
+          "d": 32,
+          "p": 0.65625,
+          "wilson95": [
+            0.4831077350878594,
+            0.7958976664567146
+          ]
+        },
+        "naming": {
+          "n": 14,
+          "d": 21,
+          "p": 0.6666666666666666,
+          "wilson95": [
+            0.45373075657210293,
+            0.828054635673163
+          ]
+        },
+        "n_judged": 78,
+        "n_assigned_good_box": 32,
+        "n_in_cand": 21,
+        "identification_precision": 0.438,
+        "end_to_end_precision": 0.35,
+        "n_assigned_all": 40,
+        "abstain_rate": 0.487,
+        "per_match": {
+          "manutd_liverpool": {
+            "gate_hit": {
+              "n": 26,
+              "d": 29,
+              "p": 0.896551724137931
+            },
+            "team": {
+              "n": 9,
+              "d": 12,
+              "p": 0.75
+            },
+            "naming": {
+              "n": 4,
+              "d": 9,
+              "p": 0.4444444444444444
+            },
+            "n_judged": 29,
+            "n_assigned_good_box": 12
+          },
+          "manutd_tottenham": {
+            "gate_hit": {
+              "n": 17,
+              "d": 23,
+              "p": 0.7391304347826086
+            },
+            "team": {
+              "n": 3,
+              "d": 11,
+              "p": 0.2727272727272727
+            },
+            "naming": {
+              "n": 3,
+              "d": 3,
+              "p": 1.0
+            },
+            "n_judged": 23,
+            "n_assigned_good_box": 11
+          },
+          "manutd_brighton": {
+            "gate_hit": {
+              "n": 23,
+              "d": 26,
+              "p": 0.8846153846153846
+            },
+            "team": {
+              "n": 9,
+              "d": 9,
+              "p": 1.0
+            },
+            "naming": {
+              "n": 7,
+              "d": 9,
+              "p": 0.7777777777777778
+            },
+            "n_judged": 26,
+            "n_assigned_good_box": 9
+          }
+        }
+      },
+      "repair": {
+        "manutd_liverpool": {
+          "n_fragments_before": 6301,
+          "n_fragments_after": 3592,
+          "n_merges": 2709,
+          "n_named_before": 833,
+          "n_named_after": 1725,
+          "n_names_propagated": 892,
+          "n_groups_name_disagree": 17,
+          "n_reads_no_team": 0,
+          "n_reads_no_roster_slot": 423,
+          "n_groups_name_conflict_dropped": 17,
+          "n_gallery_crops_before": 1277,
+          "n_gallery_crops_after": 9745,
+          "n_gallery_players_before": 18,
+          "n_gallery_players_after": 21
+        },
+        "manutd_tottenham": {
+          "n_fragments_before": 6424,
+          "n_fragments_after": 3959,
+          "n_merges": 2465,
+          "n_named_before": 820,
+          "n_named_after": 1473,
+          "n_names_propagated": 653,
+          "n_groups_name_disagree": 23,
+          "n_reads_no_team": 0,
+          "n_reads_no_roster_slot": 480,
+          "n_groups_name_conflict_dropped": 23,
+          "n_gallery_crops_before": 1623,
+          "n_gallery_crops_after": 7931,
+          "n_gallery_players_before": 24,
+          "n_gallery_players_after": 18
+        },
+        "manutd_brighton": {
+          "n_fragments_before": 7866,
+          "n_fragments_after": 3862,
+          "n_merges": 4004,
+          "n_named_before": 1607,
+          "n_named_after": 2760,
+          "n_names_propagated": 1153,
+          "n_groups_name_disagree": 84,
+          "n_reads_no_team": 0,
+          "n_reads_no_roster_slot": 39,
+          "n_groups_name_conflict_dropped": 84,
+          "n_gallery_crops_before": 977,
+          "n_gallery_crops_after": 13976,
+          "n_gallery_players_before": 20,
+          "n_gallery_players_after": 27
+        }
+      }
+    }
+  }
+}

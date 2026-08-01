@@ -161,6 +161,95 @@ def derive_keeper(
     return out
 
 
+def _frame_homographies(df: pd.DataFrame, min_donor_rows: int) -> dict[int, np.ndarray]:
+    """Recover each frame's image->pitch homography from its own already-projected rows (pure).
+
+    A frame that survived the calibration gate carries >= 4 rows related by exactly one homography,
+    so the transform can be re-derived from the positions table alone -- no calibrator, no video.
+    """
+    from generator.calibrate import estimate_homography  # noqa: PLC0415 - keeps this module pure
+
+    out: dict[int, np.ndarray] = {}
+    fin = df[np.isfinite(df["pitch_x"]) & np.isfinite(df["pitch_y"])
+             & np.isfinite(df["image_x"]) & np.isfinite(df["image_y"])]
+    for fr, grp in fin.groupby("frame"):
+        if len(grp) < min_donor_rows:
+            continue
+        h = estimate_homography(grp[["image_x", "image_y"]].to_numpy(),
+                                grp[["pitch_x", "pitch_y"]].to_numpy())
+        if h is not None and np.isfinite(h).all() and abs(h[2, 2]) > 1e-12:
+            out[int(fr)] = h / h[2, 2]
+    return out
+
+
+def _donor_homography(frame: int, donors: list[int], hs: dict[int, np.ndarray],
+                      max_gap: int | None) -> np.ndarray | None:
+    """Homography for ``frame``: lerp between the bracketing donors, else carry the nearest (pure)."""
+    i = np.searchsorted(donors, frame)
+    lo = donors[i - 1] if i > 0 else None
+    hi = donors[i] if i < len(donors) else None
+    if lo is not None and max_gap is not None and frame - lo > max_gap:
+        lo = None
+    if hi is not None and max_gap is not None and hi - frame > max_gap:
+        hi = None
+    if lo is None and hi is None:
+        return None
+    if lo is None:
+        return hs[hi]
+    if hi is None:
+        return hs[lo]
+    w = (frame - lo) / (hi - lo)
+    h = (1.0 - w) * hs[lo] + w * hs[hi]
+    return h / h[2, 2] if abs(h[2, 2]) > 1e-12 else None
+
+
+def fill_calibration_gaps(
+    df: pd.DataFrame,
+    *,
+    min_donor_rows: int = MIN_ONPITCH_PLAYERS,
+    max_gap: int | None = None,
+) -> pd.DataFrame:
+    """Re-project rows the calibrator dropped, using a neighbouring frame's homography (pure).
+
+    On SoccerNet-GSR the per-frame calibrator passes its own keypoint-reprojection gate while
+    projecting every player off the pitch, so :func:`clamp_to_pitch` (and then
+    :func:`reject_implausible_frames`) discard the whole frame: 25% of valid-split frames carry no
+    pitch position at all although 84% of the ground-truth players were detected in image space.
+    The camera barely moves, so a neighbouring frame's homography recovers them.
+
+    Never overwrites a finite coordinate; filled points go through :func:`clamp_to_pitch` exactly
+    like the calibrator's own, so an off-pitch recovery is still rejected.
+
+    Args:
+        df: A positions table (needs ``frame``, ``pitch_x/y``, ``image_x/y``).
+        min_donor_rows: A frame may donate its homography only with this many projected rows.
+        max_gap: Refuse to reach further than this many frames for a donor (``None`` = unlimited).
+
+    Returns:
+        A new table with the recoverable pitch coordinates filled in.
+    """
+    if df.empty or not {"image_x", "image_y"}.issubset(df.columns):
+        return df
+    hs = _frame_homographies(df, min_donor_rows)
+    if not hs:
+        return df
+    donors = sorted(hs)
+    out = df.copy()
+    need = (~np.isfinite(out["pitch_x"]) | ~np.isfinite(out["pitch_y"])) & \
+        np.isfinite(out["image_x"]) & np.isfinite(out["image_y"])
+    for fr, idx in out[need].groupby("frame").groups.items():
+        if int(fr) in hs:  # partial frame: the calibrator's own H rejected these points on purpose
+            continue
+        h = _donor_homography(int(fr), donors, hs, max_gap)
+        if h is None:
+            continue
+        from generator.calibrate import apply_homography  # noqa: PLC0415
+
+        proj = apply_homography(h, out.loc[idx, ["image_x", "image_y"]].to_numpy())
+        out.loc[idx, ["pitch_x", "pitch_y"]] = [clamp_to_pitch(x, y) for x, y in proj]
+    return out
+
+
 def reject_implausible_frames(
     df: pd.DataFrame,
     *,

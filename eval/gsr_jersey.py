@@ -41,7 +41,7 @@ import numpy as np
 import pandas as pd
 
 from eval.gsr_score import DEFAULT_DATA_DIR, DEFAULT_OUT_DIR, DEFAULT_RESULTS_DIR, EVAL_CONFIGS, gs_hota
-from generator.jersey_id import aggregate_votes
+from generator.jersey_id import OCR_PERCROP_VERSION, aggregate_votes
 from generator.track_relink import _frame_path, _sample_frames
 
 logger = logging.getLogger("gsr_jersey")
@@ -210,6 +210,118 @@ def read_sequence_jerseys(
         "votes": {str(t): [n, round(c, 4)] for t, (n, c) in votes.items()},
     }), encoding="utf-8")
     return votes
+
+
+#: Per-crop evidence cache (NEW artifact; the aggregated koshkina_jersey/*.json is left untouched).
+PERCROP_SUBDIR = "koshkina_percrop"
+
+
+def percrop_frame(
+    paths_by_tid: dict[int, list[Path]], probs: np.ndarray, detail: dict, index: list[int],
+    flat: list[Path],
+) -> pd.DataFrame:
+    """Assemble one sequence's per-crop OCR evidence into a tidy frame (pure).
+
+    Args:
+        paths_by_tid: Unused beyond documenting provenance; the row order comes from ``flat``.
+        probs: ``[N, NUM_CLASSES]`` folded per-crop distributions from ``crop_reads``.
+        detail: The ``crop_reads`` detail dict (``leg``, ``torso``, ``p0``, ``p1``).
+        index: ``track_id`` per row of ``probs``.
+        flat: Crop path per row (``t<tid>_<frame>.jpg``), used to recover the frame index.
+
+    Returns:
+        One row per crop: track/frame, legibility, torso flag, the crop's best number and its mass,
+        the illegible mass, and the raw PARSeq positional softmaxes (list columns ``p0``/``p1``).
+    """
+    del paths_by_tid
+    best = probs[:, 1:].argmax(axis=1) + 1
+    conf = probs[np.arange(probs.shape[0]), best]
+    return pd.DataFrame({
+        "track_id": np.asarray(index, dtype=np.int32),
+        "frame": np.array([int(p.stem.split("_")[-1]) for p in flat], dtype=np.int32),
+        "legibility": detail["leg"].astype(np.float32),
+        "torso": detail["torso"],
+        "number": np.where(probs.argmax(axis=1) == 0, -1, best).astype(np.int16),
+        "p_number": conf.astype(np.float32),
+        "p_illegible": probs[:, 0].astype(np.float32),
+        "p0": list(detail["p0"]),
+        "p1": list(detail["p1"]),
+        "ocr_version": OCR_PERCROP_VERSION,
+    })
+
+
+def read_sequence_percrop(
+    seq_dir: Path, parquet: Path, dest: Path, detector, *, max_crops: int, force: bool = False,
+) -> pd.DataFrame:
+    """Run the Koshkina chain over one sequence and persist EVERY crop's read (resumable by disk).
+
+    Args:
+        seq_dir: GSR sequence directory.
+        parquet: The sequence's cached positions parquet.
+        dest: Destination per-crop parquet; reused if present.
+        detector: The football detector (built once, reused across sequences).
+        max_crops: Crops sampled per track (the densification lever; the on-record run used 20).
+        force: Recompute even if ``dest`` exists.
+
+    Returns:
+        The per-crop frame (see :func:`percrop_frame`).
+    """
+    import shutil  # noqa: PLC0415
+
+    if dest.exists() and not force:
+        return pd.read_parquet(dest)
+    df = pd.read_parquet(parquet)
+    crop_dir = dest.parent / "_crops" / seq_dir.name
+    shutil.rmtree(crop_dir, ignore_errors=True)
+    paths_by_tid = extract_track_crops(seq_dir, df, detector, crop_dir, max_crops=max_crops)
+    flat: list[Path] = []
+    index: list[int] = []
+    for tid, ps in paths_by_tid.items():
+        for p in ps:
+            flat.append(p)
+            index.append(int(tid))
+    from generator.jersey_id import NUM_CLASSES  # noqa: PLC0415
+
+    if flat:
+        recog = _build_recognizer()
+        probs, detail = recog.crop_reads(flat)
+    else:
+        probs = np.empty((0, NUM_CLASSES), np.float32)
+        detail = {"leg": np.empty(0, np.float32), "torso": np.empty(0, bool),
+                  "p0": np.empty((0, 11), np.float32), "p1": np.empty((0, 11), np.float32)}
+    out = percrop_frame(paths_by_tid, probs, detail, index, flat)
+    shutil.rmtree(crop_dir, ignore_errors=True)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    out.to_parquet(dest, index=False)
+    return out
+
+
+def run_percrop(data_dir: Path, out_dir: Path, *, max_crops: int, limit: int | None) -> None:
+    """GPU pass: persist per-crop OCR evidence for every valid-split sequence (resumable)."""
+    pos_dir = out_dir / "positions"
+    dest_dir = out_dir / PERCROP_SUBDIR
+    seqs = sorted(p for p in data_dir.iterdir()
+                  if p.is_dir() and (pos_dir / f"{p.name}.parquet").exists())
+    if limit:
+        seqs = seqs[:limit]
+    detector = None
+    for i, seq_dir in enumerate(seqs):
+        dest = dest_dir / f"{seq_dir.name}.parquet"
+        if dest.exists():
+            continue
+        if detector is None:
+            import torch  # noqa: PLC0415
+
+            from generator.extract import _build_detector  # noqa: PLC0415
+
+            detector = _build_detector("cuda" if torch.cuda.is_available() else "cpu", "football")
+        t0 = time.time()
+        frame = read_sequence_percrop(seq_dir, pos_dir / f"{seq_dir.name}.parquet", dest, detector,
+                                      max_crops=max_crops)
+        n_read = int((frame["number"] > 0).sum())
+        logger.info("[%d/%d] %s: %d crops, %d with a number, %d tracks (%.0fs)",
+                    i + 1, len(seqs), seq_dir.name, len(frame), n_read,
+                    frame["track_id"].nunique(), time.time() - t0)
 
 
 def patch_submission(base_json: Path, votes: dict[int, tuple[int, float]], dest: Path) -> dict:
@@ -386,7 +498,14 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=None, help="process only the first N sequences")
     ap.add_argument("--score-only", action="store_true",
                     help="patch + score from existing vote checkpoints; skip the GPU read")
+    ap.add_argument("--percrop", action="store_true",
+                    help="GPU pass persisting EVERY crop's read to outputs/gsr/koshkina_percrop/")
+    ap.add_argument("--max-crops", type=int, default=MAX_CROPS,
+                    help="crops sampled per track (on-record aggregated run used 20)")
     args = ap.parse_args()
+    if args.percrop:
+        run_percrop(args.data_dir, args.out_dir, max_crops=args.max_crops, limit=args.limit)
+        return
     run(args.data_dir, args.out_dir, args.results_dir, limit=args.limit, score_only=args.score_only)
 
 

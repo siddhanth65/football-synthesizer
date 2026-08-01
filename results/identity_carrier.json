@@ -1,0 +1,245 @@
+{
+  "version": "identity-solve-1.0",
+  "note": "spot-check, not a gate; 23 usable naming moments",
+  "arms": {
+    "baseline": {
+      "factors": {
+        "gate_hit": {
+          "n": 66,
+          "d": 78,
+          "p": 0.8461538461538461,
+          "wilson95": [
+            0.7500653094405397,
+            0.9097458379466081
+          ]
+        },
+        "team": {
+          "n": 23,
+          "d": 32,
+          "p": 0.71875,
+          "wilson95": [
+            0.5462516306188822,
+            0.8443559315435213
+          ]
+        },
+        "naming": {
+          "n": 14,
+          "d": 23,
+          "p": 0.6086956521739131,
+          "wilson95": [
+            0.40785179603745997,
+            0.7784262201761787
+          ]
+        },
+        "n_judged": 78,
+        "n_assigned_good_box": 32,
+        "n_in_cand": 23,
+        "identification_precision": 0.438,
+        "end_to_end_precision": 0.35,
+        "n_assigned_all": 40,
+        "abstain_rate": 0.487,
+        "per_match": {
+          "manutd_liverpool": {
+            "gate_hit": {
+              "n": 26,
+              "d": 29,
+              "p": 0.896551724137931
+            },
+            "team": {
+              "n": 9,
+              "d": 14,
+              "p": 0.6428571428571429
+            },
+            "naming": {
+              "n": 5,
+              "d": 9,
+              "p": 0.5555555555555556
+            },
+            "n_judged": 29,
+            "n_assigned_good_box": 14
+          },
+          "manutd_tottenham": {
+            "gate_hit": {
+              "n": 17,
+              "d": 23,
+              "p": 0.7391304347826086
+            },
+            "team": {
+              "n": 4,
+              "d": 6,
+              "p": 0.6666666666666666
+            },
+            "naming": {
+              "n": 3,
+              "d": 4,
+              "p": 0.75
+            },
+            "n_judged": 23,
+            "n_assigned_good_box": 6
+          },
+          "manutd_brighton": {
+            "gate_hit": {
+              "n": 23,
+              "d": 26,
+              "p": 0.8846153846153846
+            },
+            "team": {
+              "n": 10,
+              "d": 12,
+              "p": 0.8333333333333334
+            },
+            "naming": {
+              "n": 6,
+              "d": 10,
+              "p": 0.6
+            },
+            "n_judged": 26,
+            "n_assigned_good_box": 12
+          }
+        }
+      },
+      "repair": {}
+    },
+    "solver": {
+      "factors": {
+        "gate_hit": {
+          "n": 66,
+          "d": 78,
+          "p": 0.8461538461538461,
+          "wilson95": [
+            0.7500653094405397,
+            0.9097458379466081
+          ]
+        },
+        "team": {
+          "n": 12,
+          "d": 12,
+          "p": 1.0,
+          "wilson95": [
+            0.7574992425007574,
+            0.9999999999999998
+          ]
+        },
+        "naming": {
+          "n": 7,
+          "d": 12,
+          "p": 0.5833333333333334,
+          "wilson95": [
+            0.3195073356553728,
+            0.8067425380947534
+          ]
+        },
+        "n_judged": 78,
+        "n_assigned_good_box": 12,
+        "n_in_cand": 12,
+        "identification_precision": 0.583,
+        "end_to_end_precision": 0.438,
+        "n_assigned_all": 16,
+        "abstain_rate": 0.795,
+        "per_match": {
+          "manutd_liverpool": {
+            "gate_hit": {
+              "n": 26,
+              "d": 29,
+              "p": 0.896551724137931
+            },
+            "team": {
+              "n": 5,
+              "d": 5,
+              "p": 1.0
+            },
+            "naming": {
+              "n": 3,
+              "d": 5,
+              "p": 0.6
+            },
+            "n_judged": 29,
+            "n_assigned_good_box": 5
+          },
+          "manutd_tottenham": {
+            "gate_hit": {
+              "n": 17,
+              "d": 23,
+              "p": 0.7391304347826086
+            },
+            "team": {
+              "n": 2,
+              "d": 2,
+              "p": 1.0
+            },
+            "naming": {
+              "n": 0,
+              "d": 2,
+              "p": 0.0
+            },
+            "n_judged": 23,
+            "n_assigned_good_box": 2
+          },
+          "manutd_brighton": {
+            "gate_hit": {
+              "n": 23,
+              "d": 26,
+              "p": 0.8846153846153846
+            },
+            "team": {
+              "n": 5,
+              "d": 5,
+              "p": 1.0
+            },
+            "naming": {
+              "n": 4,
+              "d": 5,
+              "p": 0.8
+            },
+            "n_judged": 26,
+            "n_assigned_good_box": 5
+          }
+        }
+      },
+      "repair": {
+        "manutd_liverpool": {
+          "n_fragments_before": 6301,
+          "n_fragments_after": 3592,
+          "n_merges": 2709,
+          "n_named_before": 0,
+          "n_named_after": 7398,
+          "n_names_propagated": 7398,
+          "n_groups_name_disagree": 0,
+          "n_groups_name_conflict_dropped": 7,
+          "n_gallery_crops_before": 1277,
+          "n_gallery_crops_after": 32002,
+          "n_gallery_players_before": 18,
+          "n_gallery_players_after": 29
+        },
+        "manutd_tottenham": {
+          "n_fragments_before": 6424,
+          "n_fragments_after": 3959,
+          "n_merges": 2465,
+          "n_named_before": 0,
+          "n_named_after": 8095,
+          "n_names_propagated": 8095,
+          "n_groups_name_disagree": 0,
+          "n_groups_name_conflict_dropped": 4,
+          "n_gallery_crops_before": 1623,
+          "n_gallery_crops_after": 33687,
+          "n_gallery_players_before": 24,
+          "n_gallery_players_after": 28
+        },
+        "manutd_brighton": {
+          "n_fragments_before": 7866,
+          "n_fragments_after": 3862,
+          "n_merges": 4004,
+          "n_named_before": 0,
+          "n_named_after": 7690,
+          "n_names_propagated": 7690,
+          "n_groups_name_disagree": 0,
+          "n_groups_name_conflict_dropped": 1,
+          "n_gallery_crops_before": 977,
+          "n_gallery_crops_after": 35525,
+          "n_gallery_players_before": 20,
+          "n_gallery_players_after": 31
+        }
+      }
+    }
+  }
+}

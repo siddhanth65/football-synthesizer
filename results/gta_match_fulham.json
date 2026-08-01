@@ -1,0 +1,155 @@
+{
+  "version": "gta-link-1.0",
+  "match": "fulham_manutd",
+  "params": {
+    "eps": 0.04,
+    "min_samples": 5,
+    "min_run": 5,
+    "tau": 0.06,
+    "overlap_slack": 0,
+    "fps": 25.0,
+    "max_speed_mps": 9.0,
+    "pos_slack_m": 2.0,
+    "frame_stride": 2,
+    "match_tol_px": 6.0
+  },
+  "cross_chunk": false,
+  "per_group": {
+    "h1_chunk_000": {
+      "n_tracks_embedded": 1042,
+      "n_tracks_split": 9,
+      "n_new_subtracks": 12,
+      "n_fragments_before": 900,
+      "n_fragments_after": 252,
+      "n_merges": 648
+    },
+    "h1_chunk_001": {
+      "n_tracks_embedded": 1114,
+      "n_tracks_split": 6,
+      "n_new_subtracks": 6,
+      "n_fragments_before": 1011,
+      "n_fragments_after": 204,
+      "n_merges": 807
+    },
+    "h1_chunk_002": {
+      "n_tracks_embedded": 977,
+      "n_tracks_split": 16,
+      "n_new_subtracks": 22,
+      "n_fragments_before": 857,
+      "n_fragments_after": 217,
+      "n_merges": 640
+    },
+    "h1_chunk_003": {
+      "n_tracks_embedded": 778,
+      "n_tracks_split": 12,
+      "n_new_subtracks": 16,
+      "n_fragments_before": 674,
+      "n_fragments_after": 160,
+      "n_merges": 514
+    },
+    "h1_chunk_004": {
+      "n_tracks_embedded": 824,
+      "n_tracks_split": 13,
+      "n_new_subtracks": 17,
+      "n_fragments_before": 768,
+      "n_fragments_after": 199,
+      "n_merges": 569
+    },
+    "h2_chunk_000": {
+      "n_tracks_embedded": 698,
+      "n_tracks_split": 11,
+      "n_new_subtracks": 15,
+      "n_fragments_before": 579,
+      "n_fragments_after": 182,
+      "n_merges": 397
+    },
+    "h2_chunk_001": {
+      "n_tracks_embedded": 915,
+      "n_tracks_split": 5,
+      "n_new_subtracks": 6,
+      "n_fragments_before": 806,
+      "n_fragments_after": 213,
+      "n_merges": 593
+    },
+    "h2_chunk_002": {
+      "n_tracks_embedded": 704,
+      "n_tracks_split": 5,
+      "n_new_subtracks": 6,
+      "n_fragments_before": 559,
+      "n_fragments_after": 142,
+      "n_merges": 417
+    },
+    "h2_chunk_003": {
+      "n_tracks_embedded": 803,
+      "n_tracks_split": 6,
+      "n_new_subtracks": 6,
+      "n_fragments_before": 697,
+      "n_fragments_after": 183,
+      "n_merges": 514
+    },
+    "h2_chunk_004": {
+      "n_tracks_embedded": 787,
+      "n_tracks_split": 3,
+      "n_new_subtracks": 3,
+      "n_fragments_before": 599,
+      "n_fragments_after": 185,
+      "n_merges": 414
+    },
+    "h2_chunk_005": {
+      "n_tracks_embedded": 16,
+      "n_tracks_split": 0,
+      "n_new_subtracks": 0,
+      "n_fragments_before": 13,
+      "n_fragments_after": 13,
+      "n_merges": 0
+    }
+  },
+  "report": {
+    "n_named_tracks": 155,
+    "n_named_tracks_mapped": 155,
+    "n_player_halves": 23,
+    "tracklets_per_named_player_half_before": 6.739130434782608,
+    "tracklets_per_named_player_half_after": 5.130434782608695,
+    "median_before": 3.0,
+    "median_after": 3.0,
+    "max_before": 25,
+    "max_after": 20,
+    "n_named_tracks_split": 3,
+    "n_multi_track_groups": 29,
+    "n_groups_mixing_two_named_players": 6,
+    "merge_precision_named": 0.7931034482758621,
+    "mixed_groups": {
+      "h1_chunk_000:50": [
+        "Bruno Fernandes",
+        "Calvin Bassey"
+      ],
+      "h1_chunk_001:47": [
+        "Calvin Bassey",
+        "Harrison Reed"
+      ],
+      "h1_chunk_002:60": [
+        "Alex Iwobi",
+        "Bruno Fernandes"
+      ],
+      "h1_chunk_002:2": [
+        "Calvin Bassey",
+        "Harry Wilson"
+      ],
+      "h1_chunk_004:28": [
+        "Alex Iwobi",
+        "Sa\u0161a Luki\u0107"
+      ],
+      "h1_chunk_004:19": [
+        "Calvin Bassey",
+        "Harrison Reed"
+      ]
+    },
+    "worst_before": {
+      "h1|Bruno Fernandes": 25,
+      "h1|Diogo Dalot": 22,
+      "h2|Sander Berge": 18,
+      "h1|Harry Wilson": 17,
+      "h1|Calvin Bassey": 16
+    }
+  }
+}

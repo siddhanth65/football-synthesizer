@@ -1,0 +1,14 @@
+{
+  "comparison": "retest_vs_tau0.040",
+  "registration_written_utc": "2026-07-29T10:16:11.852630+00:00",
+  "hypothesis": "The registered arm (Stage-2 solver, per-crop evidence, sim_none 0.92, r_abstain 0.05) achieves HIGHER paired leave-one-group-out top-1 gallery accuracy than the tau = 0.040 Stage-1 connector control, on the three labelled matches (manutd_liverpool, manutd_tottenham, manutd_brighton), graded by the anchor-truth grader of tools.gta_carrier.loto_query_hits.",
+  "alpha": 0.05,
+  "n_paired": 1491,
+  "control_p": 0.6894701542588867,
+  "arm_p": 0.6566063044936284,
+  "delta": -0.032863849765258246,
+  "control_only_right": 205,
+  "arm_only_right": 156,
+  "p_one_sided": 0.9957956433900227,
+  "verdict": "FAIL"
+}

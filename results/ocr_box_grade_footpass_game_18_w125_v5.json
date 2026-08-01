@@ -1,0 +1,23 @@
+{
+  "match": "footpass_game_18",
+  "variant": "_w125",
+  "floor": "0.85",
+  "rule": {
+    "min_crop_conf": 0.99,
+    "min_votes": 5,
+    "min_legibility": 0.5,
+    "emit_all": false
+  },
+  "n_tracks": 11575,
+  "n_tracks_read": 815,
+  "d": 0.07041036717062635,
+  "n_graded": 701,
+  "n_correct": 608,
+  "read_precision": 0.8673323823109843,
+  "n_gt_labelled_tracks": 7050,
+  "n_crops": 166931,
+  "crop_legible_rate": 0.19027023141297902,
+  "crop_confident_rate": 0.07353337606556003,
+  "crop_read_precision": 0.7169954476479514,
+  "n_crop_graded": 10544
+}

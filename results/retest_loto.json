@@ -1,0 +1,38 @@
+{
+  "version": "gta-link-1.0",
+  "unpaired": {
+    "baseline": {
+      "correct": 2421,
+      "n": 3877,
+      "p": 0.6244518957957184
+    },
+    "tau0.040": {
+      "correct": 2273,
+      "n": 3671,
+      "p": 0.6191773358757832
+    },
+    "retest": {
+      "correct": 1079,
+      "n": 1646,
+      "p": 0.6555285540704738
+    }
+  },
+  "paired": {
+    "baseline_vs_tau0.040": {
+      "n_paired": 1138,
+      "control_p": 0.6212653778558875,
+      "arm_p": 0.6449912126537786,
+      "control_only_right": 88,
+      "arm_only_right": 115,
+      "mcnemar_p": 0.06776079349097922
+    },
+    "retest_vs_tau0.040": {
+      "n_paired": 1491,
+      "control_p": 0.6894701542588867,
+      "arm_p": 0.6566063044936284,
+      "control_only_right": 205,
+      "arm_only_right": 156,
+      "mcnemar_p": 0.01142337602014771
+    }
+  }
+}
