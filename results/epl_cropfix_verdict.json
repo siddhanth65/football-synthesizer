@@ -1,0 +1,14 @@
+{
+  "comparison": "percrop125_vs_percrop10",
+  "registration_written_utc": "2026-07-30T16:17:07.152178+00:00",
+  "hypothesis": "The greedy namer consuming per-crop reads at crop_scale 1.25 achieves HIGHER paired leave-one-group-out top-1 gallery accuracy than the same rule at crop_scale 1.0, on manutd_liverpool + manutd_tottenham + manutd_brighton, graded by the anchor-truth grader of tools.gta_carrier.loto_query_hits.",
+  "alpha": 0.05,
+  "n_paired": 1762,
+  "control_p": 0.7128263337116912,
+  "arm_p": 0.7043132803632236,
+  "delta": -0.008513053348467636,
+  "control_only_right": 47,
+  "arm_only_right": 32,
+  "p_one_sided": 0.9644182956523544,
+  "verdict": "FAIL"
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fulham v Manchester United -- measured match read</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    color: #1a1a1a;
+    font-size: 11pt;
+    line-height: 1.55;
+    margin: 0;
+  }
+  h1 { font-size: 20pt; margin: 0 0 4pt; font-weight: 700; color: #0f172a; }
+  h2 { font-size: 14pt; margin: 18pt 0 6pt; color: #234; border-bottom: 1px solid #cbd5e1; padding-bottom: 3pt; }
+  h3 { font-size: 11.5pt; margin: 10pt 0 4pt; }
+  p { margin: 0 0 8pt; }
+  .section { page-break-before: always; }
+  .section:first-of-type { page-break-before: avoid; }
+  .subtitle { font-size: 11.5pt; color: #4b5563; margin: 0 0 12pt; font-style: italic; }
+  .meta { font-size: 9pt; color: #6b7280; margin-bottom: 10pt; }
+  .lede {
+    font-size: 12pt; font-weight: 600; border-left: 3px solid #1d4ed8;
+    padding: 6pt 12pt; margin: 10pt 0; background: #f0f4fb; color: #0f172a;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 8pt 0 4pt; font-size: 9.7pt; }
+  th, td { border: 1px solid #bcd; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { background: #e6edf7; font-weight: 700; }
+  caption { caption-side: top; text-align: left; font-size: 9.3pt; font-style: italic;
+            color: #4b5563; margin-bottom: 3pt; }
+  .num { font-variant-numeric: tabular-nums; }
+  .box {
+    border: 1px solid #94a3b8; background: #f8fafc; padding: 10pt 12pt;
+    margin: 10pt 0; border-radius: 4pt;
+  }
+  .box h3 { margin-top: 0; }
+  .src {
+    font-family: "Consolas", monospace; font-size: 8pt; color: #555;
+    border-top: 1px dotted #bbb; margin-top: 6pt; padding-top: 4pt; line-height: 1.4;
+  }
+  .footer-page { font-size: 8.5pt; color: #999; text-align: center; margin-top: 20pt; }
+</style>
+</head>
+<body>
+
+<div class="section">
+<h1>Fulham 0-1 Manchester United</h1>
+<p class="subtitle">A measured read of the match -- from tracking data, not from a highlights reel</p>
+<p class="meta">Craven Cottage, 26 January 2025, second half. Manchester United under Ruben
+Amorim. Source: football-synthesizer tracking pipeline, match id <code>fulham_manutd</code>.</p>
+
+<div class="lede">
+This is not a highlights package. It is every passage of the second half that runs at least 18
+seconds and clears our tracking gate, in order. Six passages. 122 seconds of measurement out of
+a 1,852-second half.
+</div>
+
+<p>Craven Cottage, second half. Manchester United won it 1-0. Our system does not watch the game
+like a fan does. It watches the parts of the game where the camera, the tracker, and the pitch
+geometry all agree on where every player stands. That is a smaller slice of the match than you
+would think, and this report tells you exactly how small, and what it saw inside that slice.</p>
+
+<p>This match carries the <b>highest post-link ball coverage in our whole twelve-match corpus</b>:
+0.561 of sampled frames, against a corpus median of 0.465. If any match in our library was going
+to give a clean tactical read, it is this one.</p>
+
+<p class="src"><b>Sources.</b> results/tactical_clips/fulham_manutd_h2_islands.csv;
+results/MANUTD_IDENTITY_PROFILE.md Per-match evidence table; demo/showcase.html section d.</p>
+</div>
+
+<div class="section">
+<h2>What we measured, passage by passage</h2>
+<p>Six passages pass our quality gate in the second half: at least 85% of expected frames with
+trusted geometry, at least 12 tracked players a frame, at least 60% ball coverage, both teams on
+screen.</p>
+
+<table>
+<caption>Table 1. The six gate-passing passages, second half</caption>
+<tr><th>Clock</th><th>Length</th><th>Players/frame</th><th>Ball coverage</th><th>Frame coverage</th><th>Both teams on screen</th></tr>
+<tr><td>06:12</td><td class="num">18s</td><td class="num">13.3</td><td class="num">95.6%</td><td class="num">89%</td><td class="num">83.5%</td></tr>
+<tr><td>10:36</td><td class="num">18s</td><td class="num">14.8</td><td class="num">93.4%</td><td class="num">89%</td><td class="num">83.5%</td></tr>
+<tr><td>16:36</td><td class="num">28s</td><td class="num">14.7</td><td class="num">92.9%</td><td class="num">85.1%</td><td class="num">79.4%</td></tr>
+<tr><td>18:20</td><td class="num">20s</td><td class="num">12.3</td><td class="num">99.0%</td><td class="num">86.1%</td><td class="num">81.2%</td></tr>
+<tr><td>29:21</td><td class="num">20s</td><td class="num">17.3</td><td class="num">75.2%</td><td class="num">88.1%</td><td class="num">88.1%</td></tr>
+<tr><td>36:46</td><td class="num">18s</td><td class="num">13.4</td><td class="num">94.5%</td><td class="num">85.7%</td><td class="num">76.9%</td></tr>
+</table>
+
+<h3>10:36 -- United escape their own box</h3>
+<p>United play out from their own goal line and never leave the touchline. The ball travels from
+3 m to 24 m up the pitch, and from y = 3 m to y = 2 m across it: two metres of movement on a
+68-metre-wide pitch, hugging the whitewash the whole way. United hold 96% of the possession
+frames in this passage. The only player our identity layer is confident enough to name is Joshua
+Zirkzee. This is not build-up play. It is an escape.</p>
+
+<h3>18:20 -- Fulham do the thing that fills a highlight reel and no scoresheet</h3>
+<p>Fulham hold 94% of the ball here. Calvin Bassey is the one name our identity gate allows onto
+the board. The ball swings the full width of the pitch, from y = 61 m to y = 1 m, reaching 64 m
+of advancement at its furthest point before the passage ends at 30 m -- nineteen metres
+<em>backwards</em> from where it started, in front of a defensive block our detector reads as
+low. Fulham have the ball. They are not going anywhere with it.</p>
+
+<h3>29:21 -- the half's only passage with a pulse</h3>
+<p>This is the densest passage of the half: 17.3 tracked players a frame, both teams on screen
+88% of the time, the ball contested, neither side settling on it, the defensive line pushed up to
+a high read. Twenty-four seconds after this passage ends, our goal detector fires the only peak
+it produces in the entire match: score 0.847, second half, clock 30:05. The official record for
+this fixture shows exactly one goal, second half, to Manchester United.</p>
+
+<div class="box">
+<h3>The goal happens 24 seconds after our last measurable passage</h3>
+<p>We do not show you the goal. The moment the ball goes in, the broadcast cuts to the
+celebration, and every one of those cuts destroys the pitch geometry our measurement depends on.
+Our gate refuses the passage, and the clip jumps straight to a card instead.</p>
+<p>We tested this on the whole corpus before accepting it as fixed, not just for this match. We
+took every goal peak our detector produces -- 30 peaks across 10 matches -- and scored the best
+window of 120, 90, 60 and 30 seconds ending at each one against our quality gate. <b>112 windows
+scored. Zero cleared the gate.</b> All 112 failed on the same clause: pitch geometry, never
+players or ball. The best two-minute window at any goal in the whole corpus reaches 50.9% frame
+coverage against a required 85%.</p>
+<p>The reason is not a weakness in our tracker. It is what a broadcast <em>is</em>. A goal is
+immediately followed by a replay, a close-up of the scorer, the bench, the crowd -- and every one
+of those cuts breaks the pitch geometry the measurement rests on. Goals are the least measurable
+moments in a football broadcast. That is an inconvenient thing to learn while building a demo,
+and a useful thing to know if you are buying one.</p>
+</div>
+
+<p class="src"><b>Sources.</b> results/tactical_clips/fulham_manutd_h2_islands.csv;
+results/action_spotting_probe/fulham_manutd/summary.json (peak 0.847, h2 30:05);
+results/tactical_clips/goal_window_scan.csv (112-row scan); demo/showcase.html section d.
+Note: fulham_manutd's single peak agrees with the official record on half and count, and 0.847
+sits inside the 0.75-0.96 band every one of our thirteen validated true goals occupied -- but this
+match was not itself one of the six goal-validated matches, so we call it a peak, not a certified
+goal.</p>
+</div>
+
+<div class="section">
+<h2>What the match looked like, in the round</h2>
+<p>Two more numbers from our full identity profile of this fixture, away leg, Amorim in charge:</p>
+<table>
+<caption>Table 2. Match-level tracking summary</caption>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>Post-link ball coverage</td><td class="num">0.561 (highest of 12 matches)</td></tr>
+<tr><td>United defensive block line</td><td class="num">27.0 m from own goal</td></tr>
+<tr><td>Block front-to-back spread</td><td class="num">6.56 m</td></tr>
+<tr><td>United ball samples tracked</td><td class="num">2,456</td></tr>
+<tr><td>Clean attacking-direction votes</td><td class="num">4 of 11 chunks</td></tr>
+</table>
+<p>The block-line reading (27.0 m) sits inside United's twelve-match range for the season
+(20.8 m to 37.4 m), closer to the low end -- consistent with a team that, per Table 1's 10:36
+passage, spent time defending very deep in their own third. We flag the "4 of 11" direction-vote
+figure honestly: it means the left/right framing we use to build the passage descriptions above
+rests on a minority of this match's video chunks giving a clean read, so treat the lateral
+detail (which flank, which channel) as the softer half of this report.</p>
+<p><b>We do not report possession share or territory percentage for the whole match.</b> Our ball
+layer only produces a reliable number inside a passage that clears the quality gate (Table 1);
+it does not produce a trustworthy whole-match possession split, because the broadcast's own
+camera choices bias which parts of the game we can see. Rather than compute a number we cannot
+stand behind, we report the six passages instead and let their per-passage possession share
+speak for the parts of the match we can actually measure.</p>
+<p class="src"><b>Sources.</b> results/MANUTD_IDENTITY_PROFILE.md Per-match evidence table
+(fulham_manutd row); results/MANUTD_IDENTITY_PROFILE.md section 3 (block-line range).</p>
+</div>
+
+<div class="section">
+<h2>What we refuse to say, and why</h2>
+<div class="box">
+<h3>No per-player statistics</h3>
+<p>We will not tell you how many passes Bruno Fernandes made, or rank any player's involvement in
+this match. Across our identity-tracked matches, only 1.0-4.2% of United's attributed passes
+carry a player's name -- two to five named passes a match. On 90 hand-labelled moments, the
+precision of naming the player on the ball is 0.35 to 0.40. A rebuilt, more constrained version
+of the naming logic did not beat that number. Any per-player total we could show you would be
+built on evidence that is right barely more often than a coin flip.</p>
+<h3>No calibrated uncertainty regions</h3>
+<p>Our tracking clips draw a shaded region around players we cannot currently see, showing where
+a model predicts they probably stand. Those regions were designed to be calibrated: the shaded
+50% region should contain the true player 50% of the time, the 90% region 90% of the time. On
+real broadcast footage they do not. Measured against 4,900 real player re-appearances across
+four matches, the regions cover the true position 21.2% of the time when they claim 50%, and
+55.4% of the time when they claim 90%. Every one of 14 testable buckets fails. We publish the
+measured numbers on every frame instead of the claimed ones.</p>
+</div>
+<p>Both refusals above are measurements, not caution for its own sake. We built each capability,
+tested it against real evidence, and it did not clear the bar we set for it. That is the honest
+output for this match, exactly as it would be for any match in this corpus.</p>
+<p class="src"><b>Sources.</b> results/PLAYER_ANALYSIS_v2.md; results/CARRIER_CONSTRAINED_v2.md;
+results/CALIBRATION_REPLICATION.md; knowledge/claims.json ident-008, b4-015.</p>
+
+<p class="footer-page">Fulham v Manchester United -- measured match read -- page 4 of 4</p>
+</div>
+
+</body>
+</html>

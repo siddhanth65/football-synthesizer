@@ -1,0 +1,82 @@
+{
+  "title": "Pre-registered retest 2: the widened OCR crop (crop_scale 1.25) on the three EPL matches, greedy Stage-1 namer, real-match LOTO",
+  "written_utc": "2026-07-30T16:17:07.152178+00:00",
+  "written_local": "2026-07-30T21:47:07.152178+05:30",
+  "status": "PRE-REGISTERED -- written before ANY crop_scale 1.25 artifact exists for any EPL match (see ordering_evidence)",
+  "background": [
+    "results/OCR_DOMAIN_SHIFT.md section 7: generator.team_anchor.estimate_player_box returns 0.814x the annotated player height on FOOTPASS game_18; widening the OCR crop x1.25 measured 2.56x confident reads there and 1.31x on a 1,800-crop manutd_brighton sample (209/209 identical numbers where both arms read confidently).",
+    "results/FOOTPASS_GAME18_SCORE.md v2: the full game_18 re-run at crop_scale 1.25 measured d 0.0304 -> 0.0704 at read precision 0.7860 -> 0.8673 and +30%/+33% end-to-end correct attributions, with one regression -- greedy-arm precision 0.7119 -> 0.6371 and merge groups whose propagated names disagree 2 -> 14.",
+    "results/OCR_REALMATCH.md section 6: the same greedy namer on crop_scale 1.0 per-crop evidence scored +0.0302 paired LOTO top-1 against the tau0.040 connector control at p = 0.00656 against a Bonferroni alpha of 0.00625 -- recorded as a FAIL."
+  ],
+  "arm": {
+    "name": "percrop_names_w125",
+    "description": "The SHIPPED greedy Stage-1 namer (tools.identity_carrier.percrop_namer -> tools.gta_carrier.propagate_names, i.e. dominant per-crop read per tracklet, roster/team/half-gated, then unanimous propagation inside a merge group with any disagreeing group left untouched) consuming per-crop OCR evidence produced at crop_scale 1.25 instead of 1.0. NOTHING ELSE CHANGES.",
+    "evidence": "outputs/<match>/final/ocr_percrop_w125/*.parquet, built by 'python -m tools.ocr_match --match <m> --max-crops 20 --crop-scale 1.25 --variant _w125' (OCR_PERCROP_VERSION 1.1)",
+    "aggregation_rule": {
+      "floor": "0.85",
+      "min_crop_conf": 0.99,
+      "min_votes": 5,
+      "min_legibility": 0.5,
+      "emit_all": false
+    },
+    "partition": "GTA connector, splitter OFF, tau = 0.040",
+    "matches": [
+      "manutd_liverpool",
+      "manutd_tottenham",
+      "manutd_brighton"
+    ],
+    "build_commands": [
+      "python -m tools.ocr_match --match <m> --max-crops 20 --crop-scale 1.25 --variant _w125",
+      "python -m tools.identity_carrier --arm percrop_names --percrop-variant _w125 --out-root outputs/identity_carrier_w125 --json-out results/identity_carrier_w125.json",
+      "python -m tools.gta_carrier --loto --taus 0.04 --extra percrop10=outputs/identity_carrier_percrop/percrop_names --extra percrop125=outputs/identity_carrier_w125/percrop_names --controls percrop10 --json-out results/epl_cropfix_loto.json"
+    ]
+  },
+  "control": {
+    "name": "percrop10",
+    "description": "The identical greedy rule on the identical matches at crop_scale 1.0 -- the percrop_names arm of results/OCR_REALMATCH.md section 6, scored from its ON-RECORD gallery artifacts, which are not rebuilt or overwritten.",
+    "gallery_dir": "outputs/identity_carrier_percrop/percrop_names",
+    "on_record_unpaired_loto": "1317 / 1931 = 0.6820"
+  },
+  "hypothesis": "The greedy namer consuming per-crop reads at crop_scale 1.25 achieves HIGHER paired leave-one-group-out top-1 gallery accuracy than the same rule at crop_scale 1.0, on manutd_liverpool + manutd_tottenham + manutd_brighton, graded by the anchor-truth grader of tools.gta_carrier.loto_query_hits.",
+  "test": {
+    "statistic": "exact McNemar (binomial test on discordant pairs, p0 = 0.5)",
+    "sidedness": "ONE-SIDED, alternative = arm_only_right > control_only_right",
+    "alpha": 0.05,
+    "comparison_key": "percrop125_vs_percrop10",
+    "multiplicity": "none -- ONE pre-registered comparison. Any other arm the same driver emits (baseline, tau0.040) is reference only and no verdict is read off it.",
+    "grader": "tools.gta_carrier.loto_query_hits UNMODIFIED: queries are gallery crops whose SOURCE tracklet carries a close-up-anchor OCR read, graded against that anchor's player name -- never the name either arm assigned."
+  },
+  "denominator_rule": "Paired on the exact query keys (match, chunk, src_track, frame) present in BOTH arms' hit dictionaries. The test denominator is the DISCORDANT pairs (control_only_right + arm_only_right) among those shared keys. Unpaired per-arm rates are reported, not tested.",
+  "declared_bias": "Unlike results/OCR_REALMATCH.md section 0 and results/RETEST_ABSTENTION.md, this comparison is SYMMETRIC in the truth source: neither arm's names come from the close-up anchor chain that defines the truth, and both arms run the identical rule and partition. The only asymmetry left is which crops each arm's gallery holds (an arm that names more tracklets samples more crops), which the shared-key rule controls for exactly. No direction of bias is claimed in advance.",
+  "no_tuning": "The rule, the aggregation floor, the connector tau, the grader and the scorer are all frozen on record. The ONLY code change made for this run is an evidence PATH parameter: tools.identity_carrier.percrop_namer gains 'variant', plumbed from a new --percrop-variant flag, so it can read ocr_percrop_w125 instead of ocr_percrop. min_votes stays 5 (the min_votes 4 variant of FOOTPASS_GAME18_SCORE.md v2.4 is post-hoc and is NOT run here).",
+  "reproduction_requirements": [
+    "the control arm's unpaired LOTO must reproduce 1317/1931 = 0.6820 from the on-record artifacts inside the same --loto run that scores the arm",
+    "the baseline factorisation must reproduce 66/78 = 0.846, 23/32 = 0.719, 14/23 = 0.609, e2e 0.350, 40 assigned inside the same tools.identity_carrier run"
+  ],
+  "stopping_rule": "ONE run. The verdict is read once from the one-sided p of the single comparison above. No second attempt, no knob turned after seeing it. If it fails, the failure is the finding.",
+  "report_only_no_claims": [
+    "read density d, tracks read, GK-role tracklets read and agreement with the close-up anchor chain (the 318/345 = 0.9217 statistic) at 1.25 vs 1.0, per match",
+    "the 78-moment carrier factorisation (GTA_LINK_STAGE1 A4: 23 usable naming moments cannot resolve anything below ~0.25)",
+    "merge groups whose propagated names disagree, per match at both scales -- the game_18 pathology (2 -> 14) watched for here"
+  ],
+  "ordering_evidence": {
+    "asserted_absent_at_write_time": [
+      "outputs/manutd_liverpool/final/ocr_percrop_w125",
+      "outputs/manutd_tottenham/final/ocr_percrop_w125",
+      "outputs/manutd_brighton/final/ocr_percrop_w125",
+      "results/ocr_match_manutd_liverpool_w125.json",
+      "results/ocr_match_manutd_tottenham_w125.json",
+      "results/ocr_match_manutd_brighton_w125.json",
+      "outputs/identity_carrier_w125",
+      "results/identity_carrier_w125.json",
+      "results/epl_cropfix_loto.json",
+      "results/epl_cropfix_verdict.json"
+    ],
+    "assert_result": "all absent (checked in code; this file is not written otherwise)",
+    "code_sha256_at_registration": {
+      "tools/identity_carrier.py": "d1750a416ed522df8841e9fc47da5bf0e249541e5e373c653502559e088d718d",
+      "tools/gta_carrier.py": "fa8b5bc496e880de392c3851138994fcae1a434edca44cc66fa0a1d26d8cea0b",
+      "tools/ocr_match.py": "c380bf1dcb3d4640578bb0417a29f2e9c1a37f20fdf8b73cba97b7188a532a7c"
+    }
+  }
+}

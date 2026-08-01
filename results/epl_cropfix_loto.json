@@ -1,0 +1,51 @@
+{
+  "version": "gta-link-1.0",
+  "unpaired": {
+    "baseline": {
+      "correct": 2421,
+      "n": 3877,
+      "p": 0.6244518957957184
+    },
+    "tau0.040": {
+      "correct": 2273,
+      "n": 3671,
+      "p": 0.6191773358757832
+    },
+    "percrop10": {
+      "correct": 1317,
+      "n": 1931,
+      "p": 0.6820300362506473
+    },
+    "percrop125": {
+      "correct": 1399,
+      "n": 2117,
+      "p": 0.6608408124704771
+    }
+  },
+  "paired": {
+    "baseline_vs_percrop10": {
+      "n_paired": 519,
+      "control_p": 0.7283236994219653,
+      "arm_p": 0.7052023121387283,
+      "control_only_right": 66,
+      "arm_only_right": 54,
+      "mcnemar_p": 0.315303300832257
+    },
+    "tau0.040_vs_percrop10": {
+      "n_paired": 1756,
+      "control_p": 0.7078587699316629,
+      "arm_p": 0.6776765375854215,
+      "control_only_right": 210,
+      "arm_only_right": 157,
+      "mcnemar_p": 0.006561229557398438
+    },
+    "percrop125_vs_percrop10": {
+      "n_paired": 1762,
+      "control_p": 0.7128263337116912,
+      "arm_p": 0.7043132803632236,
+      "control_only_right": 47,
+      "arm_only_right": 32,
+      "mcnemar_p": 0.11466035574580133
+    }
+  }
+}

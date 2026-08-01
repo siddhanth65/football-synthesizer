@@ -1,0 +1,94 @@
+{
+  "rule": {
+    "min_crop_conf": 0.99,
+    "min_votes": 5,
+    "min_legibility": 0.5,
+    "emit_all": false
+  },
+  "matches": {
+    "manutd_liverpool": {
+      "crop_1.0": {
+        "n_crops": 94244,
+        "legible_ge_0.5": 0.2220300496583337,
+        "confident_ge_0.99": 0.13503246891048767
+      },
+      "crop_1.25": {
+        "n_crops": 94244,
+        "legible_ge_0.5": 0.286893595348245,
+        "confident_ge_0.99": 0.17562921777513688
+      },
+      "paired_anchor": {
+        "n": 111,
+        "agree_1.0": 104,
+        "agree_1.25": 105,
+        "only_1.0_right": 0,
+        "only_1.25_right": 1
+      },
+      "read_tracklets_both_scales": 915,
+      "same_number_both_scales": 913
+    },
+    "manutd_tottenham": {
+      "crop_1.0": {
+        "n_crops": 95284,
+        "legible_ge_0.5": 0.20722261869778766,
+        "confident_ge_0.99": 0.13220477729734267
+      },
+      "crop_1.25": {
+        "n_crops": 95284,
+        "legible_ge_0.5": 0.29710129717476175,
+        "confident_ge_0.99": 0.1801876495529155
+      },
+      "paired_anchor": {
+        "n": 110,
+        "agree_1.0": 100,
+        "agree_1.25": 101,
+        "only_1.0_right": 0,
+        "only_1.25_right": 1
+      },
+      "read_tracklets_both_scales": 878,
+      "same_number_both_scales": 874
+    },
+    "manutd_brighton": {
+      "crop_1.0": {
+        "n_crops": 117041,
+        "legible_ge_0.5": 0.2127374168026589,
+        "confident_ge_0.99": 0.13104809425756786
+      },
+      "crop_1.25": {
+        "n_crops": 117042,
+        "legible_ge_0.5": 0.3325216588916799,
+        "confident_ge_0.99": 0.184813998393739
+      },
+      "paired_anchor": {
+        "n": 114,
+        "agree_1.0": 105,
+        "agree_1.25": 105,
+        "only_1.0_right": 0,
+        "only_1.25_right": 0
+      },
+      "read_tracklets_both_scales": 1125,
+      "same_number_both_scales": 1122
+    }
+  },
+  "pooled": {
+    "paired_anchor": {
+      "n": 335,
+      "agree_1.0": 309,
+      "agree_1.25": 311,
+      "only_1.0_right": 0,
+      "only_1.25_right": 2
+    },
+    "crop_1.0": {
+      "n_crops": 306569,
+      "legible_ge_0.5": 0.21388007267531942,
+      "confident_ge_0.99": 0.1326324579458458
+    },
+    "crop_1.25": {
+      "n_crops": 306570,
+      "legible_ge_0.5": 0.30748605538702417,
+      "confident_ge_0.99": 0.18055256548259777
+    },
+    "read_tracklets_both_scales": 2918,
+    "same_number_both_scales": 2909
+  }
+}

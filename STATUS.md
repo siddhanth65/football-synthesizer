@@ -1,6 +1,355 @@
 # STATUS
 
-**Last updated:** 2026-07-27 (RETRACTION: the 50/90% regions are not calibrated on real broadcast)
+**Last updated:** 2026-08-01 evening (calibfill folded into the frozen GT-free recipe: official
+test split GS-HOTA **33.37**, package v2 verified and upload-ready; legitimate arc 31.88 -> 33.37
+in one day)
+
+## 2026-08-01 (evening) — N2b: calibration fill in the legitimate recipe — test 31.88 -> 33.37
+
+Valid TEST-38 first (control reproduced GT-free 30.72 exactly): fill(max_gap=10) -> **32.01**
+(+1.29; 35/38 helped, p=7.8e-9). Frozen combined recipe ab823742 (declared 14:02:27 IST, before
+the 14:05 test read). ONE test run: **GS-HOTA 33.37 / DetA 22.26 / AssA 50.05** vs control 31.88
+re-derived at every digit; paired mean +2.10, 46/49 helped, p=3.2e-8; fill recovered 9.6% of test
+rows (the ~1.5x-worse-on-test projection held). Package
+results/gsr_submission/gsr_testphase_gtfree_calibfill_ab823742.zip — zip re-scored independently
+to the same digits, legitimacy audit 0 violations over 376,264 rows. AWAITING SID'S UPLOAD.
+Negatives, stated: the team-side lottery reshuffled (SNGS-129 fixed +7.4, SNGS-190 broken -15.3,
+still 45/49 — the 0.4 m-margin bit now dominates variance); identity columns micro-regress
+(acc -0.0045); LocA -0.56 (interpolated homographies); root cause in generator/calibrate.py still
+a post-hoc patch. kb gsr-calibfill-001.
+
+## 2026-08-01 — GSR flag-plant: 35.90 on the official test split, and two campaign-steering finds
+
+Frozen recipe (hash d084d11e..., frozen 18:01:34Z before any test read; results/gsr_flagplant_frozen.json)
+run once over the 49 test sequences (~8.5 h): **GS-HOTA 35.90 / GS-DetA 26.74 / GS-AssA 48.21**
+(GS-LocA 94.00). vs internal valid TEST-38 33.20: localization/association identical across splits
+(0.24 apart); the +2.70 is the test split's 26% higher jersey-read density propagating exactly as
+the evidence-density law predicts. kb ident-033 (7 caveats). Full report results/GSR_TEST_FLAGPLANT.md.
+
+**Find 1 — the pipeline reads GT in two places, so 35.90 is NOT leaderboard-legitimate:**
+(a) eval.gsr_score.resolve_team_map picks the cluster->side permutation by GT agreement;
+(b) eval.gsr_identity._roster hands the solver the sequence's exact (team, jersey) slots from the
+labels (~15-20 candidates instead of 198). Internally like-for-like (33.20 measured identically),
+but the submission zip is marked DO_NOT_UPLOAD until both are GT-free. Leak size deliberately NOT
+measured on test (variant arms forbidden there) — to be measured on train/valid.
+
+**Find 2 — the binding constraint MOVED.** Against the live codabench leaderboard (15 entries):
+our GS-DetA 26.74 beats every entry below rank 8; our **GS-AssA 48.21 is the worst of all 16**
+(top nine: 62-82). At 24.19 the story was "jersey is everything"; at 35.90 the cheap points are in
+ASSOCIATION. S3 (CLIP identity) targets our strong column; the association attack (BoT-SORT/
+stride/Deep-EIoU lineage — FOOTPASS probe machinery exists) is promoted to co-priority.
+
+Submission package built and format-verified against the official example (49 entries, re-scores
+identically as a zip); upload blocked on de-leaking. Ops notes: harness killed the first launch
+(~1 h lost, resumed from checkpoints); a --demo self-check overwrote the frozen record post-hoc —
+caught, fixed, record restored by hash recomputation; extract ran ~2x slower than the valid-split
+log with identical code (unexplained, doubled the dominant cost).
+
+**Next: N1 de-leak** (GT-free team-side + roster; measure leak cost on train/valid; then a
+legitimate test run + first upload) -> **N2 association attack** on valid. Cluster S3 unchanged.
+
+## 2026-08-01 (later) — N1 done: the legitimate number is GS-HOTA 31.88; upload package ready
+
+results/GSR_DELEAK.md, kb ident-034..037. Leak costs measured on valid (additive: team-map -1.06,
+roster -1.47): GT-free replacements = side-by-mean-pitch-x (56/58 valid, **45/49 held-out test =
+0.918**; no usable confidence margin exists) + self-roster from the sequence's own OCR reads
+(-0.42 on DEV; full-198 space loses -4.28 by diluting abstention). Pre-declared, verified once:
+
+**Official test split, GT-free: GS-HOTA 31.88 / DetA 21.11 / AssA 48.15** (leaky 35.90 re-derived
+to 4 decimals first). Paired p=1.75e-4. Package: results/gsr_submission/
+gsr_testphase_gtfree_7dd2a50a.zip — format-verified, legitimacy verified on the artifact (0
+violations), NO do-not-upload flag. Awaiting Sid's codabench upload (his account, 1/day).
+
+**The binding constraint moved AGAIN: team-side permutation.** 60.2% of the legitimacy loss is 4
+flipped sequences at -32.94 each (a flip is annihilation — two were our best clips); the other 45
+lose only -1.94 (roster). One bit per clip: 0.918 -> ~0.98 = ~+2.4 GS-HOTA on test. Attack
+dispatched: solve-both-permutations + pick by solver evidence (the whole solve is ~3 min/split),
+graded on train-healthy + valid, one-shot verified. Also found: 18/57 TRAIN sequences drive the
+team classifier to a degenerate fit (minority share ~0.06-0.16 vs ~0.45 elsewhere) — a data
+landmine for any future training on train; valid/test are clean (0 degenerate).
+Worker also caught + fixed a flip-suppression bug in its own first matrix (numbers above are from
+the corrected run, GT/GT arm reproducing 33.20 exactly).
+
+**N2 association diagnosis (same day): the gap is ranked, and a new silent defect is measured.**
+(1) LINKING is the big loss: an oracle connector on our own detections reaches raw AssA ~68
+(leaderboard band); GTA tau=0.040 captures only 24.5% of that headroom — blocked by the known
+appearance ceiling (trained embedder = cluster S3). (2) NEW: **calibration dropout** — 14.4% of GT
+player rows are detected AND tracked, then lost at projection: homographies pass the 2 m
+reprojection gate while putting every player off-pitch -> clamp -> NaN; 25% of frames emit no
+pitch output (test split ~1.5x worse: 30% NaN rows, 14/49 sequences below half). (3) Nulls:
+crowding +0.004, camera motion -0.138; GSR already runs stride 1 (no stride lever); BoT-SORT
+recommended AGAINST at 25 fps. **Lever shipped: generator/postprocess.fill_calibration_gaps**
+(DLT re-fit from the run's own image/pitch pairs, lerp across dead frames, max_gap=10 frozen on
+DEV-20): full valid 23.53 -> 24.35 gs_hota_full, 53/58 helped p=8.5e-10, nothing traded away;
+dose-response confirms mechanism (gain tracks calibration sickness, -0.683). Root cause inside
+PnLCalib worked around, not fixed (needs an on-pitch plausibility term in the gate + GPU re-run).
+kb gsr-assoc-001..004. In flight: fill applied to the frozen solver recipe on valid, then ONE
+test run + package v2 (expected > +0.8 given the defect is 1.5x worse there).
+
+**N1b team-side attack (same day): the +2.4 prize does NOT exist in the positional family.**
+Oracle test — every rule run on GROUND-TRUTH positions — shows "deeper cluster = left" hits the
+same 45/49 on test with perfect inputs: the four misses are inversions (visible-player geometry
+genuinely pointing the wrong way), not estimation error. Our resolver already sits at its family
+ceiling (oracle 0.9739 dev / pooled 0.9573). Solve-both-and-vote is dead by construction (the
+solver is permutation-invariant in cluster space; max|dPosterior| = 0.0 on 6/6). Attack direction
+is unrecoverable from a 30 s clip even on GT (0.52). Incumbent stands; 31.88 package untouched.
+**The one rule above 0.98 exists and is blocked by appearance, not geometry:** "the keeper's team
+defends the goal he stands in" is 113/113 on GT — but our kit KMeans links a keeper to his own
+team's cluster only 24.4% of the time (systematically the opponent's, 77%). Fixing the
+keeper->team link (role-aware appearance) IS the side-resolver fix — folds into S3/cluster.
+kb ident-038/039/040. A margin exists (AUC 0.948/0.867) but GSR admits no abstention.
+Worker disclosed a protocol exposure (pre-freeze oracle scan saw test inversions; selected
+nothing). Next laptop move: N2 association (AssA 48.15 vs top-nine 62-82).
+
+## 2026-07-31 — EPL crop-fix rerun: evidence layer wins again, naming-by-appearance is closed
+
+Re-OCR of the three labelled EPL matches at crop_scale 1.25 (6h16m GPU, one at a time, kb
+ident-031/032, results/EPL_CROPFIX.md):
+
+**Read layer, replicated 3/3:** pooled d 0.1157 -> **0.1581** (1.37x; crop-level 1.36x replicates
+the 1,800-crop probe's 1.31x); anchor agreement HELD at 0.9227 (382/414, and 1.25 was never worse
+on discordant pairs, 0/2); GK-role tracklets read 27 -> **45**/648; named tracks after propagation
+4,820 -> 5,958 (+24%). Still 2.2x below d* = 0.347.
+
+**The registered test (one shot, registration 21:47:07 before any artifact): FAIL, p = 0.9644.**
+The crop fix does not move appearance retrieval — mechanism measured: 99.69% of tracklets read at
+both scales return the IDENTICAL number, so the gallery labels barely change (79/1,762 paired
+keys discordant). Third pre-registered real-match identity arm to fail in three days, all landing
+in the same 0.65-0.71 LOTO band: **appearance retrieval on same-kit broadcast is saturated; the
+fix's real gains flow through the direct-read/propagation channel, which LOTO does not grade.**
+The 78-moment factorisation points down (0.667 naming) at its usual zero power (8th analysis,
+gate 0.846 every time). Merge-disagreement pathology replicates on EPL (+55% groups at higher
+density; game_18 showed the same).
+
+Process notes: ocr_match --report defaults to the 0.80-floor rule without --rule-floor — footgun
+flagged, registered arm unaffected (caught before any table). WatchDogs2 ran during one liverpool
+chunk (+9.7% wall clock — contention, not the fix).
+
+**Where the levers stand after this week:** evidence density EPL 0.025 -> 0.158 (6.3x total, two
+fixes) and Serie A 0.030 -> 0.070; appearance retrieval closed (3 registered fails);
+solver-as-namer closed; commentary closed. Remaining inference-side lever per the law:
+fragmentation — our EPL matches are still extracted at stride 5/ByteTrack (the collapsed-recall
+regime FOOTPASS work replaced); re-extract at stride 2 + BoT-SORT costs ~10-12 GPU-h/match and is
+the last big pre-cluster move. The trained identity model (docs/GSR_CLUSTER_ROADMAP.md S3/S4)
+remains the only measured path across the d* wall.
+
+## 2026-07-30 — The first honest from-pixels attribution number (game_18, 1,879 labelled events)
+
+Full chain (stride-2 extract, BoT-SORT, PnLCalib, ball, GTA, per-crop OCR, both namers) survived a
+session-limit outage on checkpoints alone; GPU total 10 h 26 m (12% under estimate). kb ident-026/027/028.
+
+**Headline: neither namer clears coverage@precision-0.85.** Solver (frozen, r_abstain=0): best
+knee 0.817 precision @ 0.038 coverage; full coverage 0.443 @ 0.317 precision. Greedy: single
+point, 0.129 @ 0.712 (no confidence dial exists — 60 rows all threshold 1.0). End-to-end correct:
+0.141 / 0.092. For context the official PCBAS baseline (46.41 F1) consumes GT game state; our
+number is what pixels alone deliver today.
+
+**The loss is localized, and it is NOT geometry.** Factorisation: on-screen 0.758 (annotation
+ceiling) -> ball+players tracked 0.862 -> carrier within 3 m 0.656 = **95.7% of its structural
+ceiling** (median carrier distance 1.25 m) -> naming collapses. Tracked recall on the full match:
+0.886 (probe predicted 0.988 on windows; difference explained by close-ups + box reconstruction).
+Stride-2 + BoT-SORT transferred; the carrier gate is essentially solved.
+
+**Root cause of the collapse: d = 0.0304 on Serie A** vs 0.105-0.126 on our EPL matches and the
+law's bar of 0.347. Not crop volume (166,930 crops, +43% vs brighton, for 63-70% fewer reads):
+legibility passes 9.6% vs 22.2%, confident digits 3.5% vs 13.5%. The PL-tuned read chain goes
+~4x blinder on 2019 Serie A footage. 0/163 GK tracklets read. This is Broadcast2Pitch Table 5
+from the other side: identity evidence is the whole game, and ours is domain-brittle.
+
+**Ceiling correction (contradicts ident-016's framing, recorded):** the off-screen "hard ceiling"
+is SOFT — 22.2% of off-screen events answered correctly vs 9.4% modal chance (2.4x): roi=NaN
+means not-visible-now, and tracklet temporal context still names some actors.
+
+Bug fixed pre-run: footpass_predict snapped event frames to a stride-5 grid under stride-2
+extraction (up to 2 frames error); now stride-agnostic. Games 24/47 NOT run — decision with Sid.
+
+**Same-day diagnosis (results/OCR_DOMAIN_SHIFT.md, kb ident-029): HALF the "domain wall" was our
+own crop box.** `estimate_player_box` under-sizes crops 0.814x EVERYWHERE (its two constants were
+fitted to nothing); the legibility gate is brutally sensitive to it. Paired trial: x1.25 widening
+= 93% of oracle-ROI legibility, confident reads 2.56x on game_18 and 1.31x on brighton (EPL!),
+precision RISING. Remaining gap decomposes: source encode physics ~1.5-2x (4.8 Mbps Constrained
+Baseline vs 6 Mbps High), Milan's stripes 3.29x density penalty (correctness unaffected), 2-digit
+shirts 0.663 precision vs 0.961 (44% of errors = first digit of the true number). Legibility
+recalibration/CLAHE/upsampling/rule-retuning all measured DEAD. First GT read-precision on real
+broadcast: 0.8054. Fix-validation rerun of game_18 OCR (x1.25, ~2 h GPU) dispatched — projection
+to beat: d 0.0304 -> 0.0384 @ 0.849 (shipped rule). Root-cause fix queued: persist real detector
+box heights at extract (constants currently used far beyond OCR). Cluster verdict UNCHANGED:
+even fixed d ~ 0.04-0.06 is 6-9x below d* = 0.347 — S3/S4 stand.
+
+**v2 rerun result (same day, kb ident-030): the fix OVERSHOT its projection 1.8x** — d 0.0304 ->
+**0.0704** at read precision 0.786 -> **0.867** (projection was a crop-level binomial; added reads
+cluster on tracklets, and min_votes bars exactly that — treat q-projections as lower bounds).
+End-to-end correct events +30% (solver 264 -> 342) / +33% (greedy); shirt-given-answered
+0.320 -> 0.398; on-screen solver best point 0.8448 @ 0.1221 coverage (0.005 below the 0.85 bar).
+Headline UNCHANGED: cov@0.85 ~ 0; d still 4.9x below d*. Greedy's 0.71-precision point no longer
+exists (0.637 at 1.49x coverage — name-disagreeing merge groups 2 -> 14). votes=4 arm reported
+as post-hoc, not adopted. Fix ships as --crop-scale (default 1.0), OCR_PERCROP_VERSION 1.1;
++24% OCR GPU cost. Worker verdict: bake into any rerun, but NOT itself a reason to run games
+24/47. EPL matches still at crop_scale 1.0 — rerun queued as a decision.
+
+## 2026-07-29 — Real-match extension + FOOTPASS end-to-end staging
+
+**Per-crop OCR on all three labelled matches:** pooled d 0.0253 -> 0.1143 (**4.6x**, replicates
+3/3), and a new on-footage precision anchor: 318/345 = **0.9217** agreement with 98.6%-verified
+close-up anchors. GPU cost ~4 h. kb ident-022/023/024.
+
+**Powered naming test (LOTO, anchor-truth grader, Bonferroni alpha 0.00625): FAIL, twice over.**
+(1) The solver at r_abstain=0 is catastrophically WORSE (0.637 -> 0.352, p~1e-99) — Stage 2 §8's
+warning is now measured at n=3,230, not asserted. (2) The greedy rule + per-crop reads gains
++0.030 at **p = 0.00656 — a miss by 0.0003, recorded as FAIL**, with the grader bias running
+against it. On the 78 hand moments it is the first arm to raise naming (0.609 -> 0.800) AND
+coverage (40 -> 45) together — suggestive, unclaimable. Grader fixed at root (arms graded against
+anchor truth, not their own labels); GK naming is the role gate's doing, not OCR's.
+
+**Abstention retest (one shot, pre-registered): FAIL — and it settles the question.** Tuned on
+GSR DEV only (r_abstain 0.05 chosen at the 0.85-precision knee), registration timestamped before
+the single test. Result: p = 0.9958 registered direction; the arm is significantly WORSE two-sided
+(p = 0.0114, delta -0.0329). Abstention fixed the r_abstain=0 collapse (0.359 -> 0.657) and the
+tuned solver STILL lands below the greedy connector rule. Third measurement of "the solve buys a
+dial, not a better frontier" — first on real broadcast. And the regime that fixes LOTO destroys
+the GK win (keeper slots 2/4 -> 0/4 in all three matches): no point in the current grid holds
+both. Best namer on our footage = greedy rule + per-crop reads. Any revival needs a NEW
+pre-registered question (role-aware operating point that keeps gate 4). kb ident-025.
+
+**In flight:** **FOOTPASS game_18 end-to-end from-pixels run launched**
+(Sid: stage it) — BoT-SORT priced in 10 GPU-min first (adopt if <= +6 h projected), then the full
+chain at stride 2 (harness pre-checks: tracker recall 0.488 -> 0.947 at stride 2, frame alignment
+proven exact, homography 0.13-0.20 m on foreign stadiums), scored against 1,879 labelled events
+with coverage-at-precision and on-screen split (ceiling 0.758). Games 24/47 wait on the number.
+
+## 2026-07-28 — OCR densification: the starvation was self-inflicted, and fixing it flips Stage 2
+
+**Audit finding (root cause, loud):** the shipped OCR chain was already the GSR 4th-place recipe
+(legibility gate -> pose -> torso RoI -> fine-tuned PARSeq), but the aggregation step gave every
+ILLEGIBLE crop a one-hot vote at MAXIMUM confidence weight — illegible crops out-voted legible
+reads, so a track needed majority-legible to commit. Pilot sequence: 19/64 tracks carried a read;
+the shipped rule committed 3. **The measured d=0.087 was largely an artifact of throwing away
+reads we already had.** Per-crop reads are now persisted (`OCR_PERCROP_VERSION`, parquets under
+outputs/), Stage 2 blocker B2 closed.
+
+**Density (GSR TEST-38, 3,274 tracks):** d 0.0877 -> 0.2083 at read precision 0.8578 (baseline
+0.8618, indistinguishable) — **2.38x density for ZERO extra GPU** (aggregation fix alone = 2.45x
+at matched crop volume). The arm pre-labelled PRIMARY (0.80 floor) FAILED its own floor by one
+read (0.7993) — recorded as FAIL, not rounded; the 0.85-floor arm is the shipped rule. Three
+selection floors were frozen BEFORE the TEST run (results/ocr_density_rule.json timestamp
+predates the test artifact). Law's 4.0x gap: closed to 1.7x remaining.
+
+**Downstream (frozen Stage-2 solver, only the digit prior refit on DEV per-crop reads):**
+- coverage@0.85: 0.1739 -> **0.4141**; coverage@0.60: 0.2956 -> 0.6412
+- GS-HOTA: 24.19 -> **33.20** (35 sequences helped / 3 hurt) — from 22.85 at session start
+- **Stage 2's Gate 1, which failed at p=0.566, now PASSES: identity 0.2559 -> 0.4488
+  (Wilcoxon p<1e-6), exceeding the old evidence-restricted ceiling of 0.365.** The solver was
+  never wrong — it was starved, and the starvation was ours.
+
+**Qwen2-VL-2B trial: DROP** (fits in 1.62 GiB, but 0.265 precision where the chain abstains).
+Unclaimed tail: 0.800 vs 0.700 per-crop on legible crops (p=0.031) — a re-ranker candidate, not a
+densifier. `bitsandbytes` installed for the trial only; safe to uninstall.
+
+**Real match (manutd_liverpool, report only):** d 0.0265 -> 0.1150 (0.85 rule); GK tracks with a
+read 3 -> 11 of 182. Close-up-anchor tracks overlap the per-crop pass on only 89/221 — the two
+mechanisms are complementary. Other two labelled matches pending (~3.5 GPU-h).
+
+kb: ident-017..021. Files: results/OCR_DENSIFICATION.md + gsr_benchmark artifacts.
+
+## 2026-07-28 — The evidence-density law: what attribution actually requires (FOOTPASS, 97,397 events)
+
+Simulator over FOOTPASS dense truth, **calibration-gated first**: reproduces Stage 2's measured
+0.2604 at 0.2576, appearance top-1 0.6366 at 0.6413, with nothing fitted to those targets
+(`results/EVIDENCE_DENSITY_LAW.md`, kb ident-013..016, VAL split held out and reproducing).
+
+- **The law:** precision 0.85 at coverage >=0.50 needs OCR read density **4.0x today's** (d 0.087
+  -> 0.347), or **~7x less fragmentation** (~1 fragment/30 s -> 0.505 coverage at today's reads).
+  Read precision is a weak lever (1.3x). 4x reads ~= 7x defragmentation — an exchange rate.
+- **Commentary naming channel: FAIL, retired by measurement.** At its pre-declared gate
+  (1.5 names/min, 0.60 prec, 4 s lag IQR): coverage-at-0.85 = 0.000; 27/27 conditions = no
+  evidence; binding at 4 s lag is 13.2% vs 12.5% chance (ball moves 24 m in 4 s); even oracle
+  binding tops out at 0.295; stacked on real OCR it is net-harmful. The 1-week build is cancelled
+  for the price of a simulator run. (Needs lag IQR <=0.5-1 s to matter — no known path to that.)
+- **Clip-length artifact exposed:** same evidence anchors 0.176 of events on 30 s solve units,
+  0.395 on 2-min units. Solve half-wide on real matches.
+- **Hard ceiling:** 18.5% of labelled actions have an off-screen actor — from-pixels coverage can
+  never exceed 0.81; measured full-coverage arms already sit at it.
+- Re-ranked build order in docs/ATTRIBUTION_RESEARCH_PLAN.md: OCR densification (4x) >
+  defragmentation (within-chunk association: perfect = 0.505 today) > end-to-end PCBAS run on the
+  3 VAL games. Commentary demoted to report color permanently.
+
+## 2026-07-28 — Attribution Stage 2: joint identity solver — gate FAILS, and the failure is a measurement
+
+Built `generator/identity_solve.py` (scipy MILP/HiGHS — no new dependency) + `eval/gsr_identity.py`
++ `tools/identity_match.py`; DEV/TEST declared in code (20/38 of the 58 local GSR sequences),
+config frozen to `results/identity_solver_config.json` BEFORE the single TEST run.
+
+**Gate 1 (primary, pre-declared): FAIL.** Solver vs appearance-only identity accuracy on TEST:
++0.0045, Wilcoxon p=0.566, 20 sequences helped / 18 hurt. The Lu et al. constraint jump
+(50-55% -> 85-89%) did NOT replicate. **Measured cause — evidence starvation:** only 8.7% of
+tracklets carry any jersey read (24.1% of rows have a read anywhere on their player); an oracle
+restricted to the same evidence caps at **0.365**. Lu's play-by-play supplied dense external
+identity evidence; OCR alone does not. **Constraints redistribute evidence; they cannot create
+it.** Appearance top-1 on GSR = 0.640 — independently replicates Stage 1's ~0.62 ceiling.
+
+**Frontier finding (the metric lesson):** per-row accuracy is blind to the precision/coverage
+trade — baseline names 15.4% of rows at 88.2% precision, the frozen solver 85.4% at 26.4%, and
+per-row accuracy scores them within 0.005. The solver traces 0.15@0.93 -> 0.18@0.85 -> 0.85@0.26
+and the greedy baseline sits ON that curve: **the solve buys a dial, not a better frontier.**
+Any re-run must pre-declare coverage-at-a-precision-floor. (One post-hoc DEV point reaches
+p=0.0029 at 18.3%@85.3% — flagged post-hoc, NOT claimed.)
+
+**Gate 2 PASS:** GS-HOTA 23.37 -> 24.19 on TEST-38, no regression vs the 23.53 on-record.
+**Gate 3:** n=16 assigned moments — nothing resolvable, nothing claimed.
+
+**Gate 4 — the clean win: goalkeepers are finally named.** Keeper slots filled 0/4 -> 2/4 in ALL
+three labelled matches, correct starters every time (Onana + Alisson / Vicario / Verbruggen);
+de Ligt (384 tracks) and van Dijk (242) enter the name set for the first time (previously 0
+mentions in 1,664 named tracks). Slot COVERAGE, not accuracy — no per-track truth; stated as such.
+
+Cleanups queued from the negatives: delete the digit-confusion prior (inert, p=0.52) unless
+per-crop OCR is ever persisted; real-match MILP runs pruned (6 candidates/tracklet, 60 s budget)
+— incumbents, not proven optima. kb: `ident-010/011/012`.
+
+**Same day:** FOOTPASS acquired — annotations for 54 games (97,397 public events) + full-HD video
+for the 3 labelled VAL games (14 GB total, NDA signed by Sid, CLAUDE.md narrow exception
+recorded). GS-HOTA scorer audit CLEARED (we drive `sn-trackeval` directly; static since install;
+safe image-id pairing; TrackLab 1.3.24 bug never in our path).
+
+**Implication for the plan:** the missing ingredient is dense external identity evidence — the
+role commentary (Stage 3, Sid's idea) or densified per-crop OCR would play. FOOTPASS's dense
+tracks let us measure the required evidence density synthetically BEFORE building either.
+
+## 2026-07-27 — Attribution Stage 1: tracklet repair (GTA-Link port) — connector works, splitter retired
+
+Plan: `docs/ATTRIBUTION_RESEARCH_PLAN.md` (Lu et al. 2013 joint-inference blueprint + 2024 tracklet
+association). Stage 1 = training-free repair of fragmented tracks, graded externally first.
+
+**Benchmark (SoccerNet GSR public split, 58 sequences, official trackeval):** connector-only at the
+frozen setting lifts **GS-HOTA 22.85 -> 24.18** (AssA 46.96 -> 50.08); paired per-sequence 51/58
+helped, worst regression -0.17. Threshold-matched isolation (+0.68 GS-HOTA at equal merge
+precision) attributes the gain to the algorithm, not the threshold. Fragments per GT player
+5.87 -> 4.72. Real match (fulham_manutd): tracklets per named-player-half 6.739 -> 5.043 at 82.8%
+merge precision (within-chunk), 3.783 (-43.9%) at 71.4% (cross-chunk, below the 80% per-player-fact
+bar — not usable for facts).
+
+**Negative result, shipped OFF:** the Splitter half of GTA reverses sign from pilot (+0.95) to full
+split (-0.19 GS-HOTA); the paper's eps=0.30 produces ZERO splits on same-kit football (PRTreID
+distances sit at ~1/4 the paper's scale with heavy identity overlap); real-match tracklets are too
+short to cluster (median 6 embeddings). Recorded as kb `gta-002` (fail).
+
+**Per-player-fact rule:** only the tau=0.040 arm (80.1% merge precision) may feed per-player claims;
+the 24.18 arm runs at 69.7% and the 24.24 arm was tuned post-hoc — both flagged, neither claimed.
+
+Files: `generator/gta_link.py`, `eval/gsr_gta.py`, `tools/gta_match.py`, `results/GTA_LINK_STAGE1.md`.
+
+**Naming-factor re-test (same day): NEGATIVE.** With settings frozen on GSR, the connector does
+NOT measurably improve carrier naming. On the 78 hand-judged moments: naming 0.609 -> 0.750 at
+tau=0.040 is one extra correct answer on a smaller denominator (Fisher p=0.35; coverage falls
+40 -> 31 assigned). On the high-power proxy (leave-one-group-out gallery top-1, ~2,000+ paired
+crops, McNemar): tau=0.040 flat (p=0.14), tau=0.050/0.060 significantly WORSE (p=0.0088/0.0028) —
+at 70-80% merge precision every wrongly merged crop becomes a permanent max-similarity distractor.
+Gate-hit is unchanged (0.846) in every arm — the plan's hope that repair would lift it was wrong:
+re-partitioning identity cannot create boxes. Verdict: Stage 1 buys tracking association only;
+appearance looks saturated (~0.62 LOTO top-1); Stage 2's constraints must do the work, its solver
+must consume tau=0.040 merges (not the GS-HOTA-optimal 0.060), and the 23-moment naming label set
+is too small to validate any realistic intervention — grow it or grade on the proxy/GSR split.
+kb: `gta-004`; caveats added to `gta-001`/`gta-003`. Nothing committed.
 
 ## 2026-07-27 — RETRACTION: "calibrated predictive regions" does not hold on our own footage
 

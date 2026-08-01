@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>football-synthesizer -- project report</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    color: #1a1a1a;
+    font-size: 10.6pt;
+    line-height: 1.5;
+    margin: 0;
+  }
+  h1 { font-size: 19pt; margin: 0 0 4pt; font-weight: 700; color: #0f172a; }
+  h2 { font-size: 13.5pt; margin: 20pt 0 6pt; color: #7a3b12; border-bottom: 1px solid #d8c3a5; padding-bottom: 3pt; }
+  h3 { font-size: 11.5pt; margin: 12pt 0 4pt; color: #1a1a1a; }
+  p { margin: 0 0 7pt; text-align: left; }
+  .section { page-break-before: always; }
+  .section:first-of-type { page-break-before: avoid; }
+  .subtitle { font-size: 11.5pt; color: #4b5563; margin: 0 0 14pt; font-style: italic; }
+  .thesis {
+    font-size: 12pt; font-weight: 600; border-left: 3px solid #7a3b12;
+    padding: 6pt 12pt; margin: 12pt 0; background: #faf6ef; color: #0f172a;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 8pt 0 4pt; font-size: 9.3pt; }
+  th, td { border: 1px solid #cbb994; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { background: #f2e9d8; font-weight: 700; }
+  caption { caption-side: top; text-align: left; font-size: 9.3pt; font-style: italic;
+            color: #4b5563; margin-bottom: 3pt; }
+  .num { font-variant-numeric: tabular-nums; }
+  .banner {
+    border-left: 3px solid #a33; background: #fbeeee; padding: 6pt 10pt;
+    margin: 8pt 0; font-size: 9.8pt;
+  }
+  .banner.good { border-left-color: #2f7a3f; background: #eef7ee; }
+  .banner.warn { border-left-color: #a3771a; background: #fbf3e0; }
+  .src {
+    font-family: "Consolas", monospace; font-size: 8pt; color: #555;
+    border-top: 1px dotted #bbb; margin-top: 6pt; padding-top: 4pt; line-height: 1.4;
+  }
+  .meta { font-size: 9pt; color: #6b7280; margin-bottom: 10pt; }
+  ul, ol { margin: 4pt 0 8pt 18pt; padding: 0; }
+  li { margin-bottom: 3pt; }
+  .footer-page { font-size: 8.5pt; color: #999; text-align: center; margin-top: 20pt; }
+</style>
+</head>
+<body>
+
+<div class="section">
+<h1>football-synthesizer</h1>
+<p class="subtitle">Broadcast video to validated tactical measurement -- project report</p>
+<p class="meta">Manchester United, English Premier League 2024-25. 12 matches, 6 opponents, both
+legs. Prepared for examination, IIIT Delhi, December 2026. Report date: 2026-07-28.</p>
+
+<h2>1. Summary</h2>
+<p>This project turns an ordinary television broadcast into a measured tactical record. The input
+is a normal match replay: one moving camera, replays, close-ups, crowd shots. The output is player
+and ball positions on a real 105 x 68 m pitch, tracked events, and a written report that states a
+number only when the evidence supports it.</p>
+
+<div class="thesis">
+Measure exactly what the broadcast supports. Prove where the measurement stops. Report nothing
+that cannot be grounded in an external check.
+</div>
+
+<p>Every stage of the pipeline carries an external validation number: an official statistic, a
+public benchmark scored by its own evaluator, a pre-registered baseline, or a hand-annotated
+ground truth. When a stage cannot support a claim, the system is built to say so instead of
+guessing. Twelve of 102 logged claims in this project are retractions of our own earlier work.
+The retraction trail is a feature of the method, not a defect in it.</p>
+
+<p>The corpus is a repeat-measurement design: 12 Manchester United matches from the 2024-25
+season, arranged as six home-and-away pairs against the same six opponents, spanning the change
+of manager from Erik ten Hag to Ruben Amorim. Playing the same team twice lets us separate
+"this is Manchester United" from "this is what one opponent did to them on one day".</p>
+
+<p>The rest of this report has six parts: the pipeline stage by stage, the corpus design, the
+findings on team style, the player-attribution research line, the retraction record, and the
+plan for the SoccerNet FOOTPASS benchmark leading to December.</p>
+
+<p class="src"><b>Sources.</b> demo/showcase.html; docs/PROJECT_DEFINITION.md;
+STATUS.md.</p>
+</div>
+
+<div class="section">
+<h2>2. The pipeline, stage by stage</h2>
+<p>Six stages. Each stage carries its own external number. Any stage can veto the sentence built
+downstream of it.</p>
+
+<h3>2.1 Video and registry</h3>
+<p>Full-match replays are supplied by the user and chunked into ten-minute segments. Every match
+path is looked up from <code>data/matches.yaml</code> through a registry module. No file in the
+codebase hard-codes a path to a match.</p>
+
+<h3>2.2 Detect and track</h3>
+<p>Player detection and multi-object tracking (YOLO plus BoT-SORT), then a jersey-number layer
+and a re-identification relink on top. Score on the public SoccerNet-GSR validation split, 58
+sequences, scored by the official <code>sn-trackeval</code> evaluator, not by us:</p>
+<table>
+<caption>Table 1. Tracking and identity, GS-HOTA on SoccerNet-GSR valid split (58 sequences)</caption>
+<tr><th>Arm</th><th>GS-HOTA</th><th>Note</th></tr>
+<tr><td>Pre-jersey baseline</td><td class="num">14.76</td><td>ident-001</td></tr>
+<tr><td>Jersey propagation added</td><td class="num">22.85</td><td>ident-004; repaired 15/58 regressed sequences down to 1</td></tr>
+<tr><td>Tracklet connector added (Stage 1 below)</td><td class="num">24.18</td><td>+1.33; 51/58 sequences helped</td></tr>
+</table>
+
+<h3>2.3 Pitch metres</h3>
+<p>A homography is fitted per frame and rejected when its residual error exceeds 1 m, so a
+player receives a coordinate only when the geometry is trustworthy. Usable geometry covers
+26.4% of the whole broadcast on a uniform 1-in-5 frame grid, and 80.5% of live wide-camera
+frames. The gap between those two numbers is the central honesty problem of the project: a
+broadcast spends much of its time on replays, close-ups and graphics, and none of that time
+yields measurement.</p>
+
+<h3>2.4 Ball and events</h3>
+<p>Ball detection, then a linking pass. The only ball-coverage number this project allows itself
+to quote is the coverage <em>after</em> that linking pass: 32-52% of sampled frames across the
+twelve matches. A pre-link number was once quoted as coverage; that claim was retracted end to
+end (see Section 6).</p>
+<table>
+<caption>Table 2. Event detection, checked against external sources</caption>
+<tr><th>Event</th><th>Result</th><th>Checked against</th></tr>
+<tr><td>Pass counts per match</td><td class="num">0.97-1.09x official on 10 of 12 matches</td>
+    <td>Official match statistics. Threshold frozen on the first match, never retuned.</td></tr>
+<tr><td>Goal detection, zero-shot</td><td class="num">13/13 recall, 81.3% precision (16 peaks, 3 false positives)</td>
+    <td>Six matches with an official goal oracle, including a 0-0 negative control that fires
+    zero peaks. Every true goal is the top-scoring peak in its match.</td></tr>
+</table>
+
+<h3>2.5 Identity</h3>
+<p>Jersey numbers are read from close-up crops, propagated across re-identification merge
+groups, and checked against the team sheet. It works, and it does not work often enough: only
+1.0-4.2% of Manchester United's attributed passes carry a named player. That single measurement
+is why this project ships no per-player statistics anywhere.</p>
+
+<h3>2.6 Gated report</h3>
+<p>Team-level metrics are assembled into a fact store, narrated by a free-tier language model,
+and passed through a numeric guardrail that refuses any sentence carrying a number the fact
+store does not contain. Claims live in a version-controlled knowledge base with a status field
+(confirmed, retracted, refuted, pending, superseded), so a retraction is a state change, not a
+deletion.</p>
+
+<p class="src"><b>Sources.</b> knowledge/claims.json ident-001, ident-004, event-001, event-002,
+ident-008; results/CLAIMS_AUDIT.md; results/GTA_LINK_STAGE1.md; demo/showcase.html section c.</p>
+</div>
+
+<div class="section">
+<h2>3. The corpus: repeat measurement across a manager change</h2>
+<p>Twelve Manchester United matches from the 2024-25 Premier League season form six home-and-away
+pairs against the same six opponents: Brighton, Crystal Palace, Liverpool, Southampton,
+Tottenham, and Fulham (single leg used for the demo). The pairing straddles the mid-season
+change of manager from Erik ten Hag to Ruben Amorim.</p>
+<p>This design exists for one reason: measuring the same fixture twice is the only way to tell
+"Manchester United's style" apart from "what this specific opponent, on this specific day, made
+them do". A single match cannot answer the research question; a repeated pair can start to.</p>
+<p>The demo built from this corpus is a pre-match opposition scouting pack for a fixture played
+twice. The Brighton pair is the primary demo, because Brighton's own manager stayed the same
+across both legs, making it a fair test of the design. The Southampton pair is the honest stress
+case: Southampton changed their own manager between legs, so the pack is run to the point where
+the evidence gate refuses, and what the system declines to say is itself the thesis being
+demonstrated.</p>
+<p class="src"><b>Sources.</b> docs/PROJECT_DEFINITION.md; results/MANUTD_IDENTITY_PROFILE.md.</p>
+</div>
+
+<div class="section">
+<h2>4. Findings: what is stable, what is not</h2>
+<p>Some style dimensions repeat across the corpus. Others do not survive an opponent control.
+Both kinds of result are reported with equal weight.</p>
+
+<h3>4.1 Stable across the corpus</h3>
+<ul>
+<li><b>Possession control.</b> Repeat meetings correlate at r = +0.83. A pre-match forecast from
+one prior meeting reaches 7.92 percentage points mean absolute error, beating an uninformative
+baseline (10.63) and an Elo-based one (12.18).</li>
+<li><b>The funnel shape (own third central, final third wide).</b> United play 46.9% of own-third
+ball time centrally and 23.9% of final-third ball time centrally, repeating in 11 of 12 matches
+(sign test p = 0.0063). It looks like a team trait, until Section 4.2.</li>
+</ul>
+
+<h3>4.2 Not stable, and the opponent control that killed the claim</h3>
+<p>The same funnel measurement, run on the opposition in the same twelve broadcasts, repeats in
+12 of 12 matches (p = 0.0005) and finishes marginally <em>wider</em> than United do (22.6%
+central against United's 23.9%). It is Premier League geometry, not a Manchester United trait.
+The same control killed two further claims: a "rigid block" reading (compactness 6.17 +/- 0.39 m
+for United against 5.93 +/- 0.29 m for opponents, F = 1.81, p = 0.34) and a favoured-flank
+reading (5 of 12 matches lean left, p = 0.7744, no effect).</p>
+<p><b>Defensive line height is also not stable.</b> Leg-to-leg correlation r = -0.40: the home
+leg does not predict the away leg, and if anything predicts it backwards. Between-match standard
+deviation is 4.25 m on a mean of 28.3 m (coefficient of variation 15.0%).</p>
+<table>
+<caption>Table 3. Stability summary</caption>
+<tr><th>Dimension</th><th>Stable?</th><th>Evidence</th></tr>
+<tr><td>Possession control</td><td>Yes</td><td>r = +0.83; forecast MAE 7.92pp beats baselines</td></tr>
+<tr><td>Funnel shape (build central, finish wide)</td><td>No -- league trait</td><td>11/12 United, 12/12 opponents, opponents finish wider</td></tr>
+<tr><td>Block compactness ("rigid" shape)</td><td>No -- league trait</td><td>United 6.17m vs opp 5.93m, F=1.81, p=0.34</td></tr>
+<tr><td>Defensive line height</td><td>No</td><td>leg-to-leg r = -0.40, CV 15.0%</td></tr>
+<tr><td>Favoured flank</td><td>No effect found</td><td>5/12 lean left, p = 0.7744</td></tr>
+</table>
+
+<h3>4.3 The manager change</h3>
+<p>Seven of nine players tracked in both eras stand higher up the pitch under Amorim (Garnacho
++15.1 m being the largest mover). The team's own block-height metric does not cleanly separate
+the two managers (29.7 m under ten Hag to 26.9 m under Amorim, against a 4.25 m match-to-match
+standard deviation). The manager change is visible in the players, not measurably in the team
+shape, and the design confound must be stated: venue and manager flip together in all six
+pairs, so no number here separates "new manager" from "away instead of home".</p>
+
+<div class="banner">
+<p><b>Sample-size bound, stated as a limit.</b> Team-versus-team rate comparisons (for example,
+"United press more than X") need 58-90 matches to separate two sides even with perfect tracking
+and zero measurement error, derived from published between-team and season variance. Twelve
+matches is five to eight times too few, before broadcast censoring is even considered. No
+improvement to the vision pipeline can rescue this; it is a sample-size bound.</p>
+</div>
+
+<p class="src"><b>Sources.</b> results/MANUTD_IDENTITY_PROFILE.md sections 3-5;
+results/W1B_WINDOW_AND_SAMPLING.md; docs/PROJECT_DEFINITION.md.</p>
+</div>
+
+<div class="section">
+<h2>5. The attribution research line</h2>
+<p>The question behind this line of work: can a passer, tackler or shooter be named, not just
+detected? The measured baseline before this research line: carrier attribution precision
+0.846 (gate-hit) x 0.719 (team) x 0.609 (naming) = 0.350 (best variant 0.400).</p>
+
+<h3>5.1 Stage 1 -- tracklet repair (GTA-Link)</h3>
+<p>A training-free connector (Sun et al., ACCV 2024) merges fragmented tracklets by appearance
+embedding under spatio-temporal constraints. Measured on the SoccerNet-GSR public split:</p>
+<table>
+<caption>Table 4. Stage 1 result</caption>
+<tr><th>Metric</th><th>Before</th><th>After</th></tr>
+<tr><td>GS-HOTA</td><td class="num">22.85</td><td class="num">24.18 (+1.33, 51/58 sequences helped)</td></tr>
+<tr><td>Fragments per GT player</td><td class="num">5.87</td><td class="num">4.72</td></tr>
+</table>
+<p><b>The connector helps tracking. It does not help naming.</b> On 78 hand-judged carrier
+moments, naming went 0.609 to 0.750 -- one extra correct answer on a smaller denominator, not
+significant (Fisher p = 0.35). On a higher-power proxy (leave-one-group-out gallery top-1 over
+about 2,000 paired crops), the connector's default setting is flat (p = 0.14) and two stronger
+settings are significantly <em>worse</em> (p = 0.0088, p = 0.0028): at 70-80% merge precision,
+every wrongly merged crop becomes a permanent distractor. The negative Splitter half of GTA
+(reverses sign on the full run) was shipped off entirely.</p>
+
+<h3>5.2 Stage 2 -- the joint identity solver</h3>
+<p>A Lu-style constraint solve (identity constant within a tracklet, at most one player per
+frame, roster and substitution windows) was built with <code>scipy.optimize.milp</code>, no new
+dependency. Pre-declared gate, DEV/TEST split frozen in code before the single TEST run.</p>
+<div class="banner">
+<p><b>Gate 1, primary, pre-declared: FAIL.</b> Solver versus appearance-only identity accuracy on
+TEST: +0.0045, Wilcoxon p = 0.566, 20 sequences helped, 18 hurt. The published jump this method
+is modelled on (50-55% to 85-89%) did not replicate here.</p>
+</div>
+<p><b>Measured cause: evidence starvation.</b> Only 8.7% of tracklets carry any jersey read at
+all; an oracle restricted to that same evidence caps at 0.365. The published method that inspired
+this solve had dense external identity evidence from play-by-play text; jersey OCR alone does not
+supply that density. Constraints redistribute evidence between tracklets; they cannot create
+evidence that was never read.</p>
+<p><b>The frontier finding.</b> Per-row accuracy is blind to a precision/coverage trade: the
+baseline names 15.4% of rows at 88.2% precision, the frozen solver names 85.4% of rows at 26.4%
+precision, and per-row accuracy scores the two within 0.005 of each other. The solver traces the
+same precision/coverage curve the greedy baseline already sits on. It buys a dial, not a better
+frontier.</p>
+<p><b>Gate 2 passes.</b> GS-HOTA 23.37 to 24.19 on the same 38 held-out sequences, no regression.
+<b>The one clean win:</b> goalkeeper naming. Keeper slots filled go from 0 of 4 to 2 of 4 in all
+three labelled matches, correct starters every time; two centre-backs (de Ligt, van Dijk) enter
+the name set for the first time after zero mentions in 1,664 previously named tracks.</p>
+
+<h3>5.3 The evidence-density law</h3>
+<p>A simulator over FOOTPASS dense ground truth (97,397 action events, 54 matches), calibration-
+gated first: it reproduces Stage 2's own measured numbers (0.2604 predicted at 0.2576, appearance
+top-1 0.6366 predicted at 0.6413) with nothing fitted to those targets.</p>
+<table>
+<caption>Table 5. The measured law: what attribution precision 0.85 at coverage &gt;= 0.50 needs</caption>
+<tr><th>Lever</th><th>Requirement</th><th>Multiple of today</th></tr>
+<tr><td>OCR-like read density</td><td>d = 0.347 (from 0.087 today)</td><td class="num">4.0x</td></tr>
+<tr><td>Fragmentation reduction (alternative route)</td><td>~1 fragment / 30s on-screen</td><td class="num">~7x less fragmentation</td></tr>
+<tr><td>Read precision (weak lever)</td><td>-</td><td class="num">1.3x</td></tr>
+</table>
+<p>4x more reads and 7x less fragmentation are an exchange rate: either move closes the same gap.</p>
+<div class="banner">
+<p><b>Commentary as a naming channel: FAIL, retired by measurement.</b> At its pre-declared gate
+(1.5 names/min, 0.60 precision, 4s lag IQR): coverage at the 0.85 precision floor is 0.000 across
+all 27 tested conditions. Measured cause: at a 4s lag, a commentary mention binds to the correct
+player 13.2% of the time, against a 12.5% chance rate (the ball moves about 24 m in 4 s). Even an
+oracle binder tops out at 0.295 coverage, below the bar. Stacked on real OCR it is net-harmful.
+The one-week build for this channel is cancelled for the price of a simulator run.</p>
+</div>
+<p><b>A hard ceiling, independent of any lever:</b> 18.5% of labelled actions in FOOTPASS have an
+actor who is off-screen at the moment of the action. No pixel-only pipeline can exceed 0.81
+coverage; the measured full-coverage arms of the simulator already sit at that ceiling.</p>
+
+<p class="src"><b>Sources.</b> results/GTA_LINK_STAGE1.md; results/IDENTITY_SOLVER_STAGE2.md;
+results/EVIDENCE_DENSITY_LAW.md; knowledge/claims.json gta-002, gta-004, ident-013 through
+ident-016.</p>
+</div>
+
+<div class="section">
+<h2>6. Retractions and the correction trail as a feature</h2>
+<p>The knowledge base holds 102 logged claims: 72 confirmed, 12 retracted, 8 refuted by an
+external control, 8 pending, 2 superseded. A claim record carries its statement, status, method,
+sample size, caveats and evidence files. Retracting a claim changes its status; it does not
+delete the claim.</p>
+
+<h3>6.1 The calibration retraction</h3>
+<p>The B4 imputation model's 50%/90% predictive regions passed calibration 6 of 6 buckets on
+Metrica simulated censoring, and this was treated as a genuine contribution, printed on every
+frame of the tactical-clip demo. On real broadcast footage, measured against 4,900
+liveness-guarded player re-appearances across four matches, the regions cover 21.2% where they
+promise 50% and 55.4% where they promise 90%. 14 of 14 testable buckets fail at both levels,
+with only 1.4-6.4 percentage points of spread between matches: not a one-match artefact.</p>
+<p>The check that found this is itself a method contribution: when a tracked player walks back
+into frame after an occlusion, his re-appearance position is a measured answer to the prediction
+the model made while he was hidden. This is free ground truth on real footage, and it appears to
+be the first calibration check of an off-screen imputation model outside simulation in this
+literature; comparable models (DeepMind's Graph Imputer, a 2026 arXiv preprint, and our own B4)
+are all calibrated only in simulation.</p>
+<p>What was ruled out as the sole cause: a measured observation-noise floor (0.541 m per axis)
+recovers the 50% level (55.0%) but leaves the 90% level 20 points short (70.4%); a
+displacement-matched Metrica subset still covers 52-59% and 92-95%, so selection bias does not
+explain the failure either.</p>
+
+<h3>6.2 Two other retractions on the same day</h3>
+<ul>
+<li><b>Face recognition as an identity source: closed by measurement.</b> Zero of 1,095 carrier
+moments across three matches produce a face reaching the roughly 50-pixel height recognition
+needs. Median face height is 9.9 px against a geometric ceiling of 16.8 px. This is an optics
+limit, not an engineering one.</li>
+<li><b>Team mapping errors.</b> A standing screen (possession by kit cluster versus official
+majority, warning above 8 percentage points of disagreement) found two matches with flipped team
+labels. Four downstream claims -- the two mappings and two tactical reads built on them -- were
+marked retracted.</li>
+</ul>
+
+<h3>6.3 What the correction cost, and what it produced</h3>
+<p>The fix for the calibration retraction was not to soften the wording. The regions were
+measured against 4,900 real re-appearances, the failure was published, the claim was marked
+retracted in the knowledge base, and the tactical-clip renderer was changed so the measured
+numbers are burned into every frame beside the nominal ones. A self-check now asserts that no
+on-screen string can say "calibrated" without the word "NOT" attached. A separate rendering
+defect was found in the same pass: the clip renderer had only ever drawn dead track fragments as
+ghosts, never a genuinely occluded live player; with the fix, live-track occlusions drawn on the
+flagship passage went from 0% to 56%.</p>
+
+<p class="src"><b>Sources.</b> results/CALIBRATION_REPLICATION.md; results/FULL_MATCH_RECONSTRUCTION.md;
+knowledge/claims.json b4-014, b4-015; results/CROSS_MATCH_GALLERY.md; STATUS.md
+2026-07-27 entry.</p>
+</div>
+
+<div class="section">
+<h2>7. The SoccerNet FOOTPASS arena and the road to December</h2>
+<p>SoccerNet retired its Game State Reconstruction challenge in 2026 and replaced it with
+Player-Centric Ball Action Spotting: name the acting player by team and jersey number, scored
+Macro-F1, with an exact jersey match required. Its dataset, FOOTPASS, holds 54 matches, 81 hours
+of broadcast, and 102,992 validated (frame, team, jersey, action) tuples. Annotations are
+licensed CC BY-NC 4.0 on HuggingFace; video access requires a separate signed NDA.</p>
+<p>This project has acquired the FOOTPASS annotations (97,397 visible events in train and
+validation, 54 of 54 games present) under the narrow exception recorded in project rules: an
+NDA personally signed by the project owner. Video access is a separate NDA decision, not yet
+made, and is required before FOOTPASS can grade this pipeline end to end from raw pixels.</p>
+<p>Two facts from a survey of the current SoccerNet leaderboard sharpen the plan. First, across
+the whole GSR 2025 leaderboard, tracklet-association scores (60-85) far exceed identity scores
+(14-51); the leaderboard winner states its own failures were "mostly jersey number recognition".
+This matches this project's own measured result: the connector repairs tracking, not naming.
+Second, no winning team's code is public across either GSR year, so the 4th-place recipe (a
+stack close to ours, plus a stronger detector, pose-cropped jersey OCR, and a geometric
+goalkeeper heuristic) is the most useful reference point available.</p>
+<p>The re-ranked build order, in the order the evidence-density law justifies: (1) OCR
+densification toward the measured 4x target -- persisting per-crop reads, pose or torso crops,
+a small vision-language-model zoom trial, and solving over longer windows; (2) fragmentation
+reduction toward the measured ~1-per-30s target, since a perfect within-chunk association
+already reaches 0.505 coverage on today's read volume; (3) one end-to-end from-pixels run on the
+FOOTPASS validation games once (1) and (2) have moved. Commentary is retired to report colour
+only, never attribution evidence.</p>
+<p class="src"><b>Sources.</b> docs/ATTRIBUTION_RESEARCH_PLAN.md post-survey revision;
+STATUS.md 2026-07-28 entries; docs/SOCCERNET_SURVEY_RAW.md.</p>
+
+<p class="footer-page">football-synthesizer -- project report -- page 7 of 7</p>
+</div>
+
+</body>
+</html>

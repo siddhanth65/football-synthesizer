@@ -33,7 +33,14 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
 - Scope (2026-07-17 pivot, per Sid): **Manchester United, EPL 2024-25 season** — demo = opposition
   scouting pack for ManU. France/WC material is REFERENCE ONLY (PMSR PDFs stay as method-calibration
   ground truth). Footage source: PL website 24-25 replays, supplied by Sid.
-- Never download copyrighted footage; the user supplies match video.
+- **Scope amendment (2026-07-31, per Sid): primary near-term goal = score well on the SoccerNet
+  GSR benchmark (GS-HOTA), using the SoccerNet GSR dataset.** ManU-corpus adaptation deferred.
+  College GPU cluster is approved (Sid books slots on request); the 4 GB constraint applies to the
+  LAPTOP only. Campaign docs: `docs/GSR_CAMPAIGN_BRIEF.md`, `docs/GSR_CLUSTER_ROADMAP.md`.
+- Never download copyrighted footage; the user supplies match video. **Narrow exception (Sid,
+  2026-07-28, explicit):** research-dataset video distributed under an NDA that Sid has personally
+  signed (e.g. SoccerNet / FOOTPASS) may be downloaded, each fetch with a stated size plan and
+  Sid's per-fetch approval on record.
 - **Hardware:** 4 GB GPU laptop — one heavy GPU/data job at a time; never run the full pytest suite
   during GPU training (OOM killed a fine-tune once); targeted tests only while GPU is busy.
 - Free-tier LLM narration only (Ollama / OpenAI-compatible); no paid keys assumed.

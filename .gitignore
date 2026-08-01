@@ -33,6 +33,8 @@ data/imputation/
 data/wp_opendata/
 # FBref public squad-stat HTML cache (style-factor profile — external public data, gitignored)
 data/fbref_style_cache/
+# FOOTPASS/SN-PCBAS-2026 annotations (CC BY-NC 4.0, gated HF download — external, gitignored)
+data/footpass/
 # FIFA PMSR match reports (copyrighted ground truth — keep local, never commit)
 PMSR-*.pdf
 # archive safety net
@@ -54,3 +56,5 @@ PMSR-*.pdf
 !data/ball_annotations/
 
 # Keep small sample assets explicitly with: git add -f
+
+docs/papers/
