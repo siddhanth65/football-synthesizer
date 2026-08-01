@@ -1,0 +1,489 @@
+{
+  "train": {
+    "n": 7,
+    "correct": 5,
+    "accuracy": 0.7142857142857143,
+    "wrong": [
+      "SNGS-061",
+      "SNGS-062"
+    ],
+    "margin_correct_median": 4.619693899371001,
+    "margin_wrong": [
+      7.574,
+      6.31
+    ],
+    "per_seq": [
+      {
+        "seq": "SNGS-060",
+        "gt": "left",
+        "free": "left",
+        "margin": 1.0069692660293228,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-061",
+        "gt": "right",
+        "free": "left",
+        "margin": 7.574037439068611,
+        "ok": false
+      },
+      {
+        "seq": "SNGS-062",
+        "gt": "right",
+        "free": "left",
+        "margin": 6.309773828562861,
+        "ok": false
+      },
+      {
+        "seq": "SNGS-063",
+        "gt": "right",
+        "free": "right",
+        "margin": 6.516394224446067,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-064",
+        "gt": "right",
+        "free": "right",
+        "margin": 4.619693899371001,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-065",
+        "gt": "left",
+        "free": "left",
+        "margin": 1.2295148864601586,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-066",
+        "gt": "right",
+        "free": "right",
+        "margin": 7.927420773728969,
+        "ok": true
+      }
+    ]
+  },
+  "valid": {
+    "n": 58,
+    "correct": 56,
+    "accuracy": 0.9655172413793104,
+    "wrong": [
+      "SNGS-034",
+      "SNGS-092"
+    ],
+    "margin_correct_median": 3.9986257225538093,
+    "margin_wrong": [
+      0.866,
+      1.129
+    ],
+    "per_seq": [
+      {
+        "seq": "SNGS-021",
+        "gt": "left",
+        "free": "left",
+        "margin": 8.66541707992382,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-022",
+        "gt": "right",
+        "free": "right",
+        "margin": 4.495993145846825,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-023",
+        "gt": "right",
+        "free": "right",
+        "margin": 4.855475769608788,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-024",
+        "gt": "right",
+        "free": "right",
+        "margin": 6.7253310936464885,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-025",
+        "gt": "left",
+        "free": "left",
+        "margin": 3.162539577860482,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-026",
+        "gt": "right",
+        "free": "right",
+        "margin": 15.71064472611247,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-027",
+        "gt": "right",
+        "free": "right",
+        "margin": 2.2472540553714033,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-028",
+        "gt": "left",
+        "free": "left",
+        "margin": 7.053754337937917,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-029",
+        "gt": "left",
+        "free": "left",
+        "margin": 2.747765521099609,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-030",
+        "gt": "left",
+        "free": "left",
+        "margin": 0.10266568883768912,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-031",
+        "gt": "right",
+        "free": "right",
+        "margin": 1.230917159064095,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-032",
+        "gt": "left",
+        "free": "left",
+        "margin": 7.5503587792765,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-033",
+        "gt": "right",
+        "free": "right",
+        "margin": 4.735825521072513,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-034",
+        "gt": "left",
+        "free": "right",
+        "margin": 0.8655054918287561,
+        "ok": false
+      },
+      {
+        "seq": "SNGS-035",
+        "gt": "left",
+        "free": "left",
+        "margin": 6.074091323802058,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-036",
+        "gt": "right",
+        "free": "right",
+        "margin": 3.097516757954608,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-037",
+        "gt": "right",
+        "free": "right",
+        "margin": 8.48439579534623,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-038",
+        "gt": "left",
+        "free": "left",
+        "margin": 1.5143941027919254,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-039",
+        "gt": "left",
+        "free": "left",
+        "margin": 2.2154248415218056,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-040",
+        "gt": "right",
+        "free": "right",
+        "margin": 3.743846695617691,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-041",
+        "gt": "left",
+        "free": "left",
+        "margin": 6.4252923390316425,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-042",
+        "gt": "left",
+        "free": "left",
+        "margin": 0.028480120539384757,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-043",
+        "gt": "left",
+        "free": "left",
+        "margin": 5.442423983284193,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-044",
+        "gt": "left",
+        "free": "left",
+        "margin": 3.625954556324821,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-045",
+        "gt": "right",
+        "free": "right",
+        "margin": 5.151396072307783,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-046",
+        "gt": "left",
+        "free": "left",
+        "margin": 3.977333563751589,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-047",
+        "gt": "left",
+        "free": "left",
+        "margin": 5.237970470920537,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-048",
+        "gt": "right",
+        "free": "right",
+        "margin": 8.393951901685107,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-049",
+        "gt": "right",
+        "free": "right",
+        "margin": 8.497536075043818,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-050",
+        "gt": "right",
+        "free": "right",
+        "margin": 4.05844618369478,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-051",
+        "gt": "left",
+        "free": "left",
+        "margin": 4.05507452643478,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-052",
+        "gt": "left",
+        "free": "left",
+        "margin": 4.404218320537552,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-053",
+        "gt": "right",
+        "free": "right",
+        "margin": 3.616636196327498,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-054",
+        "gt": "left",
+        "free": "left",
+        "margin": 2.467479440693893,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-055",
+        "gt": "left",
+        "free": "left",
+        "margin": 4.0199178813560295,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-056",
+        "gt": "right",
+        "free": "right",
+        "margin": 1.4901718066276288,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-057",
+        "gt": "left",
+        "free": "left",
+        "margin": 2.4208197130517846,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-058",
+        "gt": "left",
+        "free": "left",
+        "margin": 3.8021347099620613,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-059",
+        "gt": "left",
+        "free": "left",
+        "margin": 5.328913641088903,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-078",
+        "gt": "left",
+        "free": "left",
+        "margin": 3.2074992434991003,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-079",
+        "gt": "left",
+        "free": "left",
+        "margin": 7.3964754988439125,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-080",
+        "gt": "left",
+        "free": "left",
+        "margin": 2.433379065879521,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-081",
+        "gt": "left",
+        "free": "left",
+        "margin": 10.352371063566679,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-082",
+        "gt": "left",
+        "free": "left",
+        "margin": 2.1142055934788573,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-083",
+        "gt": "left",
+        "free": "left",
+        "margin": 4.841117265489814,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-084",
+        "gt": "right",
+        "free": "right",
+        "margin": 2.710111190245634,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-085",
+        "gt": "right",
+        "free": "right",
+        "margin": 6.4364308038790625,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-086",
+        "gt": "right",
+        "free": "right",
+        "margin": 1.5175627778920067,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-087",
+        "gt": "right",
+        "free": "right",
+        "margin": 3.7213095102948444,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-088",
+        "gt": "left",
+        "free": "left",
+        "margin": 1.208152054877985,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-089",
+        "gt": "left",
+        "free": "left",
+        "margin": 2.3988398532253825,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-090",
+        "gt": "left",
+        "free": "left",
+        "margin": 1.1147741915005867,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-091",
+        "gt": "right",
+        "free": "right",
+        "margin": 2.60658865114722,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-092",
+        "gt": "right",
+        "free": "left",
+        "margin": 1.129204486035384,
+        "ok": false
+      },
+      {
+        "seq": "SNGS-093",
+        "gt": "left",
+        "free": "left",
+        "margin": 2.6374627936248416,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-094",
+        "gt": "left",
+        "free": "left",
+        "margin": 4.098231617461032,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-095",
+        "gt": "left",
+        "free": "left",
+        "margin": 9.849414123986108,
+        "ok": true
+      },
+      {
+        "seq": "SNGS-096",
+        "gt": "right",
+        "free": "right",
+        "margin": 4.959319465303807,
+        "ok": true
+      }
+    ]
+  }
+}

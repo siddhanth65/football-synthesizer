@@ -1,0 +1,15 @@
+{
+  "declared_at": "2026-08-01T03:45:35+00:00",
+  "team_map": "resolve_team_map_free (deeper cluster mean pitch_x = left)",
+  "roster": "self (slots = numbers this sequence own per-crop OCR chain read, on the reading tracklet team side)",
+  "solver_config": "results\\identity_solver_config_percrop.json",
+  "solver_config_sha256": "a7282d9be6359efedd36bf0057549a27a272fbd08393afe3730309402899cf92",
+  "note": "chosen on train (team side) and valid DEV-20 (roster); valid TEST-38 and the official test split are verification only",
+  "dev20_selection": {
+    "gt_roster_leaky": 31.29,
+    "self": 30.87,
+    "selfboth": 29.0,
+    "full": 27.01,
+    "note": "GS-HOTA on valid DEV-20; team map free==gt on all 20 DEV sequences"
+  }
+}

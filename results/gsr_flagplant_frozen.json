@@ -1,0 +1,116 @@
+{
+  "split": "test",
+  "sequences": [
+    "SNGS-116",
+    "SNGS-117",
+    "SNGS-118",
+    "SNGS-119",
+    "SNGS-120",
+    "SNGS-121",
+    "SNGS-122",
+    "SNGS-123",
+    "SNGS-124",
+    "SNGS-125",
+    "SNGS-126",
+    "SNGS-127",
+    "SNGS-128",
+    "SNGS-129",
+    "SNGS-130",
+    "SNGS-131",
+    "SNGS-132",
+    "SNGS-133",
+    "SNGS-134",
+    "SNGS-135",
+    "SNGS-136",
+    "SNGS-137",
+    "SNGS-138",
+    "SNGS-139",
+    "SNGS-140",
+    "SNGS-141",
+    "SNGS-142",
+    "SNGS-143",
+    "SNGS-144",
+    "SNGS-145",
+    "SNGS-146",
+    "SNGS-147",
+    "SNGS-148",
+    "SNGS-149",
+    "SNGS-150",
+    "SNGS-187",
+    "SNGS-188",
+    "SNGS-189",
+    "SNGS-190",
+    "SNGS-191",
+    "SNGS-192",
+    "SNGS-193",
+    "SNGS-194",
+    "SNGS-195",
+    "SNGS-196",
+    "SNGS-197",
+    "SNGS-198",
+    "SNGS-199",
+    "SNGS-200"
+  ],
+  "frozen_at_utc": "2026-07-31T18:01:34+00:00",
+  "git_head": "29dc04bad96c75e3bb2b2d582666e223982903f7",
+  "versions": {
+    "solver": "identity-solve-1.0",
+    "gta": "gta-link-1.0",
+    "ocr": "ocr-percrop-1.1"
+  },
+  "detect_track": {
+    "detector": "football",
+    "tracker": "bytetrack",
+    "calib_period": 1,
+    "sample_every": 1
+  },
+  "embeddings": {
+    "model": "prtreid",
+    "frame_stride": 2
+  },
+  "ocr": {
+    "max_crops_per_track": 60,
+    "crop_scale": 1.0,
+    "rule_floor": "0.85",
+    "rule": {
+      "min_crop_conf": 0.99,
+      "min_votes": 5,
+      "min_legibility": 0.5,
+      "emit_all": false
+    }
+  },
+  "gta": {
+    "tau": 0.04,
+    "splitter": false
+  },
+  "solver": {
+    "version": "identity-solve-1.0",
+    "p_correct": 0.8837209302325582,
+    "app_gain": 10.0,
+    "sim_none": 0.92,
+    "topk": 3,
+    "pi_none": 0.7,
+    "r_abstain": 0.0,
+    "team_eps": 0.02,
+    "role_eps": 0.05,
+    "max_concurrent": 11,
+    "use_confusion": true,
+    "use_ocr": true,
+    "use_app": true,
+    "use_mutex": true
+  },
+  "solver_confusion_fit": {
+    "n": 348,
+    "n_wrong": 55,
+    "n_aligned": 573
+  },
+  "file_hashes": {
+    "results\\identity_solver_config_percrop.json": "a7282d9be6359efedd36bf0057549a27a272fbd08393afe3730309402899cf92",
+    "results\\ocr_density_rule.json": "ff4a56b27f917bee8b41a3e4618fec16009ec34c1df9d9a71415ee101c54a35e"
+  },
+  "reference_score": {
+    "internal_TEST38_valid_split_GS_HOTA": 33.2,
+    "source": "results/OCR_DENSIFICATION.md section 6"
+  },
+  "recipe_hash": "d084d11eea0426aa3c1d82bcdf025d6a696357d3997851f6b0ba2e70238a4276"
+}

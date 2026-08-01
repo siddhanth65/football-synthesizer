@@ -1,0 +1,53 @@
+{
+  "per_seq": {
+    "SNGS-021": {
+      "same_assignment": true,
+      "max_abs_posterior_delta": 0.0,
+      "sum_posterior_A": 2.9516157708280364,
+      "sum_posterior_B": 2.9516157708280364,
+      "same_roster_slots": true,
+      "n_named": 17
+    },
+    "SNGS-022": {
+      "same_assignment": true,
+      "max_abs_posterior_delta": 0.0,
+      "sum_posterior_A": 4.724871909181093,
+      "sum_posterior_B": 4.724871909181093,
+      "same_roster_slots": true,
+      "n_named": 28
+    },
+    "SNGS-023": {
+      "same_assignment": true,
+      "max_abs_posterior_delta": 0.0,
+      "sum_posterior_A": 2.629839138365091,
+      "sum_posterior_B": 2.629839138365091,
+      "same_roster_slots": true,
+      "n_named": 19
+    },
+    "SNGS-024": {
+      "same_assignment": true,
+      "max_abs_posterior_delta": 0.0,
+      "sum_posterior_A": 4.013363590934358,
+      "sum_posterior_B": 4.013363590934358,
+      "same_roster_slots": true,
+      "n_named": 34
+    },
+    "SNGS-025": {
+      "same_assignment": true,
+      "max_abs_posterior_delta": 0.0,
+      "sum_posterior_A": 5.766500953273387,
+      "sum_posterior_B": 5.766500953273387,
+      "same_roster_slots": true,
+      "n_named": 52
+    },
+    "SNGS-026": {
+      "same_assignment": true,
+      "max_abs_posterior_delta": 0.0,
+      "sum_posterior_A": 2.995163133704843,
+      "sum_posterior_B": 2.995163133704843,
+      "same_roster_slots": true,
+      "n_named": 30
+    }
+  },
+  "verdict": "the solver objective is invariant under the cluster->side permutation: Identity.key (the side string) is never read, only Identity.team (the cluster index). Every criterion the brief lists -- total objective, summed posteriors, self-roster/OCR consistency, coverage-at-abstention -- is a function of that objective, so all of them are invariant too. Solve-both-and-vote carries exactly zero bits."
+}

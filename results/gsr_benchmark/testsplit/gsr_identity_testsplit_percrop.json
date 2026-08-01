@@ -1,0 +1,770 @@
+{
+  "version": "identity-solve-1.0",
+  "tag": "testsplit_percrop",
+  "n_sequences": 49,
+  "sequences": [
+    "SNGS-116",
+    "SNGS-117",
+    "SNGS-118",
+    "SNGS-119",
+    "SNGS-120",
+    "SNGS-121",
+    "SNGS-122",
+    "SNGS-123",
+    "SNGS-124",
+    "SNGS-125",
+    "SNGS-126",
+    "SNGS-127",
+    "SNGS-128",
+    "SNGS-129",
+    "SNGS-130",
+    "SNGS-131",
+    "SNGS-132",
+    "SNGS-133",
+    "SNGS-134",
+    "SNGS-135",
+    "SNGS-136",
+    "SNGS-137",
+    "SNGS-138",
+    "SNGS-139",
+    "SNGS-140",
+    "SNGS-141",
+    "SNGS-142",
+    "SNGS-143",
+    "SNGS-144",
+    "SNGS-145",
+    "SNGS-146",
+    "SNGS-147",
+    "SNGS-148",
+    "SNGS-149",
+    "SNGS-150",
+    "SNGS-187",
+    "SNGS-188",
+    "SNGS-189",
+    "SNGS-190",
+    "SNGS-191",
+    "SNGS-192",
+    "SNGS-193",
+    "SNGS-194",
+    "SNGS-195",
+    "SNGS-196",
+    "SNGS-197",
+    "SNGS-198",
+    "SNGS-199",
+    "SNGS-200"
+  ],
+  "config": {
+    "p_correct": 0.8837209302325582,
+    "app_gain": 10.0,
+    "sim_none": 0.92,
+    "topk": 3,
+    "pi_none": 0.7,
+    "r_abstain": 0.0,
+    "team_eps": 0.02,
+    "role_eps": 0.05,
+    "max_concurrent": 11,
+    "use_confusion": true,
+    "use_ocr": true,
+    "use_app": true,
+    "use_mutex": true
+  },
+  "pooled": {
+    "n_rows": 307891,
+    "base_identity": 0.16096280826656187,
+    "solver_identity": 0.5508053174662462,
+    "base_jersey": 0.17952132410495922,
+    "solver_jersey": 0.5646186475083714,
+    "tracklets": 3114,
+    "tracklets_named": 2681
+  },
+  "gate1_paired": {
+    "n": 49,
+    "mean": 0.41736939097451026,
+    "median": 0.46367468385817007,
+    "helped": 47,
+    "hurt": 2,
+    "worst": -0.04999434453116164,
+    "best": 0.8161002651241263,
+    "wilcoxon_p": 2.4868995751603507e-14,
+    "mcnemar": {
+      "base_only_right_rows": 29570,
+      "arm_only_right_rows": 149599,
+      "p": 0.0
+    }
+  },
+  "per_seq": {
+    "SNGS-116": {
+      "n_rows": 3419,
+      "solver_identity": 0.6966949400409477,
+      "base_identity": 0.13688212927756654,
+      "solver_jersey": 0.7002047382275519,
+      "base_jersey": 0.20707809300965194,
+      "n_named": 72,
+      "n_tracklets": 77
+    },
+    "SNGS-117": {
+      "n_rows": 3341,
+      "solver_identity": 0.5342711762945226,
+      "base_identity": 0.06135887458844657,
+      "solver_jersey": 0.5516312481293026,
+      "base_jersey": 0.0709368452559114,
+      "n_named": 47,
+      "n_tracklets": 47
+    },
+    "SNGS-118": {
+      "n_rows": 7496,
+      "solver_identity": 0.5272145144076841,
+      "base_identity": 0.07350586979722519,
+      "solver_jersey": 0.5672358591248666,
+      "base_jersey": 0.13127001067235858,
+      "n_named": 41,
+      "n_tracklets": 55
+    },
+    "SNGS-119": {
+      "n_rows": 4149,
+      "solver_identity": 0.8161002651241263,
+      "base_identity": 0.0,
+      "solver_jersey": 0.8406845022897084,
+      "base_jersey": 0.0,
+      "n_named": 39,
+      "n_tracklets": 39
+    },
+    "SNGS-120": {
+      "n_rows": 7573,
+      "solver_identity": 0.43060874158193585,
+      "base_identity": 0.22778291298032483,
+      "solver_jersey": 0.44051234649412385,
+      "base_jersey": 0.2631717945332101,
+      "n_named": 57,
+      "n_tracklets": 62
+    },
+    "SNGS-121": {
+      "n_rows": 4869,
+      "solver_identity": 0.6642020948860136,
+      "base_identity": 0.066543438077634,
+      "solver_jersey": 0.6816594783323064,
+      "base_jersey": 0.1143972068186486,
+      "n_named": 53,
+      "n_tracklets": 55
+    },
+    "SNGS-122": {
+      "n_rows": 4669,
+      "solver_identity": 0.44634825444420645,
+      "base_identity": 0.25401584921824805,
+      "solver_jersey": 0.49732276718783464,
+      "base_jersey": 0.32619404583422573,
+      "n_named": 60,
+      "n_tracklets": 83
+    },
+    "SNGS-123": {
+      "n_rows": 8333,
+      "solver_identity": 0.6315852634105364,
+      "base_identity": 0.031081243249729988,
+      "solver_jersey": 0.6491059642385696,
+      "base_jersey": 0.04500180007200288,
+      "n_named": 58,
+      "n_tracklets": 59
+    },
+    "SNGS-124": {
+      "n_rows": 5717,
+      "solver_identity": 0.4846947699842575,
+      "base_identity": 0.36505160048976737,
+      "solver_jersey": 0.5168794822459332,
+      "base_jersey": 0.39391289137659613,
+      "n_named": 43,
+      "n_tracklets": 54
+    },
+    "SNGS-125": {
+      "n_rows": 1511,
+      "solver_identity": 0.6207809397749835,
+      "base_identity": 0.12772998014559894,
+      "solver_jersey": 0.628722700198544,
+      "base_jersey": 0.12971542025148908,
+      "n_named": 70,
+      "n_tracklets": 72
+    },
+    "SNGS-126": {
+      "n_rows": 6765,
+      "solver_identity": 0.8422764227642277,
+      "base_identity": 0.3348115299334812,
+      "solver_jersey": 0.8585365853658536,
+      "base_jersey": 0.3417590539541759,
+      "n_named": 41,
+      "n_tracklets": 58
+    },
+    "SNGS-127": {
+      "n_rows": 11630,
+      "solver_identity": 0.6499570077386071,
+      "base_identity": 0.5382631126397248,
+      "solver_jersey": 0.6730868443680138,
+      "base_jersey": 0.58134135855546,
+      "n_named": 12,
+      "n_tracklets": 34
+    },
+    "SNGS-128": {
+      "n_rows": 10411,
+      "solver_identity": 0.5654596100278552,
+      "base_identity": 0.17894534626837,
+      "solver_jersey": 0.5785227163576986,
+      "base_jersey": 0.18057823455960043,
+      "n_named": 50,
+      "n_tracklets": 60
+    },
+    "SNGS-129": {
+      "n_rows": 2324,
+      "solver_identity": 0.39543889845094665,
+      "base_identity": 0.1501721170395869,
+      "solver_jersey": 0.47117039586919107,
+      "base_jersey": 0.16437177280550774,
+      "n_named": 82,
+      "n_tracklets": 99
+    },
+    "SNGS-130": {
+      "n_rows": 6256,
+      "solver_identity": 0.7199488491048593,
+      "base_identity": 0.04683503836317136,
+      "solver_jersey": 0.7520780051150895,
+      "base_jersey": 0.06729539641943734,
+      "n_named": 71,
+      "n_tracklets": 80
+    },
+    "SNGS-131": {
+      "n_rows": 10821,
+      "solver_identity": 0.488124942241937,
+      "base_identity": 0.3159597079752333,
+      "solver_jersey": 0.5099343868404029,
+      "base_jersey": 0.36077996488309766,
+      "n_named": 46,
+      "n_tracklets": 68
+    },
+    "SNGS-132": {
+      "n_rows": 6710,
+      "solver_identity": 0.41520119225037255,
+      "base_identity": 0.3119225037257824,
+      "solver_jersey": 0.419672131147541,
+      "base_jersey": 0.3268256333830104,
+      "n_named": 69,
+      "n_tracklets": 85
+    },
+    "SNGS-133": {
+      "n_rows": 7335,
+      "solver_identity": 0.6068166325835037,
+      "base_identity": 0.1994546693933197,
+      "solver_jersey": 0.6205862304021813,
+      "base_jersey": 0.2227675528289025,
+      "n_named": 59,
+      "n_tracklets": 66
+    },
+    "SNGS-134": {
+      "n_rows": 4860,
+      "solver_identity": 0.6753086419753086,
+      "base_identity": 0.34629629629629627,
+      "solver_jersey": 0.679835390946502,
+      "base_jersey": 0.3512345679012346,
+      "n_named": 48,
+      "n_tracklets": 57
+    },
+    "SNGS-135": {
+      "n_rows": 5953,
+      "solver_identity": 0.5578699815219217,
+      "base_identity": 0.027213169830337645,
+      "solver_jersey": 0.564085335125147,
+      "base_jersey": 0.030236855367041827,
+      "n_named": 95,
+      "n_tracklets": 103
+    },
+    "SNGS-136": {
+      "n_rows": 4033,
+      "solver_identity": 0.5234316885693032,
+      "base_identity": 0.059757004711133155,
+      "solver_jersey": 0.5249194148276717,
+      "base_jersey": 0.06620381849739648,
+      "n_named": 86,
+      "n_tracklets": 93
+    },
+    "SNGS-137": {
+      "n_rows": 4910,
+      "solver_identity": 0.6531568228105906,
+      "base_identity": 0.11303462321792261,
+      "solver_jersey": 0.654989816700611,
+      "base_jersey": 0.11384928716904277,
+      "n_named": 58,
+      "n_tracklets": 68
+    },
+    "SNGS-138": {
+      "n_rows": 5536,
+      "solver_identity": 0.571893063583815,
+      "base_identity": 0.09284682080924855,
+      "solver_jersey": 0.5751445086705202,
+      "base_jersey": 0.09393063583815028,
+      "n_named": 57,
+      "n_tracklets": 65
+    },
+    "SNGS-139": {
+      "n_rows": 4660,
+      "solver_identity": 0.7010729613733906,
+      "base_identity": 0.025965665236051504,
+      "solver_jersey": 0.7118025751072962,
+      "base_jersey": 0.025965665236051504,
+      "n_named": 73,
+      "n_tracklets": 76
+    },
+    "SNGS-140": {
+      "n_rows": 6529,
+      "solver_identity": 0.7086843314443253,
+      "base_identity": 0.030019911165569,
+      "solver_jersey": 0.711134936437433,
+      "base_jersey": 0.030019911165569,
+      "n_named": 71,
+      "n_tracklets": 79
+    },
+    "SNGS-141": {
+      "n_rows": 4455,
+      "solver_identity": 0.5966329966329966,
+      "base_identity": 0.1840628507295174,
+      "solver_jersey": 0.6148148148148148,
+      "base_jersey": 0.2038159371492705,
+      "n_named": 64,
+      "n_tracklets": 72
+    },
+    "SNGS-142": {
+      "n_rows": 1847,
+      "solver_identity": 0.6556578234975636,
+      "base_identity": 0.006497022198159177,
+      "solver_jersey": 0.6594477531131565,
+      "base_jersey": 0.006497022198159177,
+      "n_named": 88,
+      "n_tracklets": 88
+    },
+    "SNGS-143": {
+      "n_rows": 555,
+      "solver_identity": 0.6378378378378379,
+      "base_identity": 0.03783783783783784,
+      "solver_jersey": 0.6396396396396397,
+      "base_jersey": 0.07747747747747748,
+      "n_named": 61,
+      "n_tracklets": 61
+    },
+    "SNGS-144": {
+      "n_rows": 2842,
+      "solver_identity": 0.6344123856439128,
+      "base_identity": 0.0,
+      "solver_jersey": 0.6449683321604504,
+      "base_jersey": 0.018296973961998593,
+      "n_named": 84,
+      "n_tracklets": 89
+    },
+    "SNGS-145": {
+      "n_rows": 2157,
+      "solver_identity": 0.6101066295781178,
+      "base_identity": 0.00880853036624942,
+      "solver_jersey": 0.6147426981919333,
+      "base_jersey": 0.014371812702828002,
+      "n_named": 72,
+      "n_tracklets": 72
+    },
+    "SNGS-146": {
+      "n_rows": 3312,
+      "solver_identity": 0.47252415458937197,
+      "base_identity": 0.2614734299516908,
+      "solver_jersey": 0.4788647342995169,
+      "base_jersey": 0.2614734299516908,
+      "n_named": 44,
+      "n_tracklets": 50
+    },
+    "SNGS-147": {
+      "n_rows": 546,
+      "solver_identity": 0.6190476190476191,
+      "base_identity": 0.5714285714285714,
+      "solver_jersey": 0.6336996336996337,
+      "base_jersey": 0.5879120879120879,
+      "n_named": 34,
+      "n_tracklets": 46
+    },
+    "SNGS-148": {
+      "n_rows": 3349,
+      "solver_identity": 0.6891609435652434,
+      "base_identity": 0.07733651836369065,
+      "solver_jersey": 0.6966258584652135,
+      "base_jersey": 0.07763511495968946,
+      "n_named": 65,
+      "n_tracklets": 67
+    },
+    "SNGS-149": {
+      "n_rows": 5767,
+      "solver_identity": 0.697936535460378,
+      "base_identity": 0.06953355297381654,
+      "solver_jersey": 0.6994971388937056,
+      "base_jersey": 0.06953355297381654,
+      "n_named": 64,
+      "n_tracklets": 65
+    },
+    "SNGS-150": {
+      "n_rows": 5066,
+      "solver_identity": 0.3655744176865377,
+      "base_identity": 0.12870114488748519,
+      "solver_jersey": 0.36695617844453216,
+      "base_jersey": 0.14686142913541256,
+      "n_named": 73,
+      "n_tracklets": 85
+    },
+    "SNGS-187": {
+      "n_rows": 10840,
+      "solver_identity": 0.5666051660516606,
+      "base_identity": 0.04206642066420664,
+      "solver_jersey": 0.5742619926199262,
+      "base_jersey": 0.05682656826568266,
+      "n_named": 47,
+      "n_tracklets": 51
+    },
+    "SNGS-188": {
+      "n_rows": 15442,
+      "solver_identity": 0.3858956093770237,
+      "base_identity": 0.18261883175754437,
+      "solver_jersey": 0.3891982903768942,
+      "base_jersey": 0.1881880585416397,
+      "n_named": 23,
+      "n_tracklets": 38
+    },
+    "SNGS-189": {
+      "n_rows": 9033,
+      "solver_identity": 0.5502048046053359,
+      "base_identity": 0.10483781689361231,
+      "solver_jersey": 0.5701317391785675,
+      "base_jersey": 0.13184988375954831,
+      "n_named": 51,
+      "n_tracklets": 57
+    },
+    "SNGS-190": {
+      "n_rows": 3441,
+      "solver_identity": 0.5524556814879396,
+      "base_identity": 0.12409183376925312,
+      "solver_jersey": 0.5678581807614066,
+      "base_jersey": 0.15983725661145015,
+      "n_named": 45,
+      "n_tracklets": 59
+    },
+    "SNGS-191": {
+      "n_rows": 8040,
+      "solver_identity": 0.5393034825870647,
+      "base_identity": 0.029975124378109452,
+      "solver_jersey": 0.5421641791044776,
+      "base_jersey": 0.03718905472636816,
+      "n_named": 43,
+      "n_tracklets": 45
+    },
+    "SNGS-192": {
+      "n_rows": 6547,
+      "solver_identity": 0.5946234916755766,
+      "base_identity": 0.19596761875668245,
+      "solver_jersey": 0.6047044447838704,
+      "base_jersey": 0.21063082327783716,
+      "n_named": 42,
+      "n_tracklets": 49
+    },
+    "SNGS-193": {
+      "n_rows": 5981,
+      "solver_identity": 0.25530847684333724,
+      "base_identity": 0.28741013208493565,
+      "solver_jersey": 0.2735328540377863,
+      "base_jersey": 0.3434208326366828,
+      "n_named": 52,
+      "n_tracklets": 70
+    },
+    "SNGS-194": {
+      "n_rows": 11929,
+      "solver_identity": 0.3443708609271523,
+      "base_identity": 0.11090619498700645,
+      "solver_jersey": 0.3509933774834437,
+      "base_jersey": 0.12532483862855226,
+      "n_named": 32,
+      "n_tracklets": 38
+    },
+    "SNGS-195": {
+      "n_rows": 10969,
+      "solver_identity": 0.48828516728963445,
+      "base_identity": 0.20430303582824322,
+      "solver_jersey": 0.5048773817120977,
+      "base_jersey": 0.22518005287628773,
+      "n_named": 33,
+      "n_tracklets": 43
+    },
+    "SNGS-196": {
+      "n_rows": 5577,
+      "solver_identity": 0.5318271472117626,
+      "base_identity": 0.04357181280258203,
+      "solver_jersey": 0.5325443786982249,
+      "base_jersey": 0.05845436614667384,
+      "n_named": 37,
+      "n_tracklets": 39
+    },
+    "SNGS-197": {
+      "n_rows": 11077,
+      "solver_identity": 0.7918208901327074,
+      "base_identity": 0.1367698835424754,
+      "solver_jersey": 0.8016610995756974,
+      "base_jersey": 0.1395684752189221,
+      "n_named": 35,
+      "n_tracklets": 43
+    },
+    "SNGS-198": {
+      "n_rows": 11557,
+      "solver_identity": 0.3591762568140521,
+      "base_identity": 0.03391883706844337,
+      "solver_jersey": 0.37769317296876354,
+      "base_jersey": 0.04395604395604396,
+      "n_named": 61,
+      "n_tracklets": 68
+    },
+    "SNGS-199": {
+      "n_rows": 8841,
+      "solver_identity": 0.4100214907815858,
+      "base_identity": 0.4600158353127474,
+      "solver_jersey": 0.43377445990272595,
+      "base_jersey": 0.48433435131772423,
+      "n_named": 37,
+      "n_tracklets": 84
+    },
+    "SNGS-200": {
+      "n_rows": 8911,
+      "solver_identity": 0.5981371338794748,
+      "base_identity": 0.005386600830434294,
+      "solver_jersey": 0.6050948266187858,
+      "base_jersey": 0.016945348445741217,
+      "n_named": 36,
+      "n_tracklets": 41
+    }
+  },
+  "coverage_curve": {
+    "n_rows": 307891,
+    "n_named_tracklets": 2681,
+    "full_coverage": {
+      "threshold": 2.0807408527857605e-08,
+      "coverage": 0.8360880961119357,
+      "precision": 0.5904499968922866
+    },
+    "at_0.85": {
+      "threshold": 0.028524474851523873,
+      "coverage": 0.517452604980334,
+      "precision": 0.8512920618381988
+    },
+    "at_0.6": {
+      "threshold": 0.0004953962686235081,
+      "coverage": 0.8219369841924578,
+      "precision": 0.6000466279680875
+    }
+  },
+  "votes_subdir": "koshkina_percrop_votes",
+  "gs_hota": {
+    "base_combined": 17.847344634252455,
+    "solver_combined": 35.896794656402,
+    "paired": {
+      "n": 49,
+      "mean": 18.87740492806039,
+      "median": 18.749565382927837,
+      "helped": 49,
+      "hurt": 0,
+      "worst": 0.7715362144178375,
+      "best": 50.58637477160879,
+      "wilcoxon_p": 3.552713678800501e-15
+    },
+    "per_seq": {
+      "SNGS-116": {
+        "base": 12.932032428199891,
+        "solver": 22.280929719161943
+      },
+      "SNGS-117": {
+        "base": 8.826329331703807,
+        "solver": 26.115066219594485
+      },
+      "SNGS-118": {
+        "base": 10.422527284308565,
+        "solver": 33.01352996009104
+      },
+      "SNGS-119": {
+        "base": 2.573992389240798,
+        "solver": 53.16036716084959
+      },
+      "SNGS-120": {
+        "base": 26.180467701015047,
+        "solver": 31.891781696323378
+      },
+      "SNGS-121": {
+        "base": 12.807004379387465,
+        "solver": 36.64852046903784
+      },
+      "SNGS-122": {
+        "base": 11.456938532176215,
+        "solver": 23.277177187996674
+      },
+      "SNGS-123": {
+        "base": 7.308910733489409,
+        "solver": 40.02406176209502
+      },
+      "SNGS-124": {
+        "base": 31.29867454423465,
+        "solver": 36.86163305877639
+      },
+      "SNGS-125": {
+        "base": 12.461130126655476,
+        "solver": 38.94878672034213
+      },
+      "SNGS-126": {
+        "base": 30.630482794436166,
+        "solver": 53.123048071968825
+      },
+      "SNGS-127": {
+        "base": 44.12286047755867,
+        "solver": 49.02564948081247
+      },
+      "SNGS-128": {
+        "base": 23.2947408900322,
+        "solver": 41.60886838821875
+      },
+      "SNGS-129": {
+        "base": 7.985727026275185,
+        "solver": 11.048313534556742
+      },
+      "SNGS-130": {
+        "base": 10.016378507130987,
+        "solver": 35.06794390539714
+      },
+      "SNGS-131": {
+        "base": 23.2737087609392,
+        "solver": 35.15447574504507
+      },
+      "SNGS-132": {
+        "base": 19.756853138212463,
+        "solver": 29.064939843422145
+      },
+      "SNGS-133": {
+        "base": 18.249606398065264,
+        "solver": 35.938366221261
+      },
+      "SNGS-134": {
+        "base": 26.101366821113075,
+        "solver": 37.8723404392003
+      },
+      "SNGS-135": {
+        "base": 7.860323870767491,
+        "solver": 29.02002504020562
+      },
+      "SNGS-136": {
+        "base": 12.339426652358556,
+        "solver": 28.905979043666385
+      },
+      "SNGS-137": {
+        "base": 15.837217092234566,
+        "solver": 40.27694791978798
+      },
+      "SNGS-138": {
+        "base": 11.977284300643946,
+        "solver": 31.77735939072158
+      },
+      "SNGS-139": {
+        "base": 4.62937505148043,
+        "solver": 31.787901611221752
+      },
+      "SNGS-140": {
+        "base": 3.3755810874156076,
+        "solver": 33.401614189020194
+      },
+      "SNGS-141": {
+        "base": 17.932176773838183,
+        "solver": 29.42403640955571
+      },
+      "SNGS-142": {
+        "base": 6.040807528259083,
+        "solver": 15.327048907888564
+      },
+      "SNGS-143": {
+        "base": 3.5412509799992358,
+        "solver": 16.197004905489106
+      },
+      "SNGS-144": {
+        "base": 1.96271226509712,
+        "solver": 21.659209555824752
+      },
+      "SNGS-145": {
+        "base": 1.2544347656528099,
+        "solver": 23.531663135447715
+      },
+      "SNGS-146": {
+        "base": 20.147953533709675,
+        "solver": 23.87756564697754
+      },
+      "SNGS-147": {
+        "base": 8.933819157355273,
+        "solver": 9.705355371773111
+      },
+      "SNGS-148": {
+        "base": 10.634000025817643,
+        "solver": 33.110857273828074
+      },
+      "SNGS-149": {
+        "base": 15.800483542405285,
+        "solver": 49.806676167268726
+      },
+      "SNGS-150": {
+        "base": 8.469594618407958,
+        "solver": 20.920023389003177
+      },
+      "SNGS-187": {
+        "base": 4.941491111580318,
+        "solver": 44.932713742388906
+      },
+      "SNGS-188": {
+        "base": 28.481936336520995,
+        "solver": 42.39595851677655
+      },
+      "SNGS-189": {
+        "base": 12.37268349749289,
+        "solver": 38.59869848160376
+      },
+      "SNGS-190": {
+        "base": 13.277151010105984,
+        "solver": 21.7665135023352
+      },
+      "SNGS-191": {
+        "base": 7.618373992721943,
+        "solver": 37.434732192979745
+      },
+      "SNGS-192": {
+        "base": 18.297697589633486,
+        "solver": 40.82236075816084
+      },
+      "SNGS-193": {
+        "base": 16.17610704458107,
+        "solver": 18.836854457388092
+      },
+      "SNGS-194": {
+        "base": 22.338145682423765,
+        "solver": 36.22238348012041
+      },
+      "SNGS-195": {
+        "base": 23.534098989336062,
+        "solver": 42.2836643722639
+      },
+      "SNGS-196": {
+        "base": 10.141368763177068,
+        "solver": 34.99019769101295
+      },
+      "SNGS-197": {
+        "base": 19.472044636457934,
+        "solver": 56.163212792645076
+      },
+      "SNGS-198": {
+        "base": 4.772540711559117,
+        "solver": 29.034263399847486
+      },
+      "SNGS-199": {
+        "base": 24.310646905300224,
+        "solver": 26.50444105376136
+      },
+      "SNGS-200": {
+        "base": 5.467504631913069,
+        "solver": 47.78974390426525
+      }
+    }
+  }
+}

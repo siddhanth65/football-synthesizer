@@ -1,0 +1,1461 @@
+{
+  "dev": [
+    "SNGS-021",
+    "SNGS-024",
+    "SNGS-027",
+    "SNGS-030",
+    "SNGS-033",
+    "SNGS-036",
+    "SNGS-039",
+    "SNGS-042",
+    "SNGS-045",
+    "SNGS-048",
+    "SNGS-051",
+    "SNGS-054",
+    "SNGS-057",
+    "SNGS-078",
+    "SNGS-081",
+    "SNGS-084",
+    "SNGS-087",
+    "SNGS-090",
+    "SNGS-093",
+    "SNGS-096"
+  ],
+  "arms": {
+    "dev_gt_gt": {
+      "tag": "dev_gt_gt",
+      "team_src": "gt",
+      "roster": "gt",
+      "n_sequences": 20,
+      "solve_seconds": 4.1,
+      "pooled": {
+        "n_rows": 165225,
+        "identity": 0.4217582085035558,
+        "jersey": 0.44901195339688305,
+        "tracklets": 1249,
+        "tracklets_named": 1022,
+        "mean_identities": 16.55
+      },
+      "coverage_curve": {
+        "n_rows": 165225,
+        "n_named_tracklets": 1022,
+        "full_coverage": {
+          "threshold": 7.595638950266985e-07,
+          "coverage": 0.7953396883038281,
+          "precision": 0.4685640362225097
+        },
+        "at_0.85": {
+          "threshold": 0.03984064301321139,
+          "coverage": 0.3454561960962324,
+          "precision": 0.8516766530011564
+        },
+        "at_0.6": {
+          "threshold": 0.020250926925962472,
+          "coverage": 0.5306037221970041,
+          "precision": 0.6005315447877814
+        }
+      },
+      "per_seq": {
+        "SNGS-021": {
+          "n_rows": 9760,
+          "identity": 0.4723360655737705,
+          "jersey": 0.519672131147541,
+          "n_named": 23,
+          "n_identities": 9
+        },
+        "SNGS-024": {
+          "n_rows": 2446,
+          "identity": 0.39697465249386754,
+          "jersey": 0.401471790678659,
+          "n_named": 39,
+          "n_identities": 11
+        },
+        "SNGS-027": {
+          "n_rows": 3868,
+          "identity": 0.36323681489141674,
+          "jersey": 0.38391933815925544,
+          "n_named": 67,
+          "n_identities": 18
+        },
+        "SNGS-030": {
+          "n_rows": 6091,
+          "identity": 0.24839927762272204,
+          "jersey": 0.25233951732063703,
+          "n_named": 52,
+          "n_identities": 16
+        },
+        "SNGS-033": {
+          "n_rows": 3045,
+          "identity": 0.4272577996715928,
+          "jersey": 0.45911330049261084,
+          "n_named": 41,
+          "n_identities": 10
+        },
+        "SNGS-036": {
+          "n_rows": 12261,
+          "identity": 0.5107250632085474,
+          "jersey": 0.5636571242149906,
+          "n_named": 35,
+          "n_identities": 14
+        },
+        "SNGS-039": {
+          "n_rows": 11574,
+          "identity": 0.4495420770692932,
+          "jersey": 0.45368930361154314,
+          "n_named": 74,
+          "n_identities": 20
+        },
+        "SNGS-042": {
+          "n_rows": 12245,
+          "identity": 0.15745202123315638,
+          "jersey": 0.23862801143323806,
+          "n_named": 66,
+          "n_identities": 16
+        },
+        "SNGS-045": {
+          "n_rows": 7544,
+          "identity": 0.31137327677624604,
+          "jersey": 0.3286055143160127,
+          "n_named": 51,
+          "n_identities": 17
+        },
+        "SNGS-048": {
+          "n_rows": 12694,
+          "identity": 0.3985347408224358,
+          "jersey": 0.40916968646604696,
+          "n_named": 27,
+          "n_identities": 10
+        },
+        "SNGS-051": {
+          "n_rows": 8594,
+          "identity": 0.47858971375378173,
+          "jersey": 0.5050034908075401,
+          "n_named": 48,
+          "n_identities": 20
+        },
+        "SNGS-054": {
+          "n_rows": 7528,
+          "identity": 0.468384697130712,
+          "jersey": 0.4723698193411265,
+          "n_named": 72,
+          "n_identities": 20
+        },
+        "SNGS-057": {
+          "n_rows": 9141,
+          "identity": 0.28705830871895854,
+          "jersey": 0.29942019472705395,
+          "n_named": 87,
+          "n_identities": 20
+        },
+        "SNGS-078": {
+          "n_rows": 6596,
+          "identity": 0.4643723468768951,
+          "jersey": 0.5001516070345664,
+          "n_named": 55,
+          "n_identities": 20
+        },
+        "SNGS-081": {
+          "n_rows": 9052,
+          "identity": 0.7348652231551038,
+          "jersey": 0.7579540433053469,
+          "n_named": 64,
+          "n_identities": 20
+        },
+        "SNGS-084": {
+          "n_rows": 8331,
+          "identity": 0.4965790421317969,
+          "jersey": 0.5075021005881647,
+          "n_named": 49,
+          "n_identities": 19
+        },
+        "SNGS-087": {
+          "n_rows": 6909,
+          "identity": 0.6617455492835432,
+          "jersey": 0.6666666666666666,
+          "n_named": 42,
+          "n_identities": 20
+        },
+        "SNGS-090": {
+          "n_rows": 7132,
+          "identity": 0.3930173864273696,
+          "jersey": 0.39596186203028605,
+          "n_named": 49,
+          "n_identities": 20
+        },
+        "SNGS-093": {
+          "n_rows": 7126,
+          "identity": 0.55318551782206,
+          "jersey": 0.5610440639910188,
+          "n_named": 56,
+          "n_identities": 19
+        },
+        "SNGS-096": {
+          "n_rows": 13288,
+          "identity": 0.27483443708609273,
+          "jersey": 0.3392534617700181,
+          "n_named": 25,
+          "n_identities": 12
+        }
+      },
+      "gs_hota": {
+        "GS-HOTA": 31.294277707889655,
+        "GS-DetA": 21.217222650339508,
+        "GS-AssA": 46.17180855248723,
+        "GS-LocA": 92.1262516481133,
+        "IDF1": 31.42912452209263
+      },
+      "gs_hota_per_seq": {
+        "SNGS-021": 36.28870478360046,
+        "SNGS-024": 15.566129292906908,
+        "SNGS-027": 16.032629280250255,
+        "SNGS-030": 21.607941736956555,
+        "SNGS-033": 28.414947853980827,
+        "SNGS-036": 47.148483041109536,
+        "SNGS-039": 29.819435257196268,
+        "SNGS-042": 14.111928607513176,
+        "SNGS-045": 21.981863601832654,
+        "SNGS-048": 31.635180375205756,
+        "SNGS-051": 35.200783095138824,
+        "SNGS-054": 25.40684764074699,
+        "SNGS-057": 23.045168486901762,
+        "SNGS-078": 33.22608682676571,
+        "SNGS-081": 46.405850979708816,
+        "SNGS-084": 40.317551237981384,
+        "SNGS-087": 43.836589517582766,
+        "SNGS-090": 27.250232642243315,
+        "SNGS-093": 35.24595751412842,
+        "SNGS-096": 26.88974910985351
+      }
+    },
+    "dev_gt_full": {
+      "tag": "dev_gt_full",
+      "team_src": "gt",
+      "roster": "full",
+      "n_sequences": 20,
+      "solve_seconds": 41.5,
+      "pooled": {
+        "n_rows": 165225,
+        "identity": 0.33691027386896655,
+        "jersey": 0.3485126342865789,
+        "tracklets": 1249,
+        "tracklets_named": 1217,
+        "mean_identities": 198.0
+      },
+      "coverage_curve": {
+        "n_rows": 165225,
+        "n_named_tracklets": 1217,
+        "full_coverage": {
+          "threshold": 2.1425828224482322e-06,
+          "coverage": 0.9795248903011046,
+          "precision": 0.3465293310759877
+        },
+        "at_0.85": {
+          "threshold": 0.16561648270746415,
+          "coverage": 0.27562414888788017,
+          "precision": 0.8534255599472991
+        },
+        "at_0.6": {
+          "threshold": 0.0017817309767846525,
+          "coverage": 0.551236193070056,
+          "precision": 0.6005511759151496
+        }
+      },
+      "per_seq": {
+        "SNGS-021": {
+          "n_rows": 9760,
+          "identity": 0.24774590163934426,
+          "jersey": 0.25317622950819674,
+          "n_named": 45,
+          "n_identities": 198
+        },
+        "SNGS-024": {
+          "n_rows": 2446,
+          "identity": 0.28618152085036797,
+          "jersey": 0.2874080130825838,
+          "n_named": 51,
+          "n_identities": 198
+        },
+        "SNGS-027": {
+          "n_rows": 3868,
+          "identity": 0.31618407445708374,
+          "jersey": 0.3231644260599793,
+          "n_named": 72,
+          "n_identities": 198
+        },
+        "SNGS-030": {
+          "n_rows": 6091,
+          "identity": 0.25923493679198817,
+          "jersey": 0.2630109998358233,
+          "n_named": 60,
+          "n_identities": 198
+        },
+        "SNGS-033": {
+          "n_rows": 3045,
+          "identity": 0.22561576354679802,
+          "jersey": 0.22758620689655173,
+          "n_named": 61,
+          "n_identities": 198
+        },
+        "SNGS-036": {
+          "n_rows": 12261,
+          "identity": 0.402332599298589,
+          "jersey": 0.40779708017290595,
+          "n_named": 54,
+          "n_identities": 198
+        },
+        "SNGS-039": {
+          "n_rows": 11574,
+          "identity": 0.41135303265940903,
+          "jersey": 0.41498185588387765,
+          "n_named": 81,
+          "n_identities": 198
+        },
+        "SNGS-042": {
+          "n_rows": 12245,
+          "identity": 0.12249897917517354,
+          "jersey": 0.18440179665169457,
+          "n_named": 86,
+          "n_identities": 198
+        },
+        "SNGS-045": {
+          "n_rows": 7544,
+          "identity": 0.257423117709438,
+          "jersey": 0.2667020148462354,
+          "n_named": 61,
+          "n_identities": 198
+        },
+        "SNGS-048": {
+          "n_rows": 12694,
+          "identity": 0.18071529856625176,
+          "jersey": 0.1816606270679061,
+          "n_named": 54,
+          "n_identities": 198
+        },
+        "SNGS-051": {
+          "n_rows": 8594,
+          "identity": 0.4252967186409123,
+          "jersey": 0.4517104956946707,
+          "n_named": 55,
+          "n_identities": 198
+        },
+        "SNGS-054": {
+          "n_rows": 7528,
+          "identity": 0.48020722635494156,
+          "jersey": 0.4848565356004251,
+          "n_named": 73,
+          "n_identities": 198
+        },
+        "SNGS-057": {
+          "n_rows": 9141,
+          "identity": 0.29679466141560007,
+          "jersey": 0.3060934252269992,
+          "n_named": 92,
+          "n_identities": 198
+        },
+        "SNGS-078": {
+          "n_rows": 6596,
+          "identity": 0.4520921770770164,
+          "jersey": 0.4578532443905397,
+          "n_named": 56,
+          "n_identities": 198
+        },
+        "SNGS-081": {
+          "n_rows": 9052,
+          "identity": 0.5465090587715422,
+          "jersey": 0.5620857269111799,
+          "n_named": 66,
+          "n_identities": 198
+        },
+        "SNGS-084": {
+          "n_rows": 8331,
+          "identity": 0.444604489256992,
+          "jersey": 0.45480734605689593,
+          "n_named": 53,
+          "n_identities": 198
+        },
+        "SNGS-087": {
+          "n_rows": 6909,
+          "identity": 0.5639021566073238,
+          "jersey": 0.56781010276451,
+          "n_named": 43,
+          "n_identities": 198
+        },
+        "SNGS-090": {
+          "n_rows": 7132,
+          "identity": 0.4003084688726865,
+          "jersey": 0.4032529444756029,
+          "n_named": 50,
+          "n_identities": 198
+        },
+        "SNGS-093": {
+          "n_rows": 7126,
+          "identity": 0.3850687622789784,
+          "jersey": 0.39096267190569745,
+          "n_named": 59,
+          "n_identities": 198
+        },
+        "SNGS-096": {
+          "n_rows": 13288,
+          "identity": 0.1894942805538832,
+          "jersey": 0.201158940397351,
+          "n_named": 45,
+          "n_identities": 198
+        }
+      },
+      "gs_hota": {
+        "GS-HOTA": 27.010173583915638,
+        "GS-DetA": 16.48676570126243,
+        "GS-AssA": 44.255790858730144,
+        "GS-LocA": 92.19359186767336,
+        "IDF1": 24.862798238397136
+      },
+      "gs_hota_per_seq": {
+        "SNGS-021": 26.350434139523575,
+        "SNGS-024": 13.647467501751553,
+        "SNGS-027": 15.244761831631939,
+        "SNGS-030": 21.775062139934263,
+        "SNGS-033": 18.528278300969976,
+        "SNGS-036": 39.05455558735425,
+        "SNGS-039": 28.877218873774048,
+        "SNGS-042": 13.131373643036873,
+        "SNGS-045": 18.85473141944962,
+        "SNGS-048": 21.773710999807058,
+        "SNGS-051": 31.611258696683148,
+        "SNGS-054": 25.848129971906626,
+        "SNGS-057": 23.18200318222702,
+        "SNGS-078": 32.02190901940664,
+        "SNGS-081": 36.90555296570873,
+        "SNGS-084": 38.09955662650529,
+        "SNGS-087": 39.52250165627482,
+        "SNGS-090": 26.702813233183377,
+        "SNGS-093": 27.29991364486387,
+        "SNGS-096": 20.445018588878757
+      }
+    },
+    "dev_gt_self": {
+      "tag": "dev_gt_self",
+      "team_src": "gt",
+      "roster": "self",
+      "n_sequences": 20,
+      "solve_seconds": 4.4,
+      "pooled": {
+        "n_rows": 165225,
+        "identity": 0.4021667423210773,
+        "jersey": 0.4397276441216523,
+        "tracklets": 1249,
+        "tracklets_named": 751,
+        "mean_identities": 10.15
+      },
+      "coverage_curve": {
+        "n_rows": 165225,
+        "n_named_tracklets": 751,
+        "full_coverage": {
+          "threshold": 2.8956329105566925e-06,
+          "coverage": 0.5176516870933575,
+          "precision": 0.5621952787943271
+        },
+        "at_0.85": {
+          "threshold": 0.28279047055524487,
+          "coverage": 0.2467665304887275,
+          "precision": 0.851123319925439
+        },
+        "at_0.6": {
+          "threshold": 0.01830582560611176,
+          "coverage": 0.4835829928884854,
+          "precision": 0.6002753441802253
+        }
+      },
+      "per_seq": {
+        "SNGS-021": {
+          "n_rows": 9760,
+          "identity": 0.6342213114754098,
+          "jersey": 0.684733606557377,
+          "n_named": 17,
+          "n_identities": 5
+        },
+        "SNGS-024": {
+          "n_rows": 2446,
+          "identity": 0.4452166802943581,
+          "jersey": 0.4501226492232216,
+          "n_named": 34,
+          "n_identities": 9
+        },
+        "SNGS-027": {
+          "n_rows": 3868,
+          "identity": 0.31256463288521197,
+          "jersey": 0.33169596690796277,
+          "n_named": 53,
+          "n_identities": 11
+        },
+        "SNGS-030": {
+          "n_rows": 6091,
+          "identity": 0.30159251354457395,
+          "jersey": 0.3708750615662453,
+          "n_named": 37,
+          "n_identities": 10
+        },
+        "SNGS-033": {
+          "n_rows": 3045,
+          "identity": 0.5323481116584565,
+          "jersey": 0.5691297208538588,
+          "n_named": 30,
+          "n_identities": 6
+        },
+        "SNGS-036": {
+          "n_rows": 12261,
+          "identity": 0.5498735829051464,
+          "jersey": 0.6023978468314167,
+          "n_named": 29,
+          "n_identities": 10
+        },
+        "SNGS-039": {
+          "n_rows": 11574,
+          "identity": 0.36305512355279074,
+          "jersey": 0.36694314843615,
+          "n_named": 48,
+          "n_identities": 14
+        },
+        "SNGS-042": {
+          "n_rows": 12245,
+          "identity": 0.1579420171498571,
+          "jersey": 0.3384238464679461,
+          "n_named": 45,
+          "n_identities": 8
+        },
+        "SNGS-045": {
+          "n_rows": 7544,
+          "identity": 0.3378844114528102,
+          "jersey": 0.3551166489925769,
+          "n_named": 39,
+          "n_identities": 11
+        },
+        "SNGS-048": {
+          "n_rows": 12694,
+          "identity": 0.5389948006932409,
+          "jersey": 0.5613675752323932,
+          "n_named": 18,
+          "n_identities": 7
+        },
+        "SNGS-051": {
+          "n_rows": 8594,
+          "identity": 0.3881777984640447,
+          "jersey": 0.4145915755178031,
+          "n_named": 29,
+          "n_identities": 9
+        },
+        "SNGS-054": {
+          "n_rows": 7528,
+          "identity": 0.4160467587672689,
+          "jersey": 0.4244155154091392,
+          "n_named": 46,
+          "n_identities": 10
+        },
+        "SNGS-057": {
+          "n_rows": 9141,
+          "identity": 0.24286183130948474,
+          "jersey": 0.2522699923421945,
+          "n_named": 51,
+          "n_identities": 9
+        },
+        "SNGS-078": {
+          "n_rows": 6596,
+          "identity": 0.28865979381443296,
+          "jersey": 0.29805942995755,
+          "n_named": 50,
+          "n_identities": 14
+        },
+        "SNGS-081": {
+          "n_rows": 9052,
+          "identity": 0.498232434821034,
+          "jersey": 0.513035793194874,
+          "n_named": 54,
+          "n_identities": 15
+        },
+        "SNGS-084": {
+          "n_rows": 8331,
+          "identity": 0.4527667746969151,
+          "jersey": 0.4617692954027128,
+          "n_named": 38,
+          "n_identities": 11
+        },
+        "SNGS-087": {
+          "n_rows": 6909,
+          "identity": 0.4591113040961065,
+          "jersey": 0.46287451150673037,
+          "n_named": 33,
+          "n_identities": 13
+        },
+        "SNGS-090": {
+          "n_rows": 7132,
+          "identity": 0.320527201346046,
+          "jersey": 0.32319125070106564,
+          "n_named": 41,
+          "n_identities": 13
+        },
+        "SNGS-093": {
+          "n_rows": 7126,
+          "identity": 0.3756665731125456,
+          "jersey": 0.38184114510244177,
+          "n_named": 45,
+          "n_identities": 13
+        },
+        "SNGS-096": {
+          "n_rows": 13288,
+          "identity": 0.3931366646598435,
+          "jersey": 0.47170379289584585,
+          "n_named": 14,
+          "n_identities": 5
+        }
+      },
+      "gs_hota": {
+        "GS-HOTA": 30.87342038601196,
+        "GS-DetA": 19.650098713483583,
+        "GS-AssA": 48.512005214047896,
+        "GS-LocA": 92.26428119979552,
+        "IDF1": 29.584765038958526
+      },
+      "gs_hota_per_seq": {
+        "SNGS-021": 47.533271036403306,
+        "SNGS-024": 16.39721055048791,
+        "SNGS-027": 15.135627392931303,
+        "SNGS-030": 22.54961292913685,
+        "SNGS-033": 29.858014391174194,
+        "SNGS-036": 48.106760941147485,
+        "SNGS-039": 26.09239465976765,
+        "SNGS-042": 14.423619361900677,
+        "SNGS-045": 22.619134217541408,
+        "SNGS-048": 38.710191563588396,
+        "SNGS-051": 31.20991612502743,
+        "SNGS-054": 21.865873483475877,
+        "SNGS-057": 22.200411799100337,
+        "SNGS-078": 23.968466851646014,
+        "SNGS-081": 36.383926105299864,
+        "SNGS-084": 38.282105858074,
+        "SNGS-087": 34.69304051487142,
+        "SNGS-090": 23.56915277385862,
+        "SNGS-093": 27.767547081072095,
+        "SNGS-096": 36.264123388196516
+      }
+    },
+    "dev_free_gt": {
+      "tag": "dev_free_gt",
+      "team_src": "free",
+      "roster": "gt",
+      "n_sequences": 20,
+      "solve_seconds": 3.5,
+      "pooled": {
+        "n_rows": 165225,
+        "identity": 0.4217582085035558,
+        "jersey": 0.44901195339688305,
+        "tracklets": 1249,
+        "tracklets_named": 1022,
+        "mean_identities": 16.55
+      },
+      "coverage_curve": {
+        "n_rows": 165225,
+        "n_named_tracklets": 1022,
+        "full_coverage": {
+          "threshold": 7.595638950266985e-07,
+          "coverage": 0.7953396883038281,
+          "precision": 0.4685640362225097
+        },
+        "at_0.85": {
+          "threshold": 0.03984064301321139,
+          "coverage": 0.3454561960962324,
+          "precision": 0.8516766530011564
+        },
+        "at_0.6": {
+          "threshold": 0.020250926925962472,
+          "coverage": 0.5306037221970041,
+          "precision": 0.6005315447877814
+        }
+      },
+      "per_seq": {
+        "SNGS-021": {
+          "n_rows": 9760,
+          "identity": 0.4723360655737705,
+          "jersey": 0.519672131147541,
+          "n_named": 23,
+          "n_identities": 9
+        },
+        "SNGS-024": {
+          "n_rows": 2446,
+          "identity": 0.39697465249386754,
+          "jersey": 0.401471790678659,
+          "n_named": 39,
+          "n_identities": 11
+        },
+        "SNGS-027": {
+          "n_rows": 3868,
+          "identity": 0.36323681489141674,
+          "jersey": 0.38391933815925544,
+          "n_named": 67,
+          "n_identities": 18
+        },
+        "SNGS-030": {
+          "n_rows": 6091,
+          "identity": 0.24839927762272204,
+          "jersey": 0.25233951732063703,
+          "n_named": 52,
+          "n_identities": 16
+        },
+        "SNGS-033": {
+          "n_rows": 3045,
+          "identity": 0.4272577996715928,
+          "jersey": 0.45911330049261084,
+          "n_named": 41,
+          "n_identities": 10
+        },
+        "SNGS-036": {
+          "n_rows": 12261,
+          "identity": 0.5107250632085474,
+          "jersey": 0.5636571242149906,
+          "n_named": 35,
+          "n_identities": 14
+        },
+        "SNGS-039": {
+          "n_rows": 11574,
+          "identity": 0.4495420770692932,
+          "jersey": 0.45368930361154314,
+          "n_named": 74,
+          "n_identities": 20
+        },
+        "SNGS-042": {
+          "n_rows": 12245,
+          "identity": 0.15745202123315638,
+          "jersey": 0.23862801143323806,
+          "n_named": 66,
+          "n_identities": 16
+        },
+        "SNGS-045": {
+          "n_rows": 7544,
+          "identity": 0.31137327677624604,
+          "jersey": 0.3286055143160127,
+          "n_named": 51,
+          "n_identities": 17
+        },
+        "SNGS-048": {
+          "n_rows": 12694,
+          "identity": 0.3985347408224358,
+          "jersey": 0.40916968646604696,
+          "n_named": 27,
+          "n_identities": 10
+        },
+        "SNGS-051": {
+          "n_rows": 8594,
+          "identity": 0.47858971375378173,
+          "jersey": 0.5050034908075401,
+          "n_named": 48,
+          "n_identities": 20
+        },
+        "SNGS-054": {
+          "n_rows": 7528,
+          "identity": 0.468384697130712,
+          "jersey": 0.4723698193411265,
+          "n_named": 72,
+          "n_identities": 20
+        },
+        "SNGS-057": {
+          "n_rows": 9141,
+          "identity": 0.28705830871895854,
+          "jersey": 0.29942019472705395,
+          "n_named": 87,
+          "n_identities": 20
+        },
+        "SNGS-078": {
+          "n_rows": 6596,
+          "identity": 0.4643723468768951,
+          "jersey": 0.5001516070345664,
+          "n_named": 55,
+          "n_identities": 20
+        },
+        "SNGS-081": {
+          "n_rows": 9052,
+          "identity": 0.7348652231551038,
+          "jersey": 0.7579540433053469,
+          "n_named": 64,
+          "n_identities": 20
+        },
+        "SNGS-084": {
+          "n_rows": 8331,
+          "identity": 0.4965790421317969,
+          "jersey": 0.5075021005881647,
+          "n_named": 49,
+          "n_identities": 19
+        },
+        "SNGS-087": {
+          "n_rows": 6909,
+          "identity": 0.6617455492835432,
+          "jersey": 0.6666666666666666,
+          "n_named": 42,
+          "n_identities": 20
+        },
+        "SNGS-090": {
+          "n_rows": 7132,
+          "identity": 0.3930173864273696,
+          "jersey": 0.39596186203028605,
+          "n_named": 49,
+          "n_identities": 20
+        },
+        "SNGS-093": {
+          "n_rows": 7126,
+          "identity": 0.55318551782206,
+          "jersey": 0.5610440639910188,
+          "n_named": 56,
+          "n_identities": 19
+        },
+        "SNGS-096": {
+          "n_rows": 13288,
+          "identity": 0.27483443708609273,
+          "jersey": 0.3392534617700181,
+          "n_named": 25,
+          "n_identities": 12
+        }
+      },
+      "gs_hota": {
+        "GS-HOTA": 31.294277707889655,
+        "GS-DetA": 21.217222650339508,
+        "GS-AssA": 46.17180855248723,
+        "GS-LocA": 92.1262516481133,
+        "IDF1": 31.42912452209263
+      },
+      "gs_hota_per_seq": {
+        "SNGS-021": 36.28870478360046,
+        "SNGS-024": 15.566129292906908,
+        "SNGS-027": 16.032629280250255,
+        "SNGS-030": 21.607941736956555,
+        "SNGS-033": 28.414947853980827,
+        "SNGS-036": 47.148483041109536,
+        "SNGS-039": 29.819435257196268,
+        "SNGS-042": 14.111928607513176,
+        "SNGS-045": 21.981863601832654,
+        "SNGS-048": 31.635180375205756,
+        "SNGS-051": 35.200783095138824,
+        "SNGS-054": 25.40684764074699,
+        "SNGS-057": 23.045168486901762,
+        "SNGS-078": 33.22608682676571,
+        "SNGS-081": 46.405850979708816,
+        "SNGS-084": 40.317551237981384,
+        "SNGS-087": 43.836589517582766,
+        "SNGS-090": 27.250232642243315,
+        "SNGS-093": 35.24595751412842,
+        "SNGS-096": 26.88974910985351
+      }
+    },
+    "dev_free_full": {
+      "tag": "dev_free_full",
+      "team_src": "free",
+      "roster": "full",
+      "n_sequences": 20,
+      "solve_seconds": 42.2,
+      "pooled": {
+        "n_rows": 165225,
+        "identity": 0.33691027386896655,
+        "jersey": 0.3485126342865789,
+        "tracklets": 1249,
+        "tracklets_named": 1217,
+        "mean_identities": 198.0
+      },
+      "coverage_curve": {
+        "n_rows": 165225,
+        "n_named_tracklets": 1217,
+        "full_coverage": {
+          "threshold": 2.1425828224482322e-06,
+          "coverage": 0.9795248903011046,
+          "precision": 0.3465293310759877
+        },
+        "at_0.85": {
+          "threshold": 0.16561648270746415,
+          "coverage": 0.27562414888788017,
+          "precision": 0.8534255599472991
+        },
+        "at_0.6": {
+          "threshold": 0.0017817309767846525,
+          "coverage": 0.551236193070056,
+          "precision": 0.6005511759151496
+        }
+      },
+      "per_seq": {
+        "SNGS-021": {
+          "n_rows": 9760,
+          "identity": 0.24774590163934426,
+          "jersey": 0.25317622950819674,
+          "n_named": 45,
+          "n_identities": 198
+        },
+        "SNGS-024": {
+          "n_rows": 2446,
+          "identity": 0.28618152085036797,
+          "jersey": 0.2874080130825838,
+          "n_named": 51,
+          "n_identities": 198
+        },
+        "SNGS-027": {
+          "n_rows": 3868,
+          "identity": 0.31618407445708374,
+          "jersey": 0.3231644260599793,
+          "n_named": 72,
+          "n_identities": 198
+        },
+        "SNGS-030": {
+          "n_rows": 6091,
+          "identity": 0.25923493679198817,
+          "jersey": 0.2630109998358233,
+          "n_named": 60,
+          "n_identities": 198
+        },
+        "SNGS-033": {
+          "n_rows": 3045,
+          "identity": 0.22561576354679802,
+          "jersey": 0.22758620689655173,
+          "n_named": 61,
+          "n_identities": 198
+        },
+        "SNGS-036": {
+          "n_rows": 12261,
+          "identity": 0.402332599298589,
+          "jersey": 0.40779708017290595,
+          "n_named": 54,
+          "n_identities": 198
+        },
+        "SNGS-039": {
+          "n_rows": 11574,
+          "identity": 0.41135303265940903,
+          "jersey": 0.41498185588387765,
+          "n_named": 81,
+          "n_identities": 198
+        },
+        "SNGS-042": {
+          "n_rows": 12245,
+          "identity": 0.12249897917517354,
+          "jersey": 0.18440179665169457,
+          "n_named": 86,
+          "n_identities": 198
+        },
+        "SNGS-045": {
+          "n_rows": 7544,
+          "identity": 0.257423117709438,
+          "jersey": 0.2667020148462354,
+          "n_named": 61,
+          "n_identities": 198
+        },
+        "SNGS-048": {
+          "n_rows": 12694,
+          "identity": 0.18071529856625176,
+          "jersey": 0.1816606270679061,
+          "n_named": 54,
+          "n_identities": 198
+        },
+        "SNGS-051": {
+          "n_rows": 8594,
+          "identity": 0.4252967186409123,
+          "jersey": 0.4517104956946707,
+          "n_named": 55,
+          "n_identities": 198
+        },
+        "SNGS-054": {
+          "n_rows": 7528,
+          "identity": 0.48020722635494156,
+          "jersey": 0.4848565356004251,
+          "n_named": 73,
+          "n_identities": 198
+        },
+        "SNGS-057": {
+          "n_rows": 9141,
+          "identity": 0.29679466141560007,
+          "jersey": 0.3060934252269992,
+          "n_named": 92,
+          "n_identities": 198
+        },
+        "SNGS-078": {
+          "n_rows": 6596,
+          "identity": 0.4520921770770164,
+          "jersey": 0.4578532443905397,
+          "n_named": 56,
+          "n_identities": 198
+        },
+        "SNGS-081": {
+          "n_rows": 9052,
+          "identity": 0.5465090587715422,
+          "jersey": 0.5620857269111799,
+          "n_named": 66,
+          "n_identities": 198
+        },
+        "SNGS-084": {
+          "n_rows": 8331,
+          "identity": 0.444604489256992,
+          "jersey": 0.45480734605689593,
+          "n_named": 53,
+          "n_identities": 198
+        },
+        "SNGS-087": {
+          "n_rows": 6909,
+          "identity": 0.5639021566073238,
+          "jersey": 0.56781010276451,
+          "n_named": 43,
+          "n_identities": 198
+        },
+        "SNGS-090": {
+          "n_rows": 7132,
+          "identity": 0.4003084688726865,
+          "jersey": 0.4032529444756029,
+          "n_named": 50,
+          "n_identities": 198
+        },
+        "SNGS-093": {
+          "n_rows": 7126,
+          "identity": 0.3850687622789784,
+          "jersey": 0.39096267190569745,
+          "n_named": 59,
+          "n_identities": 198
+        },
+        "SNGS-096": {
+          "n_rows": 13288,
+          "identity": 0.1894942805538832,
+          "jersey": 0.201158940397351,
+          "n_named": 45,
+          "n_identities": 198
+        }
+      },
+      "gs_hota": {
+        "GS-HOTA": 27.010173583915638,
+        "GS-DetA": 16.48676570126243,
+        "GS-AssA": 44.255790858730144,
+        "GS-LocA": 92.19359186767336,
+        "IDF1": 24.862798238397136
+      },
+      "gs_hota_per_seq": {
+        "SNGS-021": 26.350434139523575,
+        "SNGS-024": 13.647467501751553,
+        "SNGS-027": 15.244761831631939,
+        "SNGS-030": 21.775062139934263,
+        "SNGS-033": 18.528278300969976,
+        "SNGS-036": 39.05455558735425,
+        "SNGS-039": 28.877218873774048,
+        "SNGS-042": 13.131373643036873,
+        "SNGS-045": 18.85473141944962,
+        "SNGS-048": 21.773710999807058,
+        "SNGS-051": 31.611258696683148,
+        "SNGS-054": 25.848129971906626,
+        "SNGS-057": 23.18200318222702,
+        "SNGS-078": 32.02190901940664,
+        "SNGS-081": 36.90555296570873,
+        "SNGS-084": 38.09955662650529,
+        "SNGS-087": 39.52250165627482,
+        "SNGS-090": 26.702813233183377,
+        "SNGS-093": 27.29991364486387,
+        "SNGS-096": 20.445018588878757
+      }
+    },
+    "dev_free_self": {
+      "tag": "dev_free_self",
+      "team_src": "free",
+      "roster": "self",
+      "n_sequences": 20,
+      "solve_seconds": 4.4,
+      "pooled": {
+        "n_rows": 165225,
+        "identity": 0.4021667423210773,
+        "jersey": 0.4397276441216523,
+        "tracklets": 1249,
+        "tracklets_named": 751,
+        "mean_identities": 10.15
+      },
+      "coverage_curve": {
+        "n_rows": 165225,
+        "n_named_tracklets": 751,
+        "full_coverage": {
+          "threshold": 2.8956329105566925e-06,
+          "coverage": 0.5176516870933575,
+          "precision": 0.5621952787943271
+        },
+        "at_0.85": {
+          "threshold": 0.28279047055524487,
+          "coverage": 0.2467665304887275,
+          "precision": 0.851123319925439
+        },
+        "at_0.6": {
+          "threshold": 0.01830582560611176,
+          "coverage": 0.4835829928884854,
+          "precision": 0.6002753441802253
+        }
+      },
+      "per_seq": {
+        "SNGS-021": {
+          "n_rows": 9760,
+          "identity": 0.6342213114754098,
+          "jersey": 0.684733606557377,
+          "n_named": 17,
+          "n_identities": 5
+        },
+        "SNGS-024": {
+          "n_rows": 2446,
+          "identity": 0.4452166802943581,
+          "jersey": 0.4501226492232216,
+          "n_named": 34,
+          "n_identities": 9
+        },
+        "SNGS-027": {
+          "n_rows": 3868,
+          "identity": 0.31256463288521197,
+          "jersey": 0.33169596690796277,
+          "n_named": 53,
+          "n_identities": 11
+        },
+        "SNGS-030": {
+          "n_rows": 6091,
+          "identity": 0.30159251354457395,
+          "jersey": 0.3708750615662453,
+          "n_named": 37,
+          "n_identities": 10
+        },
+        "SNGS-033": {
+          "n_rows": 3045,
+          "identity": 0.5323481116584565,
+          "jersey": 0.5691297208538588,
+          "n_named": 30,
+          "n_identities": 6
+        },
+        "SNGS-036": {
+          "n_rows": 12261,
+          "identity": 0.5498735829051464,
+          "jersey": 0.6023978468314167,
+          "n_named": 29,
+          "n_identities": 10
+        },
+        "SNGS-039": {
+          "n_rows": 11574,
+          "identity": 0.36305512355279074,
+          "jersey": 0.36694314843615,
+          "n_named": 48,
+          "n_identities": 14
+        },
+        "SNGS-042": {
+          "n_rows": 12245,
+          "identity": 0.1579420171498571,
+          "jersey": 0.3384238464679461,
+          "n_named": 45,
+          "n_identities": 8
+        },
+        "SNGS-045": {
+          "n_rows": 7544,
+          "identity": 0.3378844114528102,
+          "jersey": 0.3551166489925769,
+          "n_named": 39,
+          "n_identities": 11
+        },
+        "SNGS-048": {
+          "n_rows": 12694,
+          "identity": 0.5389948006932409,
+          "jersey": 0.5613675752323932,
+          "n_named": 18,
+          "n_identities": 7
+        },
+        "SNGS-051": {
+          "n_rows": 8594,
+          "identity": 0.3881777984640447,
+          "jersey": 0.4145915755178031,
+          "n_named": 29,
+          "n_identities": 9
+        },
+        "SNGS-054": {
+          "n_rows": 7528,
+          "identity": 0.4160467587672689,
+          "jersey": 0.4244155154091392,
+          "n_named": 46,
+          "n_identities": 10
+        },
+        "SNGS-057": {
+          "n_rows": 9141,
+          "identity": 0.24286183130948474,
+          "jersey": 0.2522699923421945,
+          "n_named": 51,
+          "n_identities": 9
+        },
+        "SNGS-078": {
+          "n_rows": 6596,
+          "identity": 0.28865979381443296,
+          "jersey": 0.29805942995755,
+          "n_named": 50,
+          "n_identities": 14
+        },
+        "SNGS-081": {
+          "n_rows": 9052,
+          "identity": 0.498232434821034,
+          "jersey": 0.513035793194874,
+          "n_named": 54,
+          "n_identities": 15
+        },
+        "SNGS-084": {
+          "n_rows": 8331,
+          "identity": 0.4527667746969151,
+          "jersey": 0.4617692954027128,
+          "n_named": 38,
+          "n_identities": 11
+        },
+        "SNGS-087": {
+          "n_rows": 6909,
+          "identity": 0.4591113040961065,
+          "jersey": 0.46287451150673037,
+          "n_named": 33,
+          "n_identities": 13
+        },
+        "SNGS-090": {
+          "n_rows": 7132,
+          "identity": 0.320527201346046,
+          "jersey": 0.32319125070106564,
+          "n_named": 41,
+          "n_identities": 13
+        },
+        "SNGS-093": {
+          "n_rows": 7126,
+          "identity": 0.3756665731125456,
+          "jersey": 0.38184114510244177,
+          "n_named": 45,
+          "n_identities": 13
+        },
+        "SNGS-096": {
+          "n_rows": 13288,
+          "identity": 0.3931366646598435,
+          "jersey": 0.47170379289584585,
+          "n_named": 14,
+          "n_identities": 5
+        }
+      },
+      "gs_hota": {
+        "GS-HOTA": 30.87342038601196,
+        "GS-DetA": 19.650098713483583,
+        "GS-AssA": 48.512005214047896,
+        "GS-LocA": 92.26428119979552,
+        "IDF1": 29.584765038958526
+      },
+      "gs_hota_per_seq": {
+        "SNGS-021": 47.533271036403306,
+        "SNGS-024": 16.39721055048791,
+        "SNGS-027": 15.135627392931303,
+        "SNGS-030": 22.54961292913685,
+        "SNGS-033": 29.858014391174194,
+        "SNGS-036": 48.106760941147485,
+        "SNGS-039": 26.09239465976765,
+        "SNGS-042": 14.423619361900677,
+        "SNGS-045": 22.619134217541408,
+        "SNGS-048": 38.710191563588396,
+        "SNGS-051": 31.20991612502743,
+        "SNGS-054": 21.865873483475877,
+        "SNGS-057": 22.200411799100337,
+        "SNGS-078": 23.968466851646014,
+        "SNGS-081": 36.383926105299864,
+        "SNGS-084": 38.282105858074,
+        "SNGS-087": 34.69304051487142,
+        "SNGS-090": 23.56915277385862,
+        "SNGS-093": 27.767547081072095,
+        "SNGS-096": 36.264123388196516
+      }
+    },
+    "dev_gt_selfboth": {
+      "tag": "dev_gt_selfboth",
+      "team_src": "gt",
+      "roster": "selfboth",
+      "n_sequences": 20,
+      "solve_seconds": 7.6,
+      "pooled": {
+        "n_rows": 165225,
+        "identity": 0.3720926009986382,
+        "jersey": 0.3977243153275836,
+        "tracklets": 1249,
+        "tracklets_named": 1097,
+        "mean_identities": 20.3
+      },
+      "coverage_curve": {
+        "n_rows": 165225,
+        "n_named_tracklets": 1097,
+        "full_coverage": {
+          "threshold": 8.446146951767929e-06,
+          "coverage": 0.8506097745498562,
+          "precision": 0.39806605854477667
+        },
+        "at_0.85": {
+          "threshold": 0.1653719196649427,
+          "coverage": 0.2757209865335149,
+          "precision": 0.8554526297304417
+        },
+        "at_0.6": {
+          "threshold": 0.020764345326794536,
+          "coverage": 0.5143834165531851,
+          "precision": 0.6001364882514207
+        }
+      },
+      "per_seq": {
+        "SNGS-021": {
+          "n_rows": 9760,
+          "identity": 0.4642418032786885,
+          "jersey": 0.5076844262295082,
+          "n_named": 27,
+          "n_identities": 10
+        },
+        "SNGS-024": {
+          "n_rows": 2446,
+          "identity": 0.2865903515944399,
+          "jersey": 0.28986099754701555,
+          "n_named": 49,
+          "n_identities": 18
+        },
+        "SNGS-027": {
+          "n_rows": 3868,
+          "identity": 0.33712512926577043,
+          "jersey": 0.34643226473629785,
+          "n_named": 71,
+          "n_identities": 22
+        },
+        "SNGS-030": {
+          "n_rows": 6091,
+          "identity": 0.2613692332950254,
+          "jersey": 0.2639960597603021,
+          "n_named": 59,
+          "n_identities": 20
+        },
+        "SNGS-033": {
+          "n_rows": 3045,
+          "identity": 0.36486042692939247,
+          "jersey": 0.3960591133004926,
+          "n_named": 45,
+          "n_identities": 12
+        },
+        "SNGS-036": {
+          "n_rows": 12261,
+          "identity": 0.4499632982627844,
+          "jersey": 0.4743495636571242,
+          "n_named": 50,
+          "n_identities": 20
+        },
+        "SNGS-039": {
+          "n_rows": 11574,
+          "identity": 0.45368930361154314,
+          "jersey": 0.4587005356834284,
+          "n_named": 81,
+          "n_identities": 28
+        },
+        "SNGS-042": {
+          "n_rows": 12245,
+          "identity": 0.12372396896692528,
+          "jersey": 0.2388730093915884,
+          "n_named": 72,
+          "n_identities": 16
+        },
+        "SNGS-045": {
+          "n_rows": 7544,
+          "identity": 0.3092523860021209,
+          "jersey": 0.32423117709437965,
+          "n_named": 59,
+          "n_identities": 22
+        },
+        "SNGS-048": {
+          "n_rows": 12694,
+          "identity": 0.28367732787143535,
+          "jersey": 0.2930518355128407,
+          "n_named": 34,
+          "n_identities": 14
+        },
+        "SNGS-051": {
+          "n_rows": 8594,
+          "identity": 0.4078426809401908,
+          "jersey": 0.43425645799394924,
+          "n_named": 48,
+          "n_identities": 18
+        },
+        "SNGS-054": {
+          "n_rows": 7528,
+          "identity": 0.45031880977683314,
+          "jersey": 0.4543039319872476,
+          "n_named": 72,
+          "n_identities": 20
+        },
+        "SNGS-057": {
+          "n_rows": 9141,
+          "identity": 0.27108631440761405,
+          "jersey": 0.28377639207964117,
+          "n_named": 82,
+          "n_identities": 18
+        },
+        "SNGS-078": {
+          "n_rows": 6596,
+          "identity": 0.49408732565191027,
+          "jersey": 0.4998483929654336,
+          "n_named": 56,
+          "n_identities": 28
+        },
+        "SNGS-081": {
+          "n_rows": 9052,
+          "identity": 0.5255192222713213,
+          "jersey": 0.5404330534688466,
+          "n_named": 66,
+          "n_identities": 30
+        },
+        "SNGS-084": {
+          "n_rows": 8331,
+          "identity": 0.44760532949225784,
+          "jersey": 0.4578081862921618,
+          "n_named": 53,
+          "n_identities": 22
+        },
+        "SNGS-087": {
+          "n_rows": 6909,
+          "identity": 0.5639021566073238,
+          "jersey": 0.5689680127370097,
+          "n_named": 43,
+          "n_identities": 26
+        },
+        "SNGS-090": {
+          "n_rows": 7132,
+          "identity": 0.4010095344924285,
+          "jersey": 0.40507571508693213,
+          "n_named": 50,
+          "n_identities": 26
+        },
+        "SNGS-093": {
+          "n_rows": 7126,
+          "identity": 0.37468425484142576,
+          "jersey": 0.38071849564973337,
+          "n_named": 59,
+          "n_identities": 26
+        },
+        "SNGS-096": {
+          "n_rows": 13288,
+          "identity": 0.2618151715833835,
+          "jersey": 0.3309753160746538,
+          "n_named": 21,
+          "n_identities": 10
+        }
+      },
+      "gs_hota": {
+        "GS-HOTA": 29.00421765799691,
+        "GS-DetA": 18.49163531713893,
+        "GS-AssA": 45.50067770953998,
+        "GS-LocA": 92.19267897638964,
+        "IDF1": 27.556018003194115
+      },
+      "gs_hota_per_seq": {
+        "SNGS-021": 38.63072737830927,
+        "SNGS-024": 13.648106216041336,
+        "SNGS-027": 15.739863026228926,
+        "SNGS-030": 21.708338204822304,
+        "SNGS-033": 25.36366773660622,
+        "SNGS-036": 41.85476305665337,
+        "SNGS-039": 30.658878630521492,
+        "SNGS-042": 12.883264753771826,
+        "SNGS-045": 22.09592537949438,
+        "SNGS-048": 26.56827520995767,
+        "SNGS-051": 31.349933505404465,
+        "SNGS-054": 24.912318096399684,
+        "SNGS-057": 22.712731006374128,
+        "SNGS-078": 33.608282958226404,
+        "SNGS-081": 36.2999187862495,
+        "SNGS-084": 38.12942910225303,
+        "SNGS-087": 39.52250165627482,
+        "SNGS-090": 26.706915256228108,
+        "SNGS-093": 27.06245335573395,
+        "SNGS-096": 26.302843468873093
+      }
+    }
+  }
+}

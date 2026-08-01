@@ -229,6 +229,34 @@ def resolve_team_map(
     return {0: "left", 1: "right"}
 
 
+def resolve_team_map_free(df: pd.DataFrame) -> tuple[dict[int, str], float]:
+    """Resolve our team ``{0,1}`` -> GSR side from the geometry alone (no ground truth).
+
+    The GT-free replacement for :func:`resolve_team_map`. A team defends one goal, so over a clip
+    its outfield players sit *behind* the opponent's: whichever way the ball is running, the side
+    being attacked has its defensive line deepest. The cluster with the smaller mean centred
+    ``pitch_x`` over all player rows is therefore ``left``. Goalkeepers are excluded -- their kit is
+    a third colour, so the two-way kit clustering assigns them essentially at random and their
+    extreme x would swamp the mean (measured: a GK-only signal scores 2/12, worse than chance).
+
+    Args:
+        df: Positions table for one sequence (needs ``role``, ``team``, ``pitch_x``).
+
+    Returns:
+        ``({0: side0, 1: side1}, margin)`` where ``margin`` is the separation of the two cluster
+        means in metres -- the confidence dial. Falls back to ``{0:'left',1:'right'}`` with margin
+        ``0.0`` when a cluster has no usable player row.
+    """
+    d = df[(df["role"] == "player") & df["team"].isin([0, 1])]
+    d = d[np.isfinite(d["pitch_x"])]
+    means = d.groupby("team")["pitch_x"].mean()
+    if 0 not in means.index or 1 not in means.index:
+        return {0: "left", 1: "right"}, 0.0
+    m0, m1 = float(means[0]), float(means[1])
+    order = {0: "left", 1: "right"} if m0 <= m1 else {0: "right", 1: "left"}
+    return order, abs(m1 - m0)
+
+
 # === Pipeline extraction (GPU stage; resumable) ==================================================
 def extract_sequence(
     seq_dir: Path, out_parquet: Path, calibrator, *, calib_period: int, detector: str,
@@ -344,15 +372,23 @@ def _write_submission(df: pd.DataFrame, seq_dir: Path, dest: Path) -> dict[int, 
 
 def run_benchmark(
     data_dir: Path, out_dir: Path, results_dir: Path, *, limit: int | None, calib_period: int,
-    detector: str, tracker: str, skip_extract: bool = False,
+    detector: str, tracker: str, skip_extract: bool = False, only: list[str] | None = None,
 ) -> dict:
     """Run the full GSR benchmark: extract -> submissions -> multi-config GS-HOTA + write results.
 
     Resumable: per-sequence positions parquets and prediction JSONs are reused when present, so an
     interrupted run continues where it stopped.
+
+    Args:
+        only: Restrict to these sequence names. Needed since ``data/soccernet/gamestate-2024``
+            holds train + valid + test in one flat directory (``README_SPLITS.md``); the downstream
+            drivers self-filter on the presence of a positions parquet, this one does not.
     """
     seqs = sorted(p for p in data_dir.iterdir()
                   if p.is_dir() and (p / "Labels-GameState.json").exists())
+    if only:
+        keep = set(only)
+        seqs = [p for p in seqs if p.name in keep]
     if limit:
         seqs = seqs[:limit]
     if not seqs:
@@ -566,6 +602,8 @@ def main() -> None:
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     ap.add_argument("--results-dir", type=Path, default=DEFAULT_RESULTS_DIR)
     ap.add_argument("--limit", type=int, default=None, help="process only the first N sequences")
+    ap.add_argument("--seqs", default=None,
+                    help="comma-separated sequence names (the data dir holds every split)")
     ap.add_argument("--calib-period", type=int, default=1, help="PnLCalib every N frames (1=per-frame)")
     ap.add_argument("--detector", default="football")
     ap.add_argument("--tracker", default="bytetrack")
@@ -588,7 +626,7 @@ def main() -> None:
     run_benchmark(
         args.data_dir, args.out_dir, args.results_dir, limit=args.limit,
         calib_period=args.calib_period, detector=args.detector, tracker=args.tracker,
-        skip_extract=args.score_only,
+        skip_extract=args.score_only, only=args.seqs.split(",") if args.seqs else None,
     )
 
 

@@ -1,0 +1,19 @@
+{
+  "declared_at": "2026-08-01T08:32:27+00:00",
+  "parent": {
+    "file": "results\\gsr_deleak_frozen.json",
+    "declared_at": "2026-08-01T03:45:35+00:00"
+  },
+  "team_map": "resolve_team_map_free (deeper cluster mean pitch_x = left)",
+  "roster": "self (slots = numbers this sequence own per-crop OCR chain read, on the reading tracklet team side)",
+  "solver_config": "results\\identity_solver_config_percrop.json",
+  "solver_config_sha256": "a7282d9be6359efedd36bf0057549a27a272fbd08393afe3730309402899cf92",
+  "calibration_fill": {
+    "function": "generator.postprocess.fill_calibration_gaps",
+    "max_gap": 10,
+    "min_donor_rows": 8,
+    "applied_to": "the cached positions parquets, before the GTA connector and the solver",
+    "chosen_on": "valid DEV-20 (results/GSR_ASSOCIATION.md section 4.1)"
+  },
+  "note": "fill chosen on DEV-20, GT-free chain chosen on train + DEV-20; the valid TEST-38 arm and the official test split are verification only"
+}
