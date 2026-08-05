@@ -48,3 +48,12 @@ Rows 10-11 (Tier C, `matches/fra_sen/` and loose root PDFs/mp4s) were explicitly
 Measured free-space delta (19.33 GB) is close to the sum of executed rows (19.27 GB); the small
 excess is consistent with filesystem cluster overhead differences reported vs. actual on-disk
 allocation for the ~200k small image files in row 2.
+
+## 2026-08-02 follow-up
+
+Separate action, own verify-then-delete protocol, full record in
+`results/GDRIVE_UPLOAD_LOG.md` ("LOCAL DELETION 2026-08-02"): the 16 `matches/` dirs uploaded to
+Drive on 2026-08-01/02 (12 ManU fixtures + `fra_sen`/`france_iraq`/`france_norway`/
+`france_senegal`) were spot-restore-hash-verified (2 files, SHA-256 match) and per-dir size
+confirmed (16/16 byte-exact) against the Drive copy, then deleted locally. 62.39 GB freed
+(44.38 GB -> 106.97 GB free on C:). `matches/footpass_game_{18,24,47}` untouched.

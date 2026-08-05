@@ -1,8 +1,224 @@
 # STATUS
 
-**Last updated:** 2026-08-01 evening (calibfill folded into the frozen GT-free recipe: official
-test split GS-HOTA **33.37**, package v2 verified and upload-ready; legitimate arc 31.88 -> 33.37
-in one day)
+## 2026-08-05 — v6 campaign S0/S1/S5: the association lever lands (+2.51 held-out, p=0.0009)
+
+Approved plan: .claude/plans/floating-leaping-peacock.md. **S0**: SoccerNet-v3 fetched+audited
+(400 games, 45 GB, own resumable fetcher — SDK bypassed; mapping keeps 98.5% of 371,599 boxes;
+ball class dense; v3 = 720p-majority STILLS, 2014-17 era). **Unplanned find: 106,591
+pixel-verified jersey-number labels in v3** — per-player-within-action (identity-shortcut risk),
+admitted to S2 ONLY through the shipped legibility filter, priced as a separate arm. **S1**:
+synthetic digit pretrain passed its soft gate (0.9826 holdout, +26.0 over base STR, control
+priced; three generator self-corrections documented; upstream Koshkina train.py bug found+
+patched server-side). **S5 (results/GSR_EIOU.md, kb gsr-assoc-002): clean-room EIoU tracker
+PASSES all four DEV gates and TEST-38: 37.03 -> 39.54 (+2.51, 26/38 helped, p=0.00092) — the
+held-out gain EXCEEDS DEV, reversing the v5 shrink pattern.** Decomposition: deep-features term
++3.49, expansion +0.37, iterative scale-up NEGATIVE (frozen off) — GSR lacks the paper's
+motivating regime; appearance in association is the real lever. Mechanics: cached artifacts had
+no boxes (foot points only) — a real-box cache was built (37 GPU-min, reusable in S7); EIoU
+fragments 1.8x more at 39% less contamination, exactly what the connector+jersey chain prices.
+Connector tau NOT re-swept on the new partition — +2.51 is a lower bound; S7 owns it. S2 (jersey
+arms) still running on the server.
+
+**Last updated:** 2026-08-05 (v5.1 retune: +0.61 DEV becomes -0.05 held-out — gate 37.2 NOT met,
+test-49 spend preserved; public board stays 39.02; pivot to the DetA levers)
+
+## 2026-08-05 — v5.1: the gate does its job; DEV-20 is too small for 0.6-point decisions
+
+results/GSR_V5.md, kb clip-s5-001 (+ clip-s4-001 pending -> confirmed). The solver retune that
+was supposed to unlock the encoder's "lower bound": +0.6118 on DEV-20 -> **-0.0527 on held-out
+TEST-38** (p=0.438). Session 4's sim_none~0.67 estimate REFUTED (the tau rescale heuristic does
+not transfer to a parameter that also prices un-galleried identities); the DEV gain was 2
+sequences supplying 75% of it — **DEV-20 cannot support sub-point decisions; noted for every
+future sweep.** Final standings on TEST-38: v4 36.71 / v5 37.03 (p=0.063 vs v4) / v5.1 36.98.
+**Gate (>=37.2): NOT met -> no test-49 run, no submission; if a CLIP arm ever spends test-49 it
+should be v5 (app_gain 10), not v5.1.** Conversion rate now measured: +1.82 component mAP ->
++0.33 benchmark GS-HOTA (tracklet-mean damping + DetA untouched + metric structure).
+
+**Pivot, from the measurements:** association is saturating; **DetA (24-26 vs the winners' ~48)
+is untouched by everything since v4 and is identity-gated detection — the two unfired levers are
+(a) a GSR-train detector fine-tune (the org ships NO SoccerNet-trained detector; ours is
+PL-tuned) and (b) the Session-2/3 trained jersey head as a second OCR voter (its no-number
+abstention class was designed for exactly this; never evaluated).** Both dispatched.
+
+**5A verdict (results/CLUSTER_SESSION5A.md, kb gsr-det-001/002): gate MET on boxes — and the
+worker correctly refused its own gate.** Fine-tune (YOLOv8s, 10 ep, 32 min A100; colour-hardened
+re-run): box recall +2.4/+2.7 at matched precision, mAP@0.5 +5.29 (colour arm) — but
+**role-correct coverage FALLS -10.2/-6.05**: the fine-tune leaks player->referee on exactly ONE
+desaturated-broadcast game (game 3 = 21/58 valid sequences; mean HSV saturation 72 vs 98-167 in
+the three training games), and on an identity-gated metric one role error costs two attributes.
+The pre-declared gate measured only boxes — recorded as mis-specified, not re-drawn. Probes
+closed: naive imgsz 1280 is NOT a lever (big-box recall -30.8); early-stop no escape; GT-track
+majority vote makes it worse. **The unifying finding of the whole cluster arc: GSR train's
+THREE-GAME visual diversity is the wall for identity AND detection alike. The battering ram for
+both is SoccerNet-v3 (MIT, 400 games / 6 leagues, role-classed boxes, ~60 GB server fetch) —
+awaiting Sid's per-fetch approval.** Detector weights parked on the server; no re-extract, no
+recipe change, board stays 39.02.
+
+**5B verdict (same day, results/JERSEY_HEAD_VOTER.md, kb clip-s5-002): REJECT — worse than the
+Qwen candidate it was meant to beat (0.151 vs 0.265 precision on chain-abstain crops, bar 0.80).**
+Mechanism measured, not guessed: train 0.863 -> valid 0.125 across a boundary that changes only
+WHICH PLAYERS appear — the head learned recognise-the-player-recall-his-number, not read-the-
+digits (64% of its errors share NO digit with the truth; its predictions are a prior over
+frequent train numbers). The abstention class is near-zero information (1.16x lift). Design
+lesson banked for the real S4 jersey build: digit-level supervision decoupled from identity, or
+nothing. Side-yields: laptop-side crop builder reproducing the cluster set exactly
+(tools/gsr_crops.py); the head's class-order recovery utility. Second-voter bar stands at 0.80;
+no candidate has cleared it. 5A (detector fine-tune) still in flight.
+
+## 2026-08-04 (later) — Session 3: scaling wins; first trained model to clear the floor
+
+results/CLUSTER_SESSION3.md, kb clip-s3-005..007 (+ -002 marked RESOLVED-upheld). sn-reid train
+fetched on-server (12.11 GB verified, no stall), unified with GSR crops: **160,070 crops /
+60,040 identities (44.7x)**. Two spec departures, both load-bearing and documented: min_per_id
+4 -> 2 (sn-reid ids are cross-view PAIRS, not tracklets — the GSR law would discard 91% of the
+corpus; measured, nearly shipped wrong); jersey labels used ASYMMETRICALLY (letter = sound
+per-crop no-number evidence, 78,895 crops -> abstention class; number = unsound per-crop
+positive -> refused). Unplanned find: sn-reid's clazz field also supervises role + team side
+(sweep doc corrected).
+
+**Arm (a), our CLIP trainer, same code new manifest: identity mAP 58.75 / R1 76.70 at epoch 8 —
++1.82 / +2.75 over the floor, >=58 at FOUR consecutive checkpoints (plateau, not a spike), +5.00
+over GSR-only. Session 2's overfitting decay is gone. 41 GPU-min.** Team mAP at the identity
+peak: 77.45 vs 78.17 (-0.72) — the "team not sacrificed" condition NOT strictly met there
+(epoch 4 = the balanced point); flagged, not glossed. **Arm (b) (fine-tune shipped PRTreID on
+unified): WALL** — their stack is shape-coupled to GSR at sampler AND loss (5 structural
+failures, 4 fixed, triplet-loss None unresolved at timebox); consequence stated plainly: no
+second-architecture confirmation, the result rests on the CLIP arm alone. Our clean-room trainer
+ingested the identical corpus unchanged — the argument for having built it.
+
+**Honest framing preserved: crop-retrieval mAP is NOT GS-HOTA.** Session 4 dispatched: wire
+epoch8.pt into the actual pipeline (embed OUR detections' crops on the server), swap for PRTreID
+in the connector + solver gallery, valid GS-HOTA vs the v4 recipe, freeze-once-test-once if it
+holds, package v5. That run is the conversion question — and the campaign's next submission.
+
+## 2026-08-05 — Session 4: the encoder converts (+0.33 valid, all in association) — test spend HELD
+
+results/CLUSTER_SESSION4.md, kb clip-s4-001..003. The swap was made controlled first: two latent
+silent-mixing bugs closed (hardcoded prtreid cache path in eval/gsr_identity.py; embedder missing
+from tools/gsr_v4.config_key — either would have mixed CLIP and PRTreID artifacts invisibly; one
+GSR_EMBEDDER switch now drives both, on-record names byte-identical). Extraction ran on the
+laptop by design (one 881 MB checkpoint down, nothing back; 90 min for 58 sequences).
+
+**The retune was mandatory: CLIP's cosine space is ~4.8x wider** — at the inherited tau=0.080 the
+swap reads as a 4-point FAILURE; swept on DEV-20, broad plateau 0.32-0.52, frozen tau=0.450
+(kb clip-s4-002). **TEST-38: v5 CLIP 37.03 vs v4 control 36.71 (re-derived exactly) = +0.33,
+entirely AssA (+1.32), p=0.0629, 23/15 helped/hurt.** The mechanism is exactly where an
+appearance embedding can act; the significance is not there yet — AND the recipe is knowingly
+half-tuned: solver app_gain/sim_none are still PRTreID-scaled (estimated CLIP equivalents ~3 /
+~0.67), making +0.33 a LOWER BOUND. Worker held the test-49 spend on its own judgment (right
+call). Next: retune the two solver params on DEV-20, TEST-38 once; PRE-DECLARED gate for the
+test-49 + package-v5 spend: TEST-38 >= 37.2 after the full tune.
+
+## 2026-08-04 — Cluster Session 2: our own trainer, a caught bug, and the data-size ceiling
+
+results/CLUSTER_SESSION2.md, kb clip-s3-001..004 (+ prtreid-003 corrected with withdrawal
+recorded). The evaluator was built FIRST and gated on reproducing the 56.93 floor — it failed
+twice on real bugs (BGR channel order; the team metric's -1 filtering), and the BGR bug turned
+out to have poisoned Session 1's GK probes: re-run under RGB, every number moved and one model
+ordering FLIPPED. The GK verdict SURVIVES (best per-tracklet 0.5395 vs 0.5329 floor — still
+nothing) but the "anti-informative mechanism" claim was an artifact and is WITHDRAWN, on the
+record. This is why evaluator-verification-before-numbers is a hard rule.
+
+Built: clean-room crop builder matching sn-gamestate's dataset EXACTLY (20,067 crops / 1,343 ids
+/ 57 videos — the documented spec suffices; license question settled; also found GSR has no
+visibility field, so the documented min_vis rule filters nothing). CLIP ViT-B/16 + shared 256-d
+embedding + ArcFace identity + per-video team + jersey-with-no-number-class + role heads;
+progressive unfreeze; 13-26 s/epoch. Training does real work (+22.3 mAP over untrained CLIP) but
+**identity tops at 53.75 vs the 56.93 floor, overfitting after epoch 10; an annealed rerun
+saturates at the same level.** Combined with Session 1's from-scratch hrnet32 (peak 55.80 then
+decay): **two independent architectures agree GSR train (1,343 ids) cannot build a competitive
+embedding from generic init — the shipped checkpoint's edge is its LARGER re-ID pretraining, not
+architecture.** Verdict stated with the Table-5 comparability caveat (GS-HOTA != crop mAP).
+**Session 3 dispatched: scale identities ~17x — sn-reid's 340,993 crops / 400 games / 6 leagues
+(MIT, free download), unified training + a gentle fine-tune arm from the shipped checkpoint;
+same verified evaluator; GSR-train-alone is CLOSED as a training corpus.**
+
+## 2026-08-03 — Cluster Session 1: infrastructure conquered, first training run is an honest negative
+
+Access reality: NOT the OMNI SLURM cluster — `a100server1` (192.168.3.19, campus-net only):
+2x A100-PCIE-40GB, no scheduler, 500 GB quota. SSH key auth installed from the laptop. GPU 0
+belongs to another user (untouched); we run on GPU 1 alongside a light co-tenant.
+
+**Infrastructure (all working, all documented in the session log):** miniconda env `gsr`
+(py3.11, torch 2.5.1+cu121) — **the legacy sn-gamestate stack was NOT needed**; five documented
+fixes got their reid training path onto modern torch (constraints pin, requires-python sed,
+albumentations 1.3.1, setuptools<81, PYTHONPATH for tracklab's unpackaged hydra plugins). Data:
+30.85 GB / 164 sequences mirrored + verified (750 imgs + labels each; splits 57/58/49). Two
+upstream patches on server clones only (CUDA event sync that hard-crashed every eval on torch
+2.5; noted their downloader has no timeout — pre-fetch weights with curl). Two config traps
+documented: `test.evaluate=False` required or the "training" run silently evals-only;
+`dataset.nvid=-1` required or it silently trains on ONE video.
+
+**Session 1 complete (results/CLUSTER_SESSION1.md, kb prtreid-001..004):** the PRTreID lever is
+CLOSED for re-ID (LR-corrected fine-tune = noise band straddling the 56.93 floor; from-scratch
+cannot rebuild the shipped embedding from GSR train alone). **GK->team via appearance is CLOSED
+with a mechanism**: retrieval linking lands BELOW the majority floor (0.36-0.46 vs 0.53) while
+the SAME clusters separate outfield teams at 90.5% (the control that makes it safe to call) —
+keeper kits are REQUIRED to differ from both outfield kits, so appearance-similarity-to-outfield
+is anti-informative for keepers, and sharpening team separation makes it WORSE. The +2.4
+side-resolver path stays locked pending a genuinely different idea (position/context, not
+appearance). Gems banked: BN-stats adaptation +0.18 free (prtreid-004); from-scratch team head
++4.71 retrieval mAP (prtreid-002, deliberately PENDING — single epoch reading). Session totals:
+~4.5 GPU-h for a complete map of the cheap-lever space. NEXT: the real S3 build — CLIP encoder +
+attribute heads, our own trainer (reimplemented crop law + MIT torchreid parts), GSR train first.
+
+**First training (20 epochs, 50m43s on the shared A100): FAILS the premise honestly.** The
+flag-flip retrain at their documented recipe lands BELOW the checkpoint it initialized from:
+REID mAP 56.93 -> 55.14 (-1.79), team mAP 78.17 -> 74.94 (-3.23), role +0.95. Trace diagnosis:
+the recipe re-runs warmup to LR 3.5e-4 on an already-converged init — loss climbs monotonically
+through warmup, mAP falls in lockstep. **The floor to beat is the SHIPPED baseline: 56.93 REID
+mAP / 78.17 team mAP.** Next probes dispatched (~1 GPU-h each): (a) LR/10 + fixbase fine-tune,
+(b) from-ImageNet init for a genuine from-scratch floor. Key operational number: **a full
+20-epoch recipe = ~51 min** — iteration on this server is effectively free.
+
+## 2026-08-02 — Recipe v4: two complementary knobs, test 35.40 -> 39.02
+
+results/GSR_V4.md, kb gsr-v4-001..004 (gsr-calibgate-001 superseded). Component-honest DEV-20
+development on the v3 base (control reproduced to 4 dp everywhere):
+- **C1 crop_scale 1.25 on GSR: DROP (-0.38)** — and the negative sharpens the earlier fix's
+  meaning: the x1.25 constant repairs `estimate_player_box`'s 0.814x under-sizing on EPL
+  reconstructed crops; GSR crops come from real detector boxes — nothing to repair. 51 min GPU
+  spent to kill the premise; exactly-paired crops show 1.006x reads.
+- **C2 aggregation floor 0.85 -> 0.80 (benchmark evidence only): +1.09** (DetA lever). The FACTS
+  chain keeps 0.85 — coverage@precision-0.85 collapses under 0.80 (0.31 -> 0.03 on valid);
+  ocr_density_rule.json untouched; benchmark arm writes its own votes dir. Documented hard.
+- **C3 jersey-compatible merge gate + tau 0.080: +1.65** (AssA lever) — the gate (never merge
+  tracklets with conflicting confident reads) makes loose tau safe for the benchmark; merge
+  precision 0.771 on test (below the 0.80 facts bar — benchmark-only, like C2).
+- C4 truncation prior: not built (n=3 wrong reads on GSR DEV vs 44% on FOOTPASS — no fit on 3).
+- **Combined (frozen 02:02:32, before valid 02:17 / test 02:36): DEV +3.62, valid 34.00 -> 36.71
+  (+2.71, bar met), official test 35.40 -> 39.02** (43/49 helped, p=8.6e-10, LocA UP 0.20).
+  Package results/gsr_submission/gsr_testphase_gtfree_v4_24b4b67e.zip — re-scores to itself,
+  legitimacy 0 violations. **UPLOADED 2026-08-02: codabench shows 39.02 — server agrees with the
+  local scorer again.** Public arc: 33.37 -> 35.40 -> 39.02.
+Legitimate arc: 31.88 -> 33.37 -> 35.40 -> 39.02 in ~36 hours, every step frozen-then-verified.
+
+**Drive backup COMPLETE:** 16/16 dirs uploaded + checksum-verified, 0 failures, 582 min total
+(~58 GB). Local copies intact. results/GDRIVE_UPLOAD_LOG.md is the record.
+
+## 2026-08-01 (night) — N2c: the calibration dropout was OUR OWN filter; test 33.37 -> 35.40
+
+**Premise overturned by measurement** (results/GSR_CALIBGATE.md; kb gsr-calibgate-000 retraction +
+-001, superseding gsr-calibfill-001): PnLCalib was NOT producing off-pitch homographies (1.3% of
+dead frames). 96.4% of dead frames had good homographies with 100% of players on-pitch — killed by
+our own `reject_implausible_frames` (>=8 players, >=25 m span): a wide-shot rule strangling zoomed
+frames. Second self-inflicted evidence loss of the campaign (first: the OCR aggregation bug).
+
+**Fix (METRICS_VERSION 2026.08.1):** trust rule relaxed to (3 players, 5 m) + on-pitch
+plausibility in the gate + detection-before-calibration ordering + PnLCalib all-18-hypotheses
+candidate machinery (needed for only 0.8% of frames — the threshold was the lever). DEV sweep ->
+frozen (3,5) -> valid ONE run: 32.01 -> **34.00** (both controls reproduced to 4 decimals) ->
+official test ONE run: **35.40 / DetA 24.02 / AssA 52.18 / LocA 93.40** (+2.03 over shipped v2,
+paired p=1e-7, 84,211 rows recovered = 18.3%, LocA cost vs fill +0.03 i.e. none). Package v3
+results/gsr_submission/gsr_testphase_gtfree_calibgate_85f63db4.zip — zip re-scored identical,
+legitimacy audit 0 violations. UPLOAD TOMORROW (1/day; 33.37 went up today and matched local
+exactly). Bonus: recovered geometry GROWS every team-side margin (SNGS-129 0.75 -> 6.69 m) though
+45/49 unchanged. Negatives: identity naming drifts -0.0014; SNGS-190 still lost; fresh-run RANSAC
+jitter median 0.26 m documented. **The same defect afflicts the ManU pipeline (6.9% of frames;
+palace_manutd 18.1%) — queued EPL re-solve when that thread resumes.**
+Ops: teamside train-probe died at 37/39 (SNGS-169/170 missing — restart queued); 2 unrelated test
+failures (stale demo test broken by the Tier-A crop deletion; kb evidence-path format on
+ident-036) — cleanup dispatched.
 
 ## 2026-08-01 (evening) — N2b: calibration fill in the legitimate recipe — test 31.88 -> 33.37
 

@@ -27,8 +27,9 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
 
 ## Standing constraints (from the user — do not relax)
 
-- **Git:** commit ONLY when explicitly asked. Never push or force-push. Author is "Sid" — no Claude
-  co-author line, no "Generated with Claude" footer.
+- **Git:** commit ONLY when explicitly asked. Push ONLY to origin (siddhanth65/football-synthesizer,
+  private) under Sid's standing authorization (2026-07, in memory) — never force-push, never any
+  other remote. Author is "Sid" — no Claude co-author line, no "Generated with Claude" footer.
 - Sibling repos (e.g. `football-state-of-play`) are READ-ONLY.
 - Scope (2026-07-17 pivot, per Sid): **Manchester United, EPL 2024-25 season** — demo = opposition
   scouting pack for ManU. France/WC material is REFERENCE ONLY (PMSR PDFs stay as method-calibration
@@ -58,3 +59,7 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
   post-`link_ball` usable track. Never quote pre-link detection/projection counts as "coverage".
 - End-to-end before claiming: run the real pipeline (the regeneration, the full report), not just the
   intermediate probe, before updating STATUS/memory with a win.
+- **Never `git checkout`/`git restore` shared mutable files** (`knowledge/claims.json`, `STATUS.md`,
+  any results ledger): they routinely carry other sessions' uncommitted work. Undo your own edit
+  surgically (Edit tool, or re-apply from your diff) — a checkout destroyed 25 uncommitted claims
+  on 2026-08-05 (22 recovered by script re-run, 3 lost). Check `git diff` scope before ANY revert.
