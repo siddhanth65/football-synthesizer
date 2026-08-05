@@ -4640,6 +4640,68 @@
       "caveats": [
         "Whether activating the gate would help or hurt end-to-end is UNMEASURED -- only that it currently does nothing and that turning it on cuts torso coverage by ~5 points."
       ]
+    },
+    {
+      "id": "clip-s5-001",
+      "statement": "The v5.1 solver retune (app_gain 10.0 -> 3.0, sim_none unchanged at 0.92) buys +0.6118 GS-HOTA on DEV-20 (37.0711 -> 37.6829) but -0.0527 on held-out TEST-38 (37.0344 -> 36.9817, 7 helped / 9 hurt, Wilcoxon p = 0.438). Session 4's sim_none~0.67 estimate for the CLIP-scaled solver is refuted -- 0.67 costs 0.28 GS-HOTA against the inherited 0.92 on DEV-20, which is itself the DEV optimum. DEV-20 cannot support sub-point decisions: only 11 of 20 sequences move at all, and 2 sequences (SNGS-093 +5.50, SNGS-090 +4.44) supply 9.94 of the pooled +13.25 positive DEV delta, i.e. about 75% of the gain. The pre-declared gate (TEST-38 >= 37.2 spends the test-49 run) is NOT met; no test-49 run was spent, no submission built, no GPU booked.",
+      "value": -0.0527,
+      "unit": "GS-HOTA delta on held-out TEST-38 from the v5.1 solver retune vs the frozen v5 recipe (36.9817 vs 37.0344), against a DEV-20 gain of +0.6118 that did not transfer",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V5.md",
+        "results/gsr_v5_1_frozen.json",
+        "results/gsr_benchmark/gsr_v4_v51_t38_clip.json"
+      ],
+      "method": "tools.gsr_v4.solver_config(app_gain=, sim_none=) override swept on DEV-20 (21 arms) with the connector/embedder/positions/jersey stages frozen at v5; best arm (app_gain 3.0, sim_none 0.92) declared and hashed in results/gsr_v5_1_frozen.json before the single TEST-38 verification run against a re-derived v5 control.",
+      "n": 38,
+      "caveats": [
+        "PENDING-style negative reported as the headline, not a footnote: the largest single-knob DEV move available in this recipe (+0.6118) did not survive contact with 38 unseen sequences (p = 0.438).",
+        "Gate 37.2 not met; no test-49 spend; public leaderboard number stays the v5/v4 figures (37.03 / 36.71), not v5.1's 36.98.",
+        "re-minted 2026-08-05 after the checkout incident; original record lost, statement reconstructed verbatim from the cited documents."
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "identity",
+        "association",
+        "clip",
+        "cluster",
+        "methodology"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "clip-s4-001"
+      ]
+    },
+    {
+      "id": "clip-s5-002",
+      "statement": "The session-3 CLIP jersey head, tested as a second voter, scores 0.151 precision on the crops where the shipped chain abstains -- worse than Qwen2-VL-2B's 0.265 on the same crops, against a pre-declared floor of 0.80. Neither candidate is usable. The mechanism is diagnosable, not guessed: the head is 0.863 precise per crop on its own training split but collapses to 0.125 on held-out valid sequences built by the same crop builder from the same dataset -- a boundary that changes only which players are in frame -- meaning it learned to recognise a player and recall his number rather than to read digits. Its abstention (no-number) class carries near-zero information: precision 0.318 against a 0.275 base rate is only a 1.16x lift on valid, versus 1.95x on its own training split, confirming the abstention behaviour is also memorised rather than learned.",
+      "value": 0.151,
+      "unit": "read precision of the session-3 CLIP jersey head on DEV-20 chain-abstain crops (Qwen 0.265, floor 0.80)",
+      "status": "confirmed",
+      "evidence": [
+        "results/JERSEY_HEAD_VOTER.md",
+        "results/gsr_benchmark/jersey_head_trial.json"
+      ],
+      "method": "42-way jersey head from outputs/gsr/clip_ckpt/epoch8.pt scored on DEV-20 crops where the shipped Koshkina-chain OCR abstains, against the pre-declared 0.80 second-voter floor set in results/OCR_DENSIFICATION.md #7 (Qwen2-VL-2B baseline 0.265). Train-vs-valid collapse measured on crops built by the identical crop builder from the identical dataset, split only by sequence.",
+      "n": null,
+      "caveats": [
+        "REJECT verdict: the football-trained head is 0.11 worse than the generic VLM it was meant to beat on the same 0.80 bar; the second-voter question is closed for both trained-head and VLM candidates for now.",
+        "The 1.16x abstention lift and 0.125 read precision are both measured against same-subset baselines (0.275 base rate; 0.102 modal-number baseline), not chance alone.",
+        "re-minted 2026-08-05 after the checkout incident; original record lost, statement reconstructed verbatim from the cited documents."
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "jersey",
+        "clip",
+        "second-voter",
+        "cluster"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     }
   ]
 }
