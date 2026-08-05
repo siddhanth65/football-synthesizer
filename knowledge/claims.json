@@ -4581,12 +4581,24 @@
         "server ~/data/jersey-2023/test_results.jsonl"
       ],
       "method": "Server a100server1, GPU 1. ~/work/jersey/dev20_arm.py scores one (legibility x PARSeq) arm over the 7,055 DEV-20 GT crops (20 sequences = every 3rd of the sorted 58 valid, per eval.gsr_identity.split_sequences), of which 4,965 carry a GT number. The pose torso RoI is built ONCE by ~/work/jersey/dev20_torso.py and shared by every arm, so only the swapped weights move. Arm 4t = PARSeq from Koshkina's shipped SoccerNet fine-tune, 25 epochs on plus_v3_torso (75,154 train / 3,955 val crops: jersey-2023 + GSR-train + SoccerNet-v3, all legibility-filtered at 0.7, then pose torso-cropped). Decode matches tools/koshkina_str_sidecar.py and generator.jersey_id.parseq_positions_to_probs verbatim.",
+      "n": 4965,
       "caveats": [
         "DEV-20 only. TEST-38 confirmation is not done and is S3's job.",
         "Arm 1 (legibility retrain) was NOT run -- the sn-reid negatives component was not resolvable from verifiable assets. Emit rate is still the SHIPPED legibility model's, so the dominance is on the precision axis with coverage held fixed.",
         "The jersey-2023 secondary number is from a simplified reproduction of Koshkina's tracklet chain (100 crops/tracklet sampled, top 30 by legibility, majority vote at min_conf 0.30); it reproduces the incumbent at 0.8084, not the published 0.874.",
         "An earlier full-body variant (arm 4, 0.7330) also passed but geometry-asymmetrically; arm 4t supersedes it and needs no pipeline geometry change."
-      ]
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "jersey",
+        "identity",
+        "cluster",
+        "soccernet-v3"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "gsr-jersey-011",
@@ -4601,10 +4613,23 @@
         "server ~/data/s2corpus/corpus_stats.json"
       ],
       "method": "Four PARSeq arms, 25 epochs each, batch 128, max_label_length 2, uniform last.ckpt rule: (2) synthetic init x planned, (3) shipped init x planned, (4) synthetic init x planned+v3, (4t) shipped init x planned+v3 in torso geometry. Arms 2/3/4 are compared in full-body geometry (their training geometry) at a common emit of 0.2866; the synthetic-vs-shipped init comparison (arm 2 vs arm 3) is like-for-like in corpus, geometry and emit.",
+      "n": 4965,
       "caveats": [
         "The v3 delta is measured in full-body geometry (arms 2/3/4). Arm 4t re-confirms the level in torso geometry but there is no torso-geometry no-v3 control, so the exact +0.31 is a full-body number.",
-        "Single seed per arm; no repeats, so small deltas like the -0.0217 init effect are indicative rather than significant. The v3 effect (+0.29 to +0.31) is far outside any plausible seed noise."
-      ]
+        "Single seed per arm; no repeats, so small deltas like the -0.0217 init effect are indicative rather than significant. The v3 effect (+0.29 to +0.31) is far outside any plausible seed noise.",
+        "n=4965 assumes the arm-2/3/4 emit rate (0.2866) is computed over the same 4,965 numbered-GT DEV-20 crops as the incumbent bar (section 3.1); CLUSTER_SESSION_S2.md does not restate the denominator for the full-body arms explicitly."
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "jersey",
+        "identity",
+        "cluster",
+        "soccernet-v3"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "gsr-jersey-012",
@@ -4620,10 +4645,23 @@
         "server ~/v3_ids.png, ~/leg_keep.png, ~/leg_drop.png"
       ],
       "method": "~/work/jersey/v3_crops.py cuts every Player/Goalkeeper box with a 1-2 digit ID from the 400 v3 games (105,702 crops; 889 dropped below 40 px height), streaming one game's zip at a time. ~/work/jersey/legibility.py runs the shipped legibility_resnet34_soccer_20240215.pth with the pipeline's exact preprocessing (Resize 256x256, ImageNet normalisation) and sweeps the threshold.",
+      "n": 105702,
       "caveats": [
         "The 56.8% is the legibility MODEL's opinion, not human ground truth; the visual check is a 40-crop sample, not an annotated audit.",
         "Threshold 0.7 is the coordinator-set operating point, not a tuned optimum; the sweep (0.3 -> 0.9 keeps 49.7% -> 35.7%) is recorded so it can be revisited."
-      ]
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "jersey",
+        "identity",
+        "cluster",
+        "soccernet-v3",
+        "data"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "gsr-pipeline-003",
@@ -4637,9 +4675,21 @@
         "server ~/work/jersey/dev20_torso.py (verbatim-match comment)"
       ],
       "method": "Two builds of the DEV-20 torso set over the same 7,055 crops, differing only in whether the keypoint third channel is the visibility placeholder (upstream) or sigmoid(keypoints_scores); each scored end-to-end with the shipped legibility model and shipped PARSeq against the recorded 1,370-read / 0.7029-precision baseline.",
+      "n": null,
       "caveats": [
-        "Whether activating the gate would help or hurt end-to-end is UNMEASURED -- only that it currently does nothing and that turning it on cuts torso coverage by ~5 points."
-      ]
+        "Whether activating the gate would help or hurt end-to-end is UNMEASURED -- only that it currently does nothing and that turning it on cuts torso coverage by ~5 points.",
+        "n not stated independently in results/CLUSTER_SESSION_S2.md: the claim's own method text names 7,055 DEV-20 GT crops as the denominator, but that figure does not appear anywhere else in the source doc, so it is recorded as null here rather than re-asserted unverified."
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "jersey",
+        "pipeline",
+        "cluster"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "clip-s5-001",
@@ -4702,6 +4752,147 @@
       "supersedes": [],
       "superseded_by": [],
       "depends_on": []
+    },
+    {
+      "id": "s3-reader-001",
+      "statement": "The S2 retrained PARSeq reader (arm 4t) clears the pre-declared S3 tracklet gate on both floors, measured on DEV-20 GSR jersey GT with an identical 1,596-track denominator: read density d = 0.4148 at read precision 0.8228 (gate: d >= 0.35 at prec >= 0.80; incumbent 0.3026 at 0.8103) and d = 0.3872 at precision 0.8620 (gate: d >= 0.26 at prec >= 0.85; incumbent 0.2218 at 0.8678). d = 0.4148 is the first measurement in this project to clear the EVIDENCE_DENSITY_LAW target of d = 0.347. The comparison is paired at the CROP, not sampled: crop extraction, the ResNet34 legibility gate and the KeypointRCNN torso RoI all run upstream of PARSeq and are unchanged, so the two evidence caches align 1:1 over 67,224 DEV-20 crops with the legibility score identical to 5 decimals and the torso flag identical on every row -- only the PARSeq weights differ. The mechanism is decisiveness, not just accuracy: at a 0.99 per-crop confidence floor the v6 reader commits to a number on 1.289x as many crops (9,305 vs 7,220), which lets the rule sweep collapse min_votes from 3-5 to 1 while holding precision.",
+      "value": 0.4148,
+      "unit": "DEV-20 tracklet read density d at read precision >= 0.80 (incumbent 0.3026 at 0.8103; gate 0.35)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_S3_READER.md",
+        "results/gsr_benchmark/gsr_ocr_density_dev_v6.json",
+        "results/ocr_density_rule_v6.json",
+        "results/CLUSTER_SESSION_S2.md"
+      ],
+      "method": "eval.gsr_jersey --percrop --variant _v6 --max-crops 60 --parseq-ckpt <arm4t> over the 20 DEV sequences (55 min laptop GPU, 60 crops/track matching the on-record cache), then tools.ocr_density --sweep --variant _v6: the same 96-point rule grid and the same pick-highest-d-clearing-the-floor rule used for the on-record freeze, written to a variant-suffixed file so the on-record freeze is untouched.",
+      "n": 1596,
+      "caveats": [
+        "The shipped 2024 ResNet34 legibility model is unchanged and is still the binding emit gate: 12,814 of 67,224 DEV-20 crops (19.1%) pass it. CLUSTER_SESSION_S2.md section 4 records that arm 1, the legibility retrain, was never run.",
+        "Read precision is graded against the dominant GT jersey per track, so a correct read on the minority identity of a contaminated track is charged as an error -- a floor on true per-read precision, not a point estimate.",
+        "DEV-20 only; no TEST-38 or test-49 evidence was scored."
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "jersey",
+        "ocr",
+        "density",
+        "gate",
+        "v6"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
+    },
+    {
+      "id": "s3-reader-002",
+      "statement": "Dropping the S2-retrained PARSeq weights into the shipped chain -- a weights-only swap, with the aggregation rule, connector, solver and association all held at their frozen values -- moves GS-HOTA on the S5-frozen EIoU partition from 39.0820 to 42.7449 (+3.6629) on DEV-20, with 18 of 20 sequences helped, 2 hurt, worst -1.74, best +14.02, Wilcoxon p = 0.00021. The pre-declared DEV gate (>= +1.0 GS-HOTA, >= 12/20 helped, DetA carrying the gain) PASSES on all three criteria, and the DetA criterion emphatically: GS-DetA +4.7592 against GS-AssA +0.5686, i.e. 89% of the movement is detection accuracy, which is what a jersey lever must move under a metric that deletes any detection whose number is wrong. Per-row identity accuracy goes 0.4756 -> 0.5463 and jersey accuracy 0.5302 -> 0.6050 over 190,899 auditable rows. This is the largest single-lever DEV gain of campaign v6. The refactor that carries the swap was verified default-preserving by re-deriving the S5 frozen point through it first: 37.0711 control / 39.0820 arm, matching GSR_EIOU.md to four decimals.",
+      "value": 3.6629,
+      "unit": "GS-HOTA delta on DEV-20 from the v6 reader swap, on the S5-frozen EIoU base (39.0820 -> 42.7449)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_S3_READER.md",
+        "results/gsr_benchmark/gsr_eiou_dev_clip_s3reader.json",
+        "results/gsr_benchmark/gsr_eiou_dev_clip_s3repro.json",
+        "results/GSR_EIOU.md"
+      ],
+      "method": "tools.gsr_eiou --run --split dev --embedder clip --grid 0.3:1:0.5:0.3 --percrop-variants ',_v6': one invocation crosses the frozen association point with both per-crop OCR variants, so control and arm share the identical relabelling map, positions, embeddings and downstream configuration and differ ONLY in which per-crop parquet supplies the jersey evidence. Aggregation held at the on-record 0.80-floor rule (min_crop_conf 0.90, min_votes 3), tau 0.450, jersey-compatible merge gate on, no confusion refit. Paired per sequence.",
+      "n": 20,
+      "caveats": [
+        "DEV-20 only. No TEST-38 scoring was spent and the test-49 split was not touched; S7 owns the combined freeze. The v5/v5.1 precedent is a DEV win shrinking to +0.33/-0.05 on TEST-38, which is why the gate was sized at +1.0.",
+        "The connector tau was not re-swept on the changed evidence, so this is a lower bound on the lever (the GSR_EIOU.md section 8.4 caveat applies unchanged).",
+        "The digit-confusion prior was not refit on v6 reads; crop-level agreement with the incumbent is only 0.755 at the 0.50 floor, so the error pattern differs and a refit is an untested S7 candidate.",
+        "Two sequences regress (SNGS-090 -1.74, SNGS-033 -0.88)."
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "jersey",
+        "gs-hota",
+        "eiou",
+        "gate",
+        "v6"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "s3-reader-001"
+      ]
+    },
+    {
+      "id": "s3-reader-003",
+      "statement": "The aggregation rule that MAXIMISES read density subject to the precision floor is NOT the rule that maximises GS-HOTA, and the gap is worth about a point. On identical v6 evidence and an identical EIoU partition, the v6-swept rule (min_crop_conf 0.50, min_votes 1; d = 0.4148 at read precision 0.8228) scores GS-HOTA 41.8014, while reusing the incumbent's own rule (min_crop_conf 0.90, min_votes 3; d = 0.3139 at read precision 0.9256) scores 42.7449 -- 0.94 LOWER for 32% MORE read tracklets. The denser arm is worse on both terms, DetA -0.71 and GS-AssA actually negative against the control (-0.69), and it names 875 tracklets to the sparser arm's 729 while scoring a lower identity accuracy for them (0.5316 vs 0.5463); mean identities per sequence rises 13.25 -> 16.85 at flat merge precision, i.e. the extra votes split identities across more slots rather than consolidating them. The reason is structural: under GS-HOTA a wrong number is not a missing number -- it deletes a detection that a null would have let match -- so a retrained reader's precision headroom should be banked as precision, not spent on density. The tracklet-density gate and the scored objective disagree about where to sit on the frontier.",
+      "value": -0.9435,
+      "unit": "GS-HOTA delta on DEV-20 from spending the v6 reader's precision headroom on density (42.7449 -> 41.8014)",
+      "status": "tentative",
+      "evidence": [
+        "results/GSR_S3_READER.md",
+        "results/gsr_benchmark/gsr_eiou_dev_clip_s3reader.json",
+        "results/gsr_benchmark/gsr_eiou_dev_clip_s3readerB.json",
+        "results/gsr_benchmark/gsr_ocr_density_dev_v6.json"
+      ],
+      "method": "Two tools.gsr_eiou runs at the same frozen association point on the same _v6 per-crop evidence, differing only in which frozen aggregation rule tools.gsr_v4.rule_for resolves (the on-record freeze vs the variant's own DEV sweep). Both compared to the same EIoU + incumbent-reader control, paired per sequence.",
+      "n": 20,
+      "caveats": [
+        "TENTATIVE: arm B vs arm A is not statistically separated on 20 sequences (paired mean -0.850, 7 helped / 13 hurt, Wilcoxon p = 0.216). The ordering is directional on DEV, not proven.",
+        "Both arms clear the pre-declared DEV gate; this claim is about which to ship, not about whether the reader works.",
+        "Only two points on the frontier were measured; the optimum may lie between them and was not searched."
+      ],
+      "date": "2026-08-05",
+      "tags": [
+        "gsr",
+        "jersey",
+        "ocr",
+        "density",
+        "negative",
+        "v6"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "s3-reader-001",
+        "s3-reader-002"
+      ]
+    },
+    {
+      "id": "gsr-det-003",
+      "statement": "SoccerNet-v3 breadth confirms gsr-det-002's causal claim and nearly closes the role leak -- the S4 gate still FAILS by 0.0004 on its per-game criterion. Fine-tuning the pipeline detector (YOLOv8s, classes {0 ball, 1 goalkeeper, 2 player, 3 referee}) for 10 epochs at lr0 0.002 with 5A's colour-hardened aug (hsv 0.3/0.9/0.6) on a UNION of GSR train (42,750 video frames, 3 games) and SoccerNet-v3 (33,986 stills, 400 games / 6 leagues, 366,081 boxes = 98.52% of v3 kept; Staff/Wall/objects dropped), 1.258:1 GSR:v3, 48 min on one A100, evaluated on GSR valid (58 seq, 8,700 frames, 141,512 person GT) through the same evaluator as a re-derived control: box mAP@0.5 0.5003 -> 0.6853 (+18.50), recall at MATCHED precision 0.9031 -> 0.9572 (+5.41), ball mAP@0.5 0.0581 -> 0.2066, recall better on 58/58 sequences, and -- reversing 5A -- role-correct coverage of GT persons RISES 0.8403 -> 0.9038 (+6.35) where 5A's best run lost 6.05. The game-3 player->referee leak falls 0.348 (5A colour) -> 0.0504, a 6.9x cut, and misses the pre-declared <=0.05 by 20 detections in 46,053. All four gate criteria were required, so the verdict is FAIL and v6 ships without A2 at zero sunk cost (the ~5 h valid + ~9 h test laptop re-extract was deferred to S7 and never run). Two further reversals of 5A: per-track majority voting over GT tracks now REPAIRS the fine-tune (coverage 0.9038 -> 0.9197, leak 2,359 -> 258, -89%) instead of worsening it, i.e. the residual errors are per-frame flicker rather than track-consistent conviction; and the leak is NOT flat after one epoch but falls monotonically (0.0915 ep1 -> 0.0615 ep4 -> 0.0626 ep7 -> 0.0504 ep10) with the valid mAP curve still rising at epoch 10 -- the 10-epoch budget ran out before convergence, so this is a dose shortfall, not a wall.",
+      "value": 0.0504,
+      "unit": "game-3 player->referee rate at last.pt vs the pre-declared <=0.05 criterion (2,322 of 46,053 matched players; 2,302 would have passed) -- the single failed axis of four",
+      "status": "confirmed",
+      "evidence": [
+        "results/CLUSTER_SESSION_S4.md#0 PRE-DECLARED GATE (written before any S4 evaluation was run)",
+        "results/CLUSTER_SESSION_S4.md#4 Control vs fine-tune (last.pt, epoch 10)",
+        "results/CLUSTER_SESSION_S4.md#5 Per-game -- the criterion-(c) table",
+        "results/CLUSTER_SESSION_S4.md#6 Epoch trajectory -- the leak is falling and had not converged",
+        "results/CLUSTER_SESSION_S4.md#7 GATE VERDICT -- FAIL on (c), by 0.0004"
+      ],
+      "method": "~/work/det/build_det_data.py gained a --v3-root ingester: v3 class strings mapped per ~/logs/v3_audit.md section 9, frames written pre-scaled to the training imgsz long side (640, INTER_AREA, JPEG q90) because ultralytics' loader does exactly that rescale at load time -- so the 1280x720-majority v3 stills and the 1920x1080 GSR frames (both ~16:9) get identical geometry inside the network, at 1.9 GB instead of 45 GB. Sampling is a plain union (no sampler), 42,750:33,986 = 1.258:1, since the raw ratio was already the intended ~1:1. Training via ~/work/det/train_det_ft.py, judged on last.pt (best.pt was epoch 10 = last.pt). Evaluation via ~/work/det/det_eval.py (ultralytics model.val for box mAP + a class-agnostic PERSON evaluator matching greedily by confidence at IoU 0.5, at the pipeline's imgsz 640 / iou 0.7 / max_det 300 / DETECT_CONF 0.20) and ~/work/det/role_vote.py (role accuracy per detection and after a majority vote over GROUND-TRUTH tracks, plus per-game player->referee aggregation added this session). The control was re-derived first through the identical evaluator and reproduced 5A to the digit (0.5003 / 0.0581 / 0.7966 / 0.9031 / 0.8403457 / 645).",
+      "n": 58,
+      "caveats": [
+        "The failed criterion misses by 0.0004 -- 20 detections of 46,053 -- which is inside single-seed noise. The gate was declared before the evaluator ran and is NOT re-drawn; any re-run needs a fresh pre-declared gate, and selecting an epoch by its leak on the reported split is the selection the anti-selection rule forbids.",
+        "The +14.85 ball mAP@0.5 is a box-level number on stride-5 valid frames. Per the ball-metric rule, only the post-link_ball usable track counts as coverage; no ball-track validation was run, so this must not be quoted as ball coverage.",
+        "The per-track vote repair (leak -89%) uses GROUND-TRUTH track ids -- an oracle-association upper bound. A real tracker-side role vote is unmeasured.",
+        "GSR clip metadata carries no league or date, so game-level overlap with v3 cannot be checked directly; the seasons are disjoint (v3 2014-2017, GSR 2019-era) and v3's own valid/test games were not excluded, which is harmless since nothing v3 is evaluated on.",
+        "Role coverage on game 3 specifically still falls (0.8682 -> 0.8413) even though the aggregate rises; the fine-tune's win is carried by games 2 and 5 (+11.7 and +12.5 points of role coverage).",
+        "Single seed, single mix ratio, 10 epochs. Neither longer training nor a v3-oversampled mix was tested."
+      ],
+      "date": "2026-08-06",
+      "tags": [
+        "gsr",
+        "detection",
+        "detector",
+        "cluster",
+        "data",
+        "soccernet-v3"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "gsr-det-001",
+        "gsr-det-002"
+      ]
     }
   ]
 }
