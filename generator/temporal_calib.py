@@ -92,7 +92,7 @@ class TemporalCalibrator:
         (dx, dy), _ = cv2.phaseCorrelate(np.float32(self._ref), np.float32(gray))
         return float(np.hypot(dx, dy))
 
-    def calibrate_frame(self, frame_bgr) -> CalibrationResult:
+    def calibrate_frame(self, frame_bgr, foot_points=None) -> CalibrationResult:
         gray = self._gray(frame_bgr)
         is_cut = self._is_cut(gray)
         if is_cut:  # a cut invalidates the reusable pose and the drift reference
@@ -106,7 +106,7 @@ class TemporalCalibrator:
         self._prev = gray
 
         if recal:
-            res = self.base.calibrate_frame(frame_bgr)
+            res = self.base.calibrate_frame(frame_bgr, foot_points)
             self.n_full += 1
             self._since = 1  # this frame counts as 1 toward the next period boundary
             self._ref = gray

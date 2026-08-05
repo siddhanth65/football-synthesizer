@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -61,8 +62,14 @@ from generator.track_relink import load_gt_ids_by_frame, merge_precision, summar
 
 logger = logging.getLogger("gsr_gta")
 
-#: Where the per-detection PRTreID embeddings live (distinct from the shipped per-fragment cache).
-CACHE_SUBDIR = "detembed_cache_prtreid"
+#: Appearance embedder for the per-detection cache. ``GSR_EMBEDDER=clip`` swaps in the cluster
+#: session-3 encoder (:mod:`tools.clip_embedder`); the default keeps every on-record path
+#: byte-identical. Driving the cache directory off the same name stops two embedding spaces from
+#: ever landing in one cache -- every consumer resolves the subdir through this constant.
+EMBEDDER = os.environ.get("GSR_EMBEDDER", "prtreid")
+
+#: Where the per-detection embeddings live (distinct from the shipped per-fragment cache).
+CACHE_SUBDIR = f"detembed_cache_{EMBEDDER}"
 
 
 # === GT row audit ================================================================================
@@ -101,6 +108,7 @@ def fragments_per_gt(gt_by_row: dict[tuple[int, int], int]) -> float:
 # === One sequence ================================================================================
 def repair_sequence(
     df: pd.DataFrame, det: dict, params: GtaParams, *, do_split: bool = True,
+    numbers: dict[int, int] | None = None,
 ) -> tuple[pd.DataFrame, dict, dict, dict]:
     """Split then connect one sequence -> ``(split_df, row_lookup, remap, stats)``.
 
@@ -109,6 +117,8 @@ def repair_sequence(
         det: ``{track_id: (frames, embeddings)}`` per-detection embeddings.
         params: GTA hyper-parameters.
         do_split: When False the splitter is skipped (connector-only ablation).
+        numbers: Optional ``track_id -> confident jersey number`` gate for the connector
+            (:func:`generator.gta_link.connect`). Sub-tracklets inherit their parent's number.
 
     Returns:
         ``(split_df, {(old_tid, frame): sub_tid}, {sub_tid: final_tid}, stats)``.
@@ -121,7 +131,11 @@ def repair_sequence(
     sdet = split_detection_embeddings(det, splits)
     embs, counts = mean_embeddings(sdet)
     fragments = summarize_fragments(sdf)
-    remap = connect(fragments, embs, counts, params)
+    parents = {int(sub): int(old) for old, b in splits.items() for _lo, _hi, sub in b}
+    nums = None if numbers is None else {
+        **{int(k): int(v) for k, v in numbers.items()},
+        **{sub: int(numbers[old]) for sub, old in parents.items() if old in numbers}}
+    remap = connect(fragments, embs, counts, params, numbers=nums)
     n_before, n_after = len(fragments), len(set(remap.values()))
     return sdf, lookup, remap, {
         **sstats, "n_fragments_presplit": int(df[df["role"] != "ball"]["track_id"].nunique()),
@@ -183,11 +197,12 @@ def _inherit_votes(votes: dict[int, tuple[int, float]], parents: dict[int, int])
 def process_sequence(
     seq_dir: Path, df: pd.DataFrame, det: dict, params: GtaParams, *, do_split: bool,
     base_json: Path, dest: Path, vote_json: Path | None,
+    numbers: dict[int, int] | None = None,
 ) -> dict:
     """Repair, propagate jerseys, write the submission and GT-audit one sequence -> stats."""
     gt_by_frame = load_gt_ids_by_frame(seq_dir)
     pre_rows = gt_rows(df, gt_by_frame)
-    _sdf, lookup, remap, st = repair_sequence(df, det, params, do_split=do_split)
+    _sdf, lookup, remap, st = repair_sequence(df, det, params, do_split=do_split, numbers=numbers)
     post_rows = {(int(lookup.get((tid, f), tid)), f): g for (tid, f), g in pre_rows.items()}
     st["purity_before"] = tracklet_purity(pre_rows)
     st["purity_after_split"] = tracklet_purity(post_rows)
@@ -235,10 +250,8 @@ def _sequences(data_dir: Path, out_dir: Path, limit: int | None,
 
 def build_cache(data_dir: Path, out_dir: Path, params: GtaParams, limit: int | None,
                 only: list[str] | None = None) -> None:
-    """GPU stage: build the per-detection PRTreID embedding cache (resumable by disk state)."""
+    """GPU stage: build the per-detection embedding cache (resumable by disk state)."""
     import time  # noqa: PLC0415
-
-    from tools.prtreid_probe import PrtreidEmbedder  # noqa: PLC0415
 
     seqs = _sequences(data_dir, out_dir, limit, only)
     cache_dir = out_dir / CACHE_SUBDIR
@@ -252,7 +265,14 @@ def build_cache(data_dir: Path, out_dir: Path, params: GtaParams, limit: int | N
     from generator.extract import _build_detector  # noqa: PLC0415
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    embedder = PrtreidEmbedder(device=device)
+    if EMBEDDER == "clip":
+        from tools.clip_embedder import ClipEmbedder  # noqa: PLC0415
+
+        embedder = ClipEmbedder(device=device)
+    else:
+        from tools.prtreid_probe import PrtreidEmbedder  # noqa: PLC0415
+
+        embedder = PrtreidEmbedder(device=device)
     detector = _build_detector(device, "football")
     for i, seq_dir in enumerate(cold):
         t0 = time.time()

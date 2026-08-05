@@ -277,7 +277,7 @@ def _chain_ok(segs: list[tuple[int, int, tuple[float, float], tuple[float, float
 
 def connect(
     fragments: list[Fragment], embs: dict[int, np.ndarray], counts: dict[int, int],
-    params: GtaParams,
+    params: GtaParams, *, numbers: dict[int, int] | None = None,
 ) -> dict[int, int]:
     """Agglomerative tracklet connection under hard constraints -> ``{old_id: new_id}`` (pure).
 
@@ -292,25 +292,35 @@ def connect(
         embs: ``track_id -> L2-normalised mean embedding``. Tracklets absent here never merge.
         counts: ``track_id -> number of embedded detections`` (weights the running mean).
         params: GTA hyper-parameters.
+        numbers: Optional ``track_id -> confident jersey number``. When given, two components that
+            both carry a number and disagree may never merge -- an evidence gate that is orthogonal
+            to appearance, so a looser ``tau`` can be spent without buying the merges the number
+            evidence already refutes. Tracklets absent from the map are unconstrained.
 
     Returns:
         ``{old_track_id: new_track_id}`` for every fragment; each component takes its smallest id.
     """
+    numbers = numbers or {}
     comps: dict[int, dict] = {}
     for f in fragments:
         e = embs.get(f.track_id)
         if e is None:
             continue
+        num = numbers.get(f.track_id)
         comps[f.track_id] = {
             "segs": [(f.start_frame, f.end_frame, f.start_xy, f.end_xy)],
             "role": f.role, "team": f.team, "emb": e,
             "w": float(counts.get(f.track_id, 1)), "members": [f.track_id],
+            "num": num,
         }
 
     def pair(a: int, b: int) -> tuple[float, list] | None:
         """Cosine distance + merged segment chain for an admissible pair, else ``None``."""
         ca, cb = comps[a], comps[b]
         if ca["role"] != cb["role"] or ca["team"] != cb["team"]:
+            return None
+        # Both sides read a number and they disagree -> a proven bad merge, whatever appearance says.
+        if ca["num"] is not None and cb["num"] is not None and ca["num"] != cb["num"]:
             return None
         d = 1.0 - float(np.dot(ca["emb"], cb["emb"]))
         if d >= params.tau:
@@ -333,7 +343,8 @@ def connect(
         wa, wb = ca["w"], cb["w"]
         emb = ca["emb"] * wa + cb["emb"] * wb
         ca.update({"segs": merged, "emb": emb / max(float(np.linalg.norm(emb)), 1e-8),
-                   "w": wa + wb, "members": ca["members"] + cb["members"]})
+                   "w": wa + wb, "members": ca["members"] + cb["members"],
+                   "num": ca["num"] if ca["num"] is not None else cb["num"]})
         del comps[b]
         cand = {k: v for k, v in cand.items() if a not in k and b not in k}
         for other in comps:
@@ -535,6 +546,21 @@ def _demo() -> None:
     # Team gate: identical appearance, feasible motion, different team -> no merge.
     other = Fragment(2, 15, 25, (12.5, 10.0), (14.0, 10.0), "player", 1, 11)
     assert connect([f1, other], e, {1: 10, 2: 10}, params)[2] == 2
+    # Jersey gate: the pair that DOES merge is blocked once both sides read different numbers, and
+    # is untouched when only one side (or neither) carries a read.
+    assert connect([f1, f2], e, {1: 10, 2: 10}, params, numbers={1: 7, 2: 9})[2] == 2
+    assert connect([f1, f2], e, {1: 10, 2: 10}, params, numbers={1: 7, 2: 7})[2] == 1
+    assert connect([f1, f2], e, {1: 10, 2: 10}, params, numbers={1: 7})[2] == 1
+    # Transitivity: 1 reads 7 and 3 reads 9, so once 2 (unread) joins 1 it inherits 7 and 3 is out.
+    f4 = Fragment(3, 30, 40, (14.5, 10.0), (16.0, 10.0), "player", 0, 11)
+    e4 = {**e, 3: unit(a_dir + 0.01 * rng.normal(size=d))}  # same player look as 1 and 2
+    w = {1: 10, 2: 10, 3: 10}
+    assert connect([f1, f2, f4], e4, w, params) == {1: 1, 2: 1, 3: 1}, "control: all three merge"
+    gated = connect([f1, f2, f4], e4, w, params, numbers={1: 7, 3: 9})
+    # The unread tracklet 2 joins whichever neighbour is closest and inherits its number; the
+    # invariant the gate guarantees is only that the two READ tracklets never share a component.
+    assert gated[1] != gated[3], gated
+    assert len(set(gated.values())) == 2, gated
     print("gta_link demo OK: splitter cuts one switch (and no blip), connector honours all gates")
 
 

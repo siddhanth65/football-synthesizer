@@ -162,14 +162,26 @@ def jersey_arm(out_dir: Path, src: Path, dest: Path, seqs: list[str]) -> None:
 
 
 def gta_arm(data_dir: Path, out_dir: Path, pos_dir: Path, arm: Path, seqs: list[str],
-            *, tau: float) -> None:
-    """Run the frozen GTA connector (splitter OFF) over ``seqs`` on top of the jersey-attached arm."""
+            *, tau: float, jersey_dir: Path | None = None,
+            gate_votes_dir: Path | None = None) -> dict[str, dict]:
+    """Run the frozen GTA connector (splitter OFF) over ``seqs`` on top of the jersey-attached arm.
+
+    ``jersey_dir`` names the jersey-attached arm to rewrite (default: the calibration-fill one, so
+    every on-record call is unchanged). ``gate_votes_dir`` switches on the jersey-compatibility merge
+    gate of :func:`generator.gta_link.connect`, reading its numbers from that per-track vote cache.
+
+    Returns:
+        Per-sequence repair stats (merge precision, fragment counts) from
+        :func:`eval.gsr_gta.process_sequence`.
+    """
     from eval.gsr_gta import CACHE_SUBDIR, process_sequence  # noqa: PLC0415
+    from eval.gsr_identity import _load_votes, dominant_numbers  # noqa: PLC0415
     from generator.gta_link import GtaParams, load_or_build_det_embeddings  # noqa: PLC0415
 
     params = GtaParams(tau=tau, eps=0.30, min_samples=5, min_run=5, frame_stride=2)
-    base = out_dir / "eval_calibfill_koshkina" / "predictions" / "data"
+    base = (jersey_dir or out_dir / "eval_calibfill_koshkina") / "predictions" / "data"
     votes = out_dir / "koshkina_jersey"
+    stats: dict[str, dict] = {}
     for name in seqs:
         cache = out_dir / CACHE_SUBDIR / f"{name}.npz"
         if not cache.exists():
@@ -177,10 +189,13 @@ def gta_arm(data_dir: Path, out_dir: Path, pos_dir: Path, arm: Path, seqs: list[
             continue
         df = pd.read_parquet(pos_dir / f"{name}.parquet")
         det = load_or_build_det_embeddings(data_dir / name, df, cache, params=params)
-        process_sequence(data_dir / name, df, det, params, do_split=False,
-                         base_json=base / f"{name}.json",
-                         dest=arm / "predictions" / "data" / f"{name}.json",
-                         vote_json=votes / f"{name}.json")
+        nums = (dominant_numbers(_load_votes(gate_votes_dir / f"{name}.json"))
+                if gate_votes_dir is not None else None)
+        stats[name] = process_sequence(
+            data_dir / name, df, det, params, do_split=False, base_json=base / f"{name}.json",
+            dest=arm / "predictions" / "data" / f"{name}.json",
+            vote_json=votes / f"{name}.json", numbers=nums)
+    return stats
 
 
 def _paired(base_per_seq: dict, arm: dict[str, dict], seqs: list[str]) -> dict:

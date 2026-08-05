@@ -25,9 +25,10 @@ class _FakeBase:
         self.seq = list(seq)
         self.calls = 0
 
-    def calibrate_frame(self, frame_bgr):
+    def calibrate_frame(self, frame_bgr, foot_points=None):
         r = self.seq[min(self.calls, len(self.seq) - 1)]
         self.calls += 1
+        self.last_foot = foot_points  # the wrapper must forward the gate's plausibility evidence
         return r
 
 
@@ -54,8 +55,9 @@ def test_decide_recalibration_policy():
 def test_reuses_pose_within_period():
     base = _FakeBase([_ok()])
     tc = _static(base, period=10)
-    results = [tc.calibrate_frame(_F) for _ in range(5)]
+    results = [tc.calibrate_frame(_F, [(1.0, 2.0)]) for _ in range(5)]
     assert base.calls == 1  # only the first frame ran a full calibration
+    assert base.last_foot == [(1.0, 2.0)]  # foot points reach the wrapped calibrator
     assert all(r.ok for r in results)  # the rest reused the accepted pose
     assert tc.n_full == 1 and tc.n_reuse == 4
 

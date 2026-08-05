@@ -1,0 +1,16 @@
+{
+ "summary": {
+  "SNGS-034": {
+   "n_dead_cached": 645,
+   "dead_old_gate_passed": 645,
+   "dead_old_onpitch": 4,
+   "dead_recovered": 24,
+   "dead_recovered_rank0": 4,
+   "dead_median_old_err_m": 0.39720890204166226,
+   "dead_median_new_err_m": 0.3198242992443071,
+   "n_control": 30,
+   "control_pick_changed": 1,
+   "control_new_dead": 0
+  }
+ }
+}

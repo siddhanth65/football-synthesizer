@@ -1,0 +1,110 @@
+{
+  "seqs": [
+    "SNGS-021",
+    "SNGS-024",
+    "SNGS-027",
+    "SNGS-030",
+    "SNGS-033",
+    "SNGS-036",
+    "SNGS-039",
+    "SNGS-042",
+    "SNGS-045",
+    "SNGS-048",
+    "SNGS-051",
+    "SNGS-054",
+    "SNGS-057",
+    "SNGS-078",
+    "SNGS-081",
+    "SNGS-084",
+    "SNGS-087",
+    "SNGS-090",
+    "SNGS-093",
+    "SNGS-096"
+  ],
+  "crop_level": {
+    "n": 67224,
+    "shared": 67224,
+    "conf_10": 7220,
+    "conf_125": 7264,
+    "leg_10": 12814,
+    "leg_125": 11433,
+    "gain": 1189,
+    "lost": 1145,
+    "both": 6075,
+    "agree": 6057
+  },
+  "rule_arms": {
+    "0.80": {
+      "crop10": {
+        "rule": {
+          "min_crop_conf": 0.9,
+          "min_votes": 3,
+          "min_legibility": 0.5,
+          "emit_all": false
+        },
+        "max_crops": null,
+        "n_tracks": 1596,
+        "n_tracks_read": 483,
+        "d": 0.3026315789473684,
+        "n_reads": 483,
+        "n_reads_auditable": 464,
+        "read_precision": 0.8103448275862069,
+        "n_tracks_auditable": 464,
+        "track_precision": 0.8103448275862069
+      },
+      "crop125": {
+        "rule": {
+          "min_crop_conf": 0.9,
+          "min_votes": 3,
+          "min_legibility": 0.5,
+          "emit_all": false
+        },
+        "max_crops": null,
+        "n_tracks": 1596,
+        "n_tracks_read": 469,
+        "d": 0.29385964912280704,
+        "n_reads": 469,
+        "n_reads_auditable": 455,
+        "read_precision": 0.8219780219780219,
+        "n_tracks_auditable": 455,
+        "track_precision": 0.8219780219780219
+      }
+    },
+    "0.85": {
+      "crop10": {
+        "rule": {
+          "min_crop_conf": 0.99,
+          "min_votes": 5,
+          "min_legibility": 0.5,
+          "emit_all": false
+        },
+        "max_crops": null,
+        "n_tracks": 1596,
+        "n_tracks_read": 354,
+        "d": 0.22180451127819548,
+        "n_reads": 354,
+        "n_reads_auditable": 348,
+        "read_precision": 0.867816091954023,
+        "n_tracks_auditable": 348,
+        "track_precision": 0.867816091954023
+      },
+      "crop125": {
+        "rule": {
+          "min_crop_conf": 0.99,
+          "min_votes": 5,
+          "min_legibility": 0.5,
+          "emit_all": false
+        },
+        "max_crops": null,
+        "n_tracks": 1596,
+        "n_tracks_read": 341,
+        "d": 0.2136591478696742,
+        "n_reads": 341,
+        "n_reads_auditable": 336,
+        "read_precision": 0.8690476190476191,
+        "n_tracks_auditable": 336,
+        "track_precision": 0.8690476190476191
+      }
+    }
+  }
+}

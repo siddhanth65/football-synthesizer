@@ -1,0 +1,36 @@
+{
+  "declared_at": "2026-08-05T12:09:23+00:00",
+  "version": "eiou-1.0",
+  "module_sha256": "a7a8e3d09c10d0e1db37de318b04c823f9b6e5a27916d7314e6b34de8082c0ec",
+  "paper": "arXiv:2306.13074 (clean-room; reference implementation has no license and was not read)",
+  "association": {
+    "e": 0.3,
+    "e_step": 0.35,
+    "rounds": 1,
+    "w_app": 0.5,
+    "app_max": 0.3,
+    "ema": 0.9,
+    "max_lost": 30,
+    "match_tol_px": 6.0
+  },
+  "embedder": "clip",
+  "downstream": {
+    "aggregation_floor": "0.80",
+    "connector_tau": 0.45,
+    "jersey_compatible_merge": true,
+    "confusion_prior_refit": false,
+    "positions_source": "positions_gate (calibgate) -> re-associated"
+  },
+  "chosen_on": "valid DEV-20 (results/GSR_EIOU.md section 4); TEST-38 is verification only",
+  "dev20": {
+    "control_gs_hota": 37.0711,
+    "arm_gs_hota": 39.082,
+    "delta_hota": 2.0109,
+    "delta_assa": 1.8874,
+    "delta_deta": 1.8201,
+    "helped": 15,
+    "hurt": 5,
+    "wilcoxon_p": 0.05317
+  },
+  "note": "S5 component check only; the v6 combined recipe is S7 and the test-49 split is untouched."
+}

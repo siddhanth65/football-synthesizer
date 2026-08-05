@@ -1,0 +1,55 @@
+{
+  "declared_at": "2026-08-04T22:52:00+00:00",
+  "name": "v5-clip",
+  "what_changes_vs_v4": "the appearance embedder only: PRTreID (BPBreID/HRNet-32) -> the cluster session-3 CLIP ViT-B/16 + 256-d projection, trained on the unified GSR + SoccerNet-re-ID corpus. Every other stage (detector, tracker, calibration gate + fill, OCR chain, aggregation floor 0.80, jersey-compatibility merge gate, solver config, free team map, self roster) is byte-identical to the frozen v4 bundle.",
+  "parent": {
+    "file": "results/gsr_v4_frozen.json",
+    "declared_at": "2026-08-01T20:32:32+00:00"
+  },
+  "embedder": {
+    "module": "tools.clip_embedder.ClipEmbedder",
+    "checkpoint": "outputs/gsr/clip_ckpt/epoch8.pt",
+    "checkpoint_sha256": "9d2d205885abbf22c3751c19d15e7ba501cb3046eac476fe8862938a2154bdfa",
+    "provenance": "cluster session 3, ~/runs/clip_uni/epoch8.pt on a100server1; valid-split identity mAP 58.75 / team mAP 77.45 (results/CLUSTER_SESSION3.md)",
+    "embed_dim": 256,
+    "input": "RGB uint8 crop -> cv2 INTER_CUBIC resize to 224x224 -> /255 -> CLIP mean/std -> L2-normalised output",
+    "selected_by": "env GSR_EMBEDDER=clip, which drives eval.gsr_gta.CACHE_SUBDIR and tools.gsr_v4.config_key so no PRTreID artifact is ever reused"
+  },
+  "retuned_on_dev20": {
+    "connector_tau": 0.45,
+    "prior_value": 0.08,
+    "why": "the CLIP embedding space has a ~4.8x wider absolute cosine-distance scale than PRTreID (DEV-20: within-track d p90 0.2311 vs 0.0395; cross-track d p10 0.4287 vs 0.0931), so an absolute merge ceiling tuned on PRTreID is far too tight",
+    "swept": [
+      0.08,
+      0.25,
+      0.32,
+      0.38,
+      0.45,
+      0.52
+    ],
+    "chosen": "argmax of DEV-20 GS-HOTA inside a broad flat region (0.320-0.520 all within 0.18 GS-HOTA)"
+  },
+  "not_retuned": {
+    "solver_app_gain": 10.0,
+    "solver_sim_none": 0.92,
+    "note": "the solver's appearance term is also in cosine units and is therefore ALSO mis-scaled for this embedding (estimated equivalents: sim_none ~0.67, app_gain ~3). It was NOT retuned in this session. The v5 numbers are therefore a LOWER bound on what this embedder can do, not its tuned optimum."
+  },
+  "dev20_result": {
+    "gs_hota": 37.0711,
+    "gs_deta": 23.9202,
+    "gs_assa": 57.4538,
+    "gs_loca": 92.2701,
+    "idf1": 38.1219,
+    "merges": 826,
+    "merge_precision": 0.548,
+    "control_v4_prtreid": {
+      "gs_hota": 36.4488,
+      "gs_deta": 24.2649,
+      "gs_assa": 54.7536,
+      "gs_loca": 92.2615,
+      "merge_precision": 0.6355
+    },
+    "delta": 0.6223
+  },
+  "verification_plan": "valid TEST-38 exactly once at this frozen bundle, control re-derived in the same run; official test-49 only if TEST-38 beats v4's 36.71."
+}

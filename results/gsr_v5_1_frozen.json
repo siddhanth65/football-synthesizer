@@ -1,0 +1,62 @@
+{
+  "declared_at": "2026-08-04T19:36:48+00:00",
+  "name": "v5.1-clip-tuned",
+  "recipe_sha256": "41e254604b68e5084323299c5d11e71bd3648f835d47614148a7c2f5c4e0bdaf",
+  "parent": {
+    "file": "results/gsr_v5_frozen.json",
+    "declared_at": "2026-08-04T22:52:00+00:00",
+    "sha256": "92b4de6c89e05e810ec8b2ae20571ca123e5cc8ab586833862edb55068f8df0a"
+  },
+  "what_changes_vs_v5": "ONE scalar: the solver's appearance inverse temperature app_gain 10.0 -> 3.0. results/gsr_v5_frozen.json's not_retuned block flagged app_gain AND sim_none as mis-scaled for the CLIP space and estimated (app_gain ~3, sim_none ~0.67); the DEV-20 sweep confirms app_gain ~3 and REFUTES the sim_none estimate (0.67 costs -0.28 GS-HOTA against the inherited 0.92, which is the DEV argmax). sim_none therefore stays byte-identical to v3/v4, and the shipped solver config file is unchanged on disk.",
+  "v5_1_bundle": {
+    "embedder": "clip",
+    "checkpoint_sha256": "9d2d205885abbf22c3751c19d15e7ba501cb3046eac476fe8862938a2154bdfa",
+    "aggregation_floor": "0.80",
+    "connector_tau": 0.45,
+    "jersey_compatible_merge": true,
+    "crop_scale": 1.0,
+    "confusion_prior_refit_on_dev": false,
+    "solver_app_gain": 3.0,
+    "solver_sim_none": 0.92,
+    "solver_config": "results/identity_solver_config_percrop.json",
+    "solver_config_sha256": "a7282d9be6359efedd36bf0057549a27a272fbd08393afe3730309402899cf92",
+    "team_map": "resolve_team_map_free",
+    "roster": "self"
+  },
+  "dev20": {
+    "gs_hota": 37.68292453106307,
+    "gs_deta": 24.579608973717974,
+    "gs_assa": 57.773884430375865,
+    "gs_loca": 92.23674744130595,
+    "idf1": 39.02251447684274,
+    "identity": 0.45755085149738867,
+    "merge_precision": 0.5478119935170178,
+    "control_v5_half_tuned": 37.07114640333311,
+    "control_v4_prtreid": 36.4488,
+    "delta_vs_v5": 0.6117781277299628,
+    "swept_app_gain": {
+      "1.0": 37.42502466021942,
+      "2.0": 37.608668967013166,
+      "2.5": 37.62013847156151,
+      "3.0": 37.68292453106307,
+      "3.5": 37.48538280911865,
+      "4.0": 37.48538280911865,
+      "5.0": 37.47571647365177,
+      "10.0": 37.07114640333311
+    },
+    "swept_sim_none_at_gain3": {
+      "0.55": 37.40600764111463,
+      "0.6": 37.40600764111463,
+      "0.67": 37.407504202337854,
+      "0.75": 37.58744857367463,
+      "0.85": 37.619991782230635,
+      "0.9": 37.68292453106307,
+      "0.92": 37.68292453106307,
+      "0.95": 37.68292453106307,
+      "1.0": 37.47916252336358
+    },
+    "chosen": "DEV-20 argmax over 20 swept (app_gain, sim_none) pairs. NOT a broad plateau in app_gain: 2.0-3.0 spans 37.61-37.68 but 3.5 already costs 0.19. sim_none IS flat: 0.90/0.92/0.95 are identical to four decimals."
+  },
+  "verification_plan": "valid TEST-38 exactly once at this bundle, with BOTH controls re-derived in the same harness (v4 PRTreID tau 0.080 -> 36.7090; v5 half-tuned CLIP -> 37.0344). Pre-declared gate (orchestrator): TEST-38 >= 37.2 spends the one official test-49 run; below that, stop.",
+  "note": "the app_gain=1.0 row is at sim_none 0.85, not 0.92 (the sim_none surface is flat there; see swept_sim_none_at_gain3)."
+}

@@ -28,6 +28,11 @@ import numpy as np
 
 MAX_REPROJ_ERROR_M = 2.0  # mean reprojection error (m) above which a frame is rejected by the gate
 MIN_CORRESPONDENCES = 4  # a homography needs >= 4 point pairs
+#: PnLCalib's own voting grid + preference threshold (``utils_calib.heuristic_voting``), replicated
+#: here so every hypothesis it computes is *visible* to the gate instead of only its own pick.
+_VOTE_MODES = ("full", "ground_plane", "main")
+_VOTE_RANSAC = (0, 5, 10, 15, 25, 50)
+_VOTE_TH_PX = 5.0
 
 #: Environment variable pointing at the cloned PnLCalib repo (else the sibling default below).
 PNLCALIB_PATH_ENV = "FOOTBALL_PNLCALIB_PATH"
@@ -52,6 +57,71 @@ class CalibrationResult:
     error_m: float
     n_points: int
     ok: bool
+
+
+@dataclass(frozen=True)
+class CalibCandidate:
+    """One PnLCalib camera hypothesis, already reduced to an image->pitch ground homography.
+
+    Args:
+        homography: ``(3, 3)`` image->pitch transform (metres, uncentred 105x68).
+        error_m: Mean keypoint reprojection error in metres (the gate's quantity).
+        n_points: Ground-plane correspondences the error was measured over.
+        mode: PnLCalib keypoint subset (``full`` / ``ground_plane`` / ``main``).
+        use_ransac: The subset's RANSAC threshold in pixels (0 = none).
+        rep_err_px: PnLCalib's own pixel reprojection error, the quantity it votes on.
+    """
+
+    homography: np.ndarray
+    error_m: float
+    n_points: int
+    mode: str
+    use_ransac: float
+    rep_err_px: float
+
+
+def select_calibration(
+    candidates: list[CalibCandidate],
+    *,
+    foot_points: np.ndarray | None = None,
+    max_error_m: float = MAX_REPROJ_ERROR_M,
+    **plausibility,
+) -> CalibrationResult:
+    """Pick the first hypothesis that passes **both** gates: keypoint error and on-pitch plausibility.
+
+    ``candidates`` must be in PnLCalib's own preference order, so ``candidates[0]`` is exactly what
+    ``heuristic_voting`` would have returned: with ``foot_points=None`` this function is therefore a
+    no-op re-statement of the old behaviour. With foot points it walks down the list, skipping
+    hypotheses that project the frame's own players off the pitch -- the free "re-solve", since
+    PnLCalib computes all 18 of them anyway and then throws 17 away.
+
+    Args:
+        candidates: Hypotheses in preference order (see :meth:`PnLCalibCalibrator.candidates`).
+        foot_points: ``(N, 2)`` image-space player foot points of this frame, or ``None`` to skip the
+            plausibility term (pure function of our own detections; never ground truth).
+        max_error_m: The keypoint reprojection gate.
+        **plausibility: ``min_onpitch`` / ``min_span_m`` overrides for
+            :func:`generator.postprocess.onpitch_plausible`.
+
+    Returns:
+        The accepted :class:`CalibrationResult`, or the stock pick with ``ok=False`` when no
+        hypothesis passes -- which hands the frame to the caller's fallback (temporal fill).
+    """
+    from generator.postprocess import onpitch_plausible  # noqa: PLC0415 - avoids an import cycle
+
+    if not candidates:
+        return CalibrationResult(homography=None, error_m=float("inf"), n_points=0, ok=False)
+    for c in candidates:
+        if c.error_m > max_error_m:
+            continue
+        if foot_points is None or onpitch_plausible(c.homography, foot_points, **plausibility):
+            return CalibrationResult(
+                homography=c.homography, error_m=c.error_m, n_points=c.n_points, ok=True
+            )
+    top = candidates[0]
+    return CalibrationResult(
+        homography=top.homography, error_m=top.error_m, n_points=top.n_points, ok=False
+    )
 
 
 def apply_homography(h: np.ndarray, pts: np.ndarray) -> np.ndarray:
@@ -291,16 +361,21 @@ class PnLCalibCalibrator:
         kp_dict, lines_dict = complete_keypoints(kp_dict[0], lines_dict[0], w=w, h=h, normalize=True)
         return kp_dict, lines_dict, w0, h0
 
-    def calibrate_frame(self, frame_bgr: np.ndarray) -> CalibrationResult:
-        """Detect pitch points/lines on a BGR frame and calibrate via PnLCalib's full camera model.
+    def candidates(self, frame_bgr: np.ndarray) -> list[CalibCandidate]:
+        """Every camera hypothesis PnLCalib computes for a BGR frame, in its own preference order.
 
-        Uses PnLCalib's ``heuristic_voting`` (points + lines + PnL refinement, the method's real
-        strength) to get a 3D camera calibration, then derives the image->pitch ground homography
-        from it -- robust on broadcast frames where the visible keypoints cluster in a band and a
-        plain planar homography (the old approach) extrapolates players to nonsense positions. The
-        gate uses the **metre** reprojection error of the detected keypoints through that homography.
+        This is ``utils_calib.heuristic_voting`` with the last line removed: the same 3 keypoint
+        subsets x 6 RANSAC thresholds (points + lines + PnL refinement, the method's real strength),
+        the same ``(rep_err, mode)`` sort and the same "prefer ``full`` at RANSAC 0 under 5 px" rule
+        -- but *all* survivors are returned rather than only the winner, so the gate can reject a
+        hypothesis and take the next one at no extra compute. Each is reduced to an image->pitch
+        ground homography, and each is scored by the **metre** reprojection error of the frame's
+        ground-plane correspondences (the same fixed correspondence set for every candidate, exactly
+        as before).
 
-        Returns ``ok=False`` when PnLCalib cannot calibrate the frame or the error exceeds the gate.
+        Returns:
+            Candidates best-first; ``[0]`` is what the stock voting would have returned. Empty when
+            PnLCalib cannot calibrate the frame at all.
         """
         self._load()
         from utils.utils_calib import FramebyFrameCalib  # noqa: PLC0415
@@ -309,23 +384,64 @@ class PnLCalibCalibrator:
         cam = FramebyFrameCalib(iwidth=w0, iheight=h0, denormalize=True)
         cam.update(kp_dict, lines_dict)
 
-        final = cam.heuristic_voting(refine_lines=True)
-        if final is None:
-            return CalibrationResult(homography=None, error_m=float("inf"), n_points=0, ok=False)
-        h = ground_homography_from_cam_params(final["cam_params"])
-        if h is None:
-            return CalibrationResult(homography=None, error_m=float("inf"), n_points=0, ok=False)
+        raw: list[tuple[str, float, float, dict]] = []
+        for mode in _VOTE_MODES:
+            for use_ransac in _VOTE_RANSAC:
+                cam_params, rep = cam.get_cam_params(
+                    mode=mode, use_ransac=use_ransac, refine=False, refine_w_lines=True
+                )
+                if rep:
+                    raw.append((mode, float(use_ransac), float(rep), cam_params))
+        if not raw:
+            return []
+        order = sorted(range(len(raw)), key=lambda i: (raw[i][2], raw[i][0]))
+        top = next((i for i in order if raw[i][0] == "full" and raw[i][1] == 0
+                    and raw[i][2] <= _VOTE_TH_PX), None)
+        if top is not None:
+            order = [top] + [i for i in order if i != top]
 
         # Metre reprojection error of the ground keypoints through the derived homography. NB:
         # ``get_correspondences`` returns PnLCalib's **centred** world coords, while ``h`` outputs the
         # **uncentred** convention -- shift the obj points to match, else the error reads as the whole
         # ~62 m centre offset and every frame is (wrongly) rejected.
         cam.get_per_plane_correspondences(mode="ground_plane", use_ransac=5.0)
-        n_pts, err = 0, float("inf")
+        obj_uncentred = img_pts = None
+        n_pts = 0
         if cam.obj_pts:
-            obj_pts, img_pts = cam.get_correspondences("ground_plane")
+            obj_pts, img = cam.get_correspondences("ground_plane")
             n_pts = len(obj_pts)
             if n_pts >= MIN_CORRESPONDENCES:
                 obj_uncentred = obj_pts[:, :2] + np.array([PITCH_LENGTH_M / 2, PITCH_WIDTH_M / 2])
-                err = reprojection_error_m(img_pts[:, :2], obj_uncentred, h)
-        return CalibrationResult(homography=h, error_m=err, n_points=n_pts, ok=err <= self.max_error_m)
+                img_pts = img[:, :2]
+
+        out: list[CalibCandidate] = []
+        for i in order:
+            mode, use_ransac, rep_px, cam_params = raw[i]
+            h = ground_homography_from_cam_params(cam_params)
+            if h is None or not np.isfinite(h).all():
+                continue
+            err = (float("inf") if obj_uncentred is None
+                   else reprojection_error_m(img_pts, obj_uncentred, h))
+            out.append(CalibCandidate(homography=h, error_m=err, n_points=n_pts, mode=mode,
+                                      use_ransac=use_ransac, rep_err_px=rep_px))
+        return out
+
+    def calibrate_frame(
+        self, frame_bgr: np.ndarray, foot_points: np.ndarray | None = None
+    ) -> CalibrationResult:
+        """Calibrate one BGR frame: enumerate hypotheses, then apply both halves of the gate.
+
+        Args:
+            frame_bgr: The frame.
+            foot_points: ``(N, 2)`` image-space foot points of the frame's detected players. When
+                given, a hypothesis that projects them off the pitch is **rejected however well it
+                fits the pitch keypoints** -- the defect ``results/GSR_ASSOCIATION.md`` section 3.2
+                measured. When ``None`` the behaviour is byte-identical to the pre-gate calibrator.
+
+        Returns:
+            ``ok=False`` when PnLCalib cannot calibrate the frame, the error exceeds the gate, or no
+            hypothesis is plausible -- in all three cases the caller emits no positions for it.
+        """
+        return select_calibration(
+            self.candidates(frame_bgr), foot_points=foot_points, max_error_m=self.max_error_m
+        )

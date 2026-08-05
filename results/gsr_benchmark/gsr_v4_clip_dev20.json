@@ -1,0 +1,692 @@
+{
+ "dev": [
+  "SNGS-021",
+  "SNGS-024",
+  "SNGS-027",
+  "SNGS-030",
+  "SNGS-033",
+  "SNGS-036",
+  "SNGS-039",
+  "SNGS-042",
+  "SNGS-045",
+  "SNGS-048",
+  "SNGS-051",
+  "SNGS-054",
+  "SNGS-057",
+  "SNGS-078",
+  "SNGS-081",
+  "SNGS-084",
+  "SNGS-087",
+  "SNGS-090",
+  "SNGS-093",
+  "SNGS-096"
+ ],
+ "arms": {
+  "clip_tau080": {
+   "tag": "v4dev_f080_t0.080_jg_clip",
+   "team_src": "free",
+   "roster": "self",
+   "n_sequences": 20,
+   "solve_seconds": 6.0,
+   "pooled": {
+    "n_rows": 190899,
+    "identity": 0.4412699909376162,
+    "jersey": 0.49156360169513724,
+    "tracklets": 1523,
+    "tracklets_named": 1077,
+    "mean_identities": 12.85
+   },
+   "coverage_curve": {
+    "n_rows": 190899,
+    "n_named_tracklets": 1077,
+    "full_coverage": {
+     "threshold": 4.0531168236533355e-09,
+     "coverage": 0.66150687012504,
+     "precision": 0.5613591910105241
+    },
+    "at_0.85": {
+     "threshold": 0.28131050084920567,
+     "coverage": 0.15707258812251504,
+     "precision": 0.8520593630148408
+    },
+    "at_0.6": {
+     "threshold": 0.0008429335189387891,
+     "coverage": 0.6163311489321578,
+     "precision": 0.6001087908071768
+    }
+   },
+   "per_seq": {
+    "SNGS-021": {
+     "n_rows": 9871,
+     "identity": 0.5527302198358829,
+     "jersey": 0.602978421639145,
+     "n_named": 34,
+     "n_identities": 8
+    },
+    "SNGS-024": {
+     "n_rows": 6085,
+     "identity": 0.5036976170912079,
+     "jersey": 0.5087921117502054,
+     "n_named": 48,
+     "n_identities": 13
+    },
+    "SNGS-027": {
+     "n_rows": 7988,
+     "identity": 0.3381321982974462,
+     "jersey": 0.3616675012518778,
+     "n_named": 75,
+     "n_identities": 12
+    },
+    "SNGS-030": {
+     "n_rows": 8352,
+     "identity": 0.06010536398467433,
+     "jersey": 0.4524664750957854,
+     "n_named": 46,
+     "n_identities": 11
+    },
+    "SNGS-033": {
+     "n_rows": 5322,
+     "identity": 0.5582487786546411,
+     "jersey": 0.5851183765501691,
+     "n_named": 46,
+     "n_identities": 8
+    },
+    "SNGS-036": {
+     "n_rows": 12603,
+     "identity": 0.6656351662302626,
+     "jersey": 0.7089581845592319,
+     "n_named": 42,
+     "n_identities": 12
+    },
+    "SNGS-039": {
+     "n_rows": 12687,
+     "identity": 0.3542208559943249,
+     "jersey": 0.3572160479230709,
+     "n_named": 61,
+     "n_identities": 15
+    },
+    "SNGS-042": {
+     "n_rows": 12318,
+     "identity": 0.2383503815554473,
+     "jersey": 0.4176002597824322,
+     "n_named": 54,
+     "n_identities": 9
+    },
+    "SNGS-045": {
+     "n_rows": 8445,
+     "identity": 0.43291888691533453,
+     "jersey": 0.45245707519242157,
+     "n_named": 54,
+     "n_identities": 15
+    },
+    "SNGS-048": {
+     "n_rows": 12806,
+     "identity": 0.610729345619241,
+     "jersey": 0.6378260190535686,
+     "n_named": 20,
+     "n_identities": 8
+    },
+    "SNGS-051": {
+     "n_rows": 9285,
+     "identity": 0.5483037156704362,
+     "jersey": 0.5743672590199246,
+     "n_named": 44,
+     "n_identities": 14
+    },
+    "SNGS-054": {
+     "n_rows": 8837,
+     "identity": 0.4311417902002942,
+     "jersey": 0.437705103541926,
+     "n_named": 68,
+     "n_identities": 15
+    },
+    "SNGS-057": {
+     "n_rows": 9512,
+     "identity": 0.1970142977291842,
+     "jersey": 0.22771236333052985,
+     "n_named": 67,
+     "n_identities": 10
+    },
+    "SNGS-078": {
+     "n_rows": 7982,
+     "identity": 0.48083187171135056,
+     "jersey": 0.4912302681032323,
+     "n_named": 69,
+     "n_identities": 15
+    },
+    "SNGS-081": {
+     "n_rows": 9675,
+     "identity": 0.4794832041343669,
+     "jersey": 0.4954005167958656,
+     "n_named": 69,
+     "n_identities": 16
+    },
+    "SNGS-084": {
+     "n_rows": 8711,
+     "identity": 0.5436804040867869,
+     "jersey": 0.5596372402709219,
+     "n_named": 61,
+     "n_identities": 16
+    },
+    "SNGS-087": {
+     "n_rows": 8691,
+     "identity": 0.5292831664940744,
+     "jersey": 0.5340006903693476,
+     "n_named": 49,
+     "n_identities": 18
+    },
+    "SNGS-090": {
+     "n_rows": 9060,
+     "identity": 0.4806843267108168,
+     "jersey": 0.488962472406181,
+     "n_named": 65,
+     "n_identities": 17
+    },
+    "SNGS-093": {
+     "n_rows": 9058,
+     "identity": 0.4232722455288143,
+     "jersey": 0.43784499889600353,
+     "n_named": 75,
+     "n_identities": 17
+    },
+    "SNGS-096": {
+     "n_rows": 13611,
+     "identity": 0.4018808316802586,
+     "jersey": 0.47138343986481523,
+     "n_named": 30,
+     "n_identities": 8
+    }
+   },
+   "gs_hota": {
+    "GS-HOTA": 32.70845266726346,
+    "GS-DetA": 23.78196878470863,
+    "GS-AssA": 44.995708529694916,
+    "GS-LocA": 92.09724837175305,
+    "IDF1": 31.191708665627594
+   },
+   "gs_hota_per_seq": {
+    "SNGS-021": 37.73825517751243,
+    "SNGS-024": 34.323183290819685,
+    "SNGS-027": 22.5364073193848,
+    "SNGS-030": 4.786843635917476,
+    "SNGS-033": 38.56359987591901,
+    "SNGS-036": 54.32125945918608,
+    "SNGS-039": 24.50637709630194,
+    "SNGS-042": 20.666297648485944,
+    "SNGS-045": 29.32489199648064,
+    "SNGS-048": 42.63949140788104,
+    "SNGS-051": 37.25851248254897,
+    "SNGS-054": 25.284040114493834,
+    "SNGS-057": 17.832628490602602,
+    "SNGS-078": 34.959704626648346,
+    "SNGS-081": 31.746047823962908,
+    "SNGS-084": 36.000976728887615,
+    "SNGS-087": 42.12541335133403,
+    "SNGS-090": 32.98640236101451,
+    "SNGS-093": 30.490021954038,
+    "SNGS-096": 33.69286114013208
+   },
+   "v4": {
+    "key": "f080_t0.080_jg_clip",
+    "floor": "0.80",
+    "tau": 0.08,
+    "jersey_gate": true,
+    "variant": "",
+    "confusion_refit": false,
+    "merge_precision": {
+     "correct": 66,
+     "total": 75,
+     "precision": 0.88
+    },
+    "n_merges": 77,
+    "frags_after": 1567,
+    "frag_per_gt_after": 6.343183304110079,
+    "confusion_n": null
+   }
+  },
+  "clip_tau250": {
+   "tag": "v4dev_f080_t0.250_jg_clip",
+   "team_src": "free",
+   "roster": "self",
+   "n_sequences": 20,
+   "solve_seconds": 4.7,
+   "pooled": {
+    "n_rows": 190899,
+    "identity": 0.4439048921157261,
+    "jersey": 0.49355418310205923,
+    "tracklets": 1030,
+    "tracklets_named": 705,
+    "mean_identities": 12.85
+   },
+   "coverage_curve": {
+    "n_rows": 190899,
+    "n_named_tracklets": 705,
+    "full_coverage": {
+     "threshold": 4.289936523518585e-07,
+     "coverage": 0.6111032535529259,
+     "precision": 0.5987879203490515
+    },
+    "at_0.85": {
+     "threshold": 0.9927369275223995,
+     "coverage": 0.0016081802419080247,
+     "precision": 1.0
+    },
+    "at_0.6": {
+     "threshold": 8.196905206507899e-07,
+     "coverage": 0.6093850674964248,
+     "precision": 0.6004762273168803
+    }
+   },
+   "per_seq": {
+    "SNGS-021": {
+     "n_rows": 9871,
+     "identity": 0.5050146894944788,
+     "jersey": 0.5553641981562152,
+     "n_named": 23,
+     "n_identities": 8
+    },
+    "SNGS-024": {
+     "n_rows": 6085,
+     "identity": 0.4990961380443714,
+     "jersey": 0.5073130649137223,
+     "n_named": 36,
+     "n_identities": 13
+    },
+    "SNGS-027": {
+     "n_rows": 7988,
+     "identity": 0.3274912368552829,
+     "jersey": 0.34914872308462697,
+     "n_named": 40,
+     "n_identities": 12
+    },
+    "SNGS-030": {
+     "n_rows": 8352,
+     "identity": 0.06010536398467433,
+     "jersey": 0.47653256704980845,
+     "n_named": 28,
+     "n_identities": 11
+    },
+    "SNGS-033": {
+     "n_rows": 5322,
+     "identity": 0.618000751597144,
+     "jersey": 0.6352874859075536,
+     "n_named": 27,
+     "n_identities": 8
+    },
+    "SNGS-036": {
+     "n_rows": 12603,
+     "identity": 0.6661112433547568,
+     "jersey": 0.7076886455605809,
+     "n_named": 34,
+     "n_identities": 12
+    },
+    "SNGS-039": {
+     "n_rows": 12687,
+     "identity": 0.3472058012138409,
+     "jersey": 0.3516985891069599,
+     "n_named": 52,
+     "n_identities": 15
+    },
+    "SNGS-042": {
+     "n_rows": 12318,
+     "identity": 0.22325052768306544,
+     "jersey": 0.39657411917519075,
+     "n_named": 29,
+     "n_identities": 9
+    },
+    "SNGS-045": {
+     "n_rows": 8445,
+     "identity": 0.4285375962107756,
+     "jersey": 0.4442865600947306,
+     "n_named": 34,
+     "n_identities": 15
+    },
+    "SNGS-048": {
+     "n_rows": 12806,
+     "identity": 0.6582070904263626,
+     "jersey": 0.6810089020771514,
+     "n_named": 16,
+     "n_identities": 8
+    },
+    "SNGS-051": {
+     "n_rows": 9285,
+     "identity": 0.5467959073774906,
+     "jersey": 0.572859450726979,
+     "n_named": 31,
+     "n_identities": 14
+    },
+    "SNGS-054": {
+     "n_rows": 8837,
+     "identity": 0.427181170080344,
+     "jersey": 0.4315944324997171,
+     "n_named": 44,
+     "n_identities": 15
+    },
+    "SNGS-057": {
+     "n_rows": 9512,
+     "identity": 0.19522708158116064,
+     "jersey": 0.22403280067283432,
+     "n_named": 43,
+     "n_identities": 10
+    },
+    "SNGS-078": {
+     "n_rows": 7982,
+     "identity": 0.46742671009771986,
+     "jersey": 0.4780756702580807,
+     "n_named": 44,
+     "n_identities": 15
+    },
+    "SNGS-081": {
+     "n_rows": 9675,
+     "identity": 0.4986046511627907,
+     "jersey": 0.5139018087855297,
+     "n_named": 51,
+     "n_identities": 16
+    },
+    "SNGS-084": {
+     "n_rows": 8711,
+     "identity": 0.5615887957754563,
+     "jersey": 0.5766272528986339,
+     "n_named": 38,
+     "n_identities": 16
+    },
+    "SNGS-087": {
+     "n_rows": 8691,
+     "identity": 0.5389483373604879,
+     "jersey": 0.5434357381198941,
+     "n_named": 32,
+     "n_identities": 18
+    },
+    "SNGS-090": {
+     "n_rows": 9060,
+     "identity": 0.44724061810154525,
+     "jersey": 0.4562913907284768,
+     "n_named": 40,
+     "n_identities": 17
+    },
+    "SNGS-093": {
+     "n_rows": 9058,
+     "identity": 0.3946787370280415,
+     "jersey": 0.40792669463457715,
+     "n_named": 45,
+     "n_identities": 17
+    },
+    "SNGS-096": {
+     "n_rows": 13611,
+     "identity": 0.45896701197560796,
+     "jersey": 0.5241348908970686,
+     "n_named": 18,
+     "n_identities": 8
+    }
+   },
+   "gs_hota": {
+    "GS-HOTA": 36.05830834530913,
+    "GS-DetA": 23.847310319463542,
+    "GS-AssA": 54.52535758661436,
+    "GS-LocA": 92.16727671675177,
+    "IDF1": 36.33624955915312
+   },
+   "gs_hota_per_seq": {
+    "SNGS-021": 41.61949026858867,
+    "SNGS-024": 35.24803516085119,
+    "SNGS-027": 26.59198120027706,
+    "SNGS-030": 4.738468999859013,
+    "SNGS-033": 42.87520182560785,
+    "SNGS-036": 55.818921571255586,
+    "SNGS-039": 26.590954816686196,
+    "SNGS-042": 19.390061211627334,
+    "SNGS-045": 33.04586504991683,
+    "SNGS-048": 46.23575657310424,
+    "SNGS-051": 38.94755257684642,
+    "SNGS-054": 29.239252836486873,
+    "SNGS-057": 20.269517190313458,
+    "SNGS-078": 39.27504567298471,
+    "SNGS-081": 39.64884893708327,
+    "SNGS-084": 46.282753363651636,
+    "SNGS-087": 43.21496540293749,
+    "SNGS-090": 35.59697575534715,
+    "SNGS-093": 35.00461564404931,
+    "SNGS-096": 39.47213062891017
+   },
+   "v4": {
+    "key": "f080_t0.250_jg_clip",
+    "floor": "0.80",
+    "tau": 0.25,
+    "jersey_gate": true,
+    "variant": "",
+    "confusion_refit": false,
+    "merge_precision": {
+     "correct": 533,
+     "total": 796,
+     "precision": 0.6695979899497487
+    },
+    "n_merges": 593,
+    "frags_after": 1051,
+    "frag_per_gt_after": 5.243079784441341,
+    "confusion_n": null
+   }
+  },
+  "clip_tau380": {
+   "tag": "v4dev_f080_t0.380_jg_clip",
+   "team_src": "free",
+   "roster": "self",
+   "n_sequences": 20,
+   "solve_seconds": 4.8,
+   "pooled": {
+    "n_rows": 190899,
+    "identity": 0.44628835143190904,
+    "jersey": 0.49404659008166624,
+    "tracklets": 863,
+    "tracklets_named": 553,
+    "mean_identities": 12.85
+   },
+   "coverage_curve": {
+    "n_rows": 190899,
+    "n_named_tracklets": 553,
+    "full_coverage": {
+     "threshold": 2.5043995775441267e-08,
+     "coverage": 0.5949795441568578,
+     "precision": 0.6081210765885139
+    },
+    "at_0.85": {
+     "threshold": 0.9927369275223995,
+     "coverage": 0.004389755839475325,
+     "precision": 0.986873508353222
+    },
+    "at_0.6": {
+     "threshold": 2.5043995775441267e-08,
+     "coverage": 0.5949795441568578,
+     "precision": 0.6081210765885139
+    }
+   },
+   "per_seq": {
+    "SNGS-021": {
+     "n_rows": 9871,
+     "identity": 0.6047006382332084,
+     "jersey": 0.6544423057440989,
+     "n_named": 19,
+     "n_identities": 8
+    },
+    "SNGS-024": {
+     "n_rows": 6085,
+     "identity": 0.5017255546425636,
+     "jersey": 0.5112571898110106,
+     "n_named": 28,
+     "n_identities": 13
+    },
+    "SNGS-027": {
+     "n_rows": 7988,
+     "identity": 0.3557836755132699,
+     "jersey": 0.3755633450175263,
+     "n_named": 29,
+     "n_identities": 12
+    },
+    "SNGS-030": {
+     "n_rows": 8352,
+     "identity": 0.06010536398467433,
+     "jersey": 0.4766522988505747,
+     "n_named": 17,
+     "n_identities": 11
+    },
+    "SNGS-033": {
+     "n_rows": 5322,
+     "identity": 0.618000751597144,
+     "jersey": 0.6300263059000376,
+     "n_named": 25,
+     "n_identities": 8
+    },
+    "SNGS-036": {
+     "n_rows": 12603,
+     "identity": 0.6777751329048639,
+     "jersey": 0.7195112274855193,
+     "n_named": 26,
+     "n_identities": 12
+    },
+    "SNGS-039": {
+     "n_rows": 12687,
+     "identity": 0.2985733427918342,
+     "jersey": 0.3019626389217309,
+     "n_named": 35,
+     "n_identities": 15
+    },
+    "SNGS-042": {
+     "n_rows": 12318,
+     "identity": 0.20603994154895275,
+     "jersey": 0.37189478811495374,
+     "n_named": 23,
+     "n_identities": 9
+    },
+    "SNGS-045": {
+     "n_rows": 8445,
+     "identity": 0.42770870337477795,
+     "jersey": 0.4433392539964476,
+     "n_named": 28,
+     "n_identities": 15
+    },
+    "SNGS-048": {
+     "n_rows": 12806,
+     "identity": 0.6582070904263626,
+     "jersey": 0.6810089020771514,
+     "n_named": 16,
+     "n_identities": 8
+    },
+    "SNGS-051": {
+     "n_rows": 9285,
+     "identity": 0.5467959073774906,
+     "jersey": 0.572859450726979,
+     "n_named": 26,
+     "n_identities": 14
+    },
+    "SNGS-054": {
+     "n_rows": 8837,
+     "identity": 0.38485911508430465,
+     "jersey": 0.3892723775036777,
+     "n_named": 35,
+     "n_identities": 15
+    },
+    "SNGS-057": {
+     "n_rows": 9512,
+     "identity": 0.19449116904962152,
+     "jersey": 0.22413793103448276,
+     "n_named": 31,
+     "n_identities": 10
+    },
+    "SNGS-078": {
+     "n_rows": 7982,
+     "identity": 0.4656727637183663,
+     "jersey": 0.4761964419944876,
+     "n_named": 39,
+     "n_identities": 15
+    },
+    "SNGS-081": {
+     "n_rows": 9675,
+     "identity": 0.4750387596899225,
+     "jersey": 0.4897157622739018,
+     "n_named": 39,
+     "n_identities": 16
+    },
+    "SNGS-084": {
+     "n_rows": 8711,
+     "identity": 0.5859258408908277,
+     "jersey": 0.6005051084835266,
+     "n_named": 30,
+     "n_identities": 16
+    },
+    "SNGS-087": {
+     "n_rows": 8691,
+     "identity": 0.5199631803014613,
+     "jersey": 0.5243355195029341,
+     "n_named": 30,
+     "n_identities": 18
+    },
+    "SNGS-090": {
+     "n_rows": 9060,
+     "identity": 0.4460264900662252,
+     "jersey": 0.45507726269315674,
+     "n_named": 32,
+     "n_identities": 17
+    },
+    "SNGS-093": {
+     "n_rows": 9058,
+     "identity": 0.3948995363214838,
+     "jersey": 0.4081474939280194,
+     "n_named": 32,
+     "n_identities": 17
+    },
+    "SNGS-096": {
+     "n_rows": 13611,
+     "identity": 0.49592241569318934,
+     "jersey": 0.5455146572625083,
+     "n_named": 13,
+     "n_identities": 8
+    }
+   },
+   "gs_hota": {
+    "GS-HOTA": 36.916887526970605,
+    "GS-DetA": 23.89102018556748,
+    "GS-AssA": 57.04649532194025,
+    "GS-LocA": 92.24715359328256,
+    "IDF1": 37.77608391449277
+   },
+   "gs_hota_per_seq": {
+    "SNGS-021": 45.43235433060636,
+    "SNGS-024": 34.897969833825734,
+    "SNGS-027": 29.11285434685712,
+    "SNGS-030": 4.590756236252378,
+    "SNGS-033": 43.949246317569376,
+    "SNGS-036": 57.00437042108667,
+    "SNGS-039": 26.56463368517911,
+    "SNGS-042": 20.663139345747624,
+    "SNGS-045": 33.741114754538586,
+    "SNGS-048": 46.23575657310424,
+    "SNGS-051": 38.99900222976627,
+    "SNGS-054": 29.662738995161213,
+    "SNGS-057": 21.14058499220793,
+    "SNGS-078": 39.8501472002548,
+    "SNGS-081": 41.35614588792511,
+    "SNGS-084": 48.25128660848959,
+    "SNGS-087": 41.91683239646499,
+    "SNGS-090": 35.415633057475766,
+    "SNGS-093": 34.826130197917315,
+    "SNGS-096": 42.09599157764094
+   },
+   "v4": {
+    "key": "f080_t0.380_jg_clip",
+    "floor": "0.80",
+    "tau": 0.38,
+    "jersey_gate": true,
+    "variant": "",
+    "confusion_refit": false,
+    "merge_precision": {
+     "correct": 649,
+     "total": 1109,
+     "precision": 0.5852119026149685
+    },
+    "n_merges": 768,
+    "frags_after": 876,
+    "frag_per_gt_after": 4.976476269725699,
+    "confusion_n": null
+   }
+  }
+ }
+}

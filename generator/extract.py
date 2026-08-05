@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 
 from generator.calibrate import MAX_REPROJ_ERROR_M, CalibrationResult, apply_homography
-from generator.postprocess import SRC_LEN, SRC_WID, clamp_to_pitch, postprocess
+from generator.postprocess import PLAYER_ROLES, SRC_LEN, SRC_WID, clamp_to_pitch, postprocess
 from generator.teams import JerseyColorTeamClassifier
 
 logger = logging.getLogger(__name__)
@@ -426,16 +426,8 @@ def extract_positions(
             continue
         frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
 
-        calib = None
-        if calibrator is not None:
-            try:
-                calib = calibrator.calibrate_frame(frame_bgr)  # calibrator's API expects BGR
-            except Exception as exc:  # noqa: BLE001 - a failed calib just means NaN coords this frame
-                logger.debug("frame %d: calibration failed: %s", fi, exc)
-        if calib is not None and not calib.ok:
-            rejected += 1
-        err = calib.error_m if calib is not None else float("nan")
-
+        # Detect first: the calibration gate needs this frame's own foot points to reject a
+        # homography that fits the pitch keypoints yet projects every player off the pitch.
         xyxy, confs, role_ids, track_ids, ball_xy = tracker.update(detector, frame_rgb)
         if len(xyxy) == 0:
             fi += 1
@@ -447,6 +439,17 @@ def extract_positions(
         teams = team_clf.predict(crops).astype(int)
         teams = np.where(roles == "referee", -1, teams)  # officials belong to no team
         foot = np.column_stack([(xyxy[:, 0] + xyxy[:, 2]) / 2, xyxy[:, 3]])
+
+        calib = None
+        if calibrator is not None:
+            try:  # calibrator's API expects BGR
+                calib = calibrator.calibrate_frame(frame_bgr, foot[np.isin(roles, PLAYER_ROLES)])
+            except Exception as exc:  # noqa: BLE001 - a failed calib just means NaN coords this frame
+                logger.debug("frame %d: calibration failed: %s", fi, exc)
+        if calib is not None and not calib.ok:
+            rejected += 1
+        err = calib.error_m if calib is not None else float("nan")
+
         pitch = transform_and_gate(foot, calib)
         rows.extend(build_player_rows(fi, track_ids, teams, foot, pitch, confs, err, roles=roles))
 

@@ -189,11 +189,14 @@ def measure(
     }
 
 
-def load_percrop(out_dir: Path, names: list[str]) -> dict[str, pd.DataFrame]:
-    """Load the persisted per-crop frames for ``names`` (missing sequences are skipped)."""
+def load_percrop(out_dir: Path, names: list[str], variant: str = "") -> dict[str, pd.DataFrame]:
+    """Load the persisted per-crop frames for ``names`` (missing sequences are skipped).
+
+    ``variant`` selects a re-run at a different crop geometry (e.g. ``"_w125"``).
+    """
     out: dict[str, pd.DataFrame] = {}
     for n in names:
-        p = out_dir / PERCROP_SUBDIR / f"{n}.parquet"
+        p = out_dir / (PERCROP_SUBDIR + variant) / f"{n}.parquet"
         if p.exists():
             out[n] = pd.read_parquet(p)
     return out
@@ -231,16 +234,25 @@ def pick_rule(rows: list[dict], floor: float = DEV_PRECISION_FLOOR) -> dict:
     return max(ok, key=lambda r: r["d"])
 
 
-def emit_votes(out_dir: Path, names: list[str], rule: dict) -> None:
+def emit_votes(out_dir: Path, names: list[str], rule: dict, *, votes_subdir: str = VOTES_SUBDIR,
+               variant: str = "") -> None:
     """Write densified ``{track_id: [[num, conf], ...]}`` per sequence for the identity solver.
 
     Mirrors the ``outputs/gsr/koshkina_jersey/<seq>.json`` shape but allows MANY reads per track
     (Stage 2's design intent: a track whose crops disagree keeps every vote and the confusion prior
     arbitrates), so :mod:`eval.gsr_identity` can consume it without a schema change.
+
+    Args:
+        out_dir: Pipeline output root.
+        names: Sequences to emit.
+        rule: The aggregation rule (see :func:`reads_for_sequence`).
+        votes_subdir: Destination directory, so an alternative rule never overwrites the shipped
+            votes of the on-record recipe.
+        variant: Per-crop source variant (see :func:`load_percrop`).
     """
-    dest = out_dir / VOTES_SUBDIR
+    dest = out_dir / votes_subdir
     dest.mkdir(parents=True, exist_ok=True)
-    for name, df in load_percrop(out_dir, names).items():
+    for name, df in load_percrop(out_dir, names, variant).items():
         reads = reads_for_sequence(df, rule)
         n_tracks = int(df["track_id"].nunique())
         (dest / f"{name}.json").write_text(json.dumps({
@@ -249,7 +261,7 @@ def emit_votes(out_dir: Path, names: list[str], rule: dict) -> None:
             "votes": {str(t): [[int(n), round(float(c), 4)] for n, c in v]
                       for t, v in reads.items()},
         }), encoding="utf-8")
-    logger.info("densified votes -> %s (%d sequences)", dest, len(names))
+    logger.info("densified votes -> %s (%d sequences, rule %s)", dest, len(names), rule)
 
 
 def _report(tag: str, res: dict) -> None:

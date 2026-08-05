@@ -31,12 +31,19 @@ _PITCH_EDGE_TOL_M = 2.0
 KEEPER_GOAL_DEPTH_M = 16.5  # a positional keeper must be within this of a goal line (penalty-box depth)
 NON_PLAYER_ROLES = ("ball", "referee")  # excluded from actor/keeper/team reasoning
 PLAYER_ROLES = ("player", "goalkeeper")
-# Frame-calibration plausibility gate: a trustworthy broadcast freeze frame puts a decent number of
-# players on the pitch, spread over a real chunk of it. Frames that fit the pitch *keypoints* well but
-# still cram players into a corner (sparse/clustered keypoints) fail this and are dropped -- the
-# distribution check the keypoint-reprojection gate cannot do.
+# Rows a frame needs before its own homography can be re-derived from them by DLT (a genuine
+# numerical requirement: 4 is the minimum, 8 makes the fit robust). NOT a trust threshold.
 MIN_ONPITCH_PLAYERS = 8
-MIN_PITCH_SPAN_M = 25.0
+MIN_PITCH_SPAN_M = 25.0  # retained for callers that ask for the original wide-shot definition
+# Frame-calibration trust rule: a frame is trusted when its players project onto the pitch in a
+# non-degenerate arrangement. **These are deliberately weak.** The original (8 players, 25 m span)
+# encoded a wide-shot assumption and voided every zoomed broadcast frame: on the calibration-sick
+# SoccerNet-GSR sequences 100% of the dropped frames had *every* player projecting on-pitch, at
+# 96-98% precision against ground truth, and were thrown away only for showing 5 players or spanning
+# 19 m (results/GSR_CALIBGATE.md). The keypoint-reprojection gate and per-point `clamp_to_pitch` are
+# the real filters; this one only catches a projection collapsed into a point.
+TRUST_MIN_PLAYERS = 3
+TRUST_MIN_SPAN_M = 5.0
 
 
 def clamp_to_pitch(
@@ -55,6 +62,41 @@ def clamp_to_pitch(
     if not (-tol <= px <= src_len + tol and -tol <= py <= src_wid + tol):
         return float("nan"), float("nan")
     return float(np.clip(px, 0.0, src_len)), float(np.clip(py, 0.0, src_wid))
+
+
+def onpitch_plausible(
+    h: np.ndarray,
+    image_pts: np.ndarray,
+    *,
+    min_onpitch: int = TRUST_MIN_PLAYERS,
+    min_span_m: float = TRUST_MIN_SPAN_M,
+) -> bool:
+    """True iff ``h`` projects ``image_pts`` to a distribution :func:`reject_implausible_frames` keeps.
+
+    The same on-pitch/spread test, moved one stage earlier so it can *choose* a homography instead of
+    only voiding a frame after the fact. A homography that puts the frame's own player foot-points
+    off the pitch (or collapses them to a point) is implausible however well it fits the pitch
+    keypoints. Deliberately weak -- see :data:`TRUST_MIN_PLAYERS`.
+
+    Args:
+        h: A ``(3, 3)`` image->pitch homography (metres, uncentred 105x68).
+        image_pts: ``(N, 2)`` image-space foot points of the frame's *players*.
+        min_onpitch: Players that must land on the pitch (after :func:`clamp_to_pitch`).
+        min_span_m: Metres those players must span along at least one pitch axis.
+
+    Returns:
+        Whether the projection is plausible. Pure: reads no ground truth, only our own detections.
+    """
+    from generator.calibrate import apply_homography  # noqa: PLC0415 - keeps this module pure
+
+    pts = np.asarray(image_pts, dtype=float).reshape(-1, 2)
+    if len(pts) < min_onpitch or not np.isfinite(h).all():
+        return False
+    proj = np.asarray([clamp_to_pitch(x, y) for x, y in apply_homography(h, pts)])
+    good = proj[np.isfinite(proj).all(axis=1)]
+    if len(good) < min_onpitch:
+        return False
+    return float(max(np.ptp(good[:, 0]), np.ptp(good[:, 1]))) >= min_span_m
 
 
 def _players(df: pd.DataFrame) -> pd.DataFrame:
@@ -253,15 +295,19 @@ def fill_calibration_gaps(
 def reject_implausible_frames(
     df: pd.DataFrame,
     *,
-    min_onpitch: int = MIN_ONPITCH_PLAYERS,
-    min_span_m: float = MIN_PITCH_SPAN_M,
+    min_onpitch: int = TRUST_MIN_PLAYERS,
+    min_span_m: float = TRUST_MIN_SPAN_M,
 ) -> pd.DataFrame:
     """NaN the pitch coords of any frame whose on-pitch player distribution is degenerate.
 
     A frame is trusted only if it has ``>= min_onpitch`` players with valid pitch coords AND those
     players span ``>= min_span_m`` along at least one pitch axis. Otherwise the calibration is
-    untrustworthy (e.g. sparse/clustered keypoints projecting everyone into a corner) and we emit no
-    positions for that frame. Returns a new frame; ``image_x/image_y`` are kept (detection is fine).
+    untrustworthy (a projection collapsed to a point) and we emit no positions for that frame.
+    Returns a new frame; ``image_x/image_y`` are kept (detection is fine).
+
+    The thresholds are :data:`TRUST_MIN_PLAYERS` / :data:`TRUST_MIN_SPAN_M`, weakened from the
+    original wide-shot pair (8, 25 m) that was voiding correct calibrations on zoomed frames --
+    ``results/GSR_CALIBGATE.md``. Pass the old values explicitly to reproduce a pre-2026.08 run.
     """
     if df.empty:
         return df

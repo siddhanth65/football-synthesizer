@@ -13,6 +13,7 @@ import pytest
 from generator.calibrate import (
     MAX_REPROJ_ERROR_M,
     PNLCALIB_PATH_ENV,
+    CalibCandidate,
     PnLCalibCalibrator,
     apply_homography,
     calibrate_correspondences,
@@ -20,6 +21,7 @@ from generator.calibrate import (
     ground_homography_from_cam_params,
     pnlcalib_root,
     reprojection_error_m,
+    select_calibration,
 )
 
 
@@ -135,3 +137,46 @@ def test_pnlcalib_calibrator_constructs_lazily(monkeypatch, tmp_path):
     monkeypatch.setenv(PNLCALIB_PATH_ENV, str(tmp_path / "nope"))
     c = PnLCalibCalibrator(device="cpu", max_error_m=1.5)
     assert c._loaded is False and c.max_error_m == 1.5
+
+
+# --- the on-pitch plausibility half of the gate --------------------------------------------------
+_GOOD_H = np.array([[0.06, 0.004, -8.0], [0.0008, 0.045, -3.0], [8e-6, 2.5e-4, 1.0]])
+_OFF_H = _GOOD_H + np.array([[0.0, 0.0, 400.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])  # x >> 105 m
+_FOOT = np.column_stack([np.linspace(300, 1500, 12), 400 + 20 * (np.arange(12) % 5)])
+
+
+def test_onpitch_plausible_separates_a_gate_passing_off_pitch_homography():
+    from generator.postprocess import onpitch_plausible
+
+    assert onpitch_plausible(_GOOD_H, _FOOT)
+    assert not onpitch_plausible(_OFF_H, _FOOT)
+    assert not onpitch_plausible(_GOOD_H, _FOOT[:2])  # too few players to judge
+    # A zoomed frame showing 4 players over ~12 m is trusted (the wide-shot rule voided it).
+    assert onpitch_plausible(_GOOD_H, _FOOT[:4])
+    assert not onpitch_plausible(_GOOD_H, _FOOT[:4], min_onpitch=8, min_span_m=25.0)
+
+
+def test_select_calibration_is_unchanged_without_foot_points():
+    """The regression guard: no foot points -> exactly PnLCalib's own pick, error gate only."""
+    cands = [CalibCandidate(_OFF_H, 0.36, 12, "full", 0.0, 1.0),
+             CalibCandidate(_GOOD_H, 1.10, 12, "main", 5.0, 3.0)]
+    res = select_calibration(cands)
+    assert res.ok and np.allclose(res.homography, _OFF_H) and res.error_m == 0.36
+
+
+def test_select_calibration_falls_through_to_a_plausible_candidate():
+    cands = [CalibCandidate(_OFF_H, 0.36, 12, "full", 0.0, 1.0),
+             CalibCandidate(_GOOD_H, 1.10, 12, "main", 5.0, 3.0)]
+    res = select_calibration(cands, foot_points=_FOOT)
+    assert res.ok and np.allclose(res.homography, _GOOD_H)
+
+
+def test_select_calibration_rejects_when_nothing_is_plausible():
+    """No plausible hypothesis -> ok=False, so the caller falls back (temporal fill), not garbage."""
+    res = select_calibration([CalibCandidate(_OFF_H, 0.36, 12, "full", 0.0, 1.0)],
+                             foot_points=_FOOT)
+    assert not res.ok
+    assert not select_calibration([], foot_points=_FOOT).ok
+    # Plausible but over the error gate is still a reject.
+    assert not select_calibration([CalibCandidate(_GOOD_H, 9.9, 12, "full", 0.0, 1.0)],
+                                  foot_points=_FOOT).ok

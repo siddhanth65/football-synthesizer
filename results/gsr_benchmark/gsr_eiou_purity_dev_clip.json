@@ -1,0 +1,58 @@
+{
+ "seqs": [
+  "SNGS-021",
+  "SNGS-024",
+  "SNGS-027",
+  "SNGS-030",
+  "SNGS-033",
+  "SNGS-036",
+  "SNGS-039",
+  "SNGS-042",
+  "SNGS-045",
+  "SNGS-048",
+  "SNGS-051",
+  "SNGS-054",
+  "SNGS-057",
+  "SNGS-078",
+  "SNGS-081",
+  "SNGS-084",
+  "SNGS-087",
+  "SNGS-090",
+  "SNGS-093",
+  "SNGS-096"
+ ],
+ "rows": [
+  {
+   "arm": "ByteTrack (control)",
+   "purity": 0.8969084067615154,
+   "n_rows": 190549,
+   "n_tracklets": 1523,
+   "n_contaminated": 173,
+   "frag_per_gt": 6.52249398199055
+  },
+  {
+   "arm": "EIoU e 0.3 r 1 w_app 0.5 app_max 0.3",
+   "purity": 0.9416029682234247,
+   "n_rows": 188126,
+   "n_tracklets": 3262,
+   "n_contaminated": 106,
+   "frag_per_gt": 11.471495438200245
+  },
+  {
+   "arm": "EIoU e 0.3 r 1 w_app 0 app_max 0.3",
+   "purity": 0.8518570971481324,
+   "n_rows": 190647,
+   "n_tracklets": 1294,
+   "n_contaminated": 202,
+   "frag_per_gt": 6.255605912013235
+  },
+  {
+   "arm": "EIoU e 0 r 1 w_app 0.5 app_max 0.3",
+   "purity": 0.9434256543471433,
+   "n_rows": 187859,
+   "n_tracklets": 3512,
+   "n_contaminated": 108,
+   "frag_per_gt": 12.144829464966765
+  }
+ ]
+}

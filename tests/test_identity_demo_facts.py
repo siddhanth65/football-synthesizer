@@ -19,11 +19,19 @@ sys.path.insert(0, str(_ROOT / "tools"))
 import make_identity_demo as demo  # noqa: E402
 
 _ARTIFACTS = demo.NAMED_TRACKS.exists() and demo.ORACLE.exists()
+_SURVIVORS = demo.ANCHOR_ROOT / "spotcheck_step3" / "_survivors"
 
 
 @pytest.mark.skipif(not _ARTIFACTS, reason="identity artifacts not present")
 def test_identity_facts_match_artifacts() -> None:
     """Every headline figure is read straight from disk, not hardcoded."""
+    if not any(_SURVIVORS.glob("*.jpg")):
+        pytest.skip(
+            "_survivors crops purged by results/STORAGE_RECLAIM_LOG_2026-08-01.md row 2 "
+            "(Tier-A cleanup) -- hero_number/hero_share cannot be recomputed without "
+            "re-running the closeup anchor probe"
+        )
+
     f = demo.identity_facts()
 
     assert f["n_named_players"] == 3

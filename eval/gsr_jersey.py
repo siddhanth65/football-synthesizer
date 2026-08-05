@@ -61,7 +61,7 @@ MATCH_TOL_PX = 6.0
 
 def extract_track_crops(
     seq_dir: Path, df: pd.DataFrame, detector, out_dir: Path, *, max_crops: int = MAX_CROPS,
-    match_tol_px: float = MATCH_TOL_PX,
+    match_tol_px: float = MATCH_TOL_PX, crop_scale: float = 1.0,
 ) -> dict[int, list[Path]]:
     """Recover up to ``max_crops`` person-box crops per player/GK track by re-detecting frames (IO/GPU).
 
@@ -78,11 +78,19 @@ def extract_track_crops(
         out_dir: Scratch dir for the crop JPGs (created; caller owns cleanup).
         max_crops: Max crops sampled per track.
         match_tol_px: Max foot-point distance (px) to accept a re-detected box as the crop source.
+        crop_scale: Widening of the detector box about its foot point
+            (:func:`tools.ocr_match.scale_box`). ``1.0`` reproduces the shipped geometry exactly.
+            Unlike our broadcast pipeline -- where the box is *reconstructed* by
+            ``generator.team_anchor.estimate_player_box`` and measured 0.814x too small
+            (``results/OCR_DOMAIN_SHIFT.md`` section 7) -- the GSR box here is the detector's own,
+            so this knob is a genuine widening, not a repair.
 
     Returns:
         ``{track_id: [crop_path, ...]}`` (BGR JPGs), player/GK tracks only.
     """
     import cv2  # noqa: PLC0415
+
+    from tools.ocr_match import scale_box  # noqa: PLC0415
 
     people = df[df["role"].isin(["player", "goalkeeper"])
                 & np.isfinite(df["image_x"]) & np.isfinite(df["image_y"])]
@@ -111,7 +119,9 @@ def extract_track_crops(
             k = int(np.argmin(d))
             if d[k] > match_tol_px:
                 continue
-            x1, y1, x2, y2 = (int(v) for v in xyxy[k])
+            box = tuple(int(v) for v in xyxy[k])
+            x1, y1, x2, y2 = (box if crop_scale == 1.0
+                              else scale_box(box, crop_scale, bgr.shape[0], bgr.shape[1]))
             crop = bgr[max(y1, 0):max(y2, y1 + 1), max(x1, 0):max(x2, x1 + 1)]
             if crop.size:
                 p = out_dir / f"t{tid}_{frame_idx:06d}.jpg"
@@ -252,6 +262,7 @@ def percrop_frame(
 
 def read_sequence_percrop(
     seq_dir: Path, parquet: Path, dest: Path, detector, *, max_crops: int, force: bool = False,
+    crop_scale: float = 1.0,
 ) -> pd.DataFrame:
     """Run the Koshkina chain over one sequence and persist EVERY crop's read (resumable by disk).
 
@@ -262,6 +273,7 @@ def read_sequence_percrop(
         detector: The football detector (built once, reused across sequences).
         max_crops: Crops sampled per track (the densification lever; the on-record run used 20).
         force: Recompute even if ``dest`` exists.
+        crop_scale: Detector-box widening (see :func:`extract_track_crops`); stamped on every row.
 
     Returns:
         The per-crop frame (see :func:`percrop_frame`).
@@ -273,7 +285,8 @@ def read_sequence_percrop(
     df = pd.read_parquet(parquet)
     crop_dir = dest.parent / "_crops" / seq_dir.name
     shutil.rmtree(crop_dir, ignore_errors=True)
-    paths_by_tid = extract_track_crops(seq_dir, df, detector, crop_dir, max_crops=max_crops)
+    paths_by_tid = extract_track_crops(seq_dir, df, detector, crop_dir, max_crops=max_crops,
+                                       crop_scale=crop_scale)
     flat: list[Path] = []
     index: list[int] = []
     for tid, ps in paths_by_tid.items():
@@ -289,19 +302,26 @@ def read_sequence_percrop(
         probs = np.empty((0, NUM_CLASSES), np.float32)
         detail = {"leg": np.empty(0, np.float32), "torso": np.empty(0, bool),
                   "p0": np.empty((0, 11), np.float32), "p1": np.empty((0, 11), np.float32)}
-    out = percrop_frame(paths_by_tid, probs, detail, index, flat)
+    out = percrop_frame(paths_by_tid, probs, detail, index, flat).assign(
+        crop_scale=float(crop_scale))
     shutil.rmtree(crop_dir, ignore_errors=True)
     dest.parent.mkdir(parents=True, exist_ok=True)
     out.to_parquet(dest, index=False)
     return out
 
 
-def run_percrop(data_dir: Path, out_dir: Path, *, max_crops: int, limit: int | None) -> None:
-    """GPU pass: persist per-crop OCR evidence for every valid-split sequence (resumable)."""
+def run_percrop(data_dir: Path, out_dir: Path, *, max_crops: int, limit: int | None,
+                crop_scale: float = 1.0, variant: str = "", only: list[str] | None = None) -> None:
+    """GPU pass: persist per-crop OCR evidence for every valid-split sequence (resumable).
+
+    ``variant`` suffixes the output directory so a re-run at a different crop geometry lands beside
+    the shipped cache instead of overwriting it (the ``tools.ocr_match`` pattern).
+    """
     pos_dir = out_dir / "positions"
-    dest_dir = out_dir / PERCROP_SUBDIR
+    dest_dir = out_dir / (PERCROP_SUBDIR + variant)
     seqs = sorted(p for p in data_dir.iterdir()
-                  if p.is_dir() and (pos_dir / f"{p.name}.parquet").exists())
+                  if p.is_dir() and (pos_dir / f"{p.name}.parquet").exists()
+                  and (only is None or p.name in set(only)))
     if limit:
         seqs = seqs[:limit]
     detector = None
@@ -317,7 +337,7 @@ def run_percrop(data_dir: Path, out_dir: Path, *, max_crops: int, limit: int | N
             detector = _build_detector("cuda" if torch.cuda.is_available() else "cpu", "football")
         t0 = time.time()
         frame = read_sequence_percrop(seq_dir, pos_dir / f"{seq_dir.name}.parquet", dest, detector,
-                                      max_crops=max_crops)
+                                      max_crops=max_crops, crop_scale=crop_scale)
         n_read = int((frame["number"] > 0).sum())
         logger.info("[%d/%d] %s: %d crops, %d with a number, %d tracks (%.0fs)",
                     i + 1, len(seqs), seq_dir.name, len(frame), n_read,
@@ -502,9 +522,16 @@ def main() -> None:
                     help="GPU pass persisting EVERY crop's read to outputs/gsr/koshkina_percrop/")
     ap.add_argument("--max-crops", type=int, default=MAX_CROPS,
                     help="crops sampled per track (on-record aggregated run used 20)")
+    ap.add_argument("--crop-scale", type=float, default=1.0,
+                    help="widen the detector box about its foot point; 1.0 is the shipped geometry")
+    ap.add_argument("--variant", default="",
+                    help="suffix on outputs/gsr/koshkina_percrop<variant>/ (e.g. _w125)")
+    ap.add_argument("--seqs", default=None, help="comma-separated sequence names")
     args = ap.parse_args()
     if args.percrop:
-        run_percrop(args.data_dir, args.out_dir, max_crops=args.max_crops, limit=args.limit)
+        run_percrop(args.data_dir, args.out_dir, max_crops=args.max_crops, limit=args.limit,
+                    crop_scale=args.crop_scale, variant=args.variant,
+                    only=args.seqs.split(",") if args.seqs else None)
         return
     run(args.data_dir, args.out_dir, args.results_dir, limit=args.limit, score_only=args.score_only)
 

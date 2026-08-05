@@ -1,0 +1,48 @@
+{
+  "declared_at": "2026-08-01T20:32:32+00:00",
+  "parent": {
+    "file": "results\\gsr_calibgate_frozen.json",
+    "declared_at": "2026-08-01T12:12:33+00:00",
+    "sha256": "43a71347d4cddb846247cba45843e20bd00e003f2a76d2c7759b38bf8564534d"
+  },
+  "team_map": "resolve_team_map_free (deeper cluster mean pitch_x = left)",
+  "roster": "self (slots = numbers this sequence own per-crop OCR chain read, on the reading tracklet team side)",
+  "solver_config": "results\\identity_solver_config_percrop.json",
+  "solver_config_sha256": "a7282d9be6359efedd36bf0057549a27a272fbd08393afe3730309402899cf92",
+  "calibration_fill": {
+    "function": "generator.postprocess.fill_calibration_gaps",
+    "max_gap": 10,
+    "min_donor_rows": 8,
+    "applied_to": "the cached positions parquets, before the GTA connector and the solver",
+    "chosen_on": "valid DEV-20 (results/GSR_ASSOCIATION.md section 4.1)"
+  },
+  "calibration_gate": {
+    "functions": [
+      "generator.calibrate.PnLCalibCalibrator.candidates",
+      "generator.calibrate.select_calibration",
+      "generator.postprocess.onpitch_plausible"
+    ],
+    "trust_min_players": 3,
+    "trust_min_span_m": 5.0,
+    "max_reproj_error_m": 2.0,
+    "applied_to": "the frames the cached positions emit no pitch coordinate for, re-projected from that frame's own recomputed homography",
+    "chosen_on": "valid DEV-20 (results/GSR_CALIBGATE.md section 2)",
+    "order": "gate first, then fill_calibration_gaps(max_gap=10) for what is still dead"
+  },
+  "v4_bundle": {
+    "aggregation_floor": "0.80",
+    "aggregation_rule": {
+      "min_crop_conf": 0.9,
+      "min_votes": 3,
+      "min_legibility": 0.5,
+      "emit_all": false
+    },
+    "connector_tau": 0.08,
+    "jersey_compatible_merge": true,
+    "crop_scale": 1.0,
+    "confusion_prior_refit_on_dev": false,
+    "chosen_on": "valid DEV-20 (results/GSR_V4.md section 3)"
+  },
+  "dev20_gs_hota": 36.4488433425396,
+  "note": "bundle chosen on DEV-20; valid TEST-38 and the official test split are verification only"
+}

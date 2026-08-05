@@ -120,8 +120,15 @@ def _roster(seq_dir: Path, team_map: dict[int, str]) -> list[Identity]:
     return [seen[k] for k in sorted(seen)]
 
 
+def dominant_numbers(votes: dict[int, list[tuple[int, float]]]) -> dict[int, int]:
+    """``track_id -> its top-confidence read`` -- the connector's jersey-compatibility gate (pure)."""
+    return {int(t): int(max(v, key=lambda p: p[1])[0]) for t, v in votes.items()
+            if v and max(v, key=lambda p: p[1])[0] >= 1}
+
+
 def build_bundle(seq_dir: Path, out_dir: Path, *, votes_subdir: str = "koshkina_jersey",
-                 positions_subdir: str = "positions") -> dict:
+                 positions_subdir: str = "positions", params: GtaParams = PARTITION,
+                 jersey_gate: bool = False) -> dict:
     """Summarise one sequence into everything the solver and the grader need (CPU, cached).
 
     Args:
@@ -133,6 +140,10 @@ def build_bundle(seq_dir: Path, out_dir: Path, *, votes_subdir: str = "koshkina_
         positions_subdir: Which positions table to bundle. ``positions`` is the on-record
             calibrator output; ``positions_filled`` is the calibration-gap repair of
             :func:`generator.postprocess.fill_calibration_gaps` (``tools.gsr_calibfill``).
+        params: The Stage-1 connector partition to reproduce. MUST match the one the arm's
+            submissions were written under, or tracklet ids desync.
+        jersey_gate: Forbid the connector from merging two tracklets whose confident reads disagree
+            (:func:`generator.gta_link.connect`); the reads come from ``votes_subdir``.
 
     Returns a dict with the merged tracklets, their evidence, the roster, leave-one-out gallery
     similarities (top ``MAX_TOPK`` per pair), the mutual-exclusion groups and the GT row counts that
@@ -140,9 +151,16 @@ def build_bundle(seq_dir: Path, out_dir: Path, *, votes_subdir: str = "koshkina_
     """
     name = seq_dir.name
     df = pd.read_parquet(out_dir / positions_subdir / f"{name}.parquet")
+    # resolve through the shared constant, never a literal: the connector and the solver gallery
+    # must read the SAME embedding space or the bundles silently mix two of them
+    from eval.gsr_gta import CACHE_SUBDIR  # noqa: PLC0415
+
     det = load_or_build_det_embeddings(
-        seq_dir, df, out_dir / "detembed_cache_prtreid" / f"{name}.npz", params=PARTITION)
-    _sdf, _lookup, remap, _st = repair_sequence(df, det, PARTITION, do_split=False)
+        seq_dir, df, out_dir / CACHE_SUBDIR / f"{name}.npz", params=params)
+    votes = _load_votes(out_dir / votes_subdir / f"{name}.json")
+    _sdf, _lookup, remap, _st = repair_sequence(
+        df, det, params, do_split=False,
+        numbers=dominant_numbers(votes) if jersey_gate else None)
     team_map = resolve_team_map(df, load_gt_people_by_frame(seq_dir))
     identities = _roster(seq_dir, team_map)
 
@@ -151,7 +169,7 @@ def build_bundle(seq_dir: Path, out_dir: Path, *, votes_subdir: str = "koshkina_
     emb: dict[int, list] = defaultdict(list)
     for tid, (_f, e) in det.items():
         emb[int(remap.get(int(tid), int(tid)))].append(e)
-    reads = _tracklet_reads(_load_votes(out_dir / votes_subdir / f"{name}.json"), remap)
+    reads = _tracklet_reads(votes, remap)
 
     order = sorted(people["mid"].unique().tolist())
     index = {m: i for i, m in enumerate(order)}
@@ -226,7 +244,8 @@ def _gt_attributes(seq_dir: Path) -> dict[int, tuple[str | None, str | None]]:
 
 def load_bundles(data_dir: Path, out_dir: Path, names: list[str], *, rebuild: bool = False,
                  votes_subdir: str = "koshkina_jersey", cache_subdir: str = BUNDLE_SUBDIR,
-                 positions_subdir: str = "positions") -> dict:
+                 positions_subdir: str = "positions", params: GtaParams = PARTITION,
+                 jersey_gate: bool = False) -> dict:
     """Load (building and caching if needed) the evidence bundles for ``names``.
 
     Args:
@@ -249,7 +268,8 @@ def load_bundles(data_dir: Path, out_dir: Path, names: list[str], *, rebuild: bo
             continue
         t0 = time.time()
         bundles[name] = build_bundle(data_dir / name, out_dir, votes_subdir=votes_subdir,
-                                     positions_subdir=positions_subdir)
+                                     positions_subdir=positions_subdir, params=params,
+                                     jersey_gate=jersey_gate)
         path.write_bytes(pickle.dumps(bundles[name]))
         b = bundles[name]
         logger.info("[%d/%d] %s: %d tracklets, %d identities, %d groups, %d auditable rows (%.1fs)",

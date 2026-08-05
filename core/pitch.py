@@ -27,4 +27,8 @@ ATT_THIRD_X = 2 * PITCH_LEN / 3  # the 70 m line; presence beyond it = attacking
 #            counter-press window (now 5 s * native fps) and mean_recovery_s. At 25 fps native the old
 #            constants ran ~2x fast (recovery 2x too small, regain curve shifted early); this makes the
 #            counter-press / recovery / set-piece physics fps-consistent across the 25 vs 59.94 corpus.
-METRICS_VERSION = "2026.07.3"
+# 2026.08.1 the frame-trust rule (postprocess.reject_implausible_frames) dropped its wide-shot
+#           assumption -- 8 on-pitch players spanning 25 m -> 3 spanning 5 m, applied inside the
+#           calibration gate. Zoomed frames whose calibration was correct are no longer voided, so
+#           positions tables carry materially more frames (results/GSR_CALIBGATE.md).
+METRICS_VERSION = "2026.08.1"
