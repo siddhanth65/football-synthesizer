@@ -4825,7 +4825,7 @@
       "statement": "The aggregation rule that MAXIMISES read density subject to the precision floor is NOT the rule that maximises GS-HOTA, and the gap is worth about a point. On identical v6 evidence and an identical EIoU partition, the v6-swept rule (min_crop_conf 0.50, min_votes 1; d = 0.4148 at read precision 0.8228) scores GS-HOTA 41.8014, while reusing the incumbent's own rule (min_crop_conf 0.90, min_votes 3; d = 0.3139 at read precision 0.9256) scores 42.7449 -- 0.94 LOWER for 32% MORE read tracklets. The denser arm is worse on both terms, DetA -0.71 and GS-AssA actually negative against the control (-0.69), and it names 875 tracklets to the sparser arm's 729 while scoring a lower identity accuracy for them (0.5316 vs 0.5463); mean identities per sequence rises 13.25 -> 16.85 at flat merge precision, i.e. the extra votes split identities across more slots rather than consolidating them. The reason is structural: under GS-HOTA a wrong number is not a missing number -- it deletes a detection that a null would have let match -- so a retrained reader's precision headroom should be banked as precision, not spent on density. The tracklet-density gate and the scored objective disagree about where to sit on the frontier.",
       "value": -0.9435,
       "unit": "GS-HOTA delta on DEV-20 from spending the v6 reader's precision headroom on density (42.7449 -> 41.8014)",
-      "status": "tentative",
+      "status": "pending",
       "evidence": [
         "results/GSR_S3_READER.md",
         "results/gsr_benchmark/gsr_eiou_dev_clip_s3reader.json",
@@ -4837,7 +4837,8 @@
       "caveats": [
         "TENTATIVE: arm B vs arm A is not statistically separated on 20 sequences (paired mean -0.850, 7 helped / 13 hurt, Wilcoxon p = 0.216). The ordering is directional on DEV, not proven.",
         "Both arms clear the pre-declared DEV gate; this claim is about which to ship, not about whether the reader works.",
-        "Only two points on the frontier were measured; the optimum may lie between them and was not searched."
+        "Only two points on the frontier were measured; the optimum may lie between them and was not searched.",
+        "status pending: A-vs-B not separated at n=20 (p=0.216); S7's held-out runs decide."
       ],
       "date": "2026-08-05",
       "tags": [
