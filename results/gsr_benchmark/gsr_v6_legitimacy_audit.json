@@ -1,0 +1,263 @@
+{
+  "audited_at_utc": "2026-08-06T15:16:53+00:00",
+  "source": "outputs/gsr_srvtest/deleak_v6test_v6det_clip_e0.3r1w0.5a0.3 (== results/gsr_submission/gsr_testphase_gtfree_v6_28f3986b.zip content)",
+  "method": "tools.gsr_calibfill.verify_gtfree -- every shipped row team must equal free_map[cluster] (base arm value, flipped only on sequences where the free map disagrees with GT)",
+  "n_sequences": 49,
+  "n_rows": 467425,
+  "violations": 0,
+  "flipped_sequences": [
+    "SNGS-126",
+    "SNGS-130",
+    "SNGS-131",
+    "SNGS-197"
+  ],
+  "n_flipped": 4,
+  "per_sequence": {
+    "SNGS-116": {
+      "n_rows": 9274,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-117": {
+      "n_rows": 6533,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-118": {
+      "n_rows": 9679,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-119": {
+      "n_rows": 7125,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-120": {
+      "n_rows": 9836,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-121": {
+      "n_rows": 7559,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-122": {
+      "n_rows": 9099,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-123": {
+      "n_rows": 11212,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-124": {
+      "n_rows": 7869,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-125": {
+      "n_rows": 7422,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-126": {
+      "n_rows": 8839,
+      "violations": 0,
+      "flipped": true
+    },
+    "SNGS-127": {
+      "n_rows": 13075,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-128": {
+      "n_rows": 11665,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-129": {
+      "n_rows": 11145,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-130": {
+      "n_rows": 10495,
+      "violations": 0,
+      "flipped": true
+    },
+    "SNGS-131": {
+      "n_rows": 12550,
+      "violations": 0,
+      "flipped": true
+    },
+    "SNGS-132": {
+      "n_rows": 9577,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-133": {
+      "n_rows": 10494,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-134": {
+      "n_rows": 7468,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-135": {
+      "n_rows": 10128,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-136": {
+      "n_rows": 7278,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-137": {
+      "n_rows": 6925,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-138": {
+      "n_rows": 7951,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-139": {
+      "n_rows": 8696,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-140": {
+      "n_rows": 11480,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-141": {
+      "n_rows": 8711,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-142": {
+      "n_rows": 8299,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-143": {
+      "n_rows": 3356,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-144": {
+      "n_rows": 7318,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-145": {
+      "n_rows": 6098,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-146": {
+      "n_rows": 6413,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-147": {
+      "n_rows": 3668,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-148": {
+      "n_rows": 5931,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-149": {
+      "n_rows": 8500,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-150": {
+      "n_rows": 8606,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-187": {
+      "n_rows": 13234,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-188": {
+      "n_rows": 16361,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-189": {
+      "n_rows": 11684,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-190": {
+      "n_rows": 9370,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-191": {
+      "n_rows": 10855,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-192": {
+      "n_rows": 9977,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-193": {
+      "n_rows": 11018,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-194": {
+      "n_rows": 14136,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-195": {
+      "n_rows": 12473,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-196": {
+      "n_rows": 8902,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-197": {
+      "n_rows": 12818,
+      "violations": 0,
+      "flipped": true
+    },
+    "SNGS-198": {
+      "n_rows": 13106,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-199": {
+      "n_rows": 12061,
+      "violations": 0,
+      "flipped": false
+    },
+    "SNGS-200": {
+      "n_rows": 11156,
+      "violations": 0,
+      "flipped": false
+    }
+  },
+  "reproduces": "results/gsr_benchmark/gsr_v6_testsplit_package.json .legitimacy, re-derived independently on the laptop rather than read from the pipeline run"
+}

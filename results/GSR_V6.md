@@ -156,12 +156,21 @@ campaign start: 22.85 -> 53.08 across ~6 weeks, every step frozen then verified.
 **Legitimacy.** `manifest_gtfree_v6.json`: `label_reads: "none. ... No Labels-GameState.json is
 opened anywhere in the prediction chain."` — the team map comes from `resolve_team_map_free`
 (geometry only) and the roster from the sequence's own OCR reads, the same standard as
-`GSR_DELEAK.md` §6. STATUS's night entry states the same audit class scaled to test-49: **0
-violations over 467,425 rows** (`manifest_gtfree_v6.json.n_predictions_total = 467425`, matching
-exactly); no standalone per-row audit JSON for the v6 test-49 package sits on disk the way
-`GSR_DELEAK.md` §6's 333,274-row table does for the earlier package — this is flagged as a
-provenance gap, not a contested number, since the check is mechanically the same `write_arm`
-free-map path already verified there.
+`GSR_DELEAK.md` §6. The row-level audit is materialized at
+`results/gsr_benchmark/gsr_v6_legitimacy_audit.json`, via `tools.gsr_calibfill.verify_gtfree`
+(every shipped row's `team` must equal `free_map[cluster]` — the cached base arm's value, flipped
+only on the sequences where the free map disagrees with the GT-agreement map; any other row is a
+violation). Run independently on the laptop against
+`outputs/gsr_srvtest/deleak_v6test_v6det_clip_e0.3r1w0.5a0.3` (the exact directory the shipped zip
+was packaged from): **0 violations over 467,425 rows, 49 sequences**, matching
+`results/gsr_benchmark/gsr_v6_testsplit_package.json`'s embedded `legitimacy` block exactly (same
+counts, same flip set) — this is a re-derivation, not a re-read of that file. **Flip set: SNGS-126,
+SNGS-130, SNGS-131, SNGS-197** (the 4 sequences where the geometric free-map resolver disagrees
+with the GT-agreement map) — corroborated independently by the raw solver `identity` metric in
+`gsr_v6det_test_v6det.json`, which is near-zero on exactly these four sequences (0.0039 / 0.0244 /
+0.0240 / 0.0279) and normal everywhere else, including SNGS-190 (0.757). Note for the record: an
+earlier verbal restatement of this flip set as `{126, 131, 190, 197}` was a transcription slip —
+190 is not a flip sequence; 130 is. The violation count (0) is unaffected either way.
 
 **Package.** `results/gsr_submission/gsr_testphase_gtfree_v6_28f3986b.zip` — 35,483,700 bytes, 49
 sequences, layout `tracklab/<SEQ>.json`, built 2026-08-06T15:00:23Z from
@@ -191,8 +200,9 @@ UPLOAD.**
    §3's controls are explicitly same-stack: every paired claim in this document uses arms from one
    machine. Escalated as a pin-the-version backlog item, not fixed this session.
 4. **Team-map flips are now the dominant per-sequence failure mode**, roughly **+3.1 GS-HOTA of
-   estimated headroom** concentrated in the same small number of known-bad clips — stated as an
-   *estimate, not a measurement*, and not banked anywhere in the numbers above.
+   estimated headroom** concentrated in the same small number of known-bad clips (the audited flip
+   set itself, §4: SNGS-126/130/131/197) — stated as an *estimate, not a measurement*, and not
+   banked anywhere in the numbers above.
 5. **The detector dose decision (S4b's second 10-epoch run) touched valid, not test.** test-49 is
    its clean, never-touched split — the dose tuning that happened on DEV/valid does not contaminate
    the once-only test-49 spend.
@@ -207,9 +217,8 @@ UPLOAD.**
 
 Public leaderboard arc across the campaign: 31.88 -> 33.37 -> 35.40 -> 39.02 -> pending 53.08.
 Backlog carried out of this session: pin `supervision` to one version across laptop and server
-(item 3 above); resolve the team-map flip headroom on the known clips (item 4); decide whether the
-v6 test-49 legitimacy check needs a standalone per-row audit artifact to match `GSR_DELEAK.md`'s
-precedent (item raised in §4).
+(item 3 above); resolve the team-map flip headroom on the known clips (item 4, now the audited
+flip set SNGS-126/130/131/197, §4).
 
 ## 7. Files
 
@@ -225,6 +234,8 @@ precedent (item raised in §4).
 - `results/gsr_benchmark/gsr_v6det_test_v6det.json` — the once-only test-49 run.
 - `results/gsr_submission/manifest_gtfree_v6.json`, `zip_selfscore_gtfree_v6.json`,
   `gsr_testphase_gtfree_v6_28f3986b.zip` — the submission package and its self-score verification.
+- `results/gsr_benchmark/gsr_v6_legitimacy_audit.json` — the independently re-derived row-level
+  legitimacy audit (0 violations / 467,425 rows / flip set SNGS-126,130,131,197).
 - `results/GSR_S3_READER.md`, `results/CLUSTER_SESSION_S4.md`, `results/GSR_EIOU.md` — component
   provenance (jersey reader, detector, association).
 - `results/CLUSTER_MIGRATION.md` — GPU/CPU stack provenance and the same-machine pairing rule.
