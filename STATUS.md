@@ -1,5 +1,78 @@
 # STATUS
 
+## 2026-08-06 (night) — **v6 COMPLETE: official test split 53.08 (+14.06). Package ready for upload.**
+
+results/GSR_V6.md (via gsr_v6det.py act), results/gsr_v6_frozen.json (declared 05:53:08Z, before
+any TEST-38 read; provenance amendment only at 08:39). The campaign's fourth submission package:
+**results/gsr_submission/gsr_testphase_gtfree_v6_28f3986b.zip** — 467,425 predictions, legitimacy
+audit 0 violations, zip self-score identical to 4 decimals. AWAITING SID'S CODABENCH UPLOAD.
+
+- **DEV-20 leave-one-out**: full bundle 51.81; component costs — detector -9.06, v6 reader -5.52,
+  EIoU -2.09; ALL THREE IN (bar >= +1.0). S3's arm A reproduced to 4 dp post-collision-fix.
+  Tau re-sweep: measured flat (best +0.14) — S3's lower-bound caveat closed. Digit-prior refit:
+  inert, off.
+- **TEST-38: 49.50 vs pre-declared gate 40.0 — PASS by +9.5** (EIoU control re-derived to the
+  digit first; same-stack pairing +10.12, 34/4, p=4.7e-09).
+- **test-49 (once): GS-HOTA 53.08 / DetA 39.32 / AssA 71.67** vs the public 39.02 = **+14.06**.
+  Public arc: 31.88 -> 33.37 -> 35.40 -> 39.02 -> (pending upload) 53.08. Internal arc from
+  campaign start: 22.85 -> 53.08 in ~6 weeks, every step frozen-then-verified.
+- Negatives on record (results doc): a worker-introduced sharding concurrency bug in the OCR
+  scratch dir — CAUGHT by measurement, contaminated batch discarded+redone, no on-record artifact
+  affected, per-PID fix shipped; a zero-torso fault on 2 sequences (repaired, guard added, cause
+  unestablished); a cross-stack tracker difference (supervision 0.29 vs 0.30 fragments +37%,
+  -3.90 on TEST-38 — all paired claims are same-stack; escalated as a pin-the-version item);
+  team-map flips now the dominant per-sequence failure (~+3.1 estimated headroom, the known 4
+  clips); detector dose decision touched valid (test-49 is its clean split); v4 quoted not
+  re-derived (EIoU control re-derivation is the harness-fidelity evidence).
+
+## 2026-08-06 (later) — S4/S4b: the detector passes on the second dose; ALL v6 components gated in
+
+S4 (results/CLUSTER_SESSION_S4.md, kb gsr-det-003): v3+GSR fine-tune improved every axis (mAP
++18.5, role coverage +6.35 — every 5A pathology REVERSED, confirming breadth-not-augmentation)
+but FAILED the pre-declared gate on the game-3 leak by 20 detections (0.05042 vs <=0.05);
+recorded as FAIL, threshold untouched. Diagnosis: dose shortfall (leak falling monotonically,
+nothing converged at 10 epochs). **S4b (fresh gate declared BEFORE training, same thresholds): 10
+more epochs -> PASS on all four** — mAP@0.5 0.7069 (+20.66), role coverage 0.9130 (+7.27), leak
+max 0.04576, ball 0.2222; 58/58 sequences better recall; <40px recall 0.40->0.55; kb gsr-det-004.
+**Honesty rider carried into S7: the leak criterion sits inside an ~8x noise band relative to its
+passing margin (checkpoint spread 0.033-0.069) — game 3 is satisfied-but-marginal, not solved;
+and NO GS-HOTA has been measured with these weights (box-level only; the identity gate can still
+eat the box gain).** Weights parked server-side (md5 2074d874...); S7 re-extract cost ~5h valid
++ ~9h test on the laptop. Ledger: schema fields completed on 4 S2 claims + s3-reader-003
+tentative->pending (commits c173364, 31be41a; test_kb schema test green).
+
+**S7 dispatched with a RAISED pre-declared TEST-38 gate: >= 40.0** (the plan's 37.5 was written
+before S5's 39.54 existed; the bundle must beat the best on-record TEST-38 by a real margin to
+spend test-49). Sequencing: DEV-first detector ablation (re-extract only DEV-20 first, ~2h, to
+price A2's inclusion before the 14h full rebuild), leave-one-out arms, single freeze, one
+TEST-38, one test-49, package v6.
+
+## 2026-08-06 — S2+S3: the jersey lever lands — d crosses the evidence-density bar for the first time
+
+**S2 (results/CLUSTER_SESSION_S2.md, kb gsr-jersey-010..012):** arm 4t (shipped-init PARSeq on the
+legibility-filtered planned+v3 torso corpus) beats the incumbent APPLES-TO-APPLES in the identical
+chain: precision 0.8344 vs 0.7022 at equal emit. v3's 106k filtered labels are the ENTIRE effect
+(+0.31); the S1 synthetic init measured NEGATIVE (-0.022) — S1's own caution vindicated. Guard
+finding: 56.8% of v3 jersey labels sit on illegible crops. (Also: the checkout INCIDENT — 25
+uncommitted claims wiped by a worker's git checkout; 22 script-recovered + 2 re-minted from cited
+text + 1 uncited lost; new CLAUDE.md hard rule; everything committed+pushed 0abe5c8..745f33c.)
+
+**S3 (results/GSR_S3_READER.md, kb s3-reader-001..003): BOTH GATES PASS.**
+- Tracklet gate: **d = 0.4148 @ precision 0.8228** (0.80 floor) and 0.3872 @ 0.8620 (0.85 floor)
+  vs incumbents 0.3026/0.2218 — **the first measurement in this project to clear the
+  evidence-density law's d* = 0.347.** Paired at the crop (67,224 rows, only weights differ);
+  mechanism: the v6 reader is more decisive (1.29x emits at conf>=0.99, 0.959 agreement), so the
+  sweep cashes precision headroom into density via the confidence floor.
+- DEV bundle on the S5 EIoU base: **39.08 -> 42.74 (+3.66, 18/20 helped, p=0.00021), DetA +4.76**
+  — the largest single-lever DEV gain of the campaign, and 89% DetA, exactly where a jersey lever
+  must act. Denser arm B (the v6-swept rule) measured WORSE (-0.94 vs A): precision banked as
+  precision beats coverage spent as coverage; arm A (incumbent rule) is the S7 recommendation.
+- Negatives on record: legibility model unchanged = the 19.1% emit ceiling (arm 1 still unrun);
+  tau unswept on new evidence (lower bound); digit prior unrefit (crop agreement 0.755 — live S7
+  candidate); A/B share a config_key so B's votes overwrote A's cache (S7 must wipe+rebuild);
+  the v5 DEV->held-out shrink precedent noted — TEST-38 will judge, at S7's single freeze.
+DEV trajectory on record: ByteTrack 37.07 -> EIoU 39.08 -> EIoU+v6 reader 42.74.
+
 ## 2026-08-05 — v6 campaign S0/S1/S5: the association lever lands (+2.51 held-out, p=0.0009)
 
 Approved plan: .claude/plans/floating-leaping-peacock.md. **S0**: SoccerNet-v3 fetched+audited
