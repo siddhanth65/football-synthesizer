@@ -1,0 +1,251 @@
+{
+  "legitimacy": {
+    "n_sequences": 49,
+    "n_rows": 467425,
+    "violations": 0,
+    "flipped_sequences": [
+      "SNGS-126",
+      "SNGS-130",
+      "SNGS-131",
+      "SNGS-197"
+    ],
+    "n_flipped": 4
+  },
+  "manifest": {
+    "zip": "results\\gsr_submission\\gsr_testphase_gtfree_v6_28f3986b.zip",
+    "bytes": 35483700,
+    "n_sequences": 49,
+    "zip_layout": "tracklab/<SEQ>.json",
+    "recipe_hash": "28f3986bcb068c4a54de450707b3f4f91c5c317127e40fe8f2660c24de8704f6",
+    "competition": "codabench 4365 (2025 SoccerNet GSR -- Test Phase)",
+    "source_arm": "outputs\\gsr_srvtest\\deleak_v6test_v6det_clip_e0.3r1w0.5a0.3\\predictions\\data",
+    "predictions_per_sequence": {
+      "SNGS-116": 9274,
+      "SNGS-117": 6533,
+      "SNGS-118": 9679,
+      "SNGS-119": 7125,
+      "SNGS-120": 9836,
+      "SNGS-121": 7559,
+      "SNGS-122": 9099,
+      "SNGS-123": 11212,
+      "SNGS-124": 7869,
+      "SNGS-125": 7422,
+      "SNGS-126": 8839,
+      "SNGS-127": 13075,
+      "SNGS-128": 11665,
+      "SNGS-129": 11145,
+      "SNGS-130": 10495,
+      "SNGS-131": 12550,
+      "SNGS-132": 9577,
+      "SNGS-133": 10494,
+      "SNGS-134": 7468,
+      "SNGS-135": 10128,
+      "SNGS-136": 7278,
+      "SNGS-137": 6925,
+      "SNGS-138": 7951,
+      "SNGS-139": 8696,
+      "SNGS-140": 11480,
+      "SNGS-141": 8711,
+      "SNGS-142": 8299,
+      "SNGS-143": 3356,
+      "SNGS-144": 7318,
+      "SNGS-145": 6098,
+      "SNGS-146": 6413,
+      "SNGS-147": 3668,
+      "SNGS-148": 5931,
+      "SNGS-149": 8500,
+      "SNGS-150": 8606,
+      "SNGS-187": 13234,
+      "SNGS-188": 16361,
+      "SNGS-189": 11684,
+      "SNGS-190": 9370,
+      "SNGS-191": 10855,
+      "SNGS-192": 9977,
+      "SNGS-193": 11018,
+      "SNGS-194": 14136,
+      "SNGS-195": 12473,
+      "SNGS-196": 8902,
+      "SNGS-197": 12818,
+      "SNGS-198": 13106,
+      "SNGS-199": 12061,
+      "SNGS-200": 11156
+    },
+    "n_predictions_total": 467425,
+    "built_at_utc": "2026-08-06T15:00:23+00:00",
+    "gt_free": {
+      "declared_at": "2026-08-06T05:53:08+00:00",
+      "version": "v6-1.0",
+      "parents": {
+        "results\\gsr_eiou_frozen.json": {
+          "sha256": "1efbf2e84b960c9330733e3c87e26bae0b19fc0dc243aea88198ac2242363559",
+          "declared_at": "2026-08-05T12:09:23+00:00"
+        },
+        "results\\gsr_v4_frozen.json": {
+          "sha256": "4c9f5aaa15b599eea97ef6c869cbb54882e938e93d599e7481f3916e3e76ff8f",
+          "declared_at": "2026-08-01T20:32:32+00:00"
+        }
+      },
+      "components": {
+        "association": {
+          "in_bundle": true,
+          "name": "clean-room ExpansionIoU (S5)",
+          "params": {
+            "e": 0.3,
+            "e_step": 0.35,
+            "rounds": 1,
+            "w_app": 0.5,
+            "app_max": 0.3,
+            "ema": 0.9,
+            "max_lost": 30,
+            "match_tol_px": 6.0
+          },
+          "module_sha256": "44176b1e65b73cb7e05cf0bb5096f6c586356673479a2d9414e1c499b1051d2b",
+          "embedder": "clip_v6det"
+        },
+        "jersey_reader": {
+          "in_bundle": true,
+          "name": "PARSeq v6 arm 4t (S2)",
+          "ckpt": "C:\\Users\\siddh_ygv5bws\\jersey-number-pipeline\\models\\parseq_v6_arm4t.ckpt",
+          "ckpt_md5": "39c0c15defafda072ca0cefd0a4b8e18",
+          "percrop_version": "ocr-percrop-1.2",
+          "aggregation_rule": {
+            "min_crop_conf": 0.9,
+            "min_votes": 3,
+            "min_legibility": 0.5,
+            "emit_all": false
+          },
+          "aggregation_rule_source": "the incumbent 0.80-floor freeze (S3 arm A), NOT the v6 sweep's denser rule (S3 \u00a76: measured worse)"
+        },
+        "detector": {
+          "in_bundle": true,
+          "name": "YOLOv8s GSR+SoccerNet-v3 fine-tune (S4b)",
+          "weights": "models\\gsr_det\\gsr_v3_ft_b_last.pt",
+          "md5": "2074d8741f97a6892a1322d0f808244c"
+        }
+      },
+      "downstream": {
+        "aggregation_floor": "0.80",
+        "connector_tau": 0.45,
+        "jersey_compatible_merge": true,
+        "confusion_prior_refit": false,
+        "positions_source": "positions_gate_v6det -> re-associated (_eiou)",
+        "percrop_variant": "_v6_v6det_eiou"
+      },
+      "legitimacy": {
+        "team_map": "free (geometric resolver)",
+        "roster": "self (own reads)",
+        "standard": "results/GSR_DELEAK.md -- no GT read in the prediction chain"
+      },
+      "provenance": {
+        "dev20_ablation": "laptop (RTX 3050, py3.14, supervision 0.28.x) -- every DEV arm and its controls produced on that one stack",
+        "test38_and_test49_gpu_stages": "a100server1 GPU 1 (py3.11 conda 'gsr', torch 2.5.1+cu121, supervision 0.30.0), per the 2026-08-06 directive to free the laptop GPU",
+        "test38_and_test49_cpu_stages": "laptop (re-association, connector, solver, official scorer)",
+        "same_machine_rule": "every paired comparison uses arms whose GPU artifacts came from ONE machine; the detector-OUT control is therefore re-extracted server-side rather than read from the laptop cache",
+        "cross_stack_check": {
+          "sequence": "SNGS-021",
+          "detector": "S4b",
+          "paired_detections": 0.944,
+          "pitch_disagreement_median_m": 0.0657,
+          "pitch_disagreement_p90_m": 0.307,
+          "role_agreement": 1.0,
+          "team_agreement": 1.0
+        },
+        "eiou_module_drift": "tools/gsr_eiou.py sha256 differs from gsr_eiou_frozen.json (S3 added per-variant plumbing); AST-checked: expand_boxes, eiou_matrix, _match, associate, relink_sequence and attach_boxes are identical to the frozen module -- only clear_arm_caches, run_point, sweep and main changed"
+      },
+      "code_sha256": {
+        "tools\\gsr_eiou.py": "44176b1e65b73cb7e05cf0bb5096f6c586356673479a2d9414e1c499b1051d2b",
+        "tools\\gsr_v4.py": "d287f19318c0af244a7862da76d0eaf9c8948c53a033511b3941878f8f92d540",
+        "tools\\gsr_v6det.py": "d04d71f1f6be3f9fc63b65cc257f2aada2931b4d9da0ee3bef0215afea8737f7",
+        "eval\\gsr_jersey.py": "349a598dc0b2339bcd3839c236da2dff5221ff05b9e0dac7977b7dc82f66ad3c",
+        "generator\\jersey_id.py": "278e0658fb20990bb52f1ca0059a42bb37485283c4018b3ef084cb209fd327f4"
+      },
+      "dev20": {
+        "bytetrack_incumbent_v5_control": {
+          "GS-HOTA": 37.0711,
+          "GS-DetA": 23.9202,
+          "GS-AssA": 57.4538,
+          "GS-LocA": 92.2701,
+          "IDF1": 38.1219
+        },
+        "eiou_incumbent": {
+          "GS-HOTA": 39.082,
+          "GS-DetA": 25.7403,
+          "GS-AssA": 59.3412,
+          "GS-LocA": 92.416,
+          "IDF1": 39.8526
+        },
+        "eiou_v6reader_armA_detector_out": {
+          "GS-HOTA": 42.7449,
+          "GS-DetA": 30.4994,
+          "GS-AssA": 59.9098,
+          "GS-LocA": 92.5648,
+          "IDF1": 45.5482
+        },
+        "det_bytetrack_v6reader_eiou_out": {
+          "GS-HOTA": 49.7221,
+          "GS-DetA": 37.3018,
+          "GS-AssA": 66.2821,
+          "GS-LocA": 93.524,
+          "IDF1": 54.1853
+        },
+        "det_eiou_incumbent_reader_out": {
+          "GS-HOTA": 46.2903,
+          "GS-DetA": 31.9676,
+          "GS-AssA": 67.032,
+          "GS-LocA": 93.4547,
+          "IDF1": 48.2951
+        },
+        "det_eiou_v6reader_FULL": {
+          "GS-HOTA": 51.8083,
+          "GS-DetA": 39.3083,
+          "GS-AssA": 68.2868,
+          "GS-LocA": 93.6523,
+          "IDF1": 56.4526
+        },
+        "_leave_one_out_delta_vs_full": {
+          "drop_detector": -9.0634,
+          "drop_v6_reader": -5.5179,
+          "drop_eiou": -2.0862,
+          "inclusion_rule": "a component is included when dropping it costs >= 1.0 GS-HOTA on DEV-20"
+        },
+        "_negatives_priced_on_dev": {
+          "connector_tau_resweep": {
+            "0.320": 42.3333,
+            "0.380": 42.8814,
+            "0.450_frozen": 42.7449,
+            "0.520": 42.7226,
+            "verdict": "flat; best +0.14 < 1.0 -> tau stays 0.450 (measured on the arm-A base)"
+          },
+          "digit_confusion_prior_refit": {
+            "off": 42.7449,
+            "refit_on_dev": 42.7394,
+            "helped": 0,
+            "hurt": 2,
+            "verdict": "inert -> stays off"
+          }
+        }
+      },
+      "chosen_on": "valid DEV-20 leave-one-out ablation (results/GSR_V6.md)",
+      "pre_declared_gate": {
+        "split": "valid TEST-38",
+        "gs_hota_min": 40.0,
+        "source": "STATUS.md 2026-08-06, raised from the plan's 37.5",
+        "controls": {
+          "v4": 36.71,
+          "eiou_v5": 39.54
+        }
+      },
+      "note": "declared BEFORE any TEST-38 read of this bundle; the official test-49 split is untouched at declaration time.",
+      "amended_at": "2026-08-06T08:39:16+00:00",
+      "amendment_note": "bundle definition unchanged; the amendment adds the machine+stack provenance block required after the GPU stages moved to a100server1. Written before any TEST-38 read of the server-stack arm."
+    },
+    "label_reads": "none. The cluster -> side map comes from resolve_team_map_free (geometry only) and the solver's roster from the sequence's own OCR reads. No Labels-GameState.json is opened anywhere in the prediction chain."
+  },
+  "zip_selfscore": {
+    "GS-HOTA": 53.08461849762875,
+    "GS-DetA": 39.323050301425525,
+    "GS-AssA": 71.67039386681004,
+    "GS-LocA": 94.05967148264726,
+    "IDF1": 56.37029888203943
+  }
+}

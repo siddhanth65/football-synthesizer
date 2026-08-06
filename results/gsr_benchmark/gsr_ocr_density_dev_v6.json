@@ -1,0 +1,3352 @@
+{
+  "version": "ocr-percrop-1.2",
+  "variant": "_v6",
+  "dev": [
+    "SNGS-021",
+    "SNGS-024",
+    "SNGS-027",
+    "SNGS-030",
+    "SNGS-033",
+    "SNGS-036",
+    "SNGS-039",
+    "SNGS-042",
+    "SNGS-045",
+    "SNGS-048",
+    "SNGS-051",
+    "SNGS-054",
+    "SNGS-057",
+    "SNGS-078",
+    "SNGS-081",
+    "SNGS-084",
+    "SNGS-087",
+    "SNGS-090",
+    "SNGS-093",
+    "SNGS-096"
+  ],
+  "floors": [
+    0.8,
+    0.85,
+    0.87
+  ],
+  "rows": [
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 662,
+      "d": 0.41478696741854637,
+      "n_reads": 662,
+      "n_reads_auditable": 615,
+      "read_precision": 0.8227642276422764,
+      "n_tracks_auditable": 615,
+      "track_precision": 0.8227642276422764
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 662,
+      "d": 0.41478696741854637,
+      "n_reads": 1602,
+      "n_reads_auditable": 1501,
+      "read_precision": 0.3557628247834777,
+      "n_tracks_auditable": 615,
+      "track_precision": 0.8227642276422764
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 562,
+      "d": 0.35213032581453635,
+      "n_reads": 562,
+      "n_reads_auditable": 535,
+      "read_precision": 0.8654205607476636,
+      "n_tracks_auditable": 535,
+      "track_precision": 0.8654205607476636
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 562,
+      "d": 0.35213032581453635,
+      "n_reads": 1006,
+      "n_reads_auditable": 967,
+      "read_precision": 0.4953464322647363,
+      "n_tracks_auditable": 535,
+      "track_precision": 0.8654205607476636
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 378,
+      "d": 0.23684210526315788,
+      "n_reads": 378,
+      "n_reads_auditable": 370,
+      "read_precision": 0.9162162162162162,
+      "n_tracks_auditable": 370,
+      "track_precision": 0.9162162162162162
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 378,
+      "d": 0.23684210526315788,
+      "n_reads": 495,
+      "n_reads_auditable": 487,
+      "read_precision": 0.7125256673511293,
+      "n_tracks_auditable": 370,
+      "track_precision": 0.9162162162162162
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 187,
+      "d": 0.11716791979949874,
+      "n_reads": 187,
+      "n_reads_auditable": 185,
+      "read_precision": 0.918918918918919,
+      "n_tracks_auditable": 185,
+      "track_precision": 0.918918918918919
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 187,
+      "d": 0.11716791979949874,
+      "n_reads": 200,
+      "n_reads_auditable": 198,
+      "read_precision": 0.8585858585858586,
+      "n_tracks_auditable": 185,
+      "track_precision": 0.918918918918919
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 579,
+      "d": 0.36278195488721804,
+      "n_reads": 579,
+      "n_reads_auditable": 550,
+      "read_precision": 0.8745454545454545,
+      "n_tracks_auditable": 550,
+      "track_precision": 0.8745454545454545
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 579,
+      "d": 0.36278195488721804,
+      "n_reads": 851,
+      "n_reads_auditable": 809,
+      "read_precision": 0.6118665018541409,
+      "n_tracks_auditable": 550,
+      "track_precision": 0.8745454545454545
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 500,
+      "d": 0.3132832080200501,
+      "n_reads": 500,
+      "n_reads_auditable": 480,
+      "read_precision": 0.9020833333333333,
+      "n_tracks_auditable": 480,
+      "track_precision": 0.9020833333333333
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 500,
+      "d": 0.3132832080200501,
+      "n_reads": 626,
+      "n_reads_auditable": 604,
+      "read_precision": 0.7317880794701986,
+      "n_tracks_auditable": 480,
+      "track_precision": 0.9020833333333333
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 336,
+      "d": 0.21052631578947367,
+      "n_reads": 336,
+      "n_reads_auditable": 331,
+      "read_precision": 0.9335347432024169,
+      "n_tracks_auditable": 331,
+      "track_precision": 0.9335347432024169
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 336,
+      "d": 0.21052631578947367,
+      "n_reads": 364,
+      "n_reads_auditable": 359,
+      "read_precision": 0.871866295264624,
+      "n_tracks_auditable": 331,
+      "track_precision": 0.9335347432024169
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 155,
+      "d": 0.09711779448621553,
+      "n_reads": 155,
+      "n_reads_auditable": 153,
+      "read_precision": 0.954248366013072,
+      "n_tracks_auditable": 153,
+      "track_precision": 0.954248366013072
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 155,
+      "d": 0.09711779448621553,
+      "n_reads": 157,
+      "n_reads_auditable": 155,
+      "read_precision": 0.9419354838709677,
+      "n_tracks_auditable": 153,
+      "track_precision": 0.954248366013072
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 530,
+      "d": 0.33208020050125314,
+      "n_reads": 530,
+      "n_reads_auditable": 506,
+      "read_precision": 0.8952569169960475,
+      "n_tracks_auditable": 506,
+      "track_precision": 0.8952569169960475
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 530,
+      "d": 0.33208020050125314,
+      "n_reads": 661,
+      "n_reads_auditable": 630,
+      "read_precision": 0.7365079365079366,
+      "n_tracks_auditable": 506,
+      "track_precision": 0.8952569169960475
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 465,
+      "d": 0.29135338345864664,
+      "n_reads": 465,
+      "n_reads_auditable": 450,
+      "read_precision": 0.9177777777777778,
+      "n_tracks_auditable": 450,
+      "track_precision": 0.9177777777777778
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 465,
+      "d": 0.29135338345864664,
+      "n_reads": 516,
+      "n_reads_auditable": 500,
+      "read_precision": 0.84,
+      "n_tracks_auditable": 450,
+      "track_precision": 0.9177777777777778
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 308,
+      "d": 0.19298245614035087,
+      "n_reads": 308,
+      "n_reads_auditable": 306,
+      "read_precision": 0.9379084967320261,
+      "n_tracks_auditable": 306,
+      "track_precision": 0.9379084967320261
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 308,
+      "d": 0.19298245614035087,
+      "n_reads": 317,
+      "n_reads_auditable": 315,
+      "read_precision": 0.9174603174603174,
+      "n_tracks_auditable": 306,
+      "track_precision": 0.9379084967320261
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 120,
+      "d": 0.07518796992481203,
+      "n_reads": 120,
+      "n_reads_auditable": 118,
+      "read_precision": 0.9661016949152542,
+      "n_tracks_auditable": 118,
+      "track_precision": 0.9661016949152542
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 120,
+      "d": 0.07518796992481203,
+      "n_reads": 120,
+      "n_reads_auditable": 118,
+      "read_precision": 0.9661016949152542,
+      "n_tracks_auditable": 118,
+      "track_precision": 0.9661016949152542
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 481,
+      "d": 0.30137844611528825,
+      "n_reads": 481,
+      "n_reads_auditable": 466,
+      "read_precision": 0.9184549356223176,
+      "n_tracks_auditable": 466,
+      "track_precision": 0.9184549356223176
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 481,
+      "d": 0.30137844611528825,
+      "n_reads": 521,
+      "n_reads_auditable": 504,
+      "read_precision": 0.8591269841269841,
+      "n_tracks_auditable": 466,
+      "track_precision": 0.9184549356223176
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 409,
+      "d": 0.25626566416040103,
+      "n_reads": 409,
+      "n_reads_auditable": 401,
+      "read_precision": 0.9251870324189526,
+      "n_tracks_auditable": 401,
+      "track_precision": 0.9251870324189526
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 409,
+      "d": 0.25626566416040103,
+      "n_reads": 425,
+      "n_reads_auditable": 417,
+      "read_precision": 0.894484412470024,
+      "n_tracks_auditable": 401,
+      "track_precision": 0.9251870324189526
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 265,
+      "d": 0.16604010025062657,
+      "n_reads": 265,
+      "n_reads_auditable": 264,
+      "read_precision": 0.9507575757575758,
+      "n_tracks_auditable": 264,
+      "track_precision": 0.9507575757575758
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 265,
+      "d": 0.16604010025062657,
+      "n_reads": 267,
+      "n_reads_auditable": 266,
+      "read_precision": 0.9473684210526315,
+      "n_tracks_auditable": 264,
+      "track_precision": 0.9507575757575758
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 88,
+      "d": 0.05513784461152882,
+      "n_reads": 88,
+      "n_reads_auditable": 87,
+      "read_precision": 0.9885057471264368,
+      "n_tracks_auditable": 87,
+      "track_precision": 0.9885057471264368
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 88,
+      "d": 0.05513784461152882,
+      "n_reads": 88,
+      "n_reads_auditable": 87,
+      "read_precision": 0.9885057471264368,
+      "n_tracks_auditable": 87,
+      "track_precision": 0.9885057471264368
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 618,
+      "d": 0.38721804511278196,
+      "n_reads": 618,
+      "n_reads_auditable": 587,
+      "read_precision": 0.8620102214650767,
+      "n_tracks_auditable": 587,
+      "track_precision": 0.8620102214650767
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 618,
+      "d": 0.38721804511278196,
+      "n_reads": 1043,
+      "n_reads_auditable": 997,
+      "read_precision": 0.522567703109328,
+      "n_tracks_auditable": 587,
+      "track_precision": 0.8620102214650767
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 542,
+      "d": 0.33959899749373434,
+      "n_reads": 542,
+      "n_reads_auditable": 519,
+      "read_precision": 0.8901734104046243,
+      "n_tracks_auditable": 519,
+      "track_precision": 0.8901734104046243
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 542,
+      "d": 0.33959899749373434,
+      "n_reads": 761,
+      "n_reads_auditable": 732,
+      "read_precision": 0.6475409836065574,
+      "n_tracks_auditable": 519,
+      "track_precision": 0.8901734104046243
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 373,
+      "d": 0.2337092731829574,
+      "n_reads": 373,
+      "n_reads_auditable": 365,
+      "read_precision": 0.9205479452054794,
+      "n_tracks_auditable": 365,
+      "track_precision": 0.9205479452054794
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 373,
+      "d": 0.2337092731829574,
+      "n_reads": 441,
+      "n_reads_auditable": 433,
+      "read_precision": 0.7944572748267898,
+      "n_tracks_auditable": 365,
+      "track_precision": 0.9205479452054794
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 186,
+      "d": 0.11654135338345864,
+      "n_reads": 186,
+      "n_reads_auditable": 184,
+      "read_precision": 0.9239130434782609,
+      "n_tracks_auditable": 184,
+      "track_precision": 0.9239130434782609
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 186,
+      "d": 0.11654135338345864,
+      "n_reads": 193,
+      "n_reads_auditable": 191,
+      "read_precision": 0.8900523560209425,
+      "n_tracks_auditable": 184,
+      "track_precision": 0.9239130434782609
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 550,
+      "d": 0.34461152882205515,
+      "n_reads": 550,
+      "n_reads_auditable": 524,
+      "read_precision": 0.9103053435114504,
+      "n_tracks_auditable": 524,
+      "track_precision": 0.9103053435114504
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 550,
+      "d": 0.34461152882205515,
+      "n_reads": 666,
+      "n_reads_auditable": 635,
+      "read_precision": 0.7637795275590551,
+      "n_tracks_auditable": 524,
+      "track_precision": 0.9103053435114504
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 479,
+      "d": 0.300125313283208,
+      "n_reads": 479,
+      "n_reads_auditable": 462,
+      "read_precision": 0.9242424242424242,
+      "n_tracks_auditable": 462,
+      "track_precision": 0.9242424242424242
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 479,
+      "d": 0.300125313283208,
+      "n_reads": 537,
+      "n_reads_auditable": 520,
+      "read_precision": 0.8346153846153846,
+      "n_tracks_auditable": 462,
+      "track_precision": 0.9242424242424242
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 334,
+      "d": 0.20927318295739347,
+      "n_reads": 334,
+      "n_reads_auditable": 330,
+      "read_precision": 0.9333333333333333,
+      "n_tracks_auditable": 330,
+      "track_precision": 0.9333333333333333
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 334,
+      "d": 0.20927318295739347,
+      "n_reads": 349,
+      "n_reads_auditable": 345,
+      "read_precision": 0.9043478260869565,
+      "n_tracks_auditable": 330,
+      "track_precision": 0.9333333333333333
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 155,
+      "d": 0.09711779448621553,
+      "n_reads": 155,
+      "n_reads_auditable": 153,
+      "read_precision": 0.954248366013072,
+      "n_tracks_auditable": 153,
+      "track_precision": 0.954248366013072
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 155,
+      "d": 0.09711779448621553,
+      "n_reads": 155,
+      "n_reads_auditable": 153,
+      "read_precision": 0.954248366013072,
+      "n_tracks_auditable": 153,
+      "track_precision": 0.954248366013072
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 501,
+      "d": 0.31390977443609025,
+      "n_reads": 501,
+      "n_reads_auditable": 484,
+      "read_precision": 0.9256198347107438,
+      "n_tracks_auditable": 484,
+      "track_precision": 0.9256198347107438
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 501,
+      "d": 0.31390977443609025,
+      "n_reads": 550,
+      "n_reads_auditable": 532,
+      "read_precision": 0.8533834586466166,
+      "n_tracks_auditable": 484,
+      "track_precision": 0.9256198347107438
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 450,
+      "d": 0.2819548872180451,
+      "n_reads": 450,
+      "n_reads_auditable": 439,
+      "read_precision": 0.9271070615034168,
+      "n_tracks_auditable": 439,
+      "track_precision": 0.9271070615034168
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 450,
+      "d": 0.2819548872180451,
+      "n_reads": 476,
+      "n_reads_auditable": 465,
+      "read_precision": 0.8881720430107527,
+      "n_tracks_auditable": 439,
+      "track_precision": 0.9271070615034168
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 305,
+      "d": 0.19110275689223058,
+      "n_reads": 305,
+      "n_reads_auditable": 303,
+      "read_precision": 0.9405940594059405,
+      "n_tracks_auditable": 303,
+      "track_precision": 0.9405940594059405
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 305,
+      "d": 0.19110275689223058,
+      "n_reads": 312,
+      "n_reads_auditable": 310,
+      "read_precision": 0.9258064516129032,
+      "n_tracks_auditable": 303,
+      "track_precision": 0.9405940594059405
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 120,
+      "d": 0.07518796992481203,
+      "n_reads": 120,
+      "n_reads_auditable": 118,
+      "read_precision": 0.9661016949152542,
+      "n_tracks_auditable": 118,
+      "track_precision": 0.9661016949152542
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 120,
+      "d": 0.07518796992481203,
+      "n_reads": 120,
+      "n_reads_auditable": 118,
+      "read_precision": 0.9661016949152542,
+      "n_tracks_auditable": 118,
+      "track_precision": 0.9661016949152542
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 464,
+      "d": 0.2907268170426065,
+      "n_reads": 464,
+      "n_reads_auditable": 453,
+      "read_precision": 0.9359823399558499,
+      "n_tracks_auditable": 453,
+      "track_precision": 0.9359823399558499
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 464,
+      "d": 0.2907268170426065,
+      "n_reads": 481,
+      "n_reads_auditable": 470,
+      "read_precision": 0.9063829787234042,
+      "n_tracks_auditable": 453,
+      "track_precision": 0.9359823399558499
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 396,
+      "d": 0.24812030075187969,
+      "n_reads": 396,
+      "n_reads_auditable": 389,
+      "read_precision": 0.9383033419023136,
+      "n_tracks_auditable": 389,
+      "track_precision": 0.9383033419023136
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 396,
+      "d": 0.24812030075187969,
+      "n_reads": 405,
+      "n_reads_auditable": 398,
+      "read_precision": 0.9195979899497487,
+      "n_tracks_auditable": 389,
+      "track_precision": 0.9383033419023136
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 264,
+      "d": 0.16541353383458646,
+      "n_reads": 264,
+      "n_reads_auditable": 263,
+      "read_precision": 0.9505703422053232,
+      "n_tracks_auditable": 263,
+      "track_precision": 0.9505703422053232
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 264,
+      "d": 0.16541353383458646,
+      "n_reads": 266,
+      "n_reads_auditable": 265,
+      "read_precision": 0.9471698113207547,
+      "n_tracks_auditable": 263,
+      "track_precision": 0.9505703422053232
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 88,
+      "d": 0.05513784461152882,
+      "n_reads": 88,
+      "n_reads_auditable": 87,
+      "read_precision": 0.9885057471264368,
+      "n_tracks_auditable": 87,
+      "track_precision": 0.9885057471264368
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 88,
+      "d": 0.05513784461152882,
+      "n_reads": 88,
+      "n_reads_auditable": 87,
+      "read_precision": 0.9885057471264368,
+      "n_tracks_auditable": 87,
+      "track_precision": 0.9885057471264368
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 576,
+      "d": 0.3609022556390977,
+      "n_reads": 576,
+      "n_reads_auditable": 554,
+      "read_precision": 0.8880866425992779,
+      "n_tracks_auditable": 554,
+      "track_precision": 0.8880866425992779
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 576,
+      "d": 0.3609022556390977,
+      "n_reads": 753,
+      "n_reads_auditable": 729,
+      "read_precision": 0.6941015089163237,
+      "n_tracks_auditable": 554,
+      "track_precision": 0.8880866425992779
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 515,
+      "d": 0.3226817042606516,
+      "n_reads": 515,
+      "n_reads_auditable": 497,
+      "read_precision": 0.9114688128772636,
+      "n_tracks_auditable": 497,
+      "track_precision": 0.9114688128772636
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 515,
+      "d": 0.3226817042606516,
+      "n_reads": 620,
+      "n_reads_auditable": 600,
+      "read_precision": 0.775,
+      "n_tracks_auditable": 497,
+      "track_precision": 0.9114688128772636
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 370,
+      "d": 0.23182957393483708,
+      "n_reads": 370,
+      "n_reads_auditable": 363,
+      "read_precision": 0.9201101928374655,
+      "n_tracks_auditable": 363,
+      "track_precision": 0.9201101928374655
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 370,
+      "d": 0.23182957393483708,
+      "n_reads": 404,
+      "n_reads_auditable": 397,
+      "read_precision": 0.8589420654911839,
+      "n_tracks_auditable": 363,
+      "track_precision": 0.9201101928374655
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 185,
+      "d": 0.11591478696741854,
+      "n_reads": 185,
+      "n_reads_auditable": 183,
+      "read_precision": 0.9234972677595629,
+      "n_tracks_auditable": 183,
+      "track_precision": 0.9234972677595629
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 185,
+      "d": 0.11591478696741854,
+      "n_reads": 188,
+      "n_reads_auditable": 186,
+      "read_precision": 0.9086021505376344,
+      "n_tracks_auditable": 183,
+      "track_precision": 0.9234972677595629
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 519,
+      "d": 0.325187969924812,
+      "n_reads": 519,
+      "n_reads_auditable": 501,
+      "read_precision": 0.9261477045908184,
+      "n_tracks_auditable": 501,
+      "track_precision": 0.9261477045908184
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 519,
+      "d": 0.325187969924812,
+      "n_reads": 575,
+      "n_reads_auditable": 557,
+      "read_precision": 0.8491921005385996,
+      "n_tracks_auditable": 501,
+      "track_precision": 0.9261477045908184
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 471,
+      "d": 0.2951127819548872,
+      "n_reads": 471,
+      "n_reads_auditable": 456,
+      "read_precision": 0.9254385964912281,
+      "n_tracks_auditable": 456,
+      "track_precision": 0.9254385964912281
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 471,
+      "d": 0.2951127819548872,
+      "n_reads": 503,
+      "n_reads_auditable": 488,
+      "read_precision": 0.8811475409836066,
+      "n_tracks_auditable": 456,
+      "track_precision": 0.9254385964912281
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 334,
+      "d": 0.20927318295739347,
+      "n_reads": 334,
+      "n_reads_auditable": 330,
+      "read_precision": 0.9333333333333333,
+      "n_tracks_auditable": 330,
+      "track_precision": 0.9333333333333333
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 334,
+      "d": 0.20927318295739347,
+      "n_reads": 343,
+      "n_reads_auditable": 339,
+      "read_precision": 0.9203539823008849,
+      "n_tracks_auditable": 330,
+      "track_precision": 0.9333333333333333
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 155,
+      "d": 0.09711779448621553,
+      "n_reads": 155,
+      "n_reads_auditable": 153,
+      "read_precision": 0.954248366013072,
+      "n_tracks_auditable": 153,
+      "track_precision": 0.954248366013072
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 155,
+      "d": 0.09711779448621553,
+      "n_reads": 155,
+      "n_reads_auditable": 153,
+      "read_precision": 0.954248366013072,
+      "n_tracks_auditable": 153,
+      "track_precision": 0.954248366013072
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 487,
+      "d": 0.3051378446115288,
+      "n_reads": 487,
+      "n_reads_auditable": 474,
+      "read_precision": 0.9324894514767933,
+      "n_tracks_auditable": 474,
+      "track_precision": 0.9324894514767933
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 487,
+      "d": 0.3051378446115288,
+      "n_reads": 514,
+      "n_reads_auditable": 501,
+      "read_precision": 0.8942115768463074,
+      "n_tracks_auditable": 474,
+      "track_precision": 0.9324894514767933
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 441,
+      "d": 0.27631578947368424,
+      "n_reads": 441,
+      "n_reads_auditable": 430,
+      "read_precision": 0.9302325581395349,
+      "n_tracks_auditable": 430,
+      "track_precision": 0.9302325581395349
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 441,
+      "d": 0.27631578947368424,
+      "n_reads": 460,
+      "n_reads_auditable": 449,
+      "read_precision": 0.9042316258351893,
+      "n_tracks_auditable": 430,
+      "track_precision": 0.9302325581395349
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 301,
+      "d": 0.18859649122807018,
+      "n_reads": 301,
+      "n_reads_auditable": 299,
+      "read_precision": 0.939799331103679,
+      "n_tracks_auditable": 299,
+      "track_precision": 0.939799331103679
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 301,
+      "d": 0.18859649122807018,
+      "n_reads": 306,
+      "n_reads_auditable": 304,
+      "read_precision": 0.930921052631579,
+      "n_tracks_auditable": 299,
+      "track_precision": 0.939799331103679
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 120,
+      "d": 0.07518796992481203,
+      "n_reads": 120,
+      "n_reads_auditable": 118,
+      "read_precision": 0.9661016949152542,
+      "n_tracks_auditable": 118,
+      "track_precision": 0.9661016949152542
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 120,
+      "d": 0.07518796992481203,
+      "n_reads": 120,
+      "n_reads_auditable": 118,
+      "read_precision": 0.9661016949152542,
+      "n_tracks_auditable": 118,
+      "track_precision": 0.9661016949152542
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 448,
+      "d": 0.2807017543859649,
+      "n_reads": 448,
+      "n_reads_auditable": 438,
+      "read_precision": 0.9406392694063926,
+      "n_tracks_auditable": 438,
+      "track_precision": 0.9406392694063926
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 448,
+      "d": 0.2807017543859649,
+      "n_reads": 455,
+      "n_reads_auditable": 445,
+      "read_precision": 0.9303370786516854,
+      "n_tracks_auditable": 438,
+      "track_precision": 0.9406392694063926
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 382,
+      "d": 0.23934837092731828,
+      "n_reads": 382,
+      "n_reads_auditable": 376,
+      "read_precision": 0.9388297872340425,
+      "n_tracks_auditable": 376,
+      "track_precision": 0.9388297872340425
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 382,
+      "d": 0.23934837092731828,
+      "n_reads": 388,
+      "n_reads_auditable": 382,
+      "read_precision": 0.9267015706806283,
+      "n_tracks_auditable": 376,
+      "track_precision": 0.9388297872340425
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 257,
+      "d": 0.16102756892230577,
+      "n_reads": 257,
+      "n_reads_auditable": 256,
+      "read_precision": 0.953125,
+      "n_tracks_auditable": 256,
+      "track_precision": 0.953125
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 257,
+      "d": 0.16102756892230577,
+      "n_reads": 258,
+      "n_reads_auditable": 257,
+      "read_precision": 0.953307392996109,
+      "n_tracks_auditable": 256,
+      "track_precision": 0.953125
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 84,
+      "d": 0.05263157894736842,
+      "n_reads": 84,
+      "n_reads_auditable": 83,
+      "read_precision": 0.9879518072289156,
+      "n_tracks_auditable": 83,
+      "track_precision": 0.9879518072289156
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 84,
+      "d": 0.05263157894736842,
+      "n_reads": 84,
+      "n_reads_auditable": 83,
+      "read_precision": 0.9879518072289156,
+      "n_tracks_auditable": 83,
+      "track_precision": 0.9879518072289156
+    }
+  ],
+  "rows_max20": [
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 625,
+      "d": 0.3916040100250627,
+      "n_reads": 625,
+      "n_reads_auditable": 588,
+      "read_precision": 0.8197278911564626,
+      "n_tracks_auditable": 588,
+      "track_precision": 0.8197278911564626
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 625,
+      "d": 0.3916040100250627,
+      "n_reads": 1034,
+      "n_reads_auditable": 980,
+      "read_precision": 0.5173469387755102,
+      "n_tracks_auditable": 588,
+      "track_precision": 0.8197278911564626
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 528,
+      "d": 0.3308270676691729,
+      "n_reads": 528,
+      "n_reads_auditable": 504,
+      "read_precision": 0.8571428571428571,
+      "n_tracks_auditable": 504,
+      "track_precision": 0.8571428571428571
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 528,
+      "d": 0.3308270676691729,
+      "n_reads": 730,
+      "n_reads_auditable": 703,
+      "read_precision": 0.6372688477951636,
+      "n_tracks_auditable": 504,
+      "track_precision": 0.8571428571428571
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 343,
+      "d": 0.2149122807017544,
+      "n_reads": 343,
+      "n_reads_auditable": 337,
+      "read_precision": 0.9198813056379822,
+      "n_tracks_auditable": 337,
+      "track_precision": 0.9198813056379822
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 343,
+      "d": 0.2149122807017544,
+      "n_reads": 406,
+      "n_reads_auditable": 400,
+      "read_precision": 0.7925,
+      "n_tracks_auditable": 337,
+      "track_precision": 0.9198813056379822
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 149,
+      "d": 0.09335839598997493,
+      "n_reads": 149,
+      "n_reads_auditable": 147,
+      "read_precision": 0.9319727891156463,
+      "n_tracks_auditable": 147,
+      "track_precision": 0.9319727891156463
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 149,
+      "d": 0.09335839598997493,
+      "n_reads": 156,
+      "n_reads_auditable": 154,
+      "read_precision": 0.8961038961038961,
+      "n_tracks_auditable": 147,
+      "track_precision": 0.9319727891156463
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 497,
+      "d": 0.31140350877192985,
+      "n_reads": 497,
+      "n_reads_auditable": 473,
+      "read_precision": 0.9006342494714588,
+      "n_tracks_auditable": 473,
+      "track_precision": 0.9006342494714588
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 497,
+      "d": 0.31140350877192985,
+      "n_reads": 570,
+      "n_reads_auditable": 542,
+      "read_precision": 0.7988929889298892,
+      "n_tracks_auditable": 473,
+      "track_precision": 0.9006342494714588
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 427,
+      "d": 0.2675438596491228,
+      "n_reads": 427,
+      "n_reads_auditable": 413,
+      "read_precision": 0.9079903147699758,
+      "n_tracks_auditable": 413,
+      "track_precision": 0.9079903147699758
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 427,
+      "d": 0.2675438596491228,
+      "n_reads": 450,
+      "n_reads_auditable": 436,
+      "read_precision": 0.8669724770642202,
+      "n_tracks_auditable": 413,
+      "track_precision": 0.9079903147699758
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 271,
+      "d": 0.16979949874686717,
+      "n_reads": 271,
+      "n_reads_auditable": 269,
+      "read_precision": 0.9442379182156134,
+      "n_tracks_auditable": 269,
+      "track_precision": 0.9442379182156134
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 271,
+      "d": 0.16979949874686717,
+      "n_reads": 275,
+      "n_reads_auditable": 273,
+      "read_precision": 0.9304029304029304,
+      "n_tracks_auditable": 269,
+      "track_precision": 0.9442379182156134
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 90,
+      "d": 0.05639097744360902,
+      "n_reads": 90,
+      "n_reads_auditable": 88,
+      "read_precision": 0.9886363636363636,
+      "n_tracks_auditable": 88,
+      "track_precision": 0.9886363636363636
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 90,
+      "d": 0.05639097744360902,
+      "n_reads": 90,
+      "n_reads_auditable": 88,
+      "read_precision": 0.9886363636363636,
+      "n_tracks_auditable": 88,
+      "track_precision": 0.9886363636363636
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 427,
+      "d": 0.2675438596491228,
+      "n_reads": 427,
+      "n_reads_auditable": 411,
+      "read_precision": 0.9221411192214112,
+      "n_tracks_auditable": 411,
+      "track_precision": 0.9221411192214112
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 427,
+      "d": 0.2675438596491228,
+      "n_reads": 451,
+      "n_reads_auditable": 433,
+      "read_precision": 0.8799076212471132,
+      "n_tracks_auditable": 411,
+      "track_precision": 0.9221411192214112
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 353,
+      "d": 0.2211779448621554,
+      "n_reads": 353,
+      "n_reads_auditable": 344,
+      "read_precision": 0.9447674418604651,
+      "n_tracks_auditable": 344,
+      "track_precision": 0.9447674418604651
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 353,
+      "d": 0.2211779448621554,
+      "n_reads": 358,
+      "n_reads_auditable": 349,
+      "read_precision": 0.9340974212034384,
+      "n_tracks_auditable": 344,
+      "track_precision": 0.9447674418604651
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 203,
+      "d": 0.12719298245614036,
+      "n_reads": 203,
+      "n_reads_auditable": 201,
+      "read_precision": 0.9751243781094527,
+      "n_tracks_auditable": 201,
+      "track_precision": 0.9751243781094527
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 203,
+      "d": 0.12719298245614036,
+      "n_reads": 203,
+      "n_reads_auditable": 201,
+      "read_precision": 0.9751243781094527,
+      "n_tracks_auditable": 201,
+      "track_precision": 0.9751243781094527
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 60,
+      "d": 0.03759398496240601,
+      "n_reads": 60,
+      "n_reads_auditable": 58,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 58,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 60,
+      "d": 0.03759398496240601,
+      "n_reads": 60,
+      "n_reads_auditable": 58,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 58,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 314,
+      "d": 0.19674185463659147,
+      "n_reads": 314,
+      "n_reads_auditable": 306,
+      "read_precision": 0.9313725490196079,
+      "n_tracks_auditable": 306,
+      "track_precision": 0.9313725490196079
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 314,
+      "d": 0.19674185463659147,
+      "n_reads": 317,
+      "n_reads_auditable": 309,
+      "read_precision": 0.9255663430420712,
+      "n_tracks_auditable": 306,
+      "track_precision": 0.9313725490196079
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 249,
+      "d": 0.15601503759398497,
+      "n_reads": 249,
+      "n_reads_auditable": 246,
+      "read_precision": 0.959349593495935,
+      "n_tracks_auditable": 246,
+      "track_precision": 0.959349593495935
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 249,
+      "d": 0.15601503759398497,
+      "n_reads": 250,
+      "n_reads_auditable": 247,
+      "read_precision": 0.9595141700404858,
+      "n_tracks_auditable": 246,
+      "track_precision": 0.959349593495935
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 127,
+      "d": 0.07957393483709273,
+      "n_reads": 127,
+      "n_reads_auditable": 126,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 126,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 127,
+      "d": 0.07957393483709273,
+      "n_reads": 127,
+      "n_reads_auditable": 126,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 126,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 35,
+      "d": 0.021929824561403508,
+      "n_reads": 35,
+      "n_reads_auditable": 35,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 35,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 35,
+      "d": 0.021929824561403508,
+      "n_reads": 35,
+      "n_reads_auditable": 35,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 35,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 581,
+      "d": 0.36403508771929827,
+      "n_reads": 581,
+      "n_reads_auditable": 554,
+      "read_precision": 0.868231046931408,
+      "n_tracks_auditable": 554,
+      "track_precision": 0.868231046931408
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 581,
+      "d": 0.36403508771929827,
+      "n_reads": 765,
+      "n_reads_auditable": 733,
+      "read_precision": 0.6739427012278308,
+      "n_tracks_auditable": 554,
+      "track_precision": 0.868231046931408
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 501,
+      "d": 0.31390977443609025,
+      "n_reads": 501,
+      "n_reads_auditable": 481,
+      "read_precision": 0.8898128898128899,
+      "n_tracks_auditable": 481,
+      "track_precision": 0.8898128898128899
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 501,
+      "d": 0.31390977443609025,
+      "n_reads": 593,
+      "n_reads_auditable": 573,
+      "read_precision": 0.7626527050610821,
+      "n_tracks_auditable": 481,
+      "track_precision": 0.8898128898128899
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 340,
+      "d": 0.21303258145363407,
+      "n_reads": 340,
+      "n_reads_auditable": 334,
+      "read_precision": 0.9221556886227545,
+      "n_tracks_auditable": 334,
+      "track_precision": 0.9221556886227545
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 340,
+      "d": 0.21303258145363407,
+      "n_reads": 373,
+      "n_reads_auditable": 367,
+      "read_precision": 0.8583106267029973,
+      "n_tracks_auditable": 334,
+      "track_precision": 0.9221556886227545
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 148,
+      "d": 0.09273182957393483,
+      "n_reads": 148,
+      "n_reads_auditable": 146,
+      "read_precision": 0.9383561643835616,
+      "n_tracks_auditable": 146,
+      "track_precision": 0.9383561643835616
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 148,
+      "d": 0.09273182957393483,
+      "n_reads": 152,
+      "n_reads_auditable": 150,
+      "read_precision": 0.92,
+      "n_tracks_auditable": 146,
+      "track_precision": 0.9383561643835616
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 472,
+      "d": 0.2957393483709273,
+      "n_reads": 472,
+      "n_reads_auditable": 454,
+      "read_precision": 0.9229074889867841,
+      "n_tracks_auditable": 454,
+      "track_precision": 0.9229074889867841
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 472,
+      "d": 0.2957393483709273,
+      "n_reads": 503,
+      "n_reads_auditable": 485,
+      "read_precision": 0.8721649484536083,
+      "n_tracks_auditable": 454,
+      "track_precision": 0.9229074889867841
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 414,
+      "d": 0.2593984962406015,
+      "n_reads": 414,
+      "n_reads_auditable": 402,
+      "read_precision": 0.9253731343283582,
+      "n_tracks_auditable": 402,
+      "track_precision": 0.9253731343283582
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 414,
+      "d": 0.2593984962406015,
+      "n_reads": 427,
+      "n_reads_auditable": 415,
+      "read_precision": 0.9012048192771084,
+      "n_tracks_auditable": 402,
+      "track_precision": 0.9253731343283582
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 270,
+      "d": 0.16917293233082706,
+      "n_reads": 270,
+      "n_reads_auditable": 268,
+      "read_precision": 0.9440298507462687,
+      "n_tracks_auditable": 268,
+      "track_precision": 0.9440298507462687
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 270,
+      "d": 0.16917293233082706,
+      "n_reads": 271,
+      "n_reads_auditable": 269,
+      "read_precision": 0.9405204460966543,
+      "n_tracks_auditable": 268,
+      "track_precision": 0.9440298507462687
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 90,
+      "d": 0.05639097744360902,
+      "n_reads": 90,
+      "n_reads_auditable": 88,
+      "read_precision": 0.9886363636363636,
+      "n_tracks_auditable": 88,
+      "track_precision": 0.9886363636363636
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 90,
+      "d": 0.05639097744360902,
+      "n_reads": 90,
+      "n_reads_auditable": 88,
+      "read_precision": 0.9886363636363636,
+      "n_tracks_auditable": 88,
+      "track_precision": 0.9886363636363636
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 401,
+      "d": 0.25125313283208023,
+      "n_reads": 401,
+      "n_reads_auditable": 389,
+      "read_precision": 0.9383033419023136,
+      "n_tracks_auditable": 389,
+      "track_precision": 0.9383033419023136
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 401,
+      "d": 0.25125313283208023,
+      "n_reads": 408,
+      "n_reads_auditable": 396,
+      "read_precision": 0.9242424242424242,
+      "n_tracks_auditable": 389,
+      "track_precision": 0.9383033419023136
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 340,
+      "d": 0.21303258145363407,
+      "n_reads": 340,
+      "n_reads_auditable": 332,
+      "read_precision": 0.9487951807228916,
+      "n_tracks_auditable": 332,
+      "track_precision": 0.9487951807228916
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 340,
+      "d": 0.21303258145363407,
+      "n_reads": 343,
+      "n_reads_auditable": 335,
+      "read_precision": 0.9432835820895522,
+      "n_tracks_auditable": 332,
+      "track_precision": 0.9487951807228916
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 202,
+      "d": 0.12656641604010024,
+      "n_reads": 202,
+      "n_reads_auditable": 200,
+      "read_precision": 0.975,
+      "n_tracks_auditable": 200,
+      "track_precision": 0.975
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 202,
+      "d": 0.12656641604010024,
+      "n_reads": 202,
+      "n_reads_auditable": 200,
+      "read_precision": 0.975,
+      "n_tracks_auditable": 200,
+      "track_precision": 0.975
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 60,
+      "d": 0.03759398496240601,
+      "n_reads": 60,
+      "n_reads_auditable": 58,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 58,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 60,
+      "d": 0.03759398496240601,
+      "n_reads": 60,
+      "n_reads_auditable": 58,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 58,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 297,
+      "d": 0.18609022556390978,
+      "n_reads": 297,
+      "n_reads_auditable": 290,
+      "read_precision": 0.9413793103448276,
+      "n_tracks_auditable": 290,
+      "track_precision": 0.9413793103448276
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 297,
+      "d": 0.18609022556390978,
+      "n_reads": 298,
+      "n_reads_auditable": 291,
+      "read_precision": 0.9415807560137457,
+      "n_tracks_auditable": 290,
+      "track_precision": 0.9413793103448276
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 237,
+      "d": 0.14849624060150377,
+      "n_reads": 237,
+      "n_reads_auditable": 234,
+      "read_precision": 0.9658119658119658,
+      "n_tracks_auditable": 234,
+      "track_precision": 0.9658119658119658
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 237,
+      "d": 0.14849624060150377,
+      "n_reads": 238,
+      "n_reads_auditable": 235,
+      "read_precision": 0.9659574468085106,
+      "n_tracks_auditable": 234,
+      "track_precision": 0.9658119658119658
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 124,
+      "d": 0.07769423558897243,
+      "n_reads": 124,
+      "n_reads_auditable": 123,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 123,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 124,
+      "d": 0.07769423558897243,
+      "n_reads": 124,
+      "n_reads_auditable": 123,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 123,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 35,
+      "d": 0.021929824561403508,
+      "n_reads": 35,
+      "n_reads_auditable": 35,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 35,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 35,
+      "d": 0.021929824561403508,
+      "n_reads": 35,
+      "n_reads_auditable": 35,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 35,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 544,
+      "d": 0.3408521303258145,
+      "n_reads": 544,
+      "n_reads_auditable": 524,
+      "read_precision": 0.8893129770992366,
+      "n_tracks_auditable": 524,
+      "track_precision": 0.8893129770992366
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 544,
+      "d": 0.3408521303258145,
+      "n_reads": 628,
+      "n_reads_auditable": 608,
+      "read_precision": 0.7861842105263158,
+      "n_tracks_auditable": 524,
+      "track_precision": 0.8893129770992366
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 480,
+      "d": 0.3007518796992481,
+      "n_reads": 480,
+      "n_reads_auditable": 462,
+      "read_precision": 0.9069264069264069,
+      "n_tracks_auditable": 462,
+      "track_precision": 0.9069264069264069
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 480,
+      "d": 0.3007518796992481,
+      "n_reads": 531,
+      "n_reads_auditable": 513,
+      "read_precision": 0.834307992202729,
+      "n_tracks_auditable": 462,
+      "track_precision": 0.9069264069264069
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 339,
+      "d": 0.212406015037594,
+      "n_reads": 339,
+      "n_reads_auditable": 333,
+      "read_precision": 0.9219219219219219,
+      "n_tracks_auditable": 333,
+      "track_precision": 0.9219219219219219
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 339,
+      "d": 0.212406015037594,
+      "n_reads": 357,
+      "n_reads_auditable": 351,
+      "read_precision": 0.8917378917378918,
+      "n_tracks_auditable": 333,
+      "track_precision": 0.9219219219219219
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 148,
+      "d": 0.09273182957393483,
+      "n_reads": 148,
+      "n_reads_auditable": 146,
+      "read_precision": 0.9383561643835616,
+      "n_tracks_auditable": 146,
+      "track_precision": 0.9383561643835616
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 1,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 148,
+      "d": 0.09273182957393483,
+      "n_reads": 150,
+      "n_reads_auditable": 148,
+      "read_precision": 0.9324324324324325,
+      "n_tracks_auditable": 146,
+      "track_precision": 0.9383561643835616
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 452,
+      "d": 0.2832080200501253,
+      "n_reads": 452,
+      "n_reads_auditable": 436,
+      "read_precision": 0.9288990825688074,
+      "n_tracks_auditable": 436,
+      "track_precision": 0.9288990825688074
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 452,
+      "d": 0.2832080200501253,
+      "n_reads": 470,
+      "n_reads_auditable": 454,
+      "read_precision": 0.8942731277533039,
+      "n_tracks_auditable": 436,
+      "track_precision": 0.9288990825688074
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 404,
+      "d": 0.2531328320802005,
+      "n_reads": 404,
+      "n_reads_auditable": 393,
+      "read_precision": 0.926208651399491,
+      "n_tracks_auditable": 393,
+      "track_precision": 0.926208651399491
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 404,
+      "d": 0.2531328320802005,
+      "n_reads": 414,
+      "n_reads_auditable": 403,
+      "read_precision": 0.9057071960297767,
+      "n_tracks_auditable": 393,
+      "track_precision": 0.926208651399491
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 269,
+      "d": 0.16854636591478697,
+      "n_reads": 269,
+      "n_reads_auditable": 267,
+      "read_precision": 0.9438202247191011,
+      "n_tracks_auditable": 267,
+      "track_precision": 0.9438202247191011
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 269,
+      "d": 0.16854636591478697,
+      "n_reads": 270,
+      "n_reads_auditable": 268,
+      "read_precision": 0.9402985074626866,
+      "n_tracks_auditable": 267,
+      "track_precision": 0.9438202247191011
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 88,
+      "d": 0.05513784461152882,
+      "n_reads": 88,
+      "n_reads_auditable": 86,
+      "read_precision": 0.9883720930232558,
+      "n_tracks_auditable": 86,
+      "track_precision": 0.9883720930232558
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 2,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 88,
+      "d": 0.05513784461152882,
+      "n_reads": 88,
+      "n_reads_auditable": 86,
+      "read_precision": 0.9883720930232558,
+      "n_tracks_auditable": 86,
+      "track_precision": 0.9883720930232558
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 378,
+      "d": 0.23684210526315788,
+      "n_reads": 378,
+      "n_reads_auditable": 367,
+      "read_precision": 0.9400544959128065,
+      "n_tracks_auditable": 367,
+      "track_precision": 0.9400544959128065
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 378,
+      "d": 0.23684210526315788,
+      "n_reads": 383,
+      "n_reads_auditable": 372,
+      "read_precision": 0.9301075268817204,
+      "n_tracks_auditable": 367,
+      "track_precision": 0.9400544959128065
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 324,
+      "d": 0.20300751879699247,
+      "n_reads": 324,
+      "n_reads_auditable": 317,
+      "read_precision": 0.9463722397476341,
+      "n_tracks_auditable": 317,
+      "track_precision": 0.9463722397476341
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 324,
+      "d": 0.20300751879699247,
+      "n_reads": 327,
+      "n_reads_auditable": 320,
+      "read_precision": 0.940625,
+      "n_tracks_auditable": 317,
+      "track_precision": 0.9463722397476341
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 195,
+      "d": 0.12218045112781954,
+      "n_reads": 195,
+      "n_reads_auditable": 193,
+      "read_precision": 0.9740932642487047,
+      "n_tracks_auditable": 193,
+      "track_precision": 0.9740932642487047
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 195,
+      "d": 0.12218045112781954,
+      "n_reads": 195,
+      "n_reads_auditable": 193,
+      "read_precision": 0.9740932642487047,
+      "n_tracks_auditable": 193,
+      "track_precision": 0.9740932642487047
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 57,
+      "d": 0.03571428571428571,
+      "n_reads": 57,
+      "n_reads_auditable": 55,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 55,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 3,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 57,
+      "d": 0.03571428571428571,
+      "n_reads": 57,
+      "n_reads_auditable": 55,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 55,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 273,
+      "d": 0.17105263157894737,
+      "n_reads": 273,
+      "n_reads_auditable": 268,
+      "read_precision": 0.9477611940298507,
+      "n_tracks_auditable": 268,
+      "track_precision": 0.9477611940298507
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.5,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 273,
+      "d": 0.17105263157894737,
+      "n_reads": 274,
+      "n_reads_auditable": 269,
+      "read_precision": 0.9479553903345725,
+      "n_tracks_auditable": 268,
+      "track_precision": 0.9477611940298507
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 227,
+      "d": 0.14223057644110276,
+      "n_reads": 227,
+      "n_reads_auditable": 224,
+      "read_precision": 0.9642857142857143,
+      "n_tracks_auditable": 224,
+      "track_precision": 0.9642857142857143
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.9,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 227,
+      "d": 0.14223057644110276,
+      "n_reads": 228,
+      "n_reads_auditable": 225,
+      "read_precision": 0.9644444444444444,
+      "n_tracks_auditable": 224,
+      "track_precision": 0.9642857142857143
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 122,
+      "d": 0.07644110275689223,
+      "n_reads": 122,
+      "n_reads_auditable": 121,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 121,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.99,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 122,
+      "d": 0.07644110275689223,
+      "n_reads": 122,
+      "n_reads_auditable": 121,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 121,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": false
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 34,
+      "d": 0.021303258145363407,
+      "n_reads": 34,
+      "n_reads_auditable": 34,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 34,
+      "track_precision": 1.0
+    },
+    {
+      "rule": {
+        "min_crop_conf": 0.99,
+        "min_votes": 5,
+        "min_legibility": 0.999,
+        "emit_all": true
+      },
+      "max_crops": 20,
+      "n_tracks": 1596,
+      "n_tracks_read": 34,
+      "d": 0.021303258145363407,
+      "n_reads": 34,
+      "n_reads_auditable": 34,
+      "read_precision": 1.0,
+      "n_tracks_auditable": 34,
+      "track_precision": 1.0
+    }
+  ],
+  "picked": {
+    "0.80": {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 662,
+      "d": 0.41478696741854637,
+      "n_reads": 662,
+      "n_reads_auditable": 615,
+      "read_precision": 0.8227642276422764,
+      "n_tracks_auditable": 615,
+      "track_precision": 0.8227642276422764
+    },
+    "0.85": {
+      "rule": {
+        "min_crop_conf": 0.9,
+        "min_votes": 1,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 618,
+      "d": 0.38721804511278196,
+      "n_reads": 618,
+      "n_reads_auditable": 587,
+      "read_precision": 0.8620102214650767,
+      "n_tracks_auditable": 587,
+      "track_precision": 0.8620102214650767
+    },
+    "0.87": {
+      "rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false
+      },
+      "max_crops": null,
+      "n_tracks": 1596,
+      "n_tracks_read": 579,
+      "d": 0.36278195488721804,
+      "n_reads": 579,
+      "n_reads_auditable": 550,
+      "read_precision": 0.8745454545454545,
+      "n_tracks_auditable": 550,
+      "track_precision": 0.8745454545454545
+    }
+  }
+}

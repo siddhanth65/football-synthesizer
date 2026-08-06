@@ -27,12 +27,15 @@ from torchvision.models import ResNet18_Weights, resnet18
 NUM_CLASSES = 100
 """Class ``0`` = illegible/no-number (gt ``-1``); classes ``1..99`` = jersey number."""
 
-OCR_PERCROP_VERSION = "ocr-percrop-1.1"
+OCR_PERCROP_VERSION = "ocr-percrop-1.2"
 """Stamp for the persisted per-crop OCR evidence (see :meth:`KoshkinaRecognizer.crop_reads`).
 
-``1.1`` adds the crop geometry to the run: ``tools.ocr_match`` can widen the foot-point box before
-cutting (``--crop-scale``, ``results/OCR_DOMAIN_SHIFT.md`` §7). The schema is unchanged; the stamp
-moves because the *evidence* a parquet holds depends on the geometry it was cut at.
+``1.1`` added the crop geometry to the run: ``tools.ocr_match`` can widen the foot-point box before
+cutting (``--crop-scale``, ``results/OCR_DOMAIN_SHIFT.md`` §7). ``1.2`` adds the *reader weights*:
+``eval.gsr_jersey --parseq-ckpt`` selects which PARSeq fine-tune produced the positional softmaxes
+(campaign v6 S3). The schema is unchanged in both cases; the stamp moves because the *evidence* a
+parquet holds depends on the geometry it was cut at and on the model that read it. The checkpoint
+stem is additionally persisted per row (``reader``), so a parquet names its own weights.
 """
 
 ILLEGIBLE = 0

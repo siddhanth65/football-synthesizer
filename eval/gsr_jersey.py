@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -47,10 +48,17 @@ from generator.track_relink import _frame_path, _sample_frames
 logger = logging.getLogger("gsr_jersey")
 
 #: Machine-local reproduced Koshkina pipeline paths (mirrors tools/closeup_anchor_probe.py).
-KOSHKINA_REPO = Path.home() / "jersey-number-pipeline"
+#: ``$KOSHKINA_REPO`` / ``$KOSHKINA_SIDECAR_PY`` move the stack to another host (the A100 server
+#: keeps the clone under ``~/src`` and runs the STR sidecar from a conda env); unset, every path is
+#: the machine-local one every on-record number was measured with.
+KOSHKINA_REPO = Path(os.environ.get("KOSHKINA_REPO") or Path.home() / "jersey-number-pipeline")
 KOSHKINA_LEG_WEIGHTS = KOSHKINA_REPO / "models" / "legibility_resnet34_soccer_20240215.pth"
-KOSHKINA_SIDECAR_PY = Path.home() / "jersey-str-env" / "Scripts" / "python.exe"
+KOSHKINA_SIDECAR_PY = Path(os.environ.get("KOSHKINA_SIDECAR_PY")
+                           or Path.home() / "jersey-str-env" / "Scripts" / "python.exe")
 KOSHKINA_SIDECAR = Path("tools") / "koshkina_str_sidecar.py"
+#: The INCUMBENT PARSeq reader: Koshkina's published SoccerNet fine-tune, resolved by glob because
+#: its filename carries the training metrics. Every on-record number was measured with this file.
+KOSHKINA_PARSEQ_GLOB = "models/parseq_epoch=24-*.ckpt"
 
 #: Vote/decoding defaults (the reader's committed tracklet-vote threshold; NOT tuned to the metric).
 MIN_CONF = 0.30
@@ -167,18 +175,72 @@ def vote_tracks(
     return votes
 
 
-def _build_recognizer(device: str | None = None):  # noqa: ANN202
-    """Construct the Koshkina reader (wipes + reloads legibility/pose; call once per sequence)."""
+def resolve_parseq_ckpt(spec: str | Path | None = None) -> Path:
+    """Resolve which PARSeq weights the reader loads (pure lookup + existence check).
+
+    Args:
+        spec: An explicit checkpoint path, or ``None`` for the incumbent
+            (:data:`KOSHKINA_PARSEQ_GLOB` inside :data:`KOSHKINA_REPO`). Defaulting to the incumbent
+            is deliberate: every number on record was measured with that file, so a caller must ask
+            for a different reader by name before anything on record can move.
+
+    Returns:
+        The checkpoint path.
+
+    Raises:
+        SystemExit: If the requested checkpoint (or the incumbent glob) does not resolve, or if its
+            path cannot be classified by strhub.
+
+    Note:
+        ``strhub.models.utils.load_from_checkpoint`` picks the model class by substring-testing the
+        checkpoint **path** (``'parseq' in key``), so a file the trainer wrote as ``last.ckpt``
+        raises ``InvalidModelError`` in the sidecar unless ``parseq`` appears somewhere in its path.
+        Checked here, before a multi-hour GPU pass starts.
+    """
+    if spec is not None:
+        p = Path(spec)
+        if not p.exists():
+            raise SystemExit(f"parseq checkpoint not found: {p}")
+        if "parseq" not in str(p.resolve()):
+            raise SystemExit(f"strhub resolves the model class from the path; rename/move so "
+                             f"'parseq' appears in it: {p}")
+        return p
+    hits = sorted(KOSHKINA_REPO.glob(KOSHKINA_PARSEQ_GLOB))
+    if not hits:
+        raise SystemExit(f"no incumbent parseq checkpoint at {KOSHKINA_REPO / KOSHKINA_PARSEQ_GLOB}")
+    return hits[0]
+
+
+def koshkina_work_dir() -> Path:
+    """Per-PROCESS scratch dir for the Koshkina chain (torso crops + the sidecar's JSON).
+
+    :class:`generator.jersey_id.KoshkinaRecognizer` wipes this directory at construction and names
+    its torso crops ``c{call}_{i}.jpg`` from a per-process counter, so two readers sharing one
+    directory delete each other's crops AND collide on those names -- silently mixing one
+    sequence's PARSeq reads into another's. The pid keeps concurrent workers (the server runs the
+    percrop pass sharded across GPU workers) isolated; a single-process run is unchanged apart
+    from the directory name.
+    """
+    return DEFAULT_OUT_DIR / "koshkina_jersey" / f"_work_{os.getpid()}"
+
+
+def _build_recognizer(device: str | None = None, parseq_ckpt: str | Path | None = None):  # noqa: ANN202
+    """Construct the Koshkina reader (wipes + reloads legibility/pose; call once per sequence).
+
+    Args:
+        device: ``"cuda"``/``"cpu"``; auto-detected when ``None``.
+        parseq_ckpt: Reader weights; ``None`` = the incumbent (see :func:`resolve_parseq_ckpt`).
+    """
     from generator.jersey_id import KoshkinaRecognizer  # noqa: PLC0415
 
-    parseq_ckpt = next(KOSHKINA_REPO.glob("models/parseq_epoch=24-*.ckpt"))
+    parseq_ckpt = resolve_parseq_ckpt(parseq_ckpt)
     return KoshkinaRecognizer(
         legibility_weights=KOSHKINA_LEG_WEIGHTS,
         sidecar_python=KOSHKINA_SIDECAR_PY,
         sidecar_script=KOSHKINA_SIDECAR,
         parseq_ckpt=parseq_ckpt,
         parseq_repo=KOSHKINA_REPO,
-        work_dir=DEFAULT_OUT_DIR / "koshkina_jersey" / "_work",
+        work_dir=koshkina_work_dir(),
         device=device,
         min_conf=MIN_CONF,
     )
@@ -262,7 +324,7 @@ def percrop_frame(
 
 def read_sequence_percrop(
     seq_dir: Path, parquet: Path, dest: Path, detector, *, max_crops: int, force: bool = False,
-    crop_scale: float = 1.0,
+    crop_scale: float = 1.0, parseq_ckpt: str | Path | None = None,
 ) -> pd.DataFrame:
     """Run the Koshkina chain over one sequence and persist EVERY crop's read (resumable by disk).
 
@@ -274,6 +336,8 @@ def read_sequence_percrop(
         max_crops: Crops sampled per track (the densification lever; the on-record run used 20).
         force: Recompute even if ``dest`` exists.
         crop_scale: Detector-box widening (see :func:`extract_track_crops`); stamped on every row.
+        parseq_ckpt: Reader weights; ``None`` = the incumbent. The checkpoint stem is stamped on
+            every row (``reader``) so a parquet names the model that produced it.
 
     Returns:
         The per-crop frame (see :func:`percrop_frame`).
@@ -295,15 +359,16 @@ def read_sequence_percrop(
             index.append(int(tid))
     from generator.jersey_id import NUM_CLASSES  # noqa: PLC0415
 
+    ckpt = resolve_parseq_ckpt(parseq_ckpt)
     if flat:
-        recog = _build_recognizer()
+        recog = _build_recognizer(parseq_ckpt=ckpt)
         probs, detail = recog.crop_reads(flat)
     else:
         probs = np.empty((0, NUM_CLASSES), np.float32)
         detail = {"leg": np.empty(0, np.float32), "torso": np.empty(0, bool),
                   "p0": np.empty((0, 11), np.float32), "p1": np.empty((0, 11), np.float32)}
     out = percrop_frame(paths_by_tid, probs, detail, index, flat).assign(
-        crop_scale=float(crop_scale))
+        crop_scale=float(crop_scale), reader=ckpt.stem)
     shutil.rmtree(crop_dir, ignore_errors=True)
     dest.parent.mkdir(parents=True, exist_ok=True)
     out.to_parquet(dest, index=False)
@@ -311,13 +376,20 @@ def read_sequence_percrop(
 
 
 def run_percrop(data_dir: Path, out_dir: Path, *, max_crops: int, limit: int | None,
-                crop_scale: float = 1.0, variant: str = "", only: list[str] | None = None) -> None:
+                crop_scale: float = 1.0, variant: str = "", only: list[str] | None = None,
+                parseq_ckpt: str | Path | None = None,
+                positions_subdir: str = "positions") -> None:
     """GPU pass: persist per-crop OCR evidence for every valid-split sequence (resumable).
 
-    ``variant`` suffixes the output directory so a re-run at a different crop geometry lands beside
-    the shipped cache instead of overwriting it (the ``tools.ocr_match`` pattern).
+    ``variant`` suffixes the output directory so a re-run at a different crop geometry -- or a
+    different reader checkpoint (``parseq_ckpt``) -- lands beside the shipped cache instead of
+    overwriting it (the ``tools.ocr_match`` pattern). ``positions_subdir`` selects which extraction
+    the crops are recovered from; it MUST name the parquet set the active detector produced, since
+    crop recovery re-detects and matches foot points.
     """
-    pos_dir = out_dir / "positions"
+    import shutil  # noqa: PLC0415
+
+    pos_dir = out_dir / positions_subdir
     dest_dir = out_dir / (PERCROP_SUBDIR + variant)
     seqs = sorted(p for p in data_dir.iterdir()
                   if p.is_dir() and (pos_dir / f"{p.name}.parquet").exists()
@@ -337,11 +409,22 @@ def run_percrop(data_dir: Path, out_dir: Path, *, max_crops: int, limit: int | N
             detector = _build_detector("cuda" if torch.cuda.is_available() else "cpu", "football")
         t0 = time.time()
         frame = read_sequence_percrop(seq_dir, pos_dir / f"{seq_dir.name}.parquet", dest, detector,
-                                      max_crops=max_crops, crop_scale=crop_scale)
+                                      max_crops=max_crops, crop_scale=crop_scale,
+                                      parseq_ckpt=parseq_ckpt)
         n_read = int((frame["number"] > 0).sum())
         logger.info("[%d/%d] %s: %d crops, %d with a number, %d tracks (%.0fs)",
                     i + 1, len(seqs), seq_dir.name, len(frame), n_read,
                     frame["track_id"].nunique(), time.time() - t0)
+        # Integrity guard: legible crops but NO torso RoI means the pose stage produced nothing for
+        # the whole sequence, so PARSeq never ran -- the sequence then carries zero reads, the
+        # GT-free self-roster is empty and the solver names nobody (measured: -34.7 GS-HOTA on
+        # SNGS-056). Drop the artifact so the resumable pass rebuilds it instead of shipping it.
+        n_leg = int((frame["legibility"] >= 0.5).sum())  # noqa: PLR2004 - the reader's own floor
+        if n_leg > 0 and not bool(frame["torso"].any()):
+            logger.error("%s: %d legible crops but ZERO torso RoIs -- discarding, re-run needed",
+                         seq_dir.name, n_leg)
+            dest.unlink(missing_ok=True)
+    shutil.rmtree(koshkina_work_dir(), ignore_errors=True)  # this process's sidecar scratch
 
 
 def patch_submission(base_json: Path, votes: dict[int, tuple[int, float]], dest: Path) -> dict:
@@ -525,13 +608,18 @@ def main() -> None:
     ap.add_argument("--crop-scale", type=float, default=1.0,
                     help="widen the detector box about its foot point; 1.0 is the shipped geometry")
     ap.add_argument("--variant", default="",
-                    help="suffix on outputs/gsr/koshkina_percrop<variant>/ (e.g. _w125)")
+                    help="suffix on outputs/gsr/koshkina_percrop<variant>/ (e.g. _w125, _v6)")
+    ap.add_argument("--parseq-ckpt", type=Path, default=None,
+                    help="PARSeq reader weights; default = the incumbent SoccerNet fine-tune")
     ap.add_argument("--seqs", default=None, help="comma-separated sequence names")
+    ap.add_argument("--positions", default="positions",
+                    help="positions subdir the crops are recovered from")
     args = ap.parse_args()
     if args.percrop:
         run_percrop(args.data_dir, args.out_dir, max_crops=args.max_crops, limit=args.limit,
                     crop_scale=args.crop_scale, variant=args.variant,
-                    only=args.seqs.split(",") if args.seqs else None)
+                    only=args.seqs.split(",") if args.seqs else None,
+                    parseq_ckpt=args.parseq_ckpt, positions_subdir=args.positions)
         return
     run(args.data_dir, args.out_dir, args.results_dir, limit=args.limit, score_only=args.score_only)
 

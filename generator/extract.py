@@ -39,6 +39,12 @@ POSITIONS_COLUMNS = (
     "image_x", "image_y", "conf", "calib_error_m", "is_actor", "is_keeper",
 )
 
+#: Process-wide override for the football detector's weights (``None`` = the shipped HF default).
+#: Every consumer in the repo builds its detector through :func:`_build_detector`, so rebinding this
+#: one module attribute switches detection, crop recovery, box caching and embedding together --
+#: the same mechanism :data:`eval.gsr_gta.EMBEDDER` uses, and the invariant it exists to protect.
+FOOTBALL_WEIGHTS: str | None = None
+
 DETECT_CONF = 0.20  # player detection confidence
 BALL_CONF = 0.10  # the ball is small/fast -> a lower threshold recovers more ball frames
 
@@ -189,7 +195,7 @@ def _build_detector(device: str, name: str = "yolo", *, weights: str | None = No
     - ``rfdetr``: RF-DETR (DINOv2 transformer, NMS-free; SOTA on COCO, ICLR 2026). COCO-pretrained.
     """
     if name == "football":
-        return _FootballRoleDetector(weights=weights, device=device)
+        return _FootballRoleDetector(weights=weights or FOOTBALL_WEIGHTS, device=device)
     if name == "rfdetr":
         return _RFDetrDetector(device=device)
     from ultralytics import YOLO  # noqa: PLC0415

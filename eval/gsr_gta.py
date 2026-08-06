@@ -249,7 +249,7 @@ def _sequences(data_dir: Path, out_dir: Path, limit: int | None,
 
 
 def build_cache(data_dir: Path, out_dir: Path, params: GtaParams, limit: int | None,
-                only: list[str] | None = None) -> None:
+                only: list[str] | None = None, positions_subdir: str = "positions") -> None:
     """GPU stage: build the per-detection embedding cache (resumable by disk state)."""
     import time  # noqa: PLC0415
 
@@ -276,7 +276,7 @@ def build_cache(data_dir: Path, out_dir: Path, params: GtaParams, limit: int | N
     detector = _build_detector(device, "football")
     for i, seq_dir in enumerate(cold):
         t0 = time.time()
-        df = pd.read_parquet(out_dir / "positions" / f"{seq_dir.name}.parquet")
+        df = pd.read_parquet(out_dir / positions_subdir / f"{seq_dir.name}.parquet")
         det = load_or_build_det_embeddings(
             seq_dir, df, cache_dir / f"{seq_dir.name}.npz", params=params,
             embedder=embedder, detector=detector)

@@ -4877,7 +4877,8 @@
         "The per-track vote repair (leak -89%) uses GROUND-TRUTH track ids -- an oracle-association upper bound. A real tracker-side role vote is unmeasured.",
         "GSR clip metadata carries no league or date, so game-level overlap with v3 cannot be checked directly; the seasons are disjoint (v3 2014-2017, GSR 2019-era) and v3's own valid/test games were not excluded, which is harmless since nothing v3 is evaluated on.",
         "Role coverage on game 3 specifically still falls (0.8682 -> 0.8413) even though the aggregate rises; the fine-tune's win is carried by games 2 and 5 (+11.7 and +12.5 points of role coverage).",
-        "Single seed, single mix ratio, 10 epochs. Neither longer training nor a v3-oversampled mix was tested."
+        "Single seed, single mix ratio, 10 epochs. Neither longer training nor a v3-oversampled mix was tested.",
+        "SEQUEL: S4b re-ran the identical four-criterion gate after 10 more epochs and PASSED all four (game-3 leak 0.04576, role coverage 0.9130, mAP@0.5 0.7069, ball 0.2222) -- see gsr-det-004. The S4 FAIL recorded here stands as measured; the two verdicts straddle a within-run noise band of ~0.036 on the criterion-(c) quantity."
       ],
       "date": "2026-08-06",
       "tags": [
@@ -4893,6 +4894,46 @@
       "depends_on": [
         "gsr-det-001",
         "gsr-det-002"
+      ]
+    },
+    {
+      "id": "gsr-det-004",
+      "statement": "Ten more epochs on the same GSR+SoccerNet-v3 mix clear the SAME four-criterion detector gate that S4 failed: A2 is recommended for S7. S4b resumed from S4's last.pt with an identical recipe (warm restart, lr0 0.002, hsv 0.3/0.9/0.6, batch 64, seed 0, 10 epochs, 48.6 min on one A100; 20 epochs and 1.61 GPU-h cumulative) and was judged on the new last.pt against the ORIGINAL control through the same evaluator. Box: mAP@0.5 0.5003 -> 0.7069 (+20.66), recall at MATCHED precision 0.9031 -> 0.9589 (+5.58), person precision at conf 0.20 0.7966 -> 0.9124, better recall on 58/58 sequences and better precision on 57/58, and every height bucket up including <40 px (0.3996 -> 0.5528). Role: coverage of GT persons 0.8403 -> 0.9130 (+7.27), 0.9286 after a majority vote over ground-truth tracks; goalkeeper-correct 50.9% -> 79.2% and referee-correct 44.2% -> 84.3% against a 1.2-point loss on players. Per game the player->referee rate is 0.00082 / 0.04576 / 0.00010 for games 2 / 3 / 5, so criterion (c) (<=0.05 on EVERY game) is met, game 3 by 195 detections (2,110 of 46,114; 2,305 is the limit). Ball mAP@0.5 0.0581 -> 0.2222. All four PASS. best.pt was epoch 7 (valid mAP .71288 vs last.pt's .70992) and was EXCLUDED as selection on the reported split. Weights parked server-side at ~/runs/det/gsr_v3_ft_b/weights/last.pt (22,491,747 B, md5 2074d8741f97a6892a1322d0f808244c); class ids are unchanged so it is a weights-path swap in generator/extract.py's _FootballRoleDetector. Adopting it obliges S7's one-time laptop re-extract, projected ~5 h valid + ~9 h test = ~14 h, which was NOT run here.",
+      "value": 0.04576,
+      "unit": "game-3 player->referee rate at S4b last.pt against the same <=0.05 criterion S4 failed at 0.05042 -- the binding axis; the other three pass by +5.58 recall@matched / +20.66 mAP@0.5, +7.27 role coverage, +16.41 ball mAP",
+      "status": "confirmed",
+      "evidence": [
+        "results/CLUSTER_SESSION_S4.md#S4b.0 PRE-DECLARED GATE (written before any S4b training or evaluation was run)",
+        "results/CLUSTER_SESSION_S4.md#S4b.2 Control vs S4b (last.pt, extension epoch 10)",
+        "results/CLUSTER_SESSION_S4.md#S4b.3 Per-game -- the criterion-(c) table",
+        "results/CLUSTER_SESSION_S4.md#S4b.4 Epoch trace (diagnostic only -- last.pt is what the gate judges)",
+        "results/CLUSTER_SESSION_S4.md#S4b.5 GATE VERDICT -- PASS on all four"
+      ],
+      "method": "Identical to gsr-det-003's method. The one stated deviation: ultralytics' resume cannot extend a completed 10-epoch run without editing the checkpoint's stored args, so S4b is a warm restart -- the identical recipe re-run with --weights pointing at S4's last.pt, so the LR restarts at 0.002 and decays to 0.0001 again rather than continuing from 0.0001. The gate (S4b.0) was written to the results doc before any S4b training ran and repeats S4's four criteria and thresholds verbatim, including measuring criterion (a) against the ORIGINAL baseline control rather than against the S4 fine-tune. Evaluation is ~/work/det/det_eval.py + role_vote.py at imgsz 640 / iou 0.7 / max_det 300 / DETECT_CONF 0.20 on GSR valid (58 sequences, 8,700 stride-5 frames, 141,512 person GT); the control numbers were not re-measured because S4 had already reproduced them to the digit.",
+      "n": 58,
+      "caveats": [
+        "THE MARGIN IS SMALLER THAN THE NOISE IT RIDES ON. Criterion (c) passes by 0.0042, but the game-3 leak is not monotone within S4b -- 0.0691 (ep1), 0.0447 (ep4), 0.0327 (ep7), 0.0458 (ep10) -- a within-run spread of 0.0364, about 8x the pass margin. S4's FAIL at 0.05042 and S4b's PASS at 0.04576 both sit inside that spread. Both verdicts are honest readings of the same declared bar on the declared checkpoint; neither is strong evidence about the other, and game 3 should be treated as satisfied-but-marginal rather than solved.",
+        "player->referee is still 3.3x the control in absolute count (2,141 vs 645). The aggregate role win is carried by the minority classes, not by fixing the leak.",
+        "The 0.9286 per-track-vote coverage uses GROUND-TRUTH track ids -- an oracle-association upper bound. The real tracker-side gain is unmeasured. Note the vote leak went UP versus S4 (530 vs 258) even as vote coverage improved.",
+        "Ball mAP@0.5 0.0581 -> 0.2222 is a box-level number on stride-5 valid frames. Per the ball-metric rule only the post-link_ball usable track counts as coverage; this must not be quoted as ball coverage.",
+        "NO GS-HOTA NUMBER HAS BEEN MEASURED WITH THESE WEIGHTS. Everything here is box-level on one seed, one 1.258:1 mix ratio and one aug setting; the identity gate can still eat the box gain, and the DetA-to-GS-HOTA conversion is S7's job.",
+        "Games 2 and 5 are effectively solved (27 and 4 leaked detections); the entire remaining risk is game 3, and game 3's role coverage is the one per-game figure still below the control (0.8635 vs 0.8682)."
+      ],
+      "date": "2026-08-06",
+      "tags": [
+        "gsr",
+        "detection",
+        "detector",
+        "cluster",
+        "data",
+        "soccernet-v3"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "gsr-det-001",
+        "gsr-det-002",
+        "gsr-det-003"
       ]
     }
   ]

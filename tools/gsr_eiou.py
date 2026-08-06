@@ -430,15 +430,21 @@ def build_arm_artifacts(data_dir: Path, out_dir: Path, seqs: list[str], params: 
     return stats
 
 
-def clear_arm_caches(out_dir: Path, key: str) -> None:
+def clear_arm_caches(out_dir: Path, key: str, variant: str = VARIANT) -> None:
     """Delete the per-arm caches an EIoU sweep point must not inherit from the previous point.
 
     Every sweep point produces a different track partition, so the bundle pickles, the connector arm
     and the densified votes of the previous point are all stale. They are wiped rather than keyed,
     which keeps the sweep to one point's worth of disk.
+
+    Args:
+        out_dir: Pipeline output root.
+        key: The arm's :func:`tools.gsr_v4.config_key`.
+        variant: The evidence variant whose vote cache is stale -- ``VARIANT`` for the shipped
+            reader, ``<percrop_variant> + VARIANT`` when the arm swaps the reader weights.
     """
     for sub in (f"identity_bundles_v4_{key}", f"eval_v4_gta_{key}",
-                f"koshkina_percrop_votes_f{FLOOR.replace('.', '')}{VARIANT}"):
+                f"koshkina_percrop_votes_f{FLOOR.replace('.', '')}{variant}"):
         shutil.rmtree(out_dir / sub, ignore_errors=True)
 
 
@@ -459,19 +465,29 @@ def set_embedder(name: str) -> None:
 
 
 def run_point(data_dir: Path, out_dir: Path, seqs: list[str], params: EiouParams, *,
-              embedder: str, tau: float, tag: str, positions_subdir: str) -> dict:
-    """One EIoU sweep point: re-link, rewrite, then the frozen v4/v5 arm on the variant artifacts."""
+              embedder: str, tau: float, tag: str, positions_subdir: str,
+              percrop_variant: str = "") -> dict:
+    """One EIoU sweep point: re-link, rewrite, then the frozen v4/v5 arm on the variant artifacts.
+
+    ``percrop_variant`` selects which per-crop OCR evidence rides the partition (``""`` = the
+    shipped reader's ``koshkina_percrop``, ``"_v6"`` = a retrained reader's). The association, the
+    positions and the embeddings are untouched by it, so an arm at a non-empty ``percrop_variant``
+    differs from the control in the reader weights ALONE.
+    """
     from tools.gsr_v4 import config_key, solve_v4_arm  # noqa: PLC0415
 
     rl = build_arm_artifacts(data_dir, out_dir, seqs, params, positions_subdir=positions_subdir,
-                             cache_subdir=f"detembed_cache_{embedder}")
+                             cache_subdir=f"detembed_cache_{embedder}",
+                             percrop_subdir="koshkina_percrop" + percrop_variant)
     set_embedder(embedder + VARIANT)
-    clear_arm_caches(out_dir, config_key(FLOOR, tau, True, VARIANT, False))
+    variant = percrop_variant + VARIANT
+    clear_arm_caches(out_dir, config_key(FLOOR, tau, True, variant, False), variant)
     payload = solve_v4_arm(data_dir, out_dir, seqs, tag=tag, floor=FLOOR, tau=tau, gate=True,
-                           variant=VARIANT, refit=False,
+                           variant=variant, refit=False,
                            positions_subdir=positions_subdir + VARIANT)
     payload["eiou"] = {
         "version": EIOU_VERSION, "params": asdict(params), "embedder": embedder,
+        "percrop_variant": percrop_variant,
         "n_tracks_before": int(sum(v["n_tracks_before"] for v in rl.values())),
         "n_tracks_after": int(sum(v["n_tracks_after"] for v in rl.values())),
         "per_seq": rl,
@@ -515,8 +531,14 @@ def _report(rows: list[dict]) -> None:
 
 def sweep(data_dir: Path, out_dir: Path, results_dir: Path, seqs: list[str],
           grid: list[EiouParams], *, embedder: str, tau: float, split: str,
-          positions_subdir: str, tag: str = "") -> dict:
-    """Score the control and every grid point on ``seqs``, paired per sequence against the control."""
+          positions_subdir: str, tag: str = "",
+          percrop_variants: tuple[str, ...] = ("",)) -> dict:
+    """Score the control and every (grid point x percrop variant) on ``seqs``, paired per sequence.
+
+    ``percrop_variants`` crosses each association point with one or more per-crop OCR evidence
+    variants (see :func:`run_point`), so a reader swap is measured on an identical partition inside
+    one run.
+    """
     from eval.gsr_identity import paired_stats  # noqa: PLC0415
 
     set_embedder(embedder)
@@ -525,16 +547,17 @@ def sweep(data_dir: Path, out_dir: Path, results_dir: Path, seqs: list[str],
     rows = [{"name": f"control ({embedder}, tau {tau:g})", "gs_hota": ctrl["gs_hota"],
              "tracks": ctrl["v4"]["frags_after"]}]
     arms = {"control": ctrl}
-    for i, p in enumerate(grid):
-        arm_tag = f"eiou{split}_{embedder}_e{p.e:g}r{p.rounds}w{p.w_app:g}a{p.app_max:g}"
+    points = [(p, v) for p in grid for v in percrop_variants]
+    for i, (p, pv) in enumerate(points):
+        arm_tag = (f"eiou{split}_{embedder}_e{p.e:g}r{p.rounds}w{p.w_app:g}a{p.app_max:g}{pv}")
         res = run_point(data_dir, out_dir, seqs, p, embedder=embedder, tau=tau, tag=arm_tag,
-                        positions_subdir=positions_subdir)
+                        positions_subdir=positions_subdir, percrop_variant=pv)
         res["paired"] = paired_stats(ctrl["gs_hota_per_seq"], res["gs_hota_per_seq"], seqs)
         arms[arm_tag] = res
-        rows.append({"name": f"e {p.e:g} rounds {p.rounds} w_app {p.w_app:g}",
+        rows.append({"name": f"e {p.e:g} r{p.rounds} w_app {p.w_app:g} ocr{pv or '(shipped)'}",
                      "gs_hota": res["gs_hota"], "tracks": res["v4"]["frags_after"],
                      "paired": res["paired"]})
-        logger.info("point %d/%d done", i + 1, len(grid))
+        logger.info("point %d/%d done", i + 1, len(points))
     _report(rows)
     results_dir.mkdir(parents=True, exist_ok=True)
     dest = results_dir / f"gsr_eiou_{split}_{embedder}{tag}.json"
@@ -663,6 +686,9 @@ def main() -> None:
     ap.add_argument("--run", action="store_true", help="control + grid on --split")
     ap.add_argument("--purity", action="store_true", help="GT purity audit of the partitions only")
     ap.add_argument("--tag", default="", help="suffix for the results filename (extra sweep batches)")
+    ap.add_argument("--percrop-variants", default="",
+                    help="comma-separated per-crop OCR variants crossed with the grid "
+                         "(e.g. ',_v6' = shipped reader then the v6 reader on the same partition)")
     ap.add_argument("--demo", action="store_true")
     args = ap.parse_args()
     if args.demo:
@@ -698,7 +724,7 @@ def main() -> None:
         tau = args.tau if args.tau is not None else CONTROL_TAU[args.embedder]
         sweep(args.data_dir, args.out_dir, args.results_dir, seqs, _grid(args.grid),
               embedder=args.embedder, tau=tau, split=args.split, positions_subdir=args.positions,
-              tag=args.tag)
+              tag=args.tag, percrop_variants=tuple(args.percrop_variants.split(",")))
         return
     ap.error("choose --demo / --build-boxes / --run")
 

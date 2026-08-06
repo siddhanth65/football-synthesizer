@@ -44,6 +44,16 @@ logger = logging.getLogger("ocr_density")
 
 RULE_PATH = Path("results/ocr_density_rule.json")
 GT_CACHE = "percrop_gt_tracks.json"
+
+
+def rule_path(variant: str = "") -> Path:
+    """Frozen-rule file for one per-crop evidence variant (pure).
+
+    A sweep over a *different* evidence variant (widened crop, retrained reader) must never land on
+    the on-record freeze, so ``variant`` suffixes the filename exactly the way it suffixes the
+    evidence directory.
+    """
+    return RULE_PATH if not variant else RULE_PATH.with_name(f"ocr_density_rule{variant}.json")
 #: Densified per-track votes, consumed by eval.gsr_identity in place of koshkina_jersey/*.json.
 VOTES_SUBDIR = "koshkina_percrop_votes"
 
@@ -285,14 +295,19 @@ def main() -> None:
     ap.add_argument("--emit-votes", action="store_true")
     ap.add_argument("--rule-floor", default=None,
                     help="which frozen DEV floor's rule to emit votes for (default: primary)")
+    ap.add_argument("--variant", default="",
+                    help="per-crop evidence variant (e.g. _v6); suffixes the rule + results files")
     args = ap.parse_args()
 
     dev, test = split_sequences(args.data_dir, args.out_dir)
     gt = load_gt_cache(args.data_dir, args.out_dir, dev + test)
     if args.gt_cache:
         return
+    rpath = rule_path(args.variant)
     if args.sweep:
-        per_seq = load_percrop(args.out_dir, dev)
+        per_seq = load_percrop(args.out_dir, dev, args.variant)
+        if not per_seq:
+            raise SystemExit(f"no per-crop evidence under koshkina_percrop{args.variant}")
         logger.info("DEV per-crop frames: %d sequences, %d crops",
                     len(per_seq), sum(len(v) for v in per_seq.values()))
         rows = sweep(per_seq, gt)
@@ -303,29 +318,31 @@ def main() -> None:
                     f"{'all' if r['rule']['emit_all'] else 'top'}", r)
         picks = {f"{f:.2f}": pick_rule(rows, f) for f in DEV_PRECISION_FLOORS}
         args.results_dir.mkdir(parents=True, exist_ok=True)
-        (args.results_dir / "gsr_ocr_density_dev.json").write_text(json.dumps(
-            {"version": OCR_PERCROP_VERSION, "dev": dev, "floors": DEV_PRECISION_FLOORS,
-             "rows": rows, "rows_max20": rows20, "picked": picks}, indent=2), encoding="utf-8")
-        RULE_PATH.write_text(json.dumps(
-            {"version": OCR_PERCROP_VERSION, "floors": list(DEV_PRECISION_FLOORS),
-             "primary_floor": DEV_PRECISION_FLOOR,
+        (args.results_dir / f"gsr_ocr_density_dev{args.variant}.json").write_text(json.dumps(
+            {"version": OCR_PERCROP_VERSION, "variant": args.variant, "dev": dev,
+             "floors": DEV_PRECISION_FLOORS, "rows": rows, "rows_max20": rows20,
+             "picked": picks}, indent=2), encoding="utf-8")
+        rpath.write_text(json.dumps(
+            {"version": OCR_PERCROP_VERSION, "variant": args.variant,
+             "floors": list(DEV_PRECISION_FLOORS), "primary_floor": DEV_PRECISION_FLOOR,
              "rules": {k: v["rule"] for k, v in picks.items()},
              **picks[f"{DEV_PRECISION_FLOOR:.2f}"]["rule"]}, indent=2), encoding="utf-8")
         for k, v in picks.items():
             _report(f"DEV PICK floor {k}", v)
         return
-    frozen = json.loads(RULE_PATH.read_text(encoding="utf-8"))
+    frozen = json.loads(rpath.read_text(encoding="utf-8"))
     rule = {k: v for k, v in frozen.items()
             if k in {"min_crop_conf", "min_votes", "emit_all", "min_legibility"}}
     if args.emit_votes:
         if args.rule_floor:
             rule = frozen["rules"][args.rule_floor]
         logger.info("emitting votes for rule %s", rule)
-        emit_votes(args.out_dir, dev + test, rule)
+        emit_votes(args.out_dir, dev + test, rule, votes_subdir=VOTES_SUBDIR + args.variant,
+                   variant=args.variant)
         return
     if args.measure:
         names = dev if args.measure == "dev" else test
-        per_seq = load_percrop(args.out_dir, names)
+        per_seq = load_percrop(args.out_dir, names, args.variant)
         arms = {}
         for floor, r in frozen["rules"].items():
             arms[floor] = {"full": measure(per_seq, gt, r),
@@ -334,10 +351,10 @@ def main() -> None:
             _report(f"{args.measure.upper()} floor {floor} @20 crops",
                     arms[floor]["matched_volume_20"])
         args.results_dir.mkdir(parents=True, exist_ok=True)
-        (args.results_dir / f"gsr_ocr_density_{args.measure}.json").write_text(json.dumps(
-            {"version": OCR_PERCROP_VERSION, "sequences": names,
-             "primary_floor": f"{DEV_PRECISION_FLOOR:.2f}", "arms": arms}, indent=2),
-            encoding="utf-8")
+        (args.results_dir / f"gsr_ocr_density_{args.measure}{args.variant}.json").write_text(
+            json.dumps({"version": OCR_PERCROP_VERSION, "variant": args.variant,
+                        "sequences": names, "primary_floor": f"{DEV_PRECISION_FLOOR:.2f}",
+                        "arms": arms}, indent=2), encoding="utf-8")
         return
     ap.error("choose one of --gt-cache / --sweep / --measure / --emit-votes")
 

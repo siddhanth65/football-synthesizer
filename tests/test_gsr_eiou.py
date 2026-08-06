@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tools.gsr_eiou import EiouParams, _demo, associate, eiou_matrix
+from tools.gsr_eiou import FLOOR, VARIANT, EiouParams, _demo, associate, eiou_matrix, set_embedder
 
 
 def test_demo_self_check() -> None:
@@ -37,3 +37,38 @@ def test_every_detection_gets_an_id() -> None:
     again = associate(frames, boxes, None, None, EiouParams())
     assert (again == ids).all(), "association must be deterministic"
     del rng
+
+
+def test_percrop_variant_never_collides_with_the_shipped_arm(tmp_path) -> None:  # noqa: ANN001
+    """A reader-swap arm must key its own bundle/votes caches, or it silently reuses the control's."""
+    import eval.gsr_gta as gta  # noqa: PLC0415
+
+    from tools.gsr_v4 import config_key, votes_dir  # noqa: PLC0415
+
+    before = (gta.EMBEDDER, gta.CACHE_SUBDIR)
+    try:
+        set_embedder("clip" + VARIANT)
+        shipped, swapped = VARIANT, "_v6" + VARIANT
+        assert config_key(FLOOR, 0.45, True, shipped, False) != config_key(
+            FLOOR, 0.45, True, swapped, False)
+        # The vote cache is sourced from the matching per-crop directory and named for it.
+        assert votes_dir(tmp_path, FLOOR, swapped).name == "koshkina_percrop_votes_f080_v6_eiou"
+        assert votes_dir(tmp_path, FLOOR, shipped).name == "koshkina_percrop_votes_f080_eiou"
+    finally:
+        gta.EMBEDDER, gta.CACHE_SUBDIR = before
+
+
+def test_votes_cache_is_invalidated_when_the_rule_changes(tmp_path) -> None:  # noqa: ANN001
+    """S3 arms A and B shared a vote-cache path: a stale rule must wipe the cache, not be reused."""
+    import json  # noqa: PLC0415
+
+    from tools.gsr_v4 import rule_for, votes_dir  # noqa: PLC0415
+
+    dest = votes_dir(tmp_path, FLOOR, "")            # cold: writes the rule stamp, no evidence
+    stale = dest / "SNGS-000.json"
+    stale.write_text("{}", encoding="utf-8")
+    assert votes_dir(tmp_path, FLOOR, "") == dest and stale.exists(), "same rule must reuse"
+    (dest / "_rule.json").write_text(json.dumps({**rule_for(FLOOR), "min_votes": 99}),
+                                     encoding="utf-8")
+    votes_dir(tmp_path, FLOOR, "")
+    assert not stale.exists(), "a rule change must invalidate the cached votes"

@@ -37,6 +37,7 @@ import argparse
 import hashlib
 import json
 import logging
+import shutil
 from collections import Counter
 from dataclasses import replace
 from datetime import datetime, timezone
@@ -58,9 +59,17 @@ V3 = {"floor": "0.85", "tau": 0.04, "gate": False, "variant": "", "refit": False
       "app_gain": None, "sim_none": None}
 
 
-def rule_for(floor: str) -> dict:
-    """The frozen aggregation rule for a DEV read-precision floor (pure lookup)."""
-    return json.loads(RULE_PATH.read_text(encoding="utf-8"))["rules"][floor]
+def rule_for(floor: str, variant: str = "") -> dict:
+    """The frozen aggregation rule for a DEV read-precision floor (pure lookup).
+
+    An evidence variant with its OWN frozen sweep (``results/ocr_density_rule<variant>.json``, written
+    by ``tools.ocr_density --sweep --variant``) uses that rule; anything else falls back to the
+    on-record freeze, so every existing arm is unchanged.
+    """
+    from tools.ocr_density import rule_path  # noqa: PLC0415
+
+    p = rule_path(variant)
+    return json.loads((p if p.exists() else RULE_PATH).read_text(encoding="utf-8"))["rules"][floor]
 
 
 def config_key(floor: str, tau: float, gate: bool, variant: str, refit: bool) -> str:
@@ -79,15 +88,29 @@ def config_key(floor: str, tau: float, gate: bool, variant: str, refit: bool) ->
 
 
 def votes_dir(out_dir: Path, floor: str, variant: str) -> Path:
-    """Per-track densified vote cache for one (floor, crop-geometry) pair, built on demand."""
+    """Per-track densified vote cache for one (floor, crop-geometry) pair, built on demand.
+
+    The directory name encodes the floor and the evidence variant but NOT the aggregation rule, so
+    two arms that differ only in the rule (S3's arm A vs arm B: ``results/GSR_S3_READER.md`` §7)
+    used to overwrite each other's votes silently. The rule is therefore persisted next to the votes
+    and any mismatch wipes the cache instead of reusing it.
+    """
     from tools.ocr_density import emit_votes  # noqa: PLC0415
 
     dest = out_dir / f"koshkina_percrop_votes_f{floor.replace('.', '')}{variant}"
     src = out_dir / f"koshkina_percrop{variant}"
+    rule = rule_for(floor, variant)
+    stamp = dest / "_rule.json"
+    if dest.exists() and (not stamp.exists()
+                          or json.loads(stamp.read_text(encoding="utf-8")) != rule):
+        logger.warning("votes cache %s was built under a different rule -- rebuilding", dest.name)
+        shutil.rmtree(dest, ignore_errors=True)
     missing = [p.stem for p in sorted(src.glob("*.parquet"))
                if not (dest / f"{p.stem}.json").exists()]
     if missing:
-        emit_votes(out_dir, missing, rule_for(floor), votes_subdir=dest.name, variant=variant)
+        emit_votes(out_dir, missing, rule, votes_subdir=dest.name, variant=variant)
+    dest.mkdir(parents=True, exist_ok=True)
+    stamp.write_text(json.dumps(rule), encoding="utf-8")
     return dest
 
 

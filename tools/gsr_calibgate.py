@@ -279,17 +279,23 @@ def apply_sequence(df: pd.DataFrame, cache: Path, *, max_error_m: float = 2.0,
 
 
 def apply_split(out_dir: Path, seqs: list[str], *, cache_dir: Path | None = None,
-                dest_dir: Path | None = None, fill_gap: int | None = None,
-                **plausibility) -> dict[str, dict]:
-    """Write re-gated parquets for ``seqs``; optionally stack the frozen post-hoc fill on top."""
+                dest_dir: Path | None = None, src_dir: Path | None = None,
+                fill_gap: int | None = None, **plausibility) -> dict[str, dict]:
+    """Write re-gated parquets for ``seqs``; optionally stack the frozen post-hoc fill on top.
+
+    ``src_dir`` names the extraction being re-gated (``None`` = the on-record ``positions``); the
+    per-frame candidate homographies in ``cache_dir`` are detector-independent, so a re-extraction
+    with different weights re-uses them.
+    """
     from generator.postprocess import fill_calibration_gaps  # noqa: PLC0415
 
     cache_dir = cache_dir or out_dir / CACHE_SUBDIR
     dest = dest_dir or out_dir / GATED_SUBDIR
+    src = src_dir or out_dir / "positions"
     dest.mkdir(parents=True, exist_ok=True)
     stats = {}
     for name in seqs:
-        df = pd.read_parquet(out_dir / "positions" / f"{name}.parquet")
+        df = pd.read_parquet(src / f"{name}.parquet")
         cache = cache_dir / f"{name}.npz"
         gated, rec = (apply_sequence(df, cache, **plausibility) if cache.exists()
                       else (df.copy(), 0))
