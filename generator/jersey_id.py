@@ -574,6 +574,7 @@ class KoshkinaRecognizer:
         leg_thresh: float = 0.5,
         leg_batch: int = 128,
         pose_batch: int = 8,
+        edl_head: str | Path | None = None,
     ) -> None:
         """Load the legibility + pose models and prepare the (wiped) sidecar work dir.
 
@@ -586,9 +587,14 @@ class KoshkinaRecognizer:
             work_dir: Scratch dir for torso crops + the sidecar's positional-softmax JSON (wiped).
             device: ``"cuda"``/``"cpu"`` (auto-detected when ``None``).
             min_conf: Interface-parity threshold for :meth:`predict_tracklet` (unused by the funnel).
-            leg_thresh: Legibility sigmoid floor; ``<=`` reads illegible.
+            leg_thresh: Legibility sigmoid floor; ``<=`` reads illegible. Set to ``0.0`` to disable
+                the external gate entirely -- the campaign-v7 evidential arm learns abstention
+                inside the recognizer, so the ResNet34 filter (19.1% pass rate on DEV-20) becomes a
+                knob rather than a wall. Every on-record number used the shipped ``0.5``.
             leg_batch: Legibility forward-pass batch size.
             pose_batch: KeypointRCNN batch size (small for the 4 GB GPU alongside YOLO).
+            edl_head: Dirichlet evidential head checkpoint handed to the sidecar; ``None`` = the
+                incumbent PARSeq-only read (:mod:`generator.evidential_jersey`).
         """
         import shutil  # noqa: PLC0415
         import time  # noqa: PLC0415
@@ -598,6 +604,7 @@ class KoshkinaRecognizer:
         self.leg_thresh = leg_thresh
         self.leg_batch = leg_batch
         self.pose_batch = pose_batch
+        self.edl_head = None if edl_head is None else Path(edl_head).resolve()
         # The sidecar runs with cwd=parseq_repo, so every path handed to it must be absolute.
         self.sidecar_python = Path(sidecar_python).resolve()
         self.sidecar_script = Path(sidecar_script).resolve()
@@ -711,17 +718,16 @@ class KoshkinaRecognizer:
         """Invoke the py3.11 PARSeq sidecar over the torso dir (resumable JSON, raises on failure)."""
         import subprocess  # noqa: PLC0415
 
-        subprocess.run(
-            [
-                str(self.sidecar_python), str(self.sidecar_script),
-                "--crops-dir", str(self.torso_dir),
-                "--out-json", str(self.parseq_json),
-                "--ckpt", str(self.parseq_ckpt),
-                "--parseq-repo", str(self.parseq_repo),
-            ],
-            check=True,
-            cwd=str(self.parseq_repo),
-        )
+        cmd = [
+            str(self.sidecar_python), str(self.sidecar_script),
+            "--crops-dir", str(self.torso_dir),
+            "--out-json", str(self.parseq_json),
+            "--ckpt", str(self.parseq_ckpt),
+            "--parseq-repo", str(self.parseq_repo),
+        ]
+        if self.edl_head is not None:
+            cmd += ["--edl-head", str(self.edl_head)]
+        subprocess.run(cmd, check=True, cwd=str(self.parseq_repo))
 
     def crop_reads(
         self, paths: Sequence[str | Path]
@@ -739,8 +745,12 @@ class KoshkinaRecognizer:
         Returns:
             ``(probs, detail)`` where ``probs`` is ``[n, NUM_CLASSES]`` (see :meth:`crop_probs`) and
             ``detail`` holds ``leg`` ``[n]`` legibility sigmoid (``NaN`` = unreadable file),
-            ``torso`` ``[n]`` bool (a pose torso RoI was produced), and ``p0`` / ``p1``
-            ``[n, 11]`` PARSeq positional softmaxes (all-``NaN`` rows where no read happened).
+            ``torso`` ``[n]`` bool (a pose torso RoI was produced), ``p0`` / ``p1``
+            ``[n, 11]`` PARSeq positional softmaxes (all-``NaN`` rows where no read happened), and
+            -- only when an evidential head is loaded -- ``alpha`` ``[n, NUM_CLASSES]`` Dirichlet
+            concentrations (all-``NaN`` where no read happened). With a head, ``probs`` is the
+            Dirichlet MEAN rather than the folded positional product, so every downstream consumer
+            of the ``[NUM_CLASSES]`` layout is unchanged.
         """
         n = len(paths)
         out = np.zeros((n, NUM_CLASSES), dtype=np.float32)
@@ -748,6 +758,8 @@ class KoshkinaRecognizer:
         detail = {"leg": np.full(n, np.nan, np.float32), "torso": np.zeros(n, bool),
                   "p0": np.full((n, 11), np.nan, np.float32),
                   "p1": np.full((n, 11), np.nan, np.float32)}
+        if self.edl_head is not None:
+            detail["alpha"] = np.full((n, NUM_CLASSES), np.nan, np.float32)
         if n == 0:
             return out, detail
         detail["leg"] = self._legibility_scores(paths)
@@ -763,10 +775,15 @@ class KoshkinaRecognizer:
             for name, i in torso_map.items():
                 detail["torso"][i] = True
                 entry = positions.get(name)
-                if entry is not None:
-                    detail["p0"][i] = entry["p0"]
-                    detail["p1"][i] = entry["p1"]
-                    out[i] = parseq_positions_to_probs(entry["p0"], entry["p1"])
+                if entry is None:
+                    continue
+                detail["p0"][i] = entry["p0"]
+                detail["p1"][i] = entry["p1"]
+                out[i] = parseq_positions_to_probs(entry["p0"], entry["p1"])
+                if self.edl_head is not None and "alpha" in entry:
+                    a = np.asarray(entry["alpha"], dtype=np.float32)
+                    detail["alpha"][i] = a
+                    out[i] = a / a.sum()
         return out, detail
 
     def crop_probs(self, paths: Sequence[str | Path], batch_size: int = 256) -> np.ndarray:

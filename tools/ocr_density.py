@@ -58,12 +58,17 @@ def rule_path(variant: str = "") -> Path:
 VOTES_SUBDIR = "koshkina_percrop_votes"
 
 
-def track_gt(seq_dir: Path, out_dir: Path) -> dict[int, str | None]:
-    """Dominant GT jersey per ORIGINAL prediction track (``None`` = GT player carries no number).
+def track_gt(seq_dir: Path, out_dir: Path, positions_subdir: str = "positions",
+             ) -> dict[int, str | None]:
+    """Dominant GT jersey per prediction track (``None`` = GT player carries no number).
 
     Args:
         seq_dir: GSR sequence directory (holds ``Labels-GameState.json``).
         out_dir: Pipeline output root (holds ``positions/``).
+        positions_subdir: Which extraction the track ids come from. **Load-bearing:** a
+            re-extraction (the ``_v6det`` detector arm) renumbers every track, so grading its reads
+            against the original extraction's ids silently scores noise. Defaults to the on-record
+            ``positions`` so every existing cache entry is unchanged.
 
     Returns:
         ``{track_id: jersey_string | None}``; tracks with no auditable GT row are absent.
@@ -71,7 +76,7 @@ def track_gt(seq_dir: Path, out_dir: Path) -> dict[int, str | None]:
     from eval.gsr_gta import gt_rows  # noqa: PLC0415
     from generator.track_relink import load_gt_ids_by_frame  # noqa: PLC0415
 
-    df = pd.read_parquet(out_dir / "positions" / f"{seq_dir.name}.parquet")
+    df = pd.read_parquet(out_dir / positions_subdir / f"{seq_dir.name}.parquet")
     pre = gt_rows(df, load_gt_ids_by_frame(seq_dir))
     attrs = _gt_attributes(seq_dir)
     tally: dict[int, Counter] = {}
@@ -82,15 +87,22 @@ def track_gt(seq_dir: Path, out_dir: Path) -> dict[int, str | None]:
     return {t: c.most_common(1)[0][0] for t, c in tally.items()}
 
 
-def load_gt_cache(data_dir: Path, out_dir: Path, names: list[str]) -> dict[str, dict[int, str | None]]:
-    """Load (building once) the per-sequence per-track GT jersey cache."""
-    path = out_dir / PERCROP_SUBDIR / GT_CACHE
+def load_gt_cache(data_dir: Path, out_dir: Path, names: list[str],
+                  positions_subdir: str = "positions") -> dict[str, dict[int, str | None]]:
+    """Load (building once) the per-sequence per-track GT jersey cache.
+
+    The cache file is namespaced by ``positions_subdir`` so a re-extraction's ids can never be
+    served from (or written into) the on-record cache.
+    """
+    suffix = "" if positions_subdir == "positions" else positions_subdir[len("positions"):]
+    path = out_dir / PERCROP_SUBDIR / GT_CACHE.replace(".json", f"{suffix}.json")
     cache: dict[str, dict] = {}
     if path.exists():
         cache = json.loads(path.read_text(encoding="utf-8"))
     missing = [n for n in names if n not in cache]
     for i, name in enumerate(missing):
-        cache[name] = {str(k): v for k, v in track_gt(data_dir / name, out_dir).items()}
+        cache[name] = {str(k): v for k, v in
+                       track_gt(data_dir / name, out_dir, positions_subdir).items()}
         logger.info("[%d/%d] GT cache %s: %d auditable tracks", i + 1, len(missing), name,
                     len(cache[name]))
     if missing:
@@ -99,17 +111,44 @@ def load_gt_cache(data_dir: Path, out_dir: Path, names: list[str]) -> dict[str, 
     return {n: {int(k): v for k, v in cache[n].items()} for n in names}
 
 
+def crop_alpha(df: pd.DataFrame) -> np.ndarray | None:
+    """The persisted Dirichlet concentrations for one tracklet, or ``None`` for a pre-v7 frame.
+
+    Rows with no read carry an all-``NaN`` alpha; they are returned as the zero-evidence Dirichlet
+    ``alpha = 1``, whose mean is uniform and whose uncertainty is exactly 1 -- i.e. "nothing was
+    observed", which is what a crop the reader never saw actually means.
+    """
+    if "alpha" not in df.columns:
+        return None
+    from generator.jersey_id import NUM_CLASSES  # noqa: PLC0415
+
+    out = np.ones((len(df), NUM_CLASSES), dtype=np.float32)
+    for i, a in enumerate(df["alpha"].to_numpy()):
+        arr = np.asarray(a, dtype=np.float32)
+        if arr.size == NUM_CLASSES and np.isfinite(arr).all():
+            out[i] = arr
+    return out
+
+
 def crop_probs_from_percrop(df: pd.DataFrame) -> np.ndarray:
-    """Rebuild the ``[n, NUM_CLASSES]`` folded per-crop distributions from a persisted frame.
+    """Rebuild the ``[n, NUM_CLASSES]`` per-crop distributions from a persisted frame.
+
+    An evidential frame (campaign v7 V3, ``alpha`` column present) yields the Dirichlet MEAN
+    ``alpha / sum(alpha)``; a pre-v7 frame yields the folded PARSeq positional product. Both land in
+    the identical ``[NUM_CLASSES]`` layout, so every downstream aggregation is reader-agnostic.
 
     Args:
         df: A per-crop frame (:func:`eval.gsr_jersey.percrop_frame`) for one tracklet.
 
     Returns:
-        ``[n_crops, NUM_CLASSES]`` rows; a crop with no PARSeq read is an ``ILLEGIBLE`` one-hot.
+        ``[n_crops, NUM_CLASSES]`` rows; a crop with no PARSeq read is an ``ILLEGIBLE`` one-hot
+        (pre-v7) or the uniform zero-evidence Dirichlet mean (v7).
     """
     from generator.jersey_id import ILLEGIBLE, NUM_CLASSES, parseq_positions_to_probs  # noqa: PLC0415
 
+    alpha = crop_alpha(df)
+    if alpha is not None:
+        return alpha / alpha.sum(axis=1, keepdims=True)
     out = np.zeros((len(df), NUM_CLASSES), dtype=np.float32)
     out[:, ILLEGIBLE] = 1.0
     for i, (p0, p1) in enumerate(zip(df["p0"].to_numpy(), df["p1"].to_numpy())):
@@ -129,7 +168,12 @@ def reads_for_sequence(
         rule: ``{"min_crop_conf", "min_votes", "emit_all", "min_legibility"}`` -- the first three go
             to :func:`generator.jersey_id.percrop_votes`; ``min_legibility`` raises the ResNet34
             legibility floor above the reader's shipped 0.5 *offline*, which is only possible
-            because the per-crop pass persists the score.
+            because the per-crop pass persists the score. Campaign v7 V3 adds three optional keys,
+            all inert unless present: ``max_u`` / ``max_p_none`` drop per-crop rows the evidential
+            head is uncertain about or calls empty, and ``fuse: true`` swaps the Koshkina vote for
+            :func:`generator.evidential_jersey.fuse_tracklet` (additive Dirichlet evidence). With
+            ``fuse`` absent, the SAME evidential rows go through the incumbent voting machinery --
+            that is the Koshkina voting control the fusion arm has to beat.
         max_crops: Optionally sub-sample each track's crops to this many evenly-spread rows -- the
             matched-volume control that separates "more crops" from "better aggregation".
 
@@ -138,6 +182,9 @@ def reads_for_sequence(
     """
     out: dict[int, list[tuple[int, float]]] = {}
     min_leg = float(rule.get("min_legibility", 0.0))
+    max_u = float(rule.get("max_u", 1.01))
+    max_p_none = float(rule.get("max_p_none", 1.01))
+    fuse = bool(rule.get("fuse", False))
     for tid, grp in df.groupby("track_id"):
         grp = grp.sort_values("frame")
         if max_crops is not None and len(grp) > max_crops:
@@ -147,9 +194,27 @@ def reads_for_sequence(
             grp = grp[grp["legibility"].to_numpy() >= min_leg]
             if grp.empty:
                 continue
-        votes = percrop_votes(
-            crop_probs_from_percrop(grp), min_crop_conf=float(rule["min_crop_conf"]),
-            min_votes=int(rule["min_votes"]), emit_all=bool(rule["emit_all"]))
+        if fuse:
+            from generator.evidential_jersey import fuse_tracklet  # noqa: PLC0415
+
+            alpha = crop_alpha(grp)
+            if alpha is None:
+                raise SystemExit("rule asks for evidential fusion but the frame has no 'alpha'")
+            votes = fuse_tracklet(alpha, max_u=max_u, max_p_none=max_p_none,
+                                  min_conf=float(rule["min_crop_conf"]),
+                                  min_crops=int(rule["min_votes"]))
+        else:
+            probs = crop_probs_from_percrop(grp)
+            if max_u < 1.0 or max_p_none < 1.0:
+                alpha = crop_alpha(grp)
+                if alpha is None:
+                    raise SystemExit("rule asks for an evidential filter but there is no 'alpha'")
+                s = alpha.sum(1)
+                keep = (alpha.shape[1] / s < max_u) & (alpha[:, 0] / s < max_p_none)
+                probs = probs[keep]
+            votes = percrop_votes(
+                probs, min_crop_conf=float(rule["min_crop_conf"]),
+                min_votes=int(rule["min_votes"]), emit_all=bool(rule["emit_all"]))
         if votes:
             out[int(tid)] = votes
     return out

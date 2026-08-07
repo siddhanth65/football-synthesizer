@@ -224,12 +224,16 @@ def koshkina_work_dir() -> Path:
     return DEFAULT_OUT_DIR / "koshkina_jersey" / f"_work_{os.getpid()}"
 
 
-def _build_recognizer(device: str | None = None, parseq_ckpt: str | Path | None = None):  # noqa: ANN202
+def _build_recognizer(device: str | None = None, parseq_ckpt: str | Path | None = None,
+                      edl_head: str | Path | None = None, leg_thresh: float = 0.5):  # noqa: ANN202
     """Construct the Koshkina reader (wipes + reloads legibility/pose; call once per sequence).
 
     Args:
         device: ``"cuda"``/``"cpu"``; auto-detected when ``None``.
         parseq_ckpt: Reader weights; ``None`` = the incumbent (see :func:`resolve_parseq_ckpt`).
+        edl_head: Dirichlet evidential head checkpoint; ``None`` = the incumbent PARSeq-only read.
+        leg_thresh: External ResNet34 legibility floor; ``0.0`` disables the gate. The shipped
+            ``0.5`` is the default so every existing call site is unchanged.
     """
     from generator.jersey_id import KoshkinaRecognizer  # noqa: PLC0415
 
@@ -243,6 +247,8 @@ def _build_recognizer(device: str | None = None, parseq_ckpt: str | Path | None 
         work_dir=koshkina_work_dir(),
         device=device,
         min_conf=MIN_CONF,
+        leg_thresh=leg_thresh,
+        edl_head=edl_head,
     )
 
 
@@ -308,7 +314,7 @@ def percrop_frame(
     del paths_by_tid
     best = probs[:, 1:].argmax(axis=1) + 1
     conf = probs[np.arange(probs.shape[0]), best]
-    return pd.DataFrame({
+    out = pd.DataFrame({
         "track_id": np.asarray(index, dtype=np.int32),
         "frame": np.array([int(p.stem.split("_")[-1]) for p in flat], dtype=np.int32),
         "legibility": detail["leg"].astype(np.float32),
@@ -320,11 +326,17 @@ def percrop_frame(
         "p1": list(detail["p1"]),
         "ocr_version": OCR_PERCROP_VERSION,
     })
+    if "alpha" in detail:  # campaign v7 V3: the Dirichlet evidential arm keeps its concentrations
+        alpha = detail["alpha"].astype(np.float32)
+        out["alpha"] = list(alpha)
+        out["u"] = (alpha.shape[1] / alpha.sum(axis=1)).astype(np.float32)
+    return out
 
 
 def read_sequence_percrop(
     seq_dir: Path, parquet: Path, dest: Path, detector, *, max_crops: int, force: bool = False,
     crop_scale: float = 1.0, parseq_ckpt: str | Path | None = None,
+    edl_head: str | Path | None = None, leg_thresh: float = 0.5,
 ) -> pd.DataFrame:
     """Run the Koshkina chain over one sequence and persist EVERY crop's read (resumable by disk).
 
@@ -338,6 +350,8 @@ def read_sequence_percrop(
         crop_scale: Detector-box widening (see :func:`extract_track_crops`); stamped on every row.
         parseq_ckpt: Reader weights; ``None`` = the incumbent. The checkpoint stem is stamped on
             every row (``reader``) so a parquet names the model that produced it.
+        edl_head: Dirichlet evidential head checkpoint (campaign v7 V3); ``None`` = incumbent.
+        leg_thresh: External legibility floor; ``0.0`` sends every crop to the pose + reader stage.
 
     Returns:
         The per-crop frame (see :func:`percrop_frame`).
@@ -361,7 +375,7 @@ def read_sequence_percrop(
 
     ckpt = resolve_parseq_ckpt(parseq_ckpt)
     if flat:
-        recog = _build_recognizer(parseq_ckpt=ckpt)
+        recog = _build_recognizer(parseq_ckpt=ckpt, edl_head=edl_head, leg_thresh=leg_thresh)
         probs, detail = recog.crop_reads(flat)
     else:
         probs = np.empty((0, NUM_CLASSES), np.float32)
@@ -378,7 +392,8 @@ def read_sequence_percrop(
 def run_percrop(data_dir: Path, out_dir: Path, *, max_crops: int, limit: int | None,
                 crop_scale: float = 1.0, variant: str = "", only: list[str] | None = None,
                 parseq_ckpt: str | Path | None = None,
-                positions_subdir: str = "positions") -> None:
+                positions_subdir: str = "positions",
+                edl_head: str | Path | None = None, leg_thresh: float = 0.5) -> None:
     """GPU pass: persist per-crop OCR evidence for every valid-split sequence (resumable).
 
     ``variant`` suffixes the output directory so a re-run at a different crop geometry -- or a
@@ -410,7 +425,8 @@ def run_percrop(data_dir: Path, out_dir: Path, *, max_crops: int, limit: int | N
         t0 = time.time()
         frame = read_sequence_percrop(seq_dir, pos_dir / f"{seq_dir.name}.parquet", dest, detector,
                                       max_crops=max_crops, crop_scale=crop_scale,
-                                      parseq_ckpt=parseq_ckpt)
+                                      parseq_ckpt=parseq_ckpt, edl_head=edl_head,
+                                      leg_thresh=leg_thresh)
         n_read = int((frame["number"] > 0).sum())
         logger.info("[%d/%d] %s: %d crops, %d with a number, %d tracks (%.0fs)",
                     i + 1, len(seqs), seq_dir.name, len(frame), n_read,
@@ -614,12 +630,18 @@ def main() -> None:
     ap.add_argument("--seqs", default=None, help="comma-separated sequence names")
     ap.add_argument("--positions", default="positions",
                     help="positions subdir the crops are recovered from")
+    ap.add_argument("--edl-head", type=Path, default=None,
+                    help="Dirichlet evidential head checkpoint (campaign v7 V3); adds per-crop "
+                         "alpha/u columns and replaces the folded softmax with the Dirichlet mean")
+    ap.add_argument("--leg-thresh", type=float, default=0.5,
+                    help="external ResNet34 legibility floor; 0.0 disables the gate (5x crops)")
     args = ap.parse_args()
     if args.percrop:
         run_percrop(args.data_dir, args.out_dir, max_crops=args.max_crops, limit=args.limit,
                     crop_scale=args.crop_scale, variant=args.variant,
                     only=args.seqs.split(",") if args.seqs else None,
-                    parseq_ckpt=args.parseq_ckpt, positions_subdir=args.positions)
+                    parseq_ckpt=args.parseq_ckpt, positions_subdir=args.positions,
+                    edl_head=args.edl_head, leg_thresh=args.leg_thresh)
         return
     run(args.data_dir, args.out_dir, args.results_dir, limit=args.limit, score_only=args.score_only)
 

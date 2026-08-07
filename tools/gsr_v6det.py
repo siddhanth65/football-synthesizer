@@ -131,19 +131,39 @@ def stage_gate(out_dir: Path, seqs: list[str]) -> dict:
                        dest_dir=out_dir / ("positions_gate" + VARIANT), fill_gap=FILL_GAP)
 
 
-def stage_percrop(data_dir: Path, out_dir: Path, seqs: list[str], *, reader: str = "v6") -> None:
+def percrop_variant(reader: str) -> str:
+    """The per-crop evidence directory suffix for one reader arm (pure).
+
+    ``'v6'`` = the S2 arm-4t bundle reader; ``'incumbent'`` = the shipped SoccerNet fine-tune (the
+    reader leave-one-out on the new boxes); ``'edl'`` = the campaign-v7 Dirichlet evidential head on
+    the frozen arm-4t trunk, which lands in its own ``_v7e`` tree so nothing on record can mix.
+    """
+    return {"v6": "_v6", "incumbent": "", "edl": "_v7e"}[reader] + VARIANT
+
+
+def stage_percrop(data_dir: Path, out_dir: Path, seqs: list[str], *, reader: str = "v6",
+                  edl_head: Path | None = None, leg_thresh: float = 0.5) -> None:
     """GPU: a PARSeq reader over crops recovered from the NEW detector's boxes.
 
-    ``reader='v6'`` uses the S2 arm-4t checkpoint (the bundle's reader); ``'incumbent'`` uses the
-    shipped SoccerNet fine-tune, which is the reader leave-one-out arm on the new boxes.
+    Args:
+        data_dir: GSR ground-truth folder (supplies the frames).
+        out_dir: Pipeline output root.
+        seqs: Sequences to read.
+        reader: See :func:`percrop_variant`.
+        edl_head: Dirichlet evidential head checkpoint; required when ``reader='edl'``.
+        leg_thresh: External ResNet34 legibility floor; ``0.0`` sends every crop through pose +
+            reader (~5x the crops, campaign v7 V3) and leaves the gate to an offline sweep.
     """
     from eval.gsr_jersey import run_percrop  # noqa: PLC0415
 
+    if (reader == "edl") != (edl_head is not None):
+        raise SystemExit("reader='edl' needs --edl-head, and --edl-head needs reader='edl'")
     use_new_detector()
     run_percrop(data_dir, out_dir, max_crops=MAX_CROPS, limit=None,
-                variant=("_v6" + VARIANT) if reader == "v6" else VARIANT, only=seqs,
-                parseq_ckpt=PARSEQ_CKPT if reader == "v6" else None,
-                positions_subdir="positions" + VARIANT)
+                variant=percrop_variant(reader), only=seqs,
+                parseq_ckpt=PARSEQ_CKPT if reader in ("v6", "edl") else None,
+                positions_subdir="positions" + VARIANT,
+                edl_head=edl_head, leg_thresh=leg_thresh)
 
 
 def stage_boxes(data_dir: Path, out_dir: Path, seqs: list[str]) -> dict:
@@ -199,8 +219,8 @@ def stage_arm(data_dir: Path, out_dir: Path, results_dir: Path, seqs: list[str],
     import tools.gsr_eiou as eiou  # noqa: PLC0415
 
     eiou.BOX_SUBDIR = "detbox_cache" + VARIANT
-    pv = ("_v6" + VARIANT) if reader == "v6" else VARIANT
-    stem = f"{split}{VARIANT}{'' if reader == 'v6' else '_incumbent'}"
+    pv = percrop_variant(reader)
+    stem = f"{split}{VARIANT}{'' if reader == 'v6' else '_' + reader}"
     res = eiou.run_point(data_dir, out_dir, seqs, eiou.EiouParams(e=0.3, rounds=1, w_app=0.5,
                                                                  app_max=0.30),
                          embedder="clip" + VARIANT, tau=TAU,
@@ -366,9 +386,13 @@ def main() -> None:
     ap.add_argument("--split", choices=("dev", "t38", "test"), default="dev")
     ap.add_argument("--seqs", default=None, help="comma-separated sequence names")
     ap.add_argument("--stages", default="all", help=f"comma-separated subset of {STAGES} or 'all'")
-    ap.add_argument("--reader", choices=("v6", "incumbent"), default="v6",
+    ap.add_argument("--reader", choices=("v6", "incumbent", "edl"), default="v6",
                     help="OCR evidence for the percrop/arm stages ('incumbent' = the reader "
-                         "leave-one-out on the new detections)")
+                         "leave-one-out on the new detections; 'edl' = the v7 evidential head)")
+    ap.add_argument("--edl-head", type=Path, default=None,
+                    help="Dirichlet evidential head checkpoint (reader='edl')")
+    ap.add_argument("--leg-thresh", type=float, default=0.5,
+                    help="external legibility floor for the percrop stage; 0.0 disables the gate")
     ap.add_argument("--detector", choices=("s4b", "control"), default="s4b",
                     help="'control' re-extracts with the shipped detector (same-stack control)")
     args = ap.parse_args()
@@ -395,7 +419,8 @@ def main() -> None:
         elif st == "gate":
             stage_gate(args.out_dir, seqs)
         elif st == "percrop":
-            stage_percrop(args.data_dir, args.out_dir, seqs, reader=args.reader)
+            stage_percrop(args.data_dir, args.out_dir, seqs, reader=args.reader,
+                          edl_head=args.edl_head, leg_thresh=args.leg_thresh)
         elif st == "boxes":
             stage_boxes(args.data_dir, args.out_dir, seqs)
         elif st == "embed":

@@ -1,0 +1,20 @@
+{
+  "version": "v7-v3",
+  "variant": "_v6_v6det_eiou",
+  "floors": [
+    0.8
+  ],
+  "primary_floor": 0.8,
+  "rules": {
+    "0.80": {
+      "min_crop_conf": 0.9,
+      "min_votes": 3,
+      "min_legibility": 0.5,
+      "emit_all": false
+    }
+  },
+  "min_crop_conf": 0.9,
+  "min_votes": 3,
+  "min_legibility": 0.5,
+  "emit_all": false
+}
