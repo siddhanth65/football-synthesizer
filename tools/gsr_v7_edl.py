@@ -163,8 +163,20 @@ def admissible_diagnostics(data_dir: Path, out_dir: Path, seqs: list[str], varia
 
 
 def run_arm(data_dir: Path, out_dir: Path, seqs: list[str], *, reader: str, rule: dict,
-            name: str) -> dict:
-    """One rung-3 arm: freeze the rule, run the v6 chain on this reader's evidence, score it."""
+            name: str, w_app: float = 0.5, keep_arm_dir: bool = False) -> dict:
+    """One rung-3 arm: freeze the rule, run the v6 chain on this reader's evidence, score it.
+
+    Args:
+        data_dir: GSR ground-truth folder.
+        out_dir: Pipeline output root (``outputs/gsr`` for DEV-20, ``outputs/gsr_srv`` for TEST-38).
+        seqs: Sequences to score.
+        reader: ``'v6'`` (control) or ``'edl'`` (the evidential head's evidence).
+        rule: The aggregation rule, frozen into this variant's rule file.
+        name: Arm name (also the arm directory stem).
+        w_app: The EIoU appearance weight -- 0.5 is the v6 incumbent, 0.7 the V4s2 fallback point.
+            Every other association parameter stays at the frozen v6 value.
+        keep_arm_dir: Keep the materialised submission directory (needed for packaging).
+    """
     import tools.gsr_eiou as eiou  # noqa: PLC0415
     from tools.gsr_v6det import percrop_variant  # noqa: PLC0415
 
@@ -180,23 +192,36 @@ def run_arm(data_dir: Path, out_dir: Path, seqs: list[str], *, reader: str, rule
     write_rule(variant, rule)  # run_point's own clear_arm_caches then wipes the stale votes
     t0 = time.time()
     payload = eiou.run_point(
-        data_dir, out_dir, seqs, eiou.EiouParams(e=0.3, rounds=1, w_app=0.5, app_max=0.30),
+        data_dir, out_dir, seqs, eiou.EiouParams(e=0.3, rounds=1, w_app=w_app, app_max=0.30),
         embedder="clip" + DET_VARIANT, tau=TAU, tag=f"v7v3_{name}",
         percrop_variant=percrop_variant(reader),
         positions_subdir="positions_gate" + DET_VARIANT)
-    payload["v7v3"] = {"reader": reader, "rule": rule, "variant": variant,
+    payload["v7v3"] = {"reader": reader, "rule": rule, "variant": variant, "w_app": w_app,
                        "seconds": round(time.time() - t0, 1)}
     payload["admissible"] = admissible_diagnostics(data_dir, out_dir, seqs, variant)
-    shutil.rmtree(out_dir / f"deleak_v7v3_{name}", ignore_errors=True)
+    if not keep_arm_dir:
+        shutil.rmtree(out_dir / f"deleak_v7v3_{name}", ignore_errors=True)
     return payload
 
 
-def paired_vs_control(payload: dict, seqs: list[str]) -> dict:
-    """Pair one arm's per-sequence GS-HOTA against the pinned V0 control."""
+def paired_vs_control(payload: dict, seqs: list[str], control: Path = CONTROL) -> dict:
+    """Pair one arm's per-sequence GS-HOTA against a control payload, one- and two-sided.
+
+    The v7 PUSH registration tests ``arm > control`` on a held-out split, so the one-sided
+    signed-rank p is the one the gate reads; the two-sided p that every earlier session quoted is
+    reported beside it so the two are never confused.
+    """
+    import numpy as np  # noqa: PLC0415
+    from scipy.stats import wilcoxon  # noqa: PLC0415
+
     from eval.gsr_identity import paired_stats  # noqa: PLC0415
 
-    ctrl = json.loads(CONTROL.read_text(encoding="utf-8"))["arm"]
+    ctrl = json.loads(control.read_text(encoding="utf-8"))["arm"]
     st = paired_stats(ctrl["gs_hota_per_seq"], payload["gs_hota_per_seq"], seqs)
+    d = np.array([payload["gs_hota_per_seq"][n] - ctrl["gs_hota_per_seq"][n] for n in seqs])
+    st["wilcoxon_p_onesided"] = (float(wilcoxon(d, alternative="greater").pvalue)
+                                 if np.any(d != 0) else 1.0)
+    st["control"] = str(control)
     st["control_gs_hota"] = ctrl["gs_hota"]["GS-HOTA"]
     st["arm_gs_hota"] = payload["gs_hota"]["GS-HOTA"]
     st["delta"] = st["arm_gs_hota"] - st["control_gs_hota"]
@@ -234,6 +259,14 @@ def main() -> None:
     ap.add_argument("--arm", default=None, help="rung 3: JSON aggregation rule to run end-to-end")
     ap.add_argument("--reader", default="edl", choices=("edl", "v6", "incumbent"))
     ap.add_argument("--name", default="edl")
+    ap.add_argument("--split", default="dev", choices=("dev", "t38", "test"),
+                    help="which sequences to score; t38/test need --out-dir on the server caches")
+    ap.add_argument("--w-app", type=float, default=0.5,
+                    help="EIoU appearance weight (0.5 = v6 incumbent, 0.7 = the V4s2 point)")
+    ap.add_argument("--control", type=Path, default=None,
+                    help="control payload to pair against (default: the pinned DEV-20 V0 control)")
+    ap.add_argument("--arms-path", type=Path, default=None, help="where the arm payload is stored")
+    ap.add_argument("--keep-arm-dir", action="store_true", help="keep the submission directory")
     ap.add_argument("--demo", action="store_true")
     args = ap.parse_args()
     if args.demo:
@@ -242,7 +275,15 @@ def main() -> None:
 
     from eval.gsr_identity import split_sequences  # noqa: PLC0415
 
-    dev, _t38 = split_sequences(args.data_dir, args.out_dir)
+    if args.split == "test":
+        from tools.gsr_deleak import split_names  # noqa: PLC0415
+
+        dev = split_names(args.data_dir, "test")
+    else:
+        d20, t38 = split_sequences(args.data_dir, Path("outputs/gsr"))
+        dev = d20 if args.split == "dev" else t38
+    control = args.control or CONTROL
+    arms_path = args.arms_path or ARMS_PATH
     SWEEP_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     if args.sweep:
@@ -257,18 +298,19 @@ def main() -> None:
     if args.arm:
         rule = json.loads(args.arm)
         payload = run_arm(args.data_dir, args.out_dir, dev, reader=args.reader, rule=rule,
-                          name=args.name)
-        payload["paired"] = paired_vs_control(payload, dev)
-        blob = (json.loads(ARMS_PATH.read_text(encoding="utf-8")) if ARMS_PATH.exists()
-                else {"dev": dev, "arms": {}})
+                          name=args.name, w_app=args.w_app, keep_arm_dir=args.keep_arm_dir)
+        payload["paired"] = paired_vs_control(payload, dev, control)
+        blob = (json.loads(arms_path.read_text(encoding="utf-8")) if arms_path.exists()
+                else {"split": args.split, "seqs": dev, "arms": {}})
         blob["arms"][args.name] = payload
-        ARMS_PATH.write_text(json.dumps(blob, indent=1, default=str), encoding="utf-8")
+        arms_path.write_text(json.dumps(blob, indent=1, default=str), encoding="utf-8")
         p, a = payload["paired"], payload["admissible"]
         print(f"{args.name}: GS-HOTA {p['arm_gs_hota']:.4f} vs control {p['control_gs_hota']:.4f} "
-              f"({p['delta']:+.4f}), helped {p['helped']}/{len(dev)}, p={p['wilcoxon_p']:.3g}")
+              f"({p['delta']:+.4f}), helped {p['helped']}/{len(dev)}, "
+              f"p1={p['wilcoxon_p_onesided']:.3g} p2={p['wilcoxon_p']:.3g}")
         print(f"  admissible: {a['n_named']}/{a['n_tracklets']} named, "
               f"{a['slots_per_seq']:.2f} slots/sequence")
-        print(f"wrote {ARMS_PATH}")
+        print(f"wrote {arms_path}")
         return
     ap.error("choose --sweep / --arm / --demo")
 

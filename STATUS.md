@@ -1,5 +1,26 @@
 # STATUS
 
+## 2026-08-07 (final) — THE PUSH fails its registration; the GSR campaign closes at 53.09
+
+results/GSR_V7_PUSH.md, kb v7-push-001..003 (all refuted). Registration frozen 6m13s before the
+first artifact (mtime-verifiable both machines). Controls re-derived to delta 0.0. **ARM 1
+(edl_fuse94 verbatim): +0.3753, 16/38, p=0.22 — 30% of its DEV effect transferred, and V3's
+precision mechanism REVERSED SIGN out of sample (+0.0073 dev -> -0.0070 held-out at matched
+density); what survived is a small coverage effect — V1's admissible-set hypothesis, which V3
+had declared unsupported. ARM 2 (+w_app 0.7): +0.6282, 23/38, p=0.042 vs the 0.025 Bonferroni
+bar and 50.13 vs the 50.5 level — 1 of 3 criteria. NEITHER SHIPS.** No third arm, no threshold
+surgery, no test-49, no submission — as registered. Spend: 0.6 GPU-h.
+
+**Residual map for any future campaign (recorded, not chased):** w_app is the one living knob
+(+0.25 isolated on identical evidence, right-signed on two independent splits, never singly
+tested with power); the faithful-CAMELTrack trial (KPReID+pose+detector-output corpus,
+~8-12 GPU-h); SNGS-082's undiagnosed -4/-8; the triple-locked side flips.
+
+**CAMPAIGN CLOSED. Final: public 53.09 (v6, 4th-ish on the test-phase board; leader 61.48).
+Full arc 14.76 -> 22.85 -> 33.20 -> (legitimacy reset 31.88) -> 33.37 -> 35.40 -> 39.02 ->
+53.09. Six pre-registered negatives with mechanisms in the v7 era alone. Next: December
+consolidation — thesis chapters, prof pack, the ManU adaptation.**
+
 ## 2026-08-07 — v7 V0/V1/V4s1: control exact, solver retune REFUTED structurally, association routes to CAMELTrack
 
 **V0 (results/GSR_V7_V0.md, kb v7-v0-001..003):** supervision pinned 0.30.0 both machines (up,

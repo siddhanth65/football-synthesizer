@@ -1,0 +1,121 @@
+{
+  "version": "v7-push-1.0",
+  "declared_at": "2026-08-07T17:21:47+00:00",
+  "note": "Written BEFORE any TEST-38 artifact of either arm exists. The evidential TEST-38 per-crop pass had not been launched at declaration time; outputs/gsr_srv/koshkina_percrop_v7e_v6det did not exist.",
+  "purpose": "Confirmatory retest, on the held-out TEST-38 split, of the v7 V3 near-miss (results/GSR_V7_V3.md: DEV-20 +1.2562 at 11/20, gate required 12/20) and of the V4s2 fallback association point (results/GSR_V7_V4S2.md: DEV-20 +0.4853 at 12/20). Both DEV results were selected after multi-point sweeps, which is exactly the hyperparameter-selection exposure a held-out confirmatory read exists to price.",
+  "arms": {
+    "ARM1": {
+      "name": "edl_fuse94",
+      "description": "the v6 chain with the evidential gate head's votes swapped in -- the V3 arm verbatim",
+      "reader": "edl",
+      "percrop_variant": "_v7e_v6det",
+      "chain_variant": "_v7e_v6det_eiou",
+      "aggregation_rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false,
+        "max_u": 0.6,
+        "max_p_none": 0.3,
+        "fuse": true
+      },
+      "association": {"e": 0.3, "rounds": 1, "w_app": 0.5, "app_max": 0.3},
+      "dev20_on_record": {"gs_hota": 53.0645, "delta": 1.2562, "helped": "11/20",
+                          "d": 0.4104, "read_precision": 0.9438}
+    },
+    "ARM2": {
+      "name": "edl_fuse94_w07",
+      "description": "ARM 1 plus the V4s2 fallback association point",
+      "reader": "edl",
+      "percrop_variant": "_v7e_v6det",
+      "chain_variant": "_v7e_v6det_eiou",
+      "aggregation_rule": {
+        "min_crop_conf": 0.5,
+        "min_votes": 2,
+        "min_legibility": 0.5,
+        "emit_all": false,
+        "max_u": 0.6,
+        "max_p_none": 0.3,
+        "fuse": true
+      },
+      "association": {"e": 0.3, "rounds": 1, "w_app": 0.7, "app_max": 0.3},
+      "dev20_on_record": {"note": "never measured as a combination on DEV-20; its two halves are +1.2562 (V3) and +0.4853 (V4s2) measured separately"}
+    }
+  },
+  "frozen_as_measured": "No threshold, rule key or association parameter above may be re-tuned in this session. Exactly two arms are scored on TEST-38. There is no third arm and no threshold surgery.",
+  "controls": {
+    "test38_v6": {
+      "gs_hota": 49.49695486974895,
+      "source": "results/gsr_benchmark/gsr_v6det_t38_v6det.json",
+      "requirement": "re-derived on this session's stack FIRST; must reproduce 49.4970 to the digit or the push stops"
+    },
+    "test49_v6": {
+      "gs_hota": 53.0846184976,
+      "source": "results/gsr_benchmark/gsr_v6det_test_v6det.json",
+      "use": "control for the single test-49 run, which happens only if an arm ships"
+    },
+    "dev20_v0_pin": {
+      "gs_hota": 51.808280888021784,
+      "source": "results/gsr_benchmark/gsr_v7_control_dev.json"
+    }
+  },
+  "hypotheses": {
+    "H1": "ARM 1 beats the re-derived v6 TEST-38 control on per-sequence paired GS-HOTA.",
+    "H2": "ARM 2 beats the re-derived v6 TEST-38 control on per-sequence paired GS-HOTA."
+  },
+  "test": {
+    "statistic": "one-sided paired Wilcoxon signed-rank (alternative='greater') on the 38 per-sequence GS-HOTA deltas, arm minus control",
+    "multiplicity": "Bonferroni over the two registered arms",
+    "alpha_per_arm": 0.025
+  },
+  "ship_gate_per_arm": {
+    "level": "TEST-38 GS-HOTA >= 50.5",
+    "significance": "one-sided paired Wilcoxon p <= 0.025 (Bonferroni-corrected)",
+    "breadth": ">= 22 of 38 sequences helped",
+    "conjunction": "all three required"
+  },
+  "ship_rule": "The higher-scoring arm that clears its FULL gate ships. If both clear, ARM 2 ships only if its TEST-38 GS-HOTA exceeds ARM 1's; otherwise the simpler arm (ARM 1) ships. If NEITHER clears, the push ends: v7 ships nothing, the result is reported as the final registered negative, and no third arm and no re-tuned threshold is run.",
+  "if_an_arm_ships": {
+    "test49": "ONE test-49 run of the shipping arm (server evidential votes for the 49 test sequences + the arm chain), controls re-derived against the v6 test-49 53.0846",
+    "package": "results/gsr_submission/gsr_testphase_gtfree_v7_<hash>.zip built to the FULL v6 standard: zip self-score identical to the scored arm, GT-free legitimacy audit MATERIALIZED as a JSON artifact, manifest carrying every component md5",
+    "upload": "nothing is uploaded; that is Sid's action"
+  },
+  "guards": {
+    "concentration": "results/GSR_V5.md 2.1 -- a gain whose two best sequences carry >= 80% of the net is demoted (reported, not gate-bearing here since the gate is breadth-based)",
+    "same_machine_pairing": "results/CLUSTER_MIGRATION.md -- the TEST-38 GPU artifacts of BOTH arms and of the control come from a100server1; every CPU stage of all three runs on the laptop",
+    "box_subdir": "tools.gsr_eiou.BOX_SUBDIR must be rebound to detbox_cache_v6det (the GSR_V7_V3.md 2.7 landmine); the harness raises if the cache is absent",
+    "downstream_rebuild": "every arm rebuilds identity bundles, the GTA connector arm and the densified votes (clear_arm_caches), so no arm inherits another's partition",
+    "metrics_version": "unchanged -- the reader and the association are pipeline stages, not shipped metrics"
+  },
+  "components": {
+    "detector": {"path": "models/gsr_det/gsr_v3_ft_b_last.pt", "md5": "2074d8741f97a6892a1322d0f808244c"},
+    "trunk_reader": {"path": "~/jersey-number-pipeline/models/parseq_v6_arm4t.ckpt", "md5": "39c0c15defafda072ca0cefd0a4b8e18"},
+    "evidential_head": {"path": "a100server1:~/data/edl/edl_head_v7e.pt", "md5": "4cfdaea31b0a9febf984d524da25097c", "verified_on_server_at_registration": true},
+    "code_md5": {
+      "tools/gsr_eiou.py": "595f48e9fdab392b4d5cabd4b62bc34b",
+      "tools/gsr_v4.py": "ce0ccde5d38f534176d800b29a34afaf",
+      "tools/gsr_v6det.py": "5900a2affe400ef81c260ec3814aecff",
+      "tools/gsr_v7_edl.py": "c2d9bfc21c253b741f1210a5aa45a1d0",
+      "eval/gsr_jersey.py": "f045e5649a07040d5a8f38151834577c",
+      "generator/jersey_id.py": "a8edbea8a7bbaec908e77a00bbfa4027",
+      "generator/evidential_jersey.py": "7c322955261029a28e5bed2b7fccc774",
+      "tools/ocr_density.py": "30323b21bb08b982fb45daf6c1ec9d8b",
+      "tools/koshkina_str_sidecar.py": "f1bfd34ce02f97a994e5d262bd180e3b"
+    },
+    "code_md5_note": "tools/gsr_v7_edl.py is extended in this session with --split / --out-dir / --eiou / --control plumbing so a TEST-38 arm can run at all; the extension is default-preserving and the post-edit md5 is recorded in results/GSR_V7_PUSH.md."
+  },
+  "percrop_pass": {
+    "command": "python -m tools.gsr_v6det --detector s4b --stages percrop --reader edl --edl-head ~/data/edl/edl_head_v7e.pt --leg-thresh 0.0 --seqs <TEST-38>",
+    "leg_thresh": 0.0,
+    "reason": "the V3 arm verbatim: the external legibility gate is OFF at crop time and applied at aggregation time by the rule's min_legibility 0.5"
+  },
+  "split_test38": ["SNGS-022", "SNGS-023", "SNGS-025", "SNGS-026", "SNGS-028", "SNGS-029",
+                   "SNGS-031", "SNGS-032", "SNGS-034", "SNGS-035", "SNGS-037", "SNGS-038",
+                   "SNGS-040", "SNGS-041", "SNGS-043", "SNGS-044", "SNGS-046", "SNGS-047",
+                   "SNGS-049", "SNGS-050", "SNGS-052", "SNGS-053", "SNGS-055", "SNGS-056",
+                   "SNGS-058", "SNGS-059", "SNGS-079", "SNGS-080", "SNGS-082", "SNGS-083",
+                   "SNGS-085", "SNGS-086", "SNGS-088", "SNGS-089", "SNGS-091", "SNGS-092",
+                   "SNGS-094", "SNGS-095"],
+  "not_done_by_declaration": ["no TEST-38 read of either arm", "no test-49 read", "no commit",
+                              "no METRICS_VERSION bump", "no change to the detector, the trunk reader, the solver or the connector tau"]
+}

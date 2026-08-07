@@ -5263,6 +5263,75 @@
         "Z2 (camel_bbox_app_kps_global @0.5) and sportsmot @0.7 were screened, not scored end-to-end; the 0.7 point was killed at 6/20 sequences to free the GPU.",
         "DEV-20 only. No TEST-38 or test-49 read, and valid-58 is still not measurable on the v6det detector."
       ]
+    },
+    {
+      "id": "v7-push-001",
+      "statement": "The v7 evidential-reader arm (edl_fuse94: Dirichlet evidential gate head on the frozen PARSeq arm-4t trunk + additive Dirichlet fusion at max_u 0.60 / max_p_none 0.30 / conf 0.5 / votes 2 / leg 0.5, on the v6 chain) FAILS its pre-registered confirmatory TEST-38 gate on all three halves. Registration results/gsr_benchmark/gsr_v7_push_registration.json was frozen 2026-08-07T17:21:47Z before the per-crop pass launched; the gate was TEST-38 GS-HOTA >= 50.5 AND one-sided paired Wilcoxon p <= 0.025 (Bonferroni over two arms) AND >= 22/38 sequences helped. Measured: 49.8722 (+0.3753 over the re-derived v6 control 49.49695486974895), 16 helped / 14 hurt / 8 exactly tied, one-sided p 0.2203 (two-sided 0.4405), GS-DetA +0.566 / GS-AssA -0.045 / IDF1 +0.61. The DEV-20 effect on record was +1.2562, so 30% of it transferred. The control was re-derived through the arms' own harness and reproduced the on-record TEST-38 number to every digit on all five metrics, with max per-sequence delta 0.0.",
+      "value": 0.3753,
+      "unit": "TEST-38 GS-HOTA delta vs the re-derived v6 control 49.4970; the gate required >= 50.5",
+      "status": "refuted",
+      "evidence": [
+        "results/GSR_V7_PUSH.md#2 RESULTS -- VERDICT",
+        "results/GSR_V7_PUSH.md#2.0 Control re-derivation -- EXACT, to every digit",
+        "results/GSR_V7_PUSH.md#2.2 The two arms on TEST-38",
+        "results/gsr_benchmark/gsr_v7_push_registration.json",
+        "results/gsr_benchmark/gsr_v7_push_t38.json",
+        "results/gsr_benchmark/gsr_v7_push_t38_control.json",
+        "results/gsr_benchmark/gsr_v7_push_cropcheck_t38.json",
+        "results/GSR_V7_V3.md#2.8 Rung 3 -- DEV-20 end to end",
+        "results/gsr_benchmark/gsr_v6det_t38_v6det.json"
+      ],
+      "method": "Pre-registered one-shot confirmatory retest on the held-out TEST-38 split (38 valid sequences never used to select any v7 hyperparameter). Evidential per-crop pass on a100server1 GPU 1 (4 shards, --leg-thresh 0.0, head ~/data/edl/edl_head_v7e.pt md5 4cfdaea31b0a9febf984d524da25097c on the frozen trunk parseq_v6_arm4t md5 39c0c15defafda072ca0cefd0a4b8e18); every CPU stage (EIoU re-link, vote densification, GTA connector, MILP solver, official SoccerNet GS-HOTA scorer) on the laptop, same-machine pairing per results/CLUSTER_MIGRATION.md. Only the per-crop evidence and its aggregation rule differ from the control; detector gsr_v3_ft_b_last.pt md5 2074d8741f97a6892a1322d0f808244c, connector tau 0.450, team_src free, roster self and aggregation floor 0.80 are the frozen v6 values. Crop-set equivalence verified first: 99,932/99,932 crops paired on (track_id, frame), max |delta legibility| 0.000244, 0 crops over 0.01, torso agreement 0.99935.",
+      "caveats": [
+        "ARM 1's gain is concentrated: two of 38 sequences (SNGS-029 +9.16, SNGS-022 +6.14) carry 76% of the net +20.22, and the median per-sequence delta is exactly 0.000 because eight sequences are unchanged to four decimals.",
+        "The one-sided p is the more permissive convention; every earlier v7 session quoted the two-sided p, under which this arm sits at 0.4405.",
+        "One seed, one head, one run per arm. No repeat and no confidence interval beyond the paired signed-rank.",
+        "TEST-38 is a held-out valid split, not the official test-49 split; no test-49 read was spent, because the gate closed it."
+      ]
+    },
+    {
+      "id": "v7-push-002",
+      "statement": "The v7 combined arm (edl_fuse94 evidential votes PLUS the V4s2 fallback association point e0.3 / rounds 1 / w_app 0.7 / app_max 0.30) also FAILS its pre-registered TEST-38 gate, clearing only the breadth half. Measured: GS-HOTA 50.1252 (+0.6282 over the re-derived v6 control 49.4970), 23 helped / 14 hurt / 1 tied, one-sided paired Wilcoxon p 0.0421 against a Bonferroni alpha of 0.025 (two-sided 0.0841), GS-DetA +0.893 / GS-AssA +0.034 / IDF1 +0.88, connector merges 2,622 -> 2,564 at precision 0.4885 -> 0.4959, named tracklets 1,197 -> 1,212. Gate: level FAIL (50.1252 < 50.5), significance FAIL (0.0421 > 0.025), breadth PASS (23 >= 22). Per the pre-declared ship rule neither registered arm clears its full gate, so the push ends: v7 ships nothing, the v6 bundle (TEST-38 49.4970, test-49 53.0846) stands, and no test-49 run or submission package was produced. Isolating the association knob on identical evidential evidence, ARM 2 minus ARM 1 is +0.2530 pooled GS-HOTA, per-sequence mean +0.1874, 20/38 helped, one-sided p 0.1102 -- about half the +0.4853 the same knob was worth on DEV-20 over the v6 reader.",
+      "value": 0.6282,
+      "unit": "TEST-38 GS-HOTA delta vs the re-derived v6 control 49.4970; the gate required >= 50.5 AND p <= 0.025 AND >= 22/38",
+      "status": "refuted",
+      "evidence": [
+        "results/GSR_V7_PUSH.md#2.2 The two arms on TEST-38",
+        "results/GSR_V7_PUSH.md#2.4 What the appearance weight is worth on the evidential partition",
+        "results/GSR_V7_PUSH.md#3 VERDICT AND WHAT IT CLOSES",
+        "results/gsr_benchmark/gsr_v7_push_registration.json",
+        "results/gsr_benchmark/gsr_v7_push_t38.json",
+        "results/GSR_V7_V4S2.md#2.4 Fallback -- the pre-registered EIoU retune",
+        "results/GSR_V6.md#3 TEST-38 -- the single pre-declared gate"
+      ],
+      "method": "Same pre-registered harness and same-machine pairing as v7-push-001; the only difference from ARM 1 is the EIoU appearance weight (0.5 -> 0.7), with every downstream cache (identity bundles, GTA connector arm, densified votes) rebuilt per arm by clear_arm_caches so no arm inherits another's partition. tools.gsr_eiou.BOX_SUBDIR rebound to detbox_cache_v6det with a hard failure if the cache is absent (the GSR_V7_V3.md 2.7 landmine).",
+      "caveats": [
+        "This exact combination was never measured on DEV-20; its two halves come from two different sessions, so the TEST-38 read is its first read of any kind -- no DEV selection exposure, but also no prior.",
+        "SNGS-082 loses 7.838 GS-HOTA on this arm (the worst single-sequence regression of the session) and is hurt by both arms. Not diagnosed.",
+        "The appearance weight has now moved the score in the right direction on two independent splits but is under-powered at every measurement (DEV p 0.0401 over six swept points; TEST-38 isolated p 0.1102). It has never been the registered headline of a properly powered single-knob test.",
+        "The connector tau was still not re-swept on any of these partitions (GSR_EIOU.md negative 4)."
+      ]
+    },
+    {
+      "id": "v7-push-003",
+      "statement": "The mechanism claimed by results/GSR_V7_V3.md 2.9 -- that the Dirichlet evidential reader buys transferable READ PRECISION at matched read density, and that on this chain 0.0073 of read precision is worth ~1.26 GS-HOTA -- does NOT reproduce on held-out data: the precision advantage reverses sign. Graded against the GSR jersey GT on the identical positions_gate_v6det track partition, each reader at its own arm's rule: DEV-20 (on record) v6 reader d 0.4114 at precision 0.9365 vs evidential d 0.4104 at 0.9438 (+0.0073); TEST-38 (this session) v6 reader d 0.3512 (834/2,375 tracks) at 0.9079 vs evidential d 0.3528 (838/2,375) at 0.9009 (-0.0070), i.e. density matched to 0.0016 and precision worse by 0.0070. The 450-point DEV rung-2 aggregation sweep that selected fuse94 was fitting DEV's density/precision frontier, not a property of the reader. What DID transfer is a small coverage effect the same V3 session had declared unsupported: GS-DetA +0.566 with GS-AssA -0.045, named tracklets 1,197 -> 1,206, admissible slots per sequence 13.26 -> 13.34 -- i.e. GSR_V7_V1.md's admissible-set hypothesis, not V3's read-precision one.",
+      "value": -0.007,
+      "unit": "TEST-38 read-precision delta of the evidential reader vs the v6 reader at matched density; DEV-20 on record was +0.0073",
+      "status": "refuted",
+      "evidence": [
+        "results/GSR_V7_PUSH.md#2.3 The mechanism the V3 session claimed does NOT transfer",
+        "results/gsr_benchmark/gsr_v7_push_readgrade_t38.json",
+        "results/GSR_V7_V3.md#2.9 What the frontier actually says -- and the one clean, isolated win",
+        "results/GSR_V7_V3.md#2.6 Rung 2 -- tracklet aggregation",
+        "results/GSR_V7_V1.md#2.7",
+        "results/gsr_benchmark/gsr_v7_push_t38.json"
+      ],
+      "method": "tools.ocr_density.measure over the TEST-38 per-crop evidence of both readers on one shared GT cache keyed to positions_gate_v6det, so both readers are graded on the identical track partition; each reader runs at the aggregation rule its own registered arm ships (v6 = conf 0.9 / votes 3 / leg 0.5; evidential = conf 0.5 / votes 2 / leg 0.5 / max_u 0.60 / max_p_none 0.30 / fuse). Read precision is measured only over auditable tracks carrying a GT number (793 and 797 respectively).",
+      "caveats": [
+        "The DEV-20 row is quoted from GSR_V7_V3.md 2.9, where grading used the ungated positions_v6det ids rather than positions_gate_v6det; the TEST-38 comparison between the two readers is internally consistent (one partition, one GT cache), but the DEV-vs-TEST density levels are not strictly comparable across that difference.",
+        "Both readers lose density and precision going from DEV-20 to TEST-38 (0.41 -> 0.35, and 0.9365/0.9438 -> 0.9079/0.9009), so part of the shift is split difficulty. What split difficulty does not explain is the sign flip of the DIFFERENCE between the two readers measured on one split.",
+        "Single measurement per reader per split; no bootstrap on the precision estimate."
+      ]
     }
   ]
 }

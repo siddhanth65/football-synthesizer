@@ -1,0 +1,39 @@
+{
+ "v6 reader / incumbent rule": {
+  "rule": {
+   "min_crop_conf": 0.9,
+   "min_votes": 3,
+   "min_legibility": 0.5,
+   "emit_all": false
+  },
+  "max_crops": null,
+  "n_tracks": 2375,
+  "n_tracks_read": 834,
+  "d": 0.3511578947368421,
+  "n_reads": 834,
+  "n_reads_auditable": 793,
+  "read_precision": 0.9079445145018915,
+  "n_tracks_auditable": 793,
+  "track_precision": 0.9079445145018915
+ },
+ "evidential / fuse94 rule": {
+  "rule": {
+   "min_crop_conf": 0.5,
+   "min_votes": 2,
+   "min_legibility": 0.5,
+   "emit_all": false,
+   "max_u": 0.6,
+   "max_p_none": 0.3,
+   "fuse": true
+  },
+  "max_crops": null,
+  "n_tracks": 2375,
+  "n_tracks_read": 838,
+  "d": 0.3528421052631579,
+  "n_reads": 838,
+  "n_reads_auditable": 797,
+  "read_precision": 0.9008782936010038,
+  "n_tracks_auditable": 797,
+  "track_precision": 0.9008782936010038
+ }
+}
