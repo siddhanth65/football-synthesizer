@@ -1,5 +1,93 @@
 # STATUS
 
+## 2026-08-07 — v7 V0/V1/V4s1: control exact, solver retune REFUTED structurally, association routes to CAMELTrack
+
+**V0 (results/GSR_V7_V0.md, kb v7-v0-001..003):** supervision pinned 0.30.0 both machines (up,
+not down — protects the server's expensive caches; NOTE 0.31 removes sv.ByteTrack, the pin has
+an expiry); DEV control re-derived on the pinned stack to **delta 0.0 at full float precision,
+20/20 submissions byte-identical** (gsr_v7_control_dev.json). Vote cache verified/rebuilt
+deterministic. Zero-torso fault not reproducible (hypothesis: the S7 concurrency wipe; both
+mitigations live; open-but-mitigated). Disk truth: LAPTOP 30 GB free is the binding constraint;
+server FS 93% full globally (~/runs pruning assigned to V2).
+
+**V1 (results/GSR_V7_V1.md, kb v7-v1-001 REFUTED):** the dense-regime solver retune FAILS its
+pre-registered gate — 18 arms, best +0.058 (p=0.841, concentration 1.92 = the v5.1 signature at
+a tenth scale), 17/18 at-or-below control. **Structural mechanism, measured by a label-change
+probe:** at r_abstain=0 the solver sits in the name-everything-admissible corner where
+p_correct/pi_none/sim_none moves change ZERO of 870 labels (the unknown column's payoff is
+pinned; priors scale the whole identity block against one fixed entry) — and the only exit knob
+(r_abstain) exits in the losing direction because GS-HOTA prices coverage above precision.
+**Law split-verdict, honestly recorded:** evidence IS above the knee (d=0.386 > d*=0.347) and
+the precision dial IS live (+0.5 jersey precision at r_abstain 0.10) — but the objective pins
+the optimum at max coverage; what binds is the ADMISSIBLE SET (13.2 self-roster slots/seq; 260
+of 870 tracklets lack a slot, not calibration). Naming headroom = V2/V3/V4 territory. GK-collapse
+mechanism replicated on a second corpus (never reaches the submission — roster_self is
+player-only). Grid gaps noted, not chased: app_gain 3.0, team_eps/role_eps/max_concurrent.
+
+**V4s1 (results/GSR_V7_V4S1.md, kb v7-v4-001): PATH = CAMELTrack.** Ceiling on v6det detections:
+**+24.79 AssA full-oracle / +11.89 connector-achievable** — both in the CAMELTrack band; 19/20
+sequences FRAGMENTATION-dominated (2.91:1); coverage-override does not fire (calibration dropout
+now closed: pitch recall 0.9155 vs 0.7453). Two reversals of intuition: the ceiling was raised
+by the DETECTOR+CALIBRATION repairs, not EIoU (+0.0015); and the connector DESTROYS part of its
+own ceiling (54% merge precision locks in contamination — E's merge-only bound 0.6936 < D's
+0.7415). Connector captures 43.2% of headroom (was 24.5% in July).
+
+**V2 (results/GSR_V7_V2_TRAIN.md, kb v7-v2-001): KILL at rung 1 — the field's first learned
+side-assignment measurement is a NEGATIVE, and a diagnostic one.** The 6-class side-detector
+(30 epochs from S4b, fliplr=0 mandatory, 0.96 GPU-h) ties meanx exactly (91/97 vs 91/97,
+agreeing 89/97) and misses 2 of 3 GT-inversion clips at HIGH vote confidence (0.71/0.76) — it
+is a second estimator of the SAME per-frame pitch-geometry quantity, not a new signal (its +4
+fixes are all meanx's low-margin estimation errors; its -4 breaks are its own confident
+inversions; margin AUC 0.839 vs meanx's 0.843). Real learning existed (per-box 0.7713 vs the
+0.598 geometry shortcut) but collapses to geometry at sequence level. Bonus finding: class
+splitting costs box quality (person AP 0.972 -> 0.960) — vindicates the overlay design that
+left the shipped detector untouched. The ~+3.1 flip headroom stays LOCKED; no known signal
+family remains (geometry ceiling, GK-appearance anti-informative, learned-side = geometry
+again). Kill cost: 1.5 of the budgeted 10-14 GPU-h; +15.6 GB server disk reclaimed.
+
+**V3 (results/GSR_V7_V3.md, kb v7-v3-001..004): rungs 0-2 PASS, rung 3 FAILS BY ONE SEQUENCE**
+(+1.2562 clears the +1.0 bar; 11/20 helped misses the 12/20; p=0.0355 uncorrected vs the 0.00625
+Bonferroni bar). Nothing ships; the v6 reader stands. The findings outlast the fail:
+(1) matched-density PRECISION conversion is real — 0.9365 -> 0.9438 at equal d buys +1.26
+GS-HOTA (the frontier is interior on both sides); (2) **Grad's "free illegible supervision"
+claim REFUTED** — negatives defined by the legibility model teach the head to imitate its
+teacher (invisible AUC 0.620 < the shipped classifier's 0.704); (3) the uncertainty term alone
+pays +0.36 end-to-end; (4) BOTH the session premise (use 4.1x more crops) and V1's
+admissible-set hypothesis are unsupported — winning arms DECLINE the extra crops and rosters
+barely grow. Registered architecture failed (100-way evidential MLP smooths the trunk's
+combinatorial map: 0.49 vs 0.96 precision) and was replaced mid-session with an evidential GATE
+head preserving the trunk argmax — deviation reported; hyperparameter-selection caveat stated.
+GPU spend: 1.1 h. One harness bug (BOX_SUBDIR default) found+fixed.
+
+**V4s2 (results/GSR_V7_V4S2.md, kb v7-v4-002 REFUTED): FAIL on all four arms — and the v7
+campaign CLOSES.** CAMELTrack zero-shot: -13.6 to -20.2 (0/20) — its checkpoints require KPReID
+6x128 part embeddings + visibility; our single 256-d CLIP cache cannot enter that basis, so
+every multi-cue model ran appearance-less. From-scratch retrain on our cues: val association
+0.69->0.92 but end-to-end -18.6 (trained on GT boxes, never detector output — named as the
+likely cause). Pre-registered EIoU fallback: best +0.4853 at 12/20 (breadth passes, level
+fails; w_app is the only live knob). Mechanism: with appearance effectively absent, geometry
+cannot separate 22 same-kit players — purity collapses (0.94 -> 0.61-0.83) and contamination
+cannot be un-merged. CAVEAT stated plainly: this measured CAMELTrack-WITHOUT-its-appearance-cue;
+a faithful trial needs KPReID+pose (scoped, declined on budget) + detector-output training.
+Apache-2.0 license recorded. GPU 3.0 h.
+
+**v7 CAMPAIGN VERDICT: five pre-registered gates, five failures, each with a measured
+mechanism — v7 ships NOTHING; v6 stays live at 53.09.** The ledger: solver = disconnected-knobs
+corner (v7-v1-001); learned-side = geometry re-derived (v7-v2-001); evidential reader = +1.26
+missed by one sequence, teacher-imitation refuted Grad's supervision claim (v7-v3-001..004);
+learned association = appearance-basis mismatch (v7-v4-002); + the V4s1 ceiling map. Total GPU
+spent: ~5.6 h of 42 budgeted — the gates killed everything at ~13% of the planned cost, which
+is the system working. Residual mapped headroom, for any future campaign: the V3 near-miss
+(one legitimate pre-registered confirmatory at larger dev scale), faithful-CAMELTrack
+(KPReID+pose+detector-output corpus, ~8-12 GPU-h), the w_app micro-gain, and the triple-locked
+side flips awaiting a genuinely new observable.
+
+Previously in flight: **V4s2 (CAMELTrack) — the campaign's last live lever** (+11.9 connector-achievable
+ceiling, fragmentation-dominated). If it fails its DEV gate, v7 ships NOTHING and v6 stays —
+an honest outcome: the campaign would close with four registered negatives (solver corner,
+learned-side=geometry, evidential-reader near-miss, and whatever V4 says), each thesis-grade.
+Board: 53.09 live. GPU spent ~2.6 h of the 42 budgeted.
+
 ## 2026-08-06 (night) — **v6 COMPLETE: official test split 53.08 (+14.06). Package ready for upload.**
 
 results/GSR_V6.md (via gsr_v6det.py act), results/gsr_v6_frozen.json (declared 05:53:08Z, before
