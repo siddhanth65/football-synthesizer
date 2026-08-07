@@ -4935,6 +4935,334 @@
         "gsr-det-002",
         "gsr-det-003"
       ]
+    },
+    {
+      "id": "v7-v0-001",
+      "statement": "The v7 DEV-20 FULL-bundle control re-derives EXACTLY on the supervision-0.30.0 pinned stack: GS-HOTA 51.808280888021784 against the on-record 51.808280888021784, delta 0.0000000000 on a pre-declared +-1.5 gate, with GS-DetA 39.308307987997765, GS-AssA 68.28680940240496, GS-LocA 93.65233939165817 and IDF1 56.452551003353804 all matching to every digit and per-sequence GS-HOTA identical on all 20 sequences. The whole result JSON differs in 3 of 259 leaves, all non-numeric naming metadata (/arm/tag, /arm/detector/arm_variant, /arm/detector/origin) from a post-hoc rename in tools/gsr_v6det.py; max numeric delta across every differing leaf is 0. Because the tag changed, the regenerated arm landed in a separate directory and could be compared file by file against the on-record one: 20/20 sequence submissions BYTE-IDENTICAL by sha256, so the reproduction is at the level of shipped rows, not just the score. The run rebuilt everything downstream of the cached GPU artifacts -- clear_arm_caches wiped the identity bundles, the GTA arm and the vote cache, then EIoU relink (1,137 -> 2,289 tracks), vote densification, connector, MILP solver, submission materialisation and the official scorer all re-ran on CPU. Every v7 DEV gate may therefore pair against 51.8083 on this stack.",
+      "value": 51.808280888021784,
+      "unit": "GS-HOTA on DEV-20 (20 valid sequences), v6 FULL bundle = S4b detector + v6 PARSeq reader + EIoU association; delta vs the on-record control = 0.0000000000, gate was +-1.5",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V7_V0.md#2 The DEV-20 FULL-bundle control -- GATE PASS, exactly",
+        "results/gsr_benchmark/gsr_v7_control_dev.json",
+        "results/gsr_benchmark/gsr_v6det_dev.json",
+        "results/GSR_V6.md#2 the FULL bundle and its leave-one-out"
+      ],
+      "method": "python -m tools.gsr_v6det --stages arm --split dev --results-dir <scratch> on the laptop (RTX 3050, py 3.14.0, supervision 0.30.0, numpy 2.4.0, scipy 1.17.0), CPU only, reading the cached GPU artifacts positions_gate_v6det, detbox_cache_v6det, detembed_cache_clip_v6det and koshkina_percrop_v6_v6det (all extracted earlier under supervision 0.29 -- the caches are version-independent because supervision only enters at extraction). --results-dir was pointed at a scratch directory so the on-record gsr_v6det_dev.json was never overwritten. Comparison: recursive leaf-by-leaf diff of the two result JSONs, plus a per-file sha256 comparison of the two materialised submission directories.",
+      "n": 20,
+      "caveats": [
+        "This is a REPRODUCTION, not an independent measurement. Same machine, same cached GPU artifacts, same scorer -- it proves the CPU half of the chain is deterministic under the pin, not that the number generalises.",
+        "The pin does not retro-fix the caches. The DEV artifacts were extracted under supervision 0.29 and the TEST-38/test-49 artifacts under 0.30. Each split is internally same-stack (which the pairing rule requires), but re-extracting DEV positions on the pinned laptop would NOT reproduce this control -- see v7-v0-002.",
+        "The duplicate arm directory created by the tag drift was deleted after the byte comparison, so the byte-identity check is not re-runnable without re-deriving."
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "control",
+        "reproducibility",
+        "v7",
+        "dev20",
+        "pin"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
+    },
+    {
+      "id": "v7-v0-002",
+      "statement": "supervision is now pinned to 0.30.0 on BOTH machines, and the cross-version track partition difference behind GSR_V6 negative 3 is reproduced and quantified on one machine with the detector held fixed. The laptop moved 0.29.0.post0 -> 0.30.0 (the server was already 0.30.0 and holds the most expensive caches, so pinning up rather than down was the cheaper direction); pip's dry run reported exactly one action, so no other package moved. Re-extracting two DEV sequences with the S4b detector on the pinned stack against the on-record 0.29 extraction: SNGS-021 48 -> 53 tracks (+10.4%) and 11,757 -> 11,893 rows, SNGS-024 45 -> 48 tracks (+6.7%) and 7,484 -> 7,704 rows, both gaining one tracked frame (747 -> 748) and losing mean track length (244.9 -> 224.4, 166.3 -> 160.5). Same detector, same calibration, same frames -- the tracker library alone fragments more on 0.30. Verified alongside: the EIoU self-check (IoU 0.000 -> EIoU(e=0.7) 0.133) and 13 passed targeted tests. NEW CEILING FOUND: sv.ByteTrack is deprecated since 0.28.0 and is REMOVED in 0.31.0, so 0.30.0 is the last release that carries the tracker this pipeline uses.",
+      "value": 10.4,
+      "unit": "percent more ByteTrack tracks on supervision 0.30 vs 0.29 for SNGS-021 (48 -> 53) with the detector, calibration and frames held identical; SNGS-024 +6.7% (45 -> 48)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V7_V0.md#1 The pin -- supervision==0.30.0, both machines",
+        "results/GSR_V6.md#5 Negatives, verbatim-faithful to the record (negative 3)",
+        "requirements.txt",
+        "results/CLUSTER_MIGRATION.md#1 Machine map"
+      ],
+      "method": "pip install supervision==0.30.0 on the laptop (py 3.14.0) after a --dry-run check; the server env gsr already had 0.30.0 and gained the pin line in ~/constraints.txt. Smoke: python -m tools.gsr_v6det --stages extract --seqs SNGS-021,SNGS-024 --out-dir <scratch> (S4b weights md5 2074d8741f97a6892a1322d0f808244c, PnLCalib calib_period=1, tracker bytetrack), compared against outputs/gsr/positions_v6det extracted on the same laptop under 0.29. Runtimes 404 s and 376 s per sequence, matching the on-record ~390 s/sequence, so the version change costs no throughput.",
+      "n": 2,
+      "caveats": [
+        "Two sequences. The track-count deltas (+10.4%, +6.7%) are a demonstration that the difference is real and one-directional, NOT a calibrated estimate of the fragmentation gap; GSR_V6 negative 3 quotes ~+37% fragments measured further down the chain, and these numbers are the raw ByteTrack partition, a different quantity.",
+        "No GS-HOTA was measured on the 0.30 re-extraction -- doing so would need the whole downstream chain rebuilt on new track ids, which is exactly the cost the pin exists to avoid paying twice.",
+        "The pin has a hard expiry: sv.ByteTrack is removed in supervision 0.31.0. Any future bump needs generator/tracking.py ported off it AND a full re-extraction.",
+        "Pinning does not make the existing DEV (0.29) and TEST (0.30) caches comparable to each other; it only guarantees that anything extracted from now on is comparable."
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "tooling",
+        "reproducibility",
+        "v7",
+        "tracking",
+        "pin"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v7-v0-001"
+      ]
+    },
+    {
+      "id": "v7-v0-003",
+      "statement": "The S3 arm-A/arm-B vote-cache collision is closed and the zero-torso fault does not reproduce. (a) outputs/gsr/koshkina_percrop_votes_f080_v6_eiou was wiped and rebuilt through the now rule-keyed machinery; the rebuilt cache re-derives S3 arm A to every digit -- GS-HOTA 42.74492210340575, GS-DetA 30.49944109110281, GS-AssA 59.90976080218577, GS-LocA 92.5648245755026, IDF1 45.54818598618869, n_merges 2,326, frags_after 1,140, 1,139 tracklets / 729 named, per-sequence max |delta| 0 over 20 sequences -- and a second wipe+rebuild gives 59/59 byte-identical vote files, so emit_votes is deterministic. The cache was ALREADY arm A's on arrival (rule stamp conf 0.90 / votes 3), because two S7 fixes had landed: votes_dir now persists the rule and wipes on mismatch, and results/ocr_density_rule_v6_eiou.json was renamed to ...armB.json so rule_for of ('0.80','_v6_eiou') falls back to the incumbent freeze -- that rename is load-bearing. (b) Re-running the per-crop pass for SNGS-055 and SNGS-056, the two sequences of GSR_V6 negative 2, yields 599 and 882 torso RoIs -- not zero -- and agrees with the on-record artifact on 100.00% of 4,152 and 3,876 matched (track_id, frame) rows for both the torso flag and the read number, with max |delta legibility| = 0. The fault was TRANSIENT.",
+      "value": 42.74492210340575,
+      "unit": "GS-HOTA of the rebuilt S3 arm A on DEV-20, identical to the on-record value to 16 significant figures; vote-cache determinism 59/59 byte-identical files",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V7_V0.md#3 Vote-cache hygiene -- arm B evicted, arm A rebuilt and re-verified",
+        "results/GSR_V7_V0.md#4 Zero-torso re-probe (30-minute box) -- NOT REPRODUCIBLE",
+        "results/GSR_S3_READER.md#7 Negatives, limits, and what was not done (item 7)",
+        "results/gsr_benchmark/gsr_eiou_dev_clip_s3reader.json"
+      ],
+      "method": "(a) shutil.rmtree on the vote directory, then eiou.run_point(e 0.3, rounds 1, w_app 0.5, app_max 0.30, CLIP, tau 0.450, positions_gate, percrop variant _v6) on the 20 DEV sequences, compared leaf by leaf against the on-record arm entry eioudev_clip_e0.3r1w0.5a0.3_v6; determinism by sha256 over a second wipe + tools.gsr_v4.votes_dir rebuild. (b) eval.gsr_jersey --percrop --variant _v7probe --max-crops 60 --parseq-ckpt parseq_v6_arm4t.ckpt --seqs SNGS-055,SNGS-056 on the pinned stack, inner-joined to outputs/gsr/koshkina_percrop_v6 on (track_id, frame).",
+      "n": 20,
+      "caveats": [
+        "The pre-wipe sha256 snapshot of the vote cache was clobbered by a scratchpad filename collision, so 'rebuilt bytes == pre-wipe bytes' was never measured. The determinism check and the exact score reproduction stand in its place; the weaker check is missing and is recorded as missing.",
+        "The zero-torso CAUSE remains unestablished, only mitigated. The hypothesis -- a concurrent shard wiping the shared STR-sidecar scratch that KoshkinaRecognizer clears at construction, i.e. the same root cause as GSR_V6 negative 1 -- is consistent with the signature (legible crops, zero torso RoIs, PARSeq never invoked) but UNPROVEN: the original failing run's log is not on the laptop, so concurrency at the moment of the fault is not demonstrated.",
+        "No failing frame's pose output was captured because the fault did not recur; there was no failing frame. The item stays open-but-mitigated (per-PID work dir + the legible-but-no-torso discard guard), not solved.",
+        "Arm A's superiority over arm B is unchanged and still unresolved statistically on 20 sequences (GSR_S3_READER section 6, Wilcoxon p = 0.216). This claim is about cache hygiene, not about re-litigating that ordering."
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "reproducibility",
+        "jersey",
+        "ocr",
+        "v7",
+        "hygiene"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v7-v0-001",
+        "s3-reader-002"
+      ]
+    },
+    {
+      "id": "v7-v4-001",
+      "statement": "Re-measured on the CURRENT v6 stack (S4b detector + calibration gap repair + clean-room EIoU), the association ceiling is LARGER than the pre-repair one and the loss is FRAGMENTATION-dominated, not coverage-dominated. On DEV-20 the shipped chain (EIoU + GTA connector tau 0.450 + MILP solver) scores proxy assa_hat 0.6283 against a split+merge linking oracle on its own detections of assa_perfect_link 0.8642 -- headroom +0.2359 proxy = +24.79 GS-AssA on the measured loc_assoc scale (66.07 -> ~90.9); a merge-only oracle (what a connector alone can reach, since it can never split a contaminated tracklet) reaches 0.7415 = +11.89. Coverage+contamination is worth only assa_perfect_det 0.7093 = +8.51 by the same instrument, a fragmentation:coverage ratio of 2.91:1, with 19 of 20 sequences fragmentation-dominated (exception SNGS-033). The connector realises 43.2% of the split+merge headroom available at the tracker's output (61.3% of the merge-only headroom) against the 24.5% GSR_ASSOCIATION measured on the old stack. The ceiling rose because of the DETECTOR and the calibration repair, not because of EIoU: assa_perfect_link is 0.6486 on the pre-repair positions (same 20 sequences), 0.8064 after the calibration gate+fill, 0.8627 after the S4b detector swap and 0.8642 after EIoU -- the EIoU step moves it by 0.0015. The calibration dropout is closed: GT pitch-space recall 0.7453 -> 0.9155, image-detected-then-lost-to-calibration 0.1443 -> 0.0101, frames with any pitch output 0.7540 -> 0.9807. PRE-REGISTERED PATH VERDICT: CAMELTrack. Both ceiling readings clear the +5 bar (+24.79 lands in the '> +12' band, +11.89 in the '+5..+12' band, which route to the same decision), and the plan's coverage-dominated override does not fire.",
+      "value": 24.79,
+      "unit": "GS-AssA points of linking headroom over the shipped v6 chain on DEV-20, loc_assoc scale (merge-only oracle: +11.89; unscaled proxy: +23.59; linear-fit map: +19.36)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V7_V4S1.md#2 The ceiling -- the table",
+        "results/GSR_V7_V4S1.md#3 Fragmentation or coverage? -- FRAGMENTATION, 2.9 : 1",
+        "results/GSR_V7_V4S1.md#5 PATH VERDICT",
+        "results/gsr_benchmark/gsr_assoc_diag_v7.json",
+        "results/gsr_benchmark/gsr_assoc_diag_v7_extra.json",
+        "results/GSR_ASSOCIATION.md#3 Where association dies -- ranked (the pre-repair baseline)"
+      ],
+      "method": "tools/gsr_assoc_diag.py --v7 (CPU, ~28 min): HOTA's own A(i,g)=n/(N_g+M_i-n) rebuilt from a greedy nearest-GT assignment at the evaluator's 5 m tolerance, over five track partitions on the same 20 DEV sequences -- positions_gate, positions_gate_eiou, positions_gate_v6det, positions_gate_v6det_eiou and the shipped submission deleak_v6detdev_clip_e0.3r1w0.5a0.3 read back through the new submission_positions(). Counterfactuals: assa_perfect_link (merge AND split by GT id), the new assa_merge_only (each predicted track goes wholesale to its dominant GT id -- no splitting), assa_perfect_det. Proxy re-validated against the official scorer on the shipped partition: Spearman +0.842 / Pearson +0.864 / scale 1.051 vs loc_assoc GS-AssA. Harness control: re-scoring the shipped arm reproduces the on-record v7 control GS-AssA 68.28680940240496 exactly. Purity/contamination via tools.gsr_eiou.partition_purity, whose base-detector rows reproduce GSR_EIOU.md section 5 exactly (0.8969/1523/173/6.52 and 0.9416/3262/106/11.47).",
+      "n": 20,
+      "caveats": [
+        "assa_perfect_link is an oracle that SPLITS as well as merges, so +24.79 is the ceiling of a tracker replacement, not of a connector. The connector-only bound is assa_merge_only, +11.89 -- half the headline. Any claim quoting +24.79 must say 'tracker', not 'connector'.",
+        "The proxy is greedy one-to-one at a hard 5 m gate, not trackeval's Hungarian assignment over a Gaussian similarity averaged across alphas. Its Spearman on this stack is +0.842, weaker than GSR_ASSOCIATION's +0.971 (which validated a geometry-only proxy against a geometry-only arm). Levels are +-3 AssA points, not +-2.",
+        "The 1.051 scale is fitted at proxy ~0.63 and applied at 0.86. A linear fit of the same 20 points (measured = 0.1446 + 0.8208*proxy, R2 0.747) gives +19.36 instead of +24.79; the unscaled proxy difference is +23.59. All three exceed +12, so the verdict is invariant under the choice of mapping but the LEVEL is not.",
+        "valid-58 was NOT measured on the current detector: positions_gate_v6det exists for the 20 DEV sequences only, and the 38 held-out sequences need ~4.4 GPU-hours of re-extraction. The representativeness check is on the OLD detector, where DEV-20 sits within 0.008 of valid-58 on assa_perfect_link (0.8064 vs 0.7992 ByteTrack, 0.8091 vs 0.8016 EIoU).",
+        "assa_perfect_det removes false negatives and false positives together, so +8.51 is an upper bound on the coverage half alone. The direct figures are matched_share 0.8672 (13.3% of GT rows matched by nothing) and pred_precision 0.9678.",
+        "The verdict is technical only. The plan's budget contingency stands unaltered: if V2+V3 exceed 30 combined GPU-hours, V4 takes the EIoU-retune path regardless of this ceiling.",
+        "The shipped connector has already destroyed part of its own remaining ceiling: the post-connector merge-only bound (0.6936) is BELOW the pre-connector one (0.7415), because its wrong merges (measured merge precision 0.5432) lock in contamination no later merge-only pass can undo."
+      ],
+      "tags": [
+        "gsr",
+        "association",
+        "tracking",
+        "v7",
+        "ceiling",
+        "eiou",
+        "camel-track"
+      ]
+    },
+    {
+      "id": "v7-v1-001",
+      "statement": "FAIL. A pre-registered 18-arm solver retune on the v6 GSR chain moves DEV-20 GS-HOTA by at most +0.0577 against a gate of >= +1.0 AND >= 12/20 sequences helped, so the incumbent solver calibration ships unchanged. 11 coordinate arms (p_correct {0.926,0.95}, r_abstain {0.02,0.05,0.10}, pi_none {0.5,0.85}, topk 5, app_gain 5, sim_none {0.90,0.95}) plus a 6-arm r_abstain x pi_none joint grid, each a full DEV-20 run paired against the V0 control (51.808280888021784, reproduced EXACTLY by the harness before any arm and again by a confirmatory repeat run, per-sequence identical both times). Best arm pi_none 0.5 + r_abstain 0.05 = 51.8660 (+0.0577), 7/20 helped, Wilcoxon p 0.841, and its top-2 sequences carry 192% of its net per-sequence gain, so it is demoted by the concentration guard as well as failing both gate legs. This is the evidence-density law's dense-regime test and it returns a SPLIT verdict: the chain IS in the dense regime the law predicts a payoff in -- read density d = 0.386 reads per merged tracklet (336/870) at ~0.926 read precision, against the law's d* = 0.347 at 0.86 precision and 0.268 at 0.95 -- and the precision/coverage dial the law describes is demonstrably live (jersey precision 0.6518 -> 0.6648 as r_abstain rises). What is refuted is the conversion step this session pre-registered: the dial does not convert into GS-HOTA, because GS-HOTA's per-row identity gate prices coverage above precision (r_abstain 0.10 buys +0.61 GS-AssA and +0.5 jersey-precision points for -1.10 GS-DetA, net -0.50 GS-HOTA). The mechanism of the null is structural, not statistical, and was measured at the label level: over 870 merged tracklets, p_correct 0.8837->0.926 changes 0 labels, pi_none 0.7->0.5 changes 0, sim_none 0.92->0.90 changes 0, topk 3->5 changes 6, app_gain 10->5 changes 21, while r_abstain 0->0.02 changes 330 (328 of them names being withdrawn). solve_bundle_scored pins the unknown column's payoff to r_abstain, and pi_none and sim_none only rescale the whole identity block against that column, so at r_abstain = 0 they cannot re-order any argmax -- pi_none 0.85 and sim_none 0.95 are measurably THE SAME intervention (identical GS-HOTA 51.7364, identical named/GK/jersey columns, both moving exactly 5 of 870 labels). At r_abstain = 0 the solver is already in the name-everything-admissible corner and the only knob that leaves it leaves in the losing direction; what binds is the admissible set (13.2 self-roster identities per sequence), not the calibration.",
+      "value": 0.0577,
+      "unit": "GS-HOTA delta of the best of 18 arms on DEV-20 vs the V0 control (gate >= +1.0); 17 of 18 arms are at or below the control",
+      "status": "refuted",
+      "evidence": [
+        "results/GSR_V7_V1.md#1 REGISTRATION (written before any arm was run)",
+        "results/GSR_V7_V1.md#2.3 The gate, applied",
+        "results/GSR_V7_V1.md#2.4 Why nine arms scored exactly the control -- the mechanism, measured",
+        "results/GSR_V7_V1.md#2.7 The evidence-density law -- the dense-regime test",
+        "results/gsr_benchmark/gsr_v7_v1_sweep.json",
+        "results/gsr_benchmark/gsr_v7_v1_inert_probe.json",
+        "results/gsr_benchmark/gsr_v7_control_dev.json"
+      ],
+      "method": "tools/gsr_v7_solver.py: each arm is a full DEV-20 pass of the v6 chain (positions_gate_v6det_eiou partition, _v6_v6det_eiou per-crop evidence, 0.80-floor rule, GTA connector tau 0.450 + jersey gate, team_src=free / roster=self, official SoccerNet GS-HOTA scorer) with ONLY generator.identity_solve.SolverConfig moving, via a new default-preserving SOLVER_OVERRIDE hook in tools.gsr_v4.solver_config. The solver-independent upstream stages (EIoU re-link, densified votes, evidence bundles, GTA arm) are shared across arms; that shortcut is verified rather than assumed by running the frozen config through the same harness and requiring the V0 control's GS-HOTA to 16 significant figures before any arm was scored (it did, twice). Pairing by eval.gsr_identity.paired_stats on the 20 per-sequence GS-HOTA values. Label-change probe: the same cached bundles re-solved per knob, counting tracklets whose assigned identity differs from the incumbent's. Arm directories deleted after scoring (laptop disk).",
+      "n": 20,
+      "caveats": [
+        "app_gain 3.0 -- the DEV optimum GSR_V5.md measured on the v5 chain -- was NOT in the pre-registered grid, which carried only {5, 10}. app_gain 5 is nearly flat here (-0.0002, 21 of 870 labels), but 3.0 on the v6 chain remains unmeasured. (v5.1 itself did not travel: -0.05 on TEST-38.)",
+        "team_eps, role_eps and max_concurrent were outside the registered grid and are the knobs that would name MORE, which section 2.4 argues is the only direction with headroom. Un-swept.",
+        "20 sequences cannot resolve a 0.058 effect (Wilcoxon p 0.841). Nothing in the positive column of the sweep is distinguishable from noise; the +1.0 gate exists for that reason.",
+        "The GK column is a mechanism measurement, not a cost line, on this chain: roster_self emits only role='player' slots and write_arm writes a jersey only onto role='player' predictions, so the 25 -> 0 GK-role naming collapse under r_abstain does not reach the submission. The r_abstain GS-HOTA loss comes from the ~328 PLAYER tracklets that stop being named.",
+        "d = 0.386 is measured per MERGED tracklet on 30-second GSR sequences; EVIDENCE_DENSITY_LAW.md section 2.2 measured that the solve window is itself an evidence multiplier (0.176 anchored at a 750-frame unit vs 0.395 at a 2-minute unit), so d is not strictly comparable across solve units and the 'above d*' reading carries that qualification.",
+        "The arms share upstream stages, so none of them (other than the control) was run cold through tools.gsr_v6det --stages arm end to end.",
+        "No TEST-38 or test-49 read was spent, so nothing here says whether the null also holds on the held-out splits -- only that no candidate earned a run on them."
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "solver",
+        "identity",
+        "evidence-density-law",
+        "v7",
+        "negative-result",
+        "pre-registered",
+        "abstention"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v7-v0-001",
+        "ident-013"
+      ]
+    },
+    {
+      "id": "v7-v2-001",
+      "statement": "A learned team-side detector does NOT beat the positional ceiling -- the first measurement of learned side assignment in SoccerNet-GSR, and it is a negative. A YOLOv8s detector was fine-tuned from the shipped S4b checkpoint on SoccerNet-v3's side-preserving labels (6 classes {0 ball, 1 gk_left, 2 gk_right, 3 player_left, 4 player_right, 5 referee}; 366,081 boxes = 98.52% of v3 kept; 32,532 train frames / 380 games, 1,454 holdout frames / 20 games; v3 ONLY, because 39 GSR train sequences are in the grading pool), 30 epochs / 57.8 min on one A100 at the S4b recipe with the one mandatory change fliplr=0.0 (a horizontal flip inverts the label semantics and ultralytics cannot swap paired detection classes). Run as an OVERLAY on the cached v6 detections (boxes matched by foot point at max(0.5*width, 12 px); validated as an IoU match -- 566,800 pairs, mean IoU 0.8608, 98.61% at IoU>=0.5), one side vote per matched row per kit cluster, 873,883 votes over 97 dev sequences: side accuracy 91/97 = 0.9381, which is EXACTLY the free incumbent meanx's score on the identical pool (91/97 = 0.9381), with 89/97 agreement. Pre-declared gate (>=0.94 AND correct on the three GT-inversion clips SNGS-038/092/111) FAILS on both criteria: 0.9381 < 0.94, and only SNGS-038 is correct -- SNGS-092 and SNGS-111 are wrong with vote shares 0.7123 and 0.7613 over 10,298 and 8,462 votes, i.e. strong evidence pointing the wrong way, the same inversion signature GSR_TEAMSIDE measured for meanx. VERDICT KILL; the V2 fusion session is cancelled and eval/gsr_score.py is untouched. The negative is sharp, not soft: (a) the model is CONVERGED -- holdout mAP@0.5 flat at ~0.822 from epoch 17 to 30 -- so unlike S4 this is not a dose shortfall; (b) it did learn something -- per-box side accuracy 0.7713 in-domain against a pure image-x shortcut worth only 0.5983 on the same corpus -- but what it learned is per-frame pitch geometry, the same information calibration already gives meanx, estimated worse; (c) the +4/-4 split is diagnostic -- every clip it fixes is one where meanx's margin is under 1.9 m (its estimation-error family: 0.01, 0.62, 0.87, 1.84) and every clip it breaks it breaks at its own low vote share 0.53-0.63 while meanx is confident (up to 7.1 m); (d) its vote-share margin is no better a correctness ranking than |meanx| (AUC 0.8388 vs 0.8425). Two side findings: splitting the classes costs box quality on an identical holdout (person AP@0.5 0.9723 -> 0.9596, person precision at conf 0.20 0.9113 -> 0.8301), and the learned gk_left/gk_right classes independently reproduce GSR_TEAMSIDE section 6's keeper/kit-cluster inversion (0.7216 here from learned classes vs 0.756 there from GT keeper matching) -- a cross-modality replication that re-confirms the keeper route is ~0.72-0.76 and not shippable as an override.",
+      "value": 0.9381,
+      "unit": "per-sequence side accuracy of the learned overlay on the 97-sequence dev side-pool (91/97), against a pre-declared >=0.94 gate and against the free incumbent meanx's 91/97 = 0.9381 on the identical pool; inversion clips 1 of 3 correct",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V7_V2_TRAIN.md#4 THE COMPONENT GATE -- the dev side-pool, 97 sequences",
+        "results/GSR_V7_V2_TRAIN.md#0 PRE-DECLARED COMPONENT GATE",
+        "results/GSR_V7_V2_TRAIN.md#3 Did splitting the classes hurt box quality?",
+        "results/gsr_benchmark/teamside/sideoverlay_dev.json",
+        "results/GSR_TEAMSIDE.md#3 Family 2 -- the rules, on our positions and on ground truth",
+        "results/GSR_TEAMSIDE.md#6 The named upgrade path: link a keeper to a team",
+        "results/CLUSTER_SESSION_S4.md#S4b.5a Weights parked"
+      ],
+      "method": "Server a100server1 GPU 1 (~1.5 GPU-h total). Dataset: ~/work/det/build_side_labels.py re-labels the existing images/train_v3 JPEGs from Labels-v3.json (box pixels + imageMetadata width/height, no zip opened, no frame decoded) into a 6-class side scheme plus a 20-game holdout, chosen by index before training; collapsing the side reproduces S4's V3_MAP exactly (--selfcheck assert). Training: ~/work/det/train_det_ft.py --weights ~/runs/det/gsr_v3_ft_b/weights/last.pt (md5 2074d8741f97a6892a1322d0f808244c) --data gsr_v3side_det.yaml --epochs 30 --fliplr 0.0 --save-period 3, imgsz 640 / batch 64 / SGD lr0 0.002 lrf 0.05 / warmup 1.0 / close_mosaic 3 / hsv 0.3-0.9-0.6 / seed 0; judged on last.pt (md5 977622f81faba4b1f4a7fb91b75fb29a), best.pt excluded by the S4 anti-selection rule. Inference: ~/work/det/side_infer_gsr.py over all 72,750 frames of the 97 dev sequences at imgsz 640 conf 0.20 -> 1,262,514 boxes. Grading: python -m tools.gsr_sideoverlay --grade on the laptop, GT map from eval.gsr_score.resolve_team_map (the same oracle map tools/gsr_teamside.py grades against), pool from tools.gsr_teamside.dev_names. Holdout detection quality: ~/work/det/side_holdout_eval.py on the same 1,454 images for both checkpoints with predictions and GT merged to a common taxonomy. Two instrument bugs were found and fixed before the reported numbers (a within-frame index used as a sequence-wide index in the IoU cross-check; referees excluded from the class-agnostic person denominator); both are recorded in the results doc section 7.",
+      "caveats": [
+        "One architecture (YOLOv8s detection head), one supervision form (a side class per box), one corpus (SoccerNet-v3 stills, 2014-17), one seed. This does not show that no learned side model can work -- it shows that a single-frame box label can only express per-frame geometry, which is what the model learned.",
+        "61% of v3 frames are replays (21,222 of 33,986) shot from angles a broadcast main camera never uses, where the match-level left/right attribute is often not expressible at all: the image-x shortcut is 0.6399 on action frames and 0.5420 on replays.",
+        "The dev pool has only 6 failures at 97 sequences, so the +4/-4 disagreement split is 8 sequences of evidence; the accuracy tie (91/97 both) is exact but the mechanism reading rests on a small n.",
+        "GSR train sequences were deliberately excluded from training because 39 of them are in the grading pool. A model trained WITH GSR side labels was therefore never measured, and cannot be measured on this pool without a fresh held-out split.",
+        "No GS-HOTA number was produced. The gate is a component gate; nothing was fused and eval/gsr_score.py was not touched."
+      ]
+    },
+    {
+      "id": "v7-v3-001",
+      "statement": "A Dirichlet evidential jersey head on the FROZEN v6 PARSeq trunk beats the shipped reader on per-crop precision at matched emit, and the win is a gating win rather than a reading win. Reimplementing Grad CVPRW2025's evidential recognizer (no public code) as a free 100-way MLP over pooled trunk features FAILED: 0.4935 per-crop precision on DEV-20 GT crops at emit 0.20 where the trunk it sits on reads 0.9617, because an MLP cannot reproduce PARSeq's autoregressive d0*10+d1 composition from a pooled vector. Replacing it with a two-output EvidentialGateHead -- total evidence e and no-number share w laid over the trunk's OWN renormalised ranking, alpha = 1 + e*[w, (1-w)*trunk] -- makes the number argmax the trunk's by construction and passes: 0.8738 per-crop precision at the incumbent's own emit 0.2761, against the S2 arm-4t bar of 0.8344 (+0.0394) and the shipped Koshkina reader's 0.7022. Against the stronger no-legibility-gate trunk control (0.8607) the margin is +0.0131. No identity shortcut: player-disjoint holdout precision 0.9969 EXCEEDS train 0.9967, i.e. the JERSEY_HEAD_VOTER 5B signature (0.863 -> 0.125 across a player boundary) does not appear.",
+      "value": 0.8738,
+      "unit": "per-crop precision on the 4,965 numbered-GT DEV-20 crops at emit 0.2761, matched to the incumbent's emit rate; bar = S2 arm-4t 0.8344 at 0.2761",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V7_V3.md#2.3 Rung 1 -- component gate on DEV-20 GT crops: PASS",
+        "results/GSR_V7_V3.md#2.2 The first head design FAILED, and the failure is the interesting part",
+        "results/GSR_V7_V3.md#2.1 The corpus, and a leak that had to be found",
+        "results/gsr_benchmark/gsr_v7_v3_component.json",
+        "results/CLUSTER_SESSION_S2.md#3.5 Arm results",
+        "results/JERSEY_HEAD_VOTER.md#3 Why, and what it means for the roadmap"
+      ],
+      "method": "Server a100server1 GPU 1, ~1.1 GPU-h total. Trunk: ~/jersey-number-pipeline/models/parseq_v6_arm4t.ckpt, frozen, never backpropagated. Feature per crop = [mean-pool(encoder memory) | max-pool(encoder memory) | decoder positional softmax at positions 0..2] = 801 dims, captured with a forward hook during the single AR decode (~/work/edl/edl_feats.py); 130,454 corpus crops in 129 s and 7,055 DEV-20 crops in 7 s, after which each head config trains in ~40 s (the GoMatching decoupling made structural). Corpus (~/work/edl/edl_corpus.py): 79,109 positives = the S2 plus_v3_torso rows reconstructed row-for-row (deterministic seeds; verified exact against corpus_stats_torso.json: v3 40,823 / jersey2023 34,398 / gsr_train 3,888) + 51,345 no-number negatives = v3 and GSR-train crops FAILING the 0.7 legibility filter, torso-RoI'd by the S2 pose pass (86.2% survival on 59,579 candidates). 130,454 rows, 10,150 players, 90 classes, 39.4% no-number. Loss: Bayes-risk MSE evidential loss + uniform-Dirichlet KL annealed 0->kl_max over 10 epochs; alpha = softplus(logits)+1; u = 100/S. Head selected on the player-disjoint corpus holdout only (kl_max=0 gives a degenerate saturated u, so among the live-u configs none_share 0.3 dominates 0.5 on every holdout column). Grading harness verified by reproducing the S2 bar exactly from the cached features' last 33 dims: 1,371 reads, emit 0.2761, precision 0.8344.",
+      "caveats": [
+        "The pre-registered architecture (a free 100-way evidential MLP) FAILED and was replaced mid-session by the gate head. That is an architecture deviation taken after measurement, not a pre-registered design.",
+        "The gate head cannot regress the trunk's number ranking BY CONSTRUCTION, so its per-crop 'precision win' is entirely a win on WHICH crops it emits, never on what it reads. It is a learned confidence/abstention layer, not a better recognizer.",
+        "The training corpus cannot grade numbers at all: arm-4t was fine-tuned on it, so the trunk reads the player-disjoint holdout at 0.9930 and the head's 0.9969 there is a measurement of the trunk's memory. Every number-class figure quoted is DEV-20 (GSR validation), unseen by both.",
+        "Head hyperparameters were chosen after all four DEV-20 rung-1 rows had been computed. The stated criterion is corpus-holdout-only and the four candidates span 0.9547-0.9617 at emit 0.20, but the selection was not blind to DEV.",
+        "One trunk, one corpus, one head architecture, one seed. No adapter was trained on the trunk even though the plan allowed one.",
+        "DEV-20 per-crop GT is inherited from the track, so a crop whose number is genuinely hidden still counts as numbered -- every per-crop precision here is a pessimistic bound, identically for every arm."
+      ]
+    },
+    {
+      "id": "v7-v3-002",
+      "statement": "The Grad CVPRW2025 claim that an evidential recognizer's big gains live on INVISIBLE detection does NOT reproduce on SoccerNet-GSR, and the reason is a supervision defect that retires the 'free illegible labels at scale' idea. Separating DEV-20 crops whose GT track carries no number (2,090) from those that do (4,965), the learned no-number class scores ROC AUC 0.6200 -- BELOW the frozen trunk's own p_illegible (0.6429) and well below the shipped 2024 ResNet34 legibility classifier it was built to replace (0.7038). The total-evidence uncertainty u scores 0.5553, barely above chance. On the training corpus's player-disjoint holdout the same head scores 0.9718, a 0.35-AUC gap with a clean explanation: the no-number supervision was DEFINED by the legibility classifier (leg <= 0.7), so the head learned to predict its own teacher's decision and is a lossy copy of it wherever 'invisible' is defined by ground truth instead. 56.8% of SoccerNet-v3's digit crops failing a legibility filter is a large, cheap, per-crop-sound signal about THAT FILTER, and only indirectly about whether a number is visible.",
+      "value": 0.62,
+      "unit": "ROC AUC of the evidential head's learned no-number probability separating no-number from numbered DEV-20 GT crops (5,879 featurised); trunk p_illegible 0.6429, shipped legibility classifier 0.7038, head uncertainty u 0.5553",
+      "status": "refuted",
+      "evidence": [
+        "results/GSR_V7_V3.md#2.4 The Grad claim does not reproduce",
+        "results/GSR_V7_V3.md#1.3 Supervision",
+        "results/gsr_benchmark/gsr_v7_v3_component.json",
+        "results/CLUSTER_SESSION_S2.md#3.2 The v3 guard, measured",
+        "results/JERSEY_HEAD_VOTER.md#1.1 Abstention quality -- the design bet, measured"
+      ],
+      "method": "Same head, corpus and features as v7-v3-001. The invisible-class label on DEV-20 is 'the GT track carries no jersey number', the same definition JERSEY_HEAD_VOTER used (base rate 0.2962 on DEV-20). AUC computed by a tie-averaged rank statistic (generator.evidential_jersey.roc_auc, unit-tested to return exactly 0.5 on a constant score). All four detectors are scored on the identical 5,879 crops that produced a pose torso RoI and a trunk feature.",
+      "caveats": [
+        "The DEV-20 invisible label is track-level, so a crop of a numbered player whose back is turned counts as 'numbered'. This biases all four detectors identically and cannot explain the ordering, but it means none of these AUCs is a per-crop visibility measurement in the strict sense.",
+        "The negatives the head trained on came from v3 (2014-17 stills) plus GSR-train; the trunk had never seen them while the head had, so the corpus-holdout AUC comparison is asymmetric in the head's favour. DEV-20 is the only symmetric partition and it is the one quoted.",
+        "One negative-mining rule (legibility <= 0.7) was tried. A no-number label from a source independent of the gate -- annotation, or GT visibility -- was NOT tried and is the obvious next experiment.",
+        "Despite the poor invisible-AUC, u is still worth +0.3598 GS-HOTA end-to-end as a vote weight (claim v7-v3-004). 'Is a number visible' and 'should this crop vote' are different questions."
+      ]
+    },
+    {
+      "id": "v7-v3-003",
+      "statement": "GATE FAIL. The evidential reader does not clear the pre-registered DEV-20 gate (>= +1.0 GS-HOTA AND >= 12/20 sequences helped): the best of nine arms scores 53.0645, +1.2562 over the pinned V0 control (51.808280888021784), on 11 of 20 sequences (8 hurt, 1 exactly tied), Wilcoxon p = 0.0355 uncorrected. The arm with 13/20 breadth scores +0.8873. No point clears both halves, so the v6 reader ships unchanged and no _v7e artifact enters any freeze. The session's own premise is also refuted end-to-end: removing the 19.1% legibility gate sends 4.13x more crops through the reader (10,802 -> 44,659 torso RoIs of 52,115) and every arm scoring above +0.7 DECLINES them -- the two ungated arms score -0.37 and +0.03.",
+      "value": 1.2562,
+      "unit": "DEV-20 GS-HOTA delta of the best evidential arm (edl_fuse94) vs the pinned V0 control, against a gate of >= +1.0 AND >= 12/20 helped; measured 11/20",
+      "status": "refuted",
+      "evidence": [
+        "results/GSR_V7_V3.md#2.8 Rung 3 -- DEV-20 end to end: FAIL by one sequence",
+        "results/GSR_V7_V3.md#1.4 The gate ladder -- pre-declared",
+        "results/GSR_V7_V3.md#2.5 The pipeline pass, and the crop-set equivalence check",
+        "results/gsr_benchmark/gsr_v7_v3_arms.json",
+        "results/gsr_benchmark/gsr_v7_control_dev.json",
+        "results/GSR_V5.md#2.1",
+        "results/GSR_S3_READER.md#6 The negative: denser is worse"
+      ],
+      "method": "Chain: positions_gate_v6det, EIoU e0.3/rounds1/w_app0.5/app_max0.30, CLIP, GTA tau 0.450 with the jersey merge gate, team_src=free, roster=self, official scorer; only the per-crop evidence directory and its aggregation rule move, in _v7e-suffixed variant dirs. Harness verified by re-deriving the v6 control through the same code path: GS-HOTA 51.808280888021784 exactly, 0 of 20 sequences differ, 610/870 named and 13.25 identities/sequence reproducing GSR_V7_V1 2.7. Evidential evidence produced server-side (tools.gsr_v6det --reader edl --leg-thresh 0.0, 4 shards, 20/20 sequences in 13 min) and verified against the on-record laptop parquet: 52,113/52,113 crops paired on (track_id, frame), legibility |delta| > 0.01 on 79 crops (0.152%), the leg>0.5 gate flipping on 5 crops (0.0096%), torso-flag agreement 0.9996.",
+      "caveats": [
+        "Nine DEV arms were scored. p = 0.0355 is uncorrected; Bonferroni over the eight evidential arms puts the threshold at 0.00625, which it does not clear.",
+        "The miss is one sequence of breadth, not a large effect gap. The concentration guard passes (top-2 share 0.49 of the net +25.50), so the gain is not two lucky sequences -- it is a broad but unbalanced +30.11 / -4.62 split.",
+        "The first rung-3 attempt was INVALID and was killed after 55 minutes: tools.gsr_eiou.BOX_SUBDIR defaults to the original detector's box cache and this harness did not rebind it, so the EIoU re-link matched _v6det positions against base-detector boxes with no warning (both caches exist on disk). Fixed with an explicit rebind plus a missing-cache SystemExit; the same run then took 2.5 minutes. Every number reported is post-fix.",
+        "The crop-set equivalence is 0.01%-level rather than bit-exact, because the evidential pass ran on the server while the on-record control was extracted on the laptop.",
+        "No TEST-38 read, no test-49 read, no commit, no METRICS_VERSION bump (no shipped metric moved).",
+        "The connector tau was not re-swept on the new evidence and the digit-confusion prior was not refit, so these are a lower bound on the lever, as in GSR_EIOU 8.4."
+      ]
+    },
+    {
+      "id": "v7-v3-004",
+      "statement": "At MATCHED read density, read precision converts into GS-HOTA at ~1.26 points per 0.007 of precision on the v6 GSR chain -- and the Dirichlet total-evidence uncertainty is worth +0.3598 GS-HOTA on its own as a vote filter. The incumbent reads d 0.4114 at precision 0.9365 and scores 51.8083; the best evidential arm reads d 0.4104 at 0.9438 (441 vs 440 read tracks of 1,072) and scores 53.0645. The frontier is interior on both sides: pushing density to d 0.4496 at precision 0.9201 costs -0.37, and pushing precision to 0.9770 at d 0.2910 costs -3.63 by starving the self-roster (13.25 -> 10.85 slots/sequence, 610 -> 548 named). Two arms differing in max_u ALONE (0.60 vs off) differ by +0.3598 GS-HOTA, spending 0.0094 of density to buy 0.0034 of precision. Separately, GSR_V7_V1's admissible-set hypothesis is NOT supported: the arm with the largest self-roster (13.65 slots/seq, 625 named) scores +0.89 while the best arm has 13.30 and scores +1.26, and across nine arms slots/sequence and GS-HOTA delta do not order together.",
+      "value": 1.2562,
+      "unit": "DEV-20 GS-HOTA gain at matched read density (d 0.4114 -> 0.4104) for +0.0073 read precision (0.9365 -> 0.9438); the max_u filter's isolated contribution is +0.3598",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V7_V3.md#2.9 What the frontier actually says -- and the one clean, isolated win",
+        "results/GSR_V7_V3.md#2.6 Rung 2 -- tracklet aggregation",
+        "results/gsr_benchmark/gsr_v7_v3_arms.json",
+        "results/gsr_benchmark/gsr_v7_v3_sweep.json",
+        "results/GSR_V7_V1.md#2.7 The evidence-density law",
+        "results/GSR_S3_READER.md#6 The negative: denser is worse",
+        "results/EVIDENCE_DENSITY_LAW.md"
+      ],
+      "method": "450 graded rung-2 points (432 evidential x {Koshkina voting, additive Dirichlet fusion}, 18 v6 reader) on DEV-20 with _v6det track ids, then nine of them run end-to-end through the frozen v6 chain. d and read precision from tools.ocr_density.measure over 1,072 original _v6det player/GK tracks (1,025 auditable, 810 carrying a GT number). The GT jersey cache had to be re-keyed first: track_gt read outputs/gsr/positions unconditionally, so a re-extraction's renumbered tracks were being graded against the original extraction's ids; positions_subdir is now a parameter and the cache file is namespaced, leaving the on-record cache untouched. Fusion = generator.evidential_jersey.fuse_tracklet, additive per-crop evidence sum(alpha - 1) with the u / p_none crop filters; it beats the voting machinery on the SAME evidential rows at every precision floor from 0.90 to 0.95 (+0.013 to +0.035 of d), which is the Koshkina voting-beats-fusion control answered in fusion's favour here.",
+      "caveats": [
+        "Nine points on 20 sequences. The precision->GS-HOTA rate is a local slope near the incumbent operating point, not a law; the -3.63 arm shows the relationship inverts once the roster starves.",
+        "The pre-registered rung-2 bar (d >= 0.35 at precision >= 0.92) was written against arm A's 0.3139 @ 0.9256, which was measured on a DIFFERENT track partition. On the _v6det partition the v6 incumbent already sits at 0.4114 @ 0.9365, so the bar passes literally and is uninformative; the same-partition comparison is the one quoted.",
+        "The incumbent aggregation rule emits ZERO reads on evidential evidence (min_crop_conf 0.90 is unreachable for a Dirichlet mean, which is capped near 0.68 by construction), so the rule had to be re-swept per arm. Evidential outputs are not drop-in for a chain calibrated on softmax confidences.",
+        "max_u and max_p_none are INERT in the voting family -- percrop_votes already gates on argmax != ILLEGIBLE plus a confidence floor, which subsumes both. The uncertainty channel only acts inside fusion.",
+        "The admissible-set conclusion is a null over nine arms whose slots/sequence span 10.85-13.65; it does not show roster size never matters, only that it does not order GS-HOTA here."
+      ]
+    },
+    {
+      "id": "v7-v4-002",
+      "statement": "CAMELTrack does NOT transfer to the SoccerNet-GSR chain: every arm fails the pre-registered DEV-20 gate (>= +1.0 GS-HOTA AND >= 12/20 helped vs the pinned control 51.8083), and the binding constraint is the appearance cue, not the matcher. The released weights' appearance tokenizer is a Linear(128, 512) fitted to KPReID's 6-part embedding space, which a 256-d global CLIP vector cannot fill, so every multi-cue checkpoint had to run through its own trained drop_app path (bbox-only): camel_bbox_bee24 @0.6 scores 38.1984 (-13.6098, 0/20), camel_bbox_app_kps_sportsmot @0.1 scores 31.6038 (-20.2045, 0/20) and @0.5 scores 36.6114 (-15.1969, 0/20). A CAMEL trained from scratch on GSR train-57 with OUR cues (bbox + 256-d CLIP, PartsEmbeddingsLinProj use_parts=False emb_size=256) reaches 92.2% held-out association accuracy on ground-truth tracklets and still scores 33.2207 (-18.5875, 0/20) end-to-end. The mechanism is measured, not inferred: row purity on the tracker's own partition is 0.6097 (sportsmot @0.1, 242 of 467 tracklets contaminated), 0.7043 (@0.5), 0.7701 (trained arm @0.7) and 0.8336 (bee24 @0.6), against the incumbent EIoU's 0.9395 at 2,116 tracklets; assa_merge_only sits barely above assa_hat on the contaminated arms (0.3593 vs 0.3342) because contamination cannot be un-merged, and the GTA connector correctly refuses those partitions (26 merges at 0.400 precision against 1,380 at 0.5432 on the control). sim_threshold is inert between 0.1 and 0.3 (bit-identical remaps) and trades purity against fragmentation thereafter without ever reaching the incumbent's operating point. The pre-registered fallback -- one EIoU retune sweep, six points -- also fails: the best point e0.3 r1 w_app0.7 app_max0.30 is +0.4853 at 12/20 (p 0.0401 uncorrected, Bonferroni 0.0083), and the live knob is the APPEARANCE weight (w_app 0.5->0.7 = +0.49) while every geometry move is <= +0.27 and tightening app_max 0.30->0.20 costs -7.7698 by exploding the partition to 11,723 tracklets. The v6 association ships unchanged.",
+      "value": -18.5875,
+      "unit": "DEV-20 GS-HOTA delta of the best trained CAMELTrack arm vs the pinned control 51.8083; best zero-shot arm -13.6098; best fallback EIoU retune +0.4853 against a +1.0 gate",
+      "status": "refuted",
+      "evidence": [
+        "results/GSR_V7_V4S2.md#3 VERDICT",
+        "results/GSR_V7_V4S2.md#2.2 Zero-shot -- every released checkpoint is FAR below the incumbent",
+        "results/GSR_V7_V4S2.md#2.5 Arm F -- CAMEL trained from scratch on GSR train-57 with OUR cues",
+        "results/GSR_V7_V4S2.md#2.4 Fallback -- the pre-registered EIoU retune",
+        "results/gsr_benchmark/gsr_v7_v4s2_z1_sportsmot.json",
+        "results/gsr_benchmark/gsr_v7_v4s2_f_t0.7.json",
+        "results/gsr_benchmark/gsr_v7_v4s2_z1_sportsmot_diag.json",
+        "results/GSR_V7_V4S1.md#5 PATH VERDICT",
+        "results/gsr_benchmark/gsr_v7_control_dev.json"
+      ],
+      "method": "CAMELTrack (github.com/TrackingLaboratory/CAMELTrack, commit 46a74bb2, Apache-2.0, LICENSE md5 86d3f3a95c324c9479bd8986968f4327) run unmodified server-side on a100server1 GPU 1 as a drop-in replacement for tools.gsr_eiou.associate: it consumes the cached v6det detections (positions_gate_v6det + detbox_cache_v6det + detembed_cache_clip_v6det) and emits one {(old_track_id, frame): new_track_id} remap per sequence, which tools.gsr_v7_camel then runs through the IDENTICAL laptop CPU chain that produced the V0 control (EIoU replaced; GTA connector tau 0.450, jersey votes and MILP solver rebuilt per arm, official sn-trackeval scorer). min_det_conf and min_init_det_conf set to 0.0 so no row is dropped -- verified: 230,753 variant rows against 230,753 source rows, singleton_fallback 0 on every sequence, so GS-DetA stays comparable. Arm F trained 10 epochs x 700 steps x batch 8 (24 min, one A100) on 690,624 GT person rows from GSR train-57 CLIP-embedded at frame stride 2, 51 train / 6 held-out sequences, after a toy unit-check that asserts association accuracy rises 0.141 -> 1.000 and which caught that the paper's init_lr 1e-4 collapses the GAFFE embedding here (std 1e-4, accuracy at chance) while 3e-5 does not, and that the NTXent loss plateaus at ln(15) and is not a progress signal. Partition quantities (purity, fragments per GT identity, assa_hat / assa_merge_only / assa_perfect_link) from tools.gsr_eiou.partition_purity and tools.gsr_assoc_diag.partition_report; the server screen and the laptop diagnosis agree to every printed digit on z1_sportsmot.",
+      "caveats": [
+        "The appearance cue was never tested zero-shot: no released checkpoint can read a 256-d global CLIP vector, so every multi-cue arm ran through its own drop_app/drop_kps path. The verdict is therefore 'CAMELTrack WITHOUT appearance fails on this chain', not 'CAMELTrack fails on this chain'. A faithful zero-shot arm needs KPReID part embeddings plus a pose model for its keypoint prompts.",
+        "Arm F's training corpus is GROUND-TRUTH boxes with GT ids, not our detector's boxes matched to GT. The model never saw a false positive or a box on the wrong player, and CAMELTrack's own SwapSporadic / SwapOccluded augmentations were not implemented. This is the most likely single cause of the transfer failure and separating it from 'the CLIP cue is too weak' needs a ~4 GPU-hour train-57 re-extraction.",
+        "The arm-F training loop is a reimplementation: upstream's is coupled to tracklab TrackerState pickles and its README still lists training-code cleanup as an open TODO. The batch format was reverse-engineered from cameltrack/camel.py and validated only by the toy check and the val curve.",
+        "One seed, one architecture, one learning rate for arm F. sim_threshold was the only zero-shot knob swept; max_wo_hits and max_track_gallery_size stayed at CAMELTrack defaults.",
+        "The fallback's +0.4853 is uncorrected over six swept points and does not survive Bonferroni; it is also the size of effect that turned into -0.05 on TEST-38 in results/GSR_V5.md, which is why the conservative-freeze rule keeps the incumbent.",
+        "Z2 (camel_bbox_app_kps_global @0.5) and sportsmot @0.7 were screened, not scored end-to-end; the 0.7 point was killed at 6/20 sequences to free the GPU.",
+        "DEV-20 only. No TEST-38 or test-49 read, and valid-58 is still not measurable on the v6det detector."
+      ]
     }
   ]
 }

@@ -406,10 +406,28 @@ def write_variant(out_dir: Path, name: str, remap: dict, *, positions_subdir: st
             "n_tracks_after": int(len(set(remap.values())))}
 
 
+def load_remap(path: Path) -> dict[tuple[int, int], int]:
+    """Read a precomputed association as ``{(old_track_id, frame): new_track_id}``.
+
+    The schema an external associator must write (campaign v7 V4 step 2: CAMELTrack): three aligned
+    int arrays ``old_tid`` / ``frame`` / ``new_tid``, one entry per non-ball positions row. Every row
+    must be present -- a missing row would silently fall back to the ball id space in
+    :func:`write_variant` and move GS-DetA.
+    """
+    z = np.load(path)
+    return {(int(t), int(f)): int(n) for t, f, n in zip(z["old_tid"], z["frame"], z["new_tid"])}
+
+
 def build_arm_artifacts(data_dir: Path, out_dir: Path, seqs: list[str], params: EiouParams, *,
                         positions_subdir: str, cache_subdir: str,
-                        percrop_subdir: str = "koshkina_percrop") -> dict[str, dict]:
-    """Re-link and rewrite the variant artifacts for every sequence (CPU)."""
+                        percrop_subdir: str = "koshkina_percrop",
+                        remap_dir: Path | None = None) -> dict[str, dict]:
+    """Re-link and rewrite the variant artifacts for every sequence (CPU).
+
+    ``remap_dir`` substitutes a precomputed ``{seq}.npz`` association (:func:`load_remap`) for
+    :func:`relink_sequence`, so an external tracker can be measured through this exact chain with
+    nothing else changed. ``params`` is then unused for the association itself.
+    """
     from generator.gta_link import GtaParams, load_or_build_det_embeddings  # noqa: PLC0415
 
     gp = GtaParams()
@@ -420,9 +438,15 @@ def build_arm_artifacts(data_dir: Path, out_dir: Path, seqs: list[str], params: 
             logger.warning("%s: no box cache, skipped", name)
             continue
         df = pd.read_parquet(out_dir / positions_subdir / f"{name}.parquet")
-        det = load_or_build_det_embeddings(
-            data_dir / name, df, out_dir / cache_subdir / f"{name}.npz", params=gp)
-        remap = relink_sequence(df, load_boxes(box_path), det, params)
+        if remap_dir is not None:
+            remap = load_remap(remap_dir / f"{name}.npz")
+            n_people = int((df["role"] != "ball").sum())
+            if len(remap) != n_people:
+                raise SystemExit(f"{name}: remap has {len(remap)} rows, positions has {n_people}")
+        else:
+            det = load_or_build_det_embeddings(
+                data_dir / name, df, out_dir / cache_subdir / f"{name}.npz", params=gp)
+            remap = relink_sequence(df, load_boxes(box_path), det, params)
         stats[name] = write_variant(out_dir, name, remap, positions_subdir=positions_subdir,
                                     cache_subdir=cache_subdir, percrop_subdir=percrop_subdir)
         logger.info("[%d/%d] %s: %d tracks -> %d", i + 1, len(seqs), name,
@@ -466,19 +490,23 @@ def set_embedder(name: str) -> None:
 
 def run_point(data_dir: Path, out_dir: Path, seqs: list[str], params: EiouParams, *,
               embedder: str, tau: float, tag: str, positions_subdir: str,
-              percrop_variant: str = "") -> dict:
+              percrop_variant: str = "", remap_dir: Path | None = None) -> dict:
     """One EIoU sweep point: re-link, rewrite, then the frozen v4/v5 arm on the variant artifacts.
 
     ``percrop_variant`` selects which per-crop OCR evidence rides the partition (``""`` = the
     shipped reader's ``koshkina_percrop``, ``"_v6"`` = a retrained reader's). The association, the
     positions and the embeddings are untouched by it, so an arm at a non-empty ``percrop_variant``
     differs from the control in the reader weights ALONE.
+
+    ``remap_dir`` swaps the association for a precomputed one (see :func:`build_arm_artifacts`);
+    everything downstream -- connector, solver, votes, scorer -- is rebuilt identically.
     """
     from tools.gsr_v4 import config_key, solve_v4_arm  # noqa: PLC0415
 
     rl = build_arm_artifacts(data_dir, out_dir, seqs, params, positions_subdir=positions_subdir,
                              cache_subdir=f"detembed_cache_{embedder}",
-                             percrop_subdir="koshkina_percrop" + percrop_variant)
+                             percrop_subdir="koshkina_percrop" + percrop_variant,
+                             remap_dir=remap_dir)
     set_embedder(embedder + VARIANT)
     variant = percrop_variant + VARIANT
     clear_arm_caches(out_dir, config_key(FLOOR, tau, True, variant, False), variant)
@@ -487,7 +515,7 @@ def run_point(data_dir: Path, out_dir: Path, seqs: list[str], params: EiouParams
                            positions_subdir=positions_subdir + VARIANT)
     payload["eiou"] = {
         "version": EIOU_VERSION, "params": asdict(params), "embedder": embedder,
-        "percrop_variant": percrop_variant,
+        "percrop_variant": percrop_variant, "remap_dir": str(remap_dir) if remap_dir else None,
         "n_tracks_before": int(sum(v["n_tracks_before"] for v in rl.values())),
         "n_tracks_after": int(sum(v["n_tracks_after"] for v in rl.values())),
         "per_seq": rl,

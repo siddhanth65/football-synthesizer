@@ -1,0 +1,9 @@
+{
+  "version": "v7-v1-null (results/GSR_V7_V1.md): the sweep FAILED its gate, so the selected point IS the incumbent; loading this file is a provable no-op",
+  "p_correct": 0.8837209302325582,
+  "app_gain": 10.0,
+  "sim_none": 0.92,
+  "topk": 3,
+  "pi_none": 0.7,
+  "r_abstain": 0.0
+}

@@ -1,0 +1,380 @@
+{
+ "seqs": [
+  "SNGS-021",
+  "SNGS-024",
+  "SNGS-027",
+  "SNGS-030",
+  "SNGS-033",
+  "SNGS-036",
+  "SNGS-039",
+  "SNGS-042",
+  "SNGS-045",
+  "SNGS-048",
+  "SNGS-051",
+  "SNGS-054",
+  "SNGS-057",
+  "SNGS-078",
+  "SNGS-081",
+  "SNGS-084",
+  "SNGS-087",
+  "SNGS-090",
+  "SNGS-093",
+  "SNGS-096"
+ ],
+ "arm": {
+  "tag": "v7camel_z1_sportsmot",
+  "team_src": "free",
+  "roster": "self",
+  "n_sequences": 20,
+  "solve_seconds": 9.0,
+  "pooled": {
+   "n_rows": 192983,
+   "identity": 0.3742194908359804,
+   "jersey": 0.41649264442982026,
+   "tracklets": 444,
+   "tracklets_named": 236,
+   "mean_identities": 10.9
+  },
+  "coverage_curve": {
+   "n_rows": 192983,
+   "n_named_tracklets": 236,
+   "full_coverage": {
+    "threshold": 1.0612459175675772e-05,
+    "coverage": 0.5784810060989828,
+    "precision": 0.4943164004765445
+   },
+   "at_0.85": {
+    "threshold": 0.28667640527052485,
+    "coverage": 0.026551561536508398,
+    "precision": 0.8555815768930523
+   },
+   "at_0.6": {
+    "threshold": 0.20546309475471836,
+    "coverage": 0.3444241202592975,
+    "precision": 0.6007402058133237
+   }
+  },
+  "per_seq": {
+   "SNGS-021": {
+    "n_rows": 9964,
+    "identity": 0.49508229626655964,
+    "jersey": 0.5516860698514653,
+    "n_named": 5,
+    "n_identities": 5
+   },
+   "SNGS-024": {
+    "n_rows": 5981,
+    "identity": 0.3636515632837318,
+    "jersey": 0.42534693195117873,
+    "n_named": 11,
+    "n_identities": 10
+   },
+   "SNGS-027": {
+    "n_rows": 10752,
+    "identity": 0.2619047619047619,
+    "jersey": 0.31352306547619047,
+    "n_named": 12,
+    "n_identities": 12
+   },
+   "SNGS-030": {
+    "n_rows": 10102,
+    "identity": 0.3610176202732132,
+    "jersey": 0.4482280736487824,
+    "n_named": 11,
+    "n_identities": 10
+   },
+   "SNGS-033": {
+    "n_rows": 5319,
+    "identity": 0.44369242338785486,
+    "jersey": 0.5354389922917842,
+    "n_named": 9,
+    "n_identities": 8
+   },
+   "SNGS-036": {
+    "n_rows": 11584,
+    "identity": 0.7081319060773481,
+    "jersey": 0.7592368784530387,
+    "n_named": 12,
+    "n_identities": 12
+   },
+   "SNGS-039": {
+    "n_rows": 11574,
+    "identity": 0.2764817694833247,
+    "jersey": 0.27812337998963194,
+    "n_named": 13,
+    "n_identities": 12
+   },
+   "SNGS-042": {
+    "n_rows": 11947,
+    "identity": 0.20189168828994727,
+    "jersey": 0.3138026282748807,
+    "n_named": 8,
+    "n_identities": 8
+   },
+   "SNGS-045": {
+    "n_rows": 8412,
+    "identity": 0.35627674750356636,
+    "jersey": 0.3821921065145031,
+    "n_named": 11,
+    "n_identities": 11
+   },
+   "SNGS-048": {
+    "n_rows": 12015,
+    "identity": 0.5230129005409905,
+    "jersey": 0.5466500208073242,
+    "n_named": 9,
+    "n_identities": 8
+   },
+   "SNGS-051": {
+    "n_rows": 8787,
+    "identity": 0.5229316035051781,
+    "jersey": 0.5402298850574713,
+    "n_named": 12,
+    "n_identities": 12
+   },
+   "SNGS-054": {
+    "n_rows": 8989,
+    "identity": 0.37290021136945156,
+    "jersey": 0.37746134163978196,
+    "n_named": 12,
+    "n_identities": 12
+   },
+   "SNGS-057": {
+    "n_rows": 10424,
+    "identity": 0.12653491941673062,
+    "jersey": 0.15166922486569456,
+    "n_named": 11,
+    "n_identities": 10
+   },
+   "SNGS-078": {
+    "n_rows": 8048,
+    "identity": 0.15444831013916502,
+    "jersey": 0.22850397614314116,
+    "n_named": 13,
+    "n_identities": 10
+   },
+   "SNGS-081": {
+    "n_rows": 9836,
+    "identity": 0.23566490443269622,
+    "jersey": 0.2772468483123221,
+    "n_named": 11,
+    "n_identities": 10
+   },
+   "SNGS-084": {
+    "n_rows": 8863,
+    "identity": 0.31862800406183006,
+    "jersey": 0.3396141261423897,
+    "n_named": 16,
+    "n_identities": 14
+   },
+   "SNGS-087": {
+    "n_rows": 8831,
+    "identity": 0.6571169742950969,
+    "jersey": 0.6670818706828219,
+    "n_named": 16,
+    "n_identities": 16
+   },
+   "SNGS-090": {
+    "n_rows": 8950,
+    "identity": 0.2970949720670391,
+    "jersey": 0.31452513966480444,
+    "n_named": 14,
+    "n_identities": 14
+   },
+   "SNGS-093": {
+    "n_rows": 9812,
+    "identity": 0.3480432123929882,
+    "jersey": 0.3569099062372605,
+    "n_named": 21,
+    "n_identities": 16
+   },
+   "SNGS-096": {
+    "n_rows": 12793,
+    "identity": 0.4426639568514031,
+    "jersey": 0.5109825685921988,
+    "n_named": 9,
+    "n_identities": 8
+   }
+  },
+  "gs_hota": {
+   "GS-HOTA": 31.603782621377903,
+   "GS-DetA": 22.60191573107581,
+   "GS-AssA": 44.192199984285764,
+   "GS-LocA": 92.86925467966147,
+   "IDF1": 33.857981704531525
+  },
+  "gs_hota_per_seq": {
+   "SNGS-021": 36.60028456379904,
+   "SNGS-024": 24.72573447798992,
+   "SNGS-027": 30.771981998536123,
+   "SNGS-030": 35.6438730144375,
+   "SNGS-033": 32.91947731289277,
+   "SNGS-036": 60.06854327718926,
+   "SNGS-039": 21.111920677783196,
+   "SNGS-042": 16.337198424101164,
+   "SNGS-045": 26.512832484970446,
+   "SNGS-048": 37.40844357852154,
+   "SNGS-051": 39.60144259884119,
+   "SNGS-054": 27.892370573698074,
+   "SNGS-057": 10.756352001453337,
+   "SNGS-078": 13.927841081611827,
+   "SNGS-081": 22.88567733167596,
+   "SNGS-084": 30.880166234582497,
+   "SNGS-087": 51.01209447456645,
+   "SNGS-090": 21.245787044567592,
+   "SNGS-093": 31.7159649287047,
+   "SNGS-096": 32.22606891869953
+  },
+  "v4": {
+   "key": "f080_v6_v6det_eiou_t0.450_jg_clip_v6det_eiou",
+   "floor": "0.80",
+   "tau": 0.45,
+   "jersey_gate": true,
+   "variant": "_v6_v6det_eiou",
+   "confusion_refit": false,
+   "app_gain": 10.0,
+   "sim_none": 0.92,
+   "solver_override": {},
+   "merge_precision": {
+    "correct": 10,
+    "total": 25,
+    "precision": 0.4
+   },
+   "n_merges": 26,
+   "frags_after": 451,
+   "frag_per_gt_after": 6.486178638295344,
+   "confusion_n": null
+  },
+  "eiou": {
+   "version": "eiou-1.0",
+   "params": {
+    "e": 0.7,
+    "e_step": 0.35,
+    "rounds": 3,
+    "w_app": 0.5,
+    "app_max": 0.3,
+    "ema": 0.9,
+    "max_lost": 30,
+    "match_tol_px": 6.0
+   },
+   "embedder": "clip_v6det",
+   "percrop_variant": "_v6_v6det",
+   "remap_dir": "outputs\\gsr\\camel_remap\\z1_sportsmot",
+   "n_tracks_before": 1137,
+   "n_tracks_after": 477,
+   "per_seq": {
+    "SNGS-021": {
+     "n_rows": 11757,
+     "n_tracks_before": 47,
+     "n_tracks_after": 19
+    },
+    "SNGS-024": {
+     "n_rows": 7484,
+     "n_tracks_before": 44,
+     "n_tracks_after": 20
+    },
+    "SNGS-027": {
+     "n_rows": 11986,
+     "n_tracks_before": 65,
+     "n_tracks_after": 26
+    },
+    "SNGS-030": {
+     "n_rows": 10903,
+     "n_tracks_before": 44,
+     "n_tracks_after": 23
+    },
+    "SNGS-033": {
+     "n_rows": 6683,
+     "n_tracks_before": 69,
+     "n_tracks_after": 33
+    },
+    "SNGS-036": {
+     "n_rows": 13283,
+     "n_tracks_before": 47,
+     "n_tracks_after": 25
+    },
+    "SNGS-039": {
+     "n_rows": 13902,
+     "n_tracks_before": 57,
+     "n_tracks_after": 24
+    },
+    "SNGS-042": {
+     "n_rows": 13970,
+     "n_tracks_before": 64,
+     "n_tracks_after": 25
+    },
+    "SNGS-045": {
+     "n_rows": 11365,
+     "n_tracks_before": 73,
+     "n_tracks_after": 23
+    },
+    "SNGS-048": {
+     "n_rows": 14793,
+     "n_tracks_before": 48,
+     "n_tracks_after": 23
+    },
+    "SNGS-051": {
+     "n_rows": 11033,
+     "n_tracks_before": 49,
+     "n_tracks_after": 23
+    },
+    "SNGS-054": {
+     "n_rows": 10899,
+     "n_tracks_before": 53,
+     "n_tracks_after": 21
+    },
+    "SNGS-057": {
+     "n_rows": 13499,
+     "n_tracks_before": 75,
+     "n_tracks_after": 25
+    },
+    "SNGS-078": {
+     "n_rows": 9293,
+     "n_tracks_before": 56,
+     "n_tracks_after": 20
+    },
+    "SNGS-081": {
+     "n_rows": 11504,
+     "n_tracks_before": 64,
+     "n_tracks_after": 24
+    },
+    "SNGS-084": {
+     "n_rows": 10661,
+     "n_tracks_before": 57,
+     "n_tracks_after": 29
+    },
+    "SNGS-087": {
+     "n_rows": 10737,
+     "n_tracks_before": 34,
+     "n_tracks_after": 19
+    },
+    "SNGS-090": {
+     "n_rows": 10646,
+     "n_tracks_before": 67,
+     "n_tracks_after": 23
+    },
+    "SNGS-093": {
+     "n_rows": 11575,
+     "n_tracks_before": 48,
+     "n_tracks_after": 26
+    },
+    "SNGS-096": {
+     "n_rows": 14780,
+     "n_tracks_before": 76,
+     "n_tracks_after": 26
+    }
+   }
+  },
+  "paired": {
+   "n": 20,
+   "mean": -21.66767526202754,
+   "median": -20.401663273180844,
+   "helped": 0,
+   "hurt": 20,
+   "worst": -43.60025398125116,
+   "best": -6.176248593791598,
+   "wilcoxon_p": 1.9073486328125e-06
+  },
+  "arm_name": "z1_sportsmot"
+ }
+}

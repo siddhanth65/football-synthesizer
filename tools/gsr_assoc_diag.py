@@ -24,6 +24,7 @@ CLI::
     python -m tools.gsr_assoc_diag --diag            # the per-sequence table + correlations
     python -m tools.gsr_assoc_diag --coverage        # image-space vs pitch-space GT coverage
     python -m tools.gsr_assoc_diag --merge           # join both + the correlation panel
+    python -m tools.gsr_assoc_diag --v7              # v7 V4 step 1: the ceiling on the CURRENT stack
     python -m tools.gsr_assoc_diag --demo            # self-check
 """
 
@@ -162,6 +163,94 @@ def frag_shares(pairs: dict[tuple[int, int], int], n_gt: dict[int, int]) -> dict
             "herfindahl": float(np.mean(hhi)), "matched_share": float(np.mean(cov))}
 
 
+def assa_merge_only(pairs: dict[tuple[int, int], int], n_gt: dict[int, int],
+                    n_pred: dict[int, int]) -> float:
+    """AssA of an oracle that only MERGES: no predicted track is ever split (pure).
+
+    :func:`counterfactuals`' ``assa_perfect_link`` lets the oracle split a contaminated predicted
+    track as well as merge fragments, so it is the ceiling of a linker *plus* a splitter. A merge-only
+    connector -- what the GTA connector is -- can never undo contamination, so each predicted track
+    goes wholesale to the GT identity holding most of its matched rows.
+
+    Returns:
+        The overlap-weighted AssA after that relabelling.
+    """
+    best: dict[int, tuple[int, int]] = {}
+    for (pid, gid), n in pairs.items():
+        if n > best.get(pid, (0, -1))[0]:
+            best[pid] = (n, gid)
+    merged: dict[tuple[int, int], int] = defaultdict(int)
+    n_merged: dict[int, int] = defaultdict(int)
+    seen: set[int] = set()
+    for (pid, gid), n in pairs.items():
+        dom = best[pid][1]
+        merged[(-2000 - dom, gid)] += n
+        if pid not in seen:
+            n_merged[-2000 - dom] += n_pred[pid]
+            seen.add(pid)
+    return assa_from_pairs(dict(merged), n_gt, dict(n_merged))
+
+
+def rank_profile(pairs: dict[tuple[int, int], int], n_gt: dict[int, int]) -> list[list[float]]:
+    """Per GT identity, its predicted fragments' shares sorted descending (pure).
+
+    One list per GT identity that at least one predicted row matched; the shares sum to the
+    identity's matched coverage, so ``1 - sum`` is the share nothing predicted.
+    """
+    per_gt: dict[int, list[int]] = defaultdict(list)
+    for (_p, gid), n in pairs.items():
+        per_gt[gid].append(n)
+    return [sorted((n / float(n_gt[gid]) for n in ns), reverse=True)
+            for gid, ns in per_gt.items()]
+
+
+def pooled_rank_table(profile: list[list[float]], k: int = 8) -> dict[str, float]:
+    """Mean share held by the k-th largest fragment, pooled over GT identities (pure)."""
+    if not profile:
+        return {}
+    out = {f"rank{i + 1}": float(np.mean([p[i] if len(p) > i else 0.0 for p in profile]))
+           for i in range(k)}
+    out[f"rank>{k}"] = float(np.mean([sum(p[k:]) for p in profile]))
+    out["unmatched"] = float(np.mean([max(0.0, 1.0 - sum(p)) for p in profile]))
+    out["n_gt_identities"] = float(len(profile))
+    return out
+
+
+def submission_positions(pred_path: Path, seq_dir: Path) -> pd.DataFrame:
+    """Read a scored GSR submission back into the positions schema this module measures.
+
+    The shipped submission is the partition the official scorer actually sees (tracker + connector
+    + identity solver), so measuring it answers "what does the CURRENT chain realise" on exactly the
+    same instrument as the tracker-only partitions.
+
+    Args:
+        pred_path: ``.../predictions/data/<seq>.json``.
+        seq_dir: The sequence's GT directory (for the ``image_id`` -> frame index map).
+
+    Returns:
+        A frame/track_id/role/pitch_xy/image_xy table; ``pitch_xy`` is un-centred so that
+        :func:`match_sequence`'s own centre shift recovers the submitted coordinate.
+    """
+    from eval.gsr_score import load_image_id_map  # noqa: PLC0415
+
+    frame_of = {v: k for k, v in load_image_id_map(seq_dir).items()}
+    rows = []
+    for ann in json.loads(pred_path.read_text(encoding="utf-8"))["predictions"]:
+        bp, f = ann.get("bbox_pitch"), frame_of.get(ann["image_id"])
+        if f is None:
+            continue
+        bi = ann.get("bbox_image") or {}
+        rows.append({
+            "frame": int(f), "track_id": int(ann["track_id"]),
+            "role": (ann.get("attributes") or {}).get("role", "player"),
+            "pitch_x": (bp["x_bottom_middle"] + CENTRE_SHIFT_X) if bp else float("nan"),
+            "pitch_y": (bp["y_bottom_middle"] + CENTRE_SHIFT_Y) if bp else float("nan"),
+            "image_x": bi.get("x_center", float("nan")),
+            "image_y": bi.get("y", float("nan")) + bi.get("h", 0.0),
+        })
+    return pd.DataFrame(rows)
+
+
 def gt_image_boxes(seq_dir: Path) -> dict[int, list[tuple[float, float, float, dict | None]]]:
     """GT player/GK boxes per frame as ``(foot_x, foot_y, width, bbox_pitch)`` in image pixels."""
     gt = json.loads((seq_dir / "Labels-GameState.json").read_text(encoding="utf-8"))
@@ -217,10 +306,10 @@ def coverage_split(seq_dir: Path, df: pd.DataFrame) -> dict[str, float]:
             "nan_row_share": float((~np.isfinite(people["pitch_x"])).mean())}
 
 
-def coverage(data_dir: Path, out_dir: Path) -> None:
+def coverage(data_dir: Path, out_dir: Path, positions_subdir: str = "positions") -> None:
     """Per-sequence image-vs-pitch coverage split -> printed table + JSON."""
     rows = []
-    for p in sorted((out_dir / "positions").glob("*.parquet")):
+    for p in sorted((out_dir / positions_subdir).glob("*.parquet")):
         rows.append({"seq": p.stem,
                      **coverage_split(data_dir / p.stem, pd.read_parquet(p))})
         print(f"  {p.stem}: img {rows[-1]['img_recall']:.3f} pitch {rows[-1]['pitch_recall']:.3f} "
@@ -257,9 +346,10 @@ def camera_motion(seq_dir: Path) -> float:
 
 
 # === Driver ======================================================================================
-def run(data_dir: Path, out_dir: Path, seqs: list[str] | None = None) -> list[dict]:
+def run(data_dir: Path, out_dir: Path, seqs: list[str] | None = None,
+        positions_subdir: str = "positions") -> list[dict]:
     """Measure every valid sequence with a cached positions parquet -> per-sequence rows."""
-    pos_dir = out_dir / "positions"
+    pos_dir = out_dir / positions_subdir
     names = seqs or sorted(p.stem for p in pos_dir.glob("*.parquet"))
     rows = []
     for name in names:
@@ -330,6 +420,148 @@ def merge() -> None:
     print(f"\nwrote {out}")
 
 
+# === v7 session V4 step 1: the ceiling on the CURRENT detector + tracker =========================
+#: The partitions compared on DEV-20. Order is the 2x2 (detector x tracker) the v6 stack walked.
+V7_PARTITIONS = (
+    ("A base-det + ByteTrack", "positions_gate"),
+    ("B base-det + EIoU", "positions_gate_eiou"),
+    ("C v6det + ByteTrack", "positions_gate_v6det"),
+    ("D v6det + EIoU  <- v6 tracker", "positions_gate_v6det_eiou"),
+)
+#: The shipped v6 arm's submission directory (tracker + GTA connector + identity solver).
+V7_SHIPPED = Path("outputs/gsr/deleak_v6detdev_clip_e0.3r1w0.5a0.3/predictions/data")
+
+
+def partition_report(data_dir: Path, out_dir: Path, seqs: list[str], *,
+                     positions_subdir: str | None = None,
+                     pred_dir: Path | None = None) -> tuple[list[dict], list[list[float]]]:
+    """Measure one track partition on ``seqs`` -> (per-sequence rows, pooled fragment profile).
+
+    Exactly one of ``positions_subdir`` (a cached positions parquet directory) or ``pred_dir`` (a
+    materialised submission's ``predictions/data``) must be given.
+    """
+    rows: list[dict] = []
+    profile: list[list[float]] = []
+    for name in seqs:
+        seq_dir = data_dir / name
+        df = (submission_positions(pred_dir / f"{name}.json", seq_dir) if pred_dir is not None
+              else pd.read_parquet(out_dir / positions_subdir / f"{name}.parquet"))
+        pairs, n_gt, n_pred, extras = match_sequence(df, load_gt_ids_by_frame(seq_dir))
+        rows.append({"seq": name, **extras, **frag_shares(pairs, n_gt),
+                     **counterfactuals(pairs, n_gt, n_pred),
+                     "assa_merge_only": assa_merge_only(pairs, n_gt, n_pred)})
+        profile.extend(rank_profile(pairs, n_gt))
+    return rows, profile
+
+
+def _measured_dev(pred_root: Path, data_dir: Path, seqs: list[str]) -> dict[str, dict[str, dict]]:
+    """Score the shipped arm under the ``loc_assoc`` and full configs -> per-config per-sequence."""
+    from eval.gsr_score import EVAL_CONFIGS, gs_hota  # noqa: PLC0415
+
+    out = {}
+    for cfg in ("loc_assoc", "gs_hota_full"):
+        res = gs_hota(pred_root, data_dir, seq_info={s: 0 for s in seqs},
+                      **EVAL_CONFIGS.get(cfg, {}))
+        out[cfg] = {"combined": res["combined"], "per_seq": res["per_seq"]}
+        print(f"  measured {cfg:14s} AssA {res['combined']['GS-AssA']:.4f} "
+              f"HOTA {res['combined']['GS-HOTA']:.4f}")
+    return out
+
+
+def _fit_scale(rows: list[dict], measured: dict[str, dict], cfg: str) -> dict[str, float]:
+    """Validate the proxy against a measured per-sequence metric: Spearman, Pearson, scale."""
+    d = pd.DataFrame(rows)
+    d["measured"] = [measured[s]["GS-AssA"] / 100.0 for s in d["seq"]]
+    return {"config": cfg,
+            "spearman": float(d["measured"].corr(d["assa_hat"], method="spearman")),
+            "pearson": float(d["measured"].corr(d["assa_hat"], method="pearson")),
+            "proxy_mean": float(d["assa_hat"].mean()),
+            "measured_mean": float(d["measured"].mean()),
+            "scale": float(d["measured"].mean() / max(d["assa_hat"].mean(), 1e-9))}
+
+
+def v7_step1(data_dir: Path, out_dir: Path, seqs: list[str], pred_root: Path) -> dict:
+    """The pre-registered V4 step-1 read: connector ceiling, decomposition and the path verdict."""
+    parts: dict[str, dict] = {}
+    for label, sub in V7_PARTITIONS:
+        if not (out_dir / sub).is_dir():
+            print(f"  SKIP {label}: {sub} missing")
+            continue
+        rows, prof = partition_report(data_dir, out_dir, seqs, positions_subdir=sub)
+        parts[label] = {"source": sub, "rows": rows, "rank_table": pooled_rank_table(prof)}
+        print(f"  {label}: done ({sub})")
+    rows, prof = partition_report(data_dir, out_dir, seqs, pred_dir=pred_root / "predictions/data")
+    parts["E shipped (D + connector + solver)"] = {
+        "source": str(pred_root), "rows": rows, "rank_table": pooled_rank_table(prof)}
+    print("  E shipped: done")
+
+    cov = [{"seq": s, **coverage_split(data_dir / s,
+                                       pd.read_parquet(out_dir / "positions_gate_v6det"
+                                                       / f"{s}.parquet"))} for s in seqs]
+    measured = _measured_dev(pred_root, data_dir, seqs)
+    scales = {c: _fit_scale(parts["E shipped (D + connector + solver)"]["rows"],
+                            measured[c]["per_seq"], c) for c in measured}
+
+    keys = ("assa_hat", "assa_merge_only", "assa_perfect_link", "assa_perfect_det", "frag_per_gt",
+            "herfindahl", "dominant_share", "matched_share", "det_recall", "pred_precision",
+            "n_pred_tracks")
+    print(f"\n{'partition':<34}" + "".join(f"{k[:9]:>11}" for k in keys))
+    for label, p in parts.items():
+        d = pd.DataFrame(p["rows"])
+        p["mean"] = {k: float(d[k].mean()) for k in keys}
+        print(f"{label:<34}" + "".join(f"{p['mean'][k]:>11.4f}" for k in keys))
+    print("\nfragment profile (mean share of a GT identity per fragment rank):")
+    for label, p in parts.items():
+        t = p["rank_table"]
+        print(f"  {label:<34}" + " ".join(f"{t[k]:.3f}" for k in
+                                          ("rank1", "rank2", "rank3", "rank4", "unmatched")))
+    print("\ncoverage (v6det gated positions, DEV-20 GT-row weighted):")
+    cdf = pd.DataFrame(cov)
+    w = cdf["n_gt"]
+    pooled_cov = {c: float(np.average(cdf[c], weights=w)) for c in
+                  ("img_recall", "pitch_recall", "img_ok_pitch_lost", "net_img_minus_pitch",
+                   "gt_no_pitch")}
+    pooled_cov["calib_frame_rate"] = float(cdf["calib_frame_rate"].mean())
+    for k, v in pooled_cov.items():
+        print(f"  {k:22s} {v:.4f}")
+    print("\nproxy validation on the shipped partition:")
+    for c, s in scales.items():
+        print(f"  {c:14s} spearman {s['spearman']:+.3f} pearson {s['pearson']:+.3f} "
+              f"scale {s['scale']:.3f} (proxy {s['proxy_mean']:.4f} -> "
+              f"measured {s['measured_mean']:.4f})")
+
+    cur = parts["E shipped (D + connector + solver)"]["mean"]
+    ceil_src = parts.get("D v6det + EIoU  <- v6 tracker", parts["E shipped (D + connector + solver)"])
+    verdict = {
+        "current_proxy_assa": cur["assa_hat"],
+        "ceiling_proxy_assa": ceil_src["mean"]["assa_perfect_link"],
+        "ceiling_merge_only_proxy": ceil_src["mean"]["assa_merge_only"],
+        "headroom_proxy": ceil_src["mean"]["assa_perfect_link"] - cur["assa_hat"],
+        "headroom_merge_only_proxy": ceil_src["mean"]["assa_merge_only"] - cur["assa_hat"],
+    }
+    for c, s in scales.items():
+        verdict[f"headroom_merge_only_scaled_{c}"] = (verdict["headroom_merge_only_proxy"]
+                                                      * s["scale"] * 100.0)
+        verdict[f"headroom_scaled_{c}"] = verdict["headroom_proxy"] * s["scale"] * 100.0
+        verdict[f"current_measured_{c}"] = measured[c]["combined"]["GS-AssA"]
+        verdict[f"ceiling_scaled_{c}"] = (measured[c]["combined"]["GS-AssA"]
+                                          + verdict["headroom_proxy"] * s["scale"] * 100.0)
+    h = verdict["headroom_scaled_loc_assoc"]
+    verdict["path"] = ("EIoU retune (CPU)" if h < 5.0 else "CAMELTrack")  # noqa: PLR2004
+    print(f"\nCEILING: proxy {verdict['ceiling_proxy_assa']:.4f} (merge-only "
+          f"{verdict['ceiling_merge_only_proxy']:.4f}) vs current proxy "
+          f"{verdict['current_proxy_assa']:.4f} -> headroom {verdict['headroom_proxy']:.4f} "
+          f"({h:+.2f} AssA on the loc_assoc scale; merge-only "
+          f"{verdict['headroom_merge_only_scaled_loc_assoc']:+.2f})")
+    print(f"PATH (pre-registered thresholds, <+5 / +5..+12 / >+12): {verdict['path']}")
+    payload = {"seqs": seqs, "partitions": parts, "coverage": cov, "coverage_pooled": pooled_cov,
+               "measured": measured, "proxy_scales": scales, "verdict": verdict}
+    dest = RESULTS / "gsr_assoc_diag_v7.json"
+    dest.write_text(json.dumps(payload, indent=1, default=str), encoding="utf-8")
+    print(f"wrote {dest}")
+    return payload
+
+
 def _demo() -> None:
     """Self-check the association arithmetic on hand-computable cases."""
     # one GT of length 10, split into two predicted tracks of 5, both pure and complete.
@@ -347,6 +579,17 @@ def _demo() -> None:
     assert abs(cf["assa_perfect_link"] - 5 / 15) < 1e-9, cf  # nothing to link
     assert abs(cf["assa_perfect_det"] - 1.0) < 1e-9, cf      # the FN/FP were the whole loss
     assert frag_shares({(1, 100): 5, (2, 100): 5}, {100: 10})["herfindahl"] == 0.5
+    # merge-only oracle: two clean fragments merge (1.0); a contaminated track cannot be split.
+    assert abs(assa_merge_only({(1, 100): 5, (2, 100): 5}, {100: 10}, {1: 5, 2: 5}) - 1.0) < 1e-9
+    # track 1 holds 6 rows of GT 100 and 4 of GT 200; merged wholesale into 100 -> 6/(10+10-6).
+    mo = assa_merge_only({(1, 100): 6, (1, 200): 4}, {100: 10, 200: 10}, {1: 10})
+    assert abs(mo - (6 * (6 / 14) + 4 * (4 / 16)) / 10) < 1e-9, mo
+    # fragment profile: two equal halves of one identity, plus one identity nobody covered fully.
+    prof = rank_profile({(1, 100): 5, (2, 100): 3}, {100: 10})
+    assert prof == [[0.5, 0.3]], prof
+    t = pooled_rank_table(prof)
+    assert abs(t["rank1"] - 0.5) < 1e-9 and abs(t["rank2"] - 0.3) < 1e-9, t
+    assert abs(t["unmatched"] - 0.2) < 1e-9 and t["rank3"] == 0.0, t
     print("gsr_assoc_diag self-check OK")
 
 
@@ -360,17 +603,32 @@ def main() -> None:
                     help="image-space vs pitch-space GT coverage (isolates the calibration loss)")
     ap.add_argument("--merge", action="store_true",
                     help="join the two tables and print the correlation panel")
+    ap.add_argument("--v7", action="store_true",
+                    help="v7 V4 step 1: the ceiling on the CURRENT (v6det + EIoU) DEV-20 stack")
+    ap.add_argument("--positions", default="positions", help="cached positions source (--coverage)")
+    ap.add_argument("--pred-root", type=Path, default=V7_SHIPPED.parent.parent,
+                    help="the shipped arm directory holding predictions/data (--v7)")
+    ap.add_argument("--seqs", default=None, help="comma-separated sequence names")
     ap.add_argument("--demo", action="store_true")
     args = ap.parse_args()
     if args.demo:
         _demo()
         return
     if args.coverage:
-        coverage(args.data_dir, args.out_dir)
+        coverage(args.data_dir, args.out_dir, args.positions)
     if args.merge:
         merge()
     if args.diag:
         diag(args.data_dir, args.out_dir)
+    if args.v7:
+        if args.seqs:
+            seqs = args.seqs.split(",")
+        else:
+            from eval.gsr_identity import split_sequences  # noqa: PLC0415
+
+            seqs = split_sequences(args.data_dir, args.out_dir)[0]
+        print(f"v7 V4 step 1: {len(seqs)} DEV sequences")
+        v7_step1(args.data_dir, args.out_dir, seqs, args.pred_root)
 
 
 if __name__ == "__main__":

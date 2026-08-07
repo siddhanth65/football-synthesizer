@@ -1,0 +1,380 @@
+{
+ "seqs": [
+  "SNGS-021",
+  "SNGS-024",
+  "SNGS-027",
+  "SNGS-030",
+  "SNGS-033",
+  "SNGS-036",
+  "SNGS-039",
+  "SNGS-042",
+  "SNGS-045",
+  "SNGS-048",
+  "SNGS-051",
+  "SNGS-054",
+  "SNGS-057",
+  "SNGS-078",
+  "SNGS-081",
+  "SNGS-084",
+  "SNGS-087",
+  "SNGS-090",
+  "SNGS-093",
+  "SNGS-096"
+ ],
+ "arm": {
+  "tag": "v7camel_f_t0.7",
+  "team_src": "free",
+  "roster": "self",
+  "n_sequences": 20,
+  "solve_seconds": 6.1,
+  "pooled": {
+   "n_rows": 192983,
+   "identity": 0.4070928527383241,
+   "jersey": 0.43919930771104193,
+   "tracklets": 813,
+   "tracklets_named": 525,
+   "mean_identities": 12.95
+  },
+  "coverage_curve": {
+   "n_rows": 192983,
+   "n_named_tracklets": 525,
+   "full_coverage": {
+    "threshold": 6.15366905477967e-10,
+    "coverage": 0.5785276423311898,
+    "precision": 0.544927717965713
+   },
+   "at_0.85": {
+    "threshold": 0.8271818121460495,
+    "coverage": 0.072669613385635,
+    "precision": 0.8573160296634341
+   },
+   "at_0.6": {
+    "threshold": 0.000758035409974467,
+    "coverage": 0.5225848908971257,
+    "precision": 0.6022112047595439
+   }
+  },
+  "per_seq": {
+   "SNGS-021": {
+    "n_rows": 9964,
+    "identity": 0.6625853071055801,
+    "jersey": 0.7198916097952629,
+    "n_named": 13,
+    "n_identities": 6
+   },
+   "SNGS-024": {
+    "n_rows": 5981,
+    "identity": 0.49657247951847516,
+    "jersey": 0.5107841498077245,
+    "n_named": 25,
+    "n_identities": 12
+   },
+   "SNGS-027": {
+    "n_rows": 10752,
+    "identity": 0.17010788690476192,
+    "jersey": 0.22646949404761904,
+    "n_named": 23,
+    "n_identities": 13
+   },
+   "SNGS-030": {
+    "n_rows": 10102,
+    "identity": 0.3454761433379529,
+    "jersey": 0.38210255394971293,
+    "n_named": 28,
+    "n_identities": 13
+   },
+   "SNGS-033": {
+    "n_rows": 5319,
+    "identity": 0.5288588080466253,
+    "jersey": 0.5395751081030269,
+    "n_named": 18,
+    "n_identities": 8
+   },
+   "SNGS-036": {
+    "n_rows": 11584,
+    "identity": 0.678435773480663,
+    "jersey": 0.724792817679558,
+    "n_named": 23,
+    "n_identities": 12
+   },
+   "SNGS-039": {
+    "n_rows": 11574,
+    "identity": 0.18818040435458788,
+    "jersey": 0.18861240711940555,
+    "n_named": 33,
+    "n_identities": 14
+   },
+   "SNGS-042": {
+    "n_rows": 11947,
+    "identity": 0.1155938729388131,
+    "jersey": 0.2267514857286348,
+    "n_named": 19,
+    "n_identities": 8
+   },
+   "SNGS-045": {
+    "n_rows": 8412,
+    "identity": 0.5053495007132668,
+    "jersey": 0.5274607703281027,
+    "n_named": 29,
+    "n_identities": 14
+   },
+   "SNGS-048": {
+    "n_rows": 12015,
+    "identity": 0.5271743653766126,
+    "jersey": 0.5514773200166458,
+    "n_named": 18,
+    "n_identities": 7
+   },
+   "SNGS-051": {
+    "n_rows": 8787,
+    "identity": 0.398429498122226,
+    "jersey": 0.4166382155456925,
+    "n_named": 30,
+    "n_identities": 13
+   },
+   "SNGS-054": {
+    "n_rows": 8989,
+    "identity": 0.30203582155968406,
+    "jersey": 0.3160529536099677,
+    "n_named": 33,
+    "n_identities": 13
+   },
+   "SNGS-057": {
+    "n_rows": 10424,
+    "identity": 0.2460667689946278,
+    "jersey": 0.2778204144282425,
+    "n_named": 30,
+    "n_identities": 13
+   },
+   "SNGS-078": {
+    "n_rows": 8048,
+    "identity": 0.433772365805169,
+    "jersey": 0.48434393638170975,
+    "n_named": 30,
+    "n_identities": 15
+   },
+   "SNGS-081": {
+    "n_rows": 9836,
+    "identity": 0.5286701911346076,
+    "jersey": 0.5517486783245221,
+    "n_named": 38,
+    "n_identities": 17
+   },
+   "SNGS-084": {
+    "n_rows": 8863,
+    "identity": 0.41047049531761254,
+    "jersey": 0.4253638722780097,
+    "n_named": 25,
+    "n_identities": 15
+   },
+   "SNGS-087": {
+    "n_rows": 8831,
+    "identity": 0.4876004982448194,
+    "jersey": 0.49541388291246746,
+    "n_named": 24,
+    "n_identities": 17
+   },
+   "SNGS-090": {
+    "n_rows": 8950,
+    "identity": 0.5229050279329609,
+    "jersey": 0.5270391061452514,
+    "n_named": 38,
+    "n_identities": 21
+   },
+   "SNGS-093": {
+    "n_rows": 9812,
+    "identity": 0.36577660008153284,
+    "jersey": 0.3721973094170404,
+    "n_named": 30,
+    "n_identities": 19
+   },
+   "SNGS-096": {
+    "n_rows": 12793,
+    "identity": 0.4041272570937231,
+    "jersey": 0.4515750801219417,
+    "n_named": 18,
+    "n_identities": 9
+   }
+  },
+  "gs_hota": {
+   "GS-HOTA": 33.22074787267014,
+   "GS-DetA": 24.59958648855765,
+   "GS-AssA": 44.8747453613266,
+   "GS-LocA": 93.02011004705926,
+   "IDF1": 36.04140436105138
+  },
+  "gs_hota_per_seq": {
+   "SNGS-021": 46.25370186743819,
+   "SNGS-024": 29.465070206918924,
+   "SNGS-027": 20.319493847361546,
+   "SNGS-030": 33.36687254398482,
+   "SNGS-033": 39.58277353298884,
+   "SNGS-036": 51.743031897464185,
+   "SNGS-039": 18.127532311675633,
+   "SNGS-042": 11.428503719756074,
+   "SNGS-045": 37.57288968640228,
+   "SNGS-048": 34.755478596069736,
+   "SNGS-051": 28.652769662955773,
+   "SNGS-054": 25.814939145068745,
+   "SNGS-057": 19.641156939959572,
+   "SNGS-078": 36.82068232258784,
+   "SNGS-081": 41.18818219851832,
+   "SNGS-084": 36.52906646805192,
+   "SNGS-087": 40.20036358419266,
+   "SNGS-090": 40.629203768486704,
+   "SNGS-093": 34.69095638104131,
+   "SNGS-096": 31.91561794651654
+  },
+  "v4": {
+   "key": "f080_v6_v6det_eiou_t0.450_jg_clip_v6det_eiou",
+   "floor": "0.80",
+   "tau": 0.45,
+   "jersey_gate": true,
+   "variant": "_v6_v6det_eiou",
+   "confusion_refit": false,
+   "app_gain": 10.0,
+   "sim_none": 0.92,
+   "solver_override": {},
+   "merge_precision": {
+    "correct": 570,
+    "total": 1338,
+    "precision": 0.4260089686098655
+   },
+   "n_merges": 875,
+   "frags_after": 821,
+   "frag_per_gt_after": 8.449462093970103,
+   "confusion_n": null
+  },
+  "eiou": {
+   "version": "eiou-1.0",
+   "params": {
+    "e": 0.7,
+    "e_step": 0.35,
+    "rounds": 3,
+    "w_app": 0.5,
+    "app_max": 0.3,
+    "ema": 0.9,
+    "max_lost": 30,
+    "match_tol_px": 6.0
+   },
+   "embedder": "clip_v6det",
+   "percrop_variant": "_v6_v6det",
+   "remap_dir": "outputs\\gsr\\camel_remap\\f_t0.7",
+   "n_tracks_before": 1137,
+   "n_tracks_after": 1701,
+   "per_seq": {
+    "SNGS-021": {
+     "n_rows": 11757,
+     "n_tracks_before": 47,
+     "n_tracks_after": 56
+    },
+    "SNGS-024": {
+     "n_rows": 7484,
+     "n_tracks_before": 44,
+     "n_tracks_after": 57
+    },
+    "SNGS-027": {
+     "n_rows": 11986,
+     "n_tracks_before": 65,
+     "n_tracks_after": 108
+    },
+    "SNGS-030": {
+     "n_rows": 10903,
+     "n_tracks_before": 44,
+     "n_tracks_after": 86
+    },
+    "SNGS-033": {
+     "n_rows": 6683,
+     "n_tracks_before": 69,
+     "n_tracks_after": 76
+    },
+    "SNGS-036": {
+     "n_rows": 13283,
+     "n_tracks_before": 47,
+     "n_tracks_after": 74
+    },
+    "SNGS-039": {
+     "n_rows": 13902,
+     "n_tracks_before": 57,
+     "n_tracks_after": 120
+    },
+    "SNGS-042": {
+     "n_rows": 13970,
+     "n_tracks_before": 64,
+     "n_tracks_after": 107
+    },
+    "SNGS-045": {
+     "n_rows": 11365,
+     "n_tracks_before": 73,
+     "n_tracks_after": 95
+    },
+    "SNGS-048": {
+     "n_rows": 14793,
+     "n_tracks_before": 48,
+     "n_tracks_after": 71
+    },
+    "SNGS-051": {
+     "n_rows": 11033,
+     "n_tracks_before": 49,
+     "n_tracks_after": 84
+    },
+    "SNGS-054": {
+     "n_rows": 10899,
+     "n_tracks_before": 53,
+     "n_tracks_after": 110
+    },
+    "SNGS-057": {
+     "n_rows": 13499,
+     "n_tracks_before": 75,
+     "n_tracks_after": 136
+    },
+    "SNGS-078": {
+     "n_rows": 9293,
+     "n_tracks_before": 56,
+     "n_tracks_after": 64
+    },
+    "SNGS-081": {
+     "n_rows": 11504,
+     "n_tracks_before": 64,
+     "n_tracks_after": 82
+    },
+    "SNGS-084": {
+     "n_rows": 10661,
+     "n_tracks_before": 57,
+     "n_tracks_after": 76
+    },
+    "SNGS-087": {
+     "n_rows": 10737,
+     "n_tracks_before": 34,
+     "n_tracks_after": 44
+    },
+    "SNGS-090": {
+     "n_rows": 10646,
+     "n_tracks_before": 67,
+     "n_tracks_after": 88
+    },
+    "SNGS-093": {
+     "n_rows": 11575,
+     "n_tracks_before": 48,
+     "n_tracks_after": 68
+    },
+    "SNGS-096": {
+     "n_rows": 14780,
+     "n_tracks_before": 76,
+     "n_tracks_after": 99
+    }
+   }
+  },
+  "paired": {
+   "n": 20,
+   "mean": -18.944963680586664,
+   "median": -17.79720919642277,
+   "helped": 0,
+   "hurt": 20,
+   "worst": -29.810564564994227,
+   "best": -9.24660475288453,
+   "wilcoxon_p": 1.9073486328125e-06
+  },
+  "arm_name": "f_t0.7"
+ }
+}

@@ -1,0 +1,64 @@
+{
+ "n_merged_tracklets": 870,
+ "tracklets_with_read": 336,
+ "d_tracklet": 0.38620689655172413,
+ "reads_per_tracklet": 0.5333333333333333,
+ "row_weighted_read_coverage": 0.6580200179970943,
+ "points": {
+  "p_correct=0.926": {
+   "tracklets_changed": 0,
+   "newly_named": 0,
+   "newly_abstained": 0
+  },
+  "p_correct=0.95": {
+   "tracklets_changed": 2,
+   "newly_named": 1,
+   "newly_abstained": 1
+  },
+  "pi_none=0.5": {
+   "tracklets_changed": 0,
+   "newly_named": 0,
+   "newly_abstained": 0
+  },
+  "pi_none=0.85": {
+   "tracklets_changed": 5,
+   "newly_named": 1,
+   "newly_abstained": 1
+  },
+  "sim_none=0.9": {
+   "tracklets_changed": 0,
+   "newly_named": 0,
+   "newly_abstained": 0
+  },
+  "sim_none=0.95": {
+   "tracklets_changed": 5,
+   "newly_named": 1,
+   "newly_abstained": 1
+  },
+  "topk=5": {
+   "tracklets_changed": 6,
+   "newly_named": 1,
+   "newly_abstained": 0
+  },
+  "app_gain=5.0": {
+   "tracklets_changed": 21,
+   "newly_named": 3,
+   "newly_abstained": 4
+  },
+  "r_abstain=0.02": {
+   "tracklets_changed": 330,
+   "newly_named": 1,
+   "newly_abstained": 328
+  },
+  "r_abstain=0.05": {
+   "tracklets_changed": 341,
+   "newly_named": 0,
+   "newly_abstained": 340
+  },
+  "r_abstain=0.1": {
+   "tracklets_changed": 349,
+   "newly_named": 0,
+   "newly_abstained": 348
+  }
+ }
+}

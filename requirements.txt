@@ -17,4 +17,10 @@ yt-dlp
 jinja2
 
 # Heavy CV stack (generator) — install when you have a GPU:
-#   pip install opencv-python ultralytics supervision inference
+#   pip install opencv-python ultralytics inference
+supervision==0.30.0  # PINNED both machines (laptop + a100server1), 2026-08-07 / v7-V0.
+# supervision's ByteTrack build changes the track partition between minor versions: 0.29 vs 0.30
+# measured -3.90 GS-HOTA on TEST-38 when arms were mixed across machines (results/GSR_V6.md
+# negative 3). Any paired comparison must have both arms extracted on ONE version.
+# Ceiling: sv.ByteTrack is deprecated since 0.28 and is REMOVED in 0.31 — do not float this pin;
+# moving past 0.30.x needs generator/tracking.py ported off sv.ByteTrack AND a re-extraction.

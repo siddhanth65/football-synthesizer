@@ -115,12 +115,49 @@ def votes_dir(out_dir: Path, floor: str, variant: str) -> Path:
 
 
 # === One arm =====================================================================================
+#: Extra :class:`generator.identity_solve.SolverConfig` fields laid over the frozen config, set by
+#: :func:`load_solver_override`. Empty by default, so every on-record arm is byte-for-byte unchanged.
+SOLVER_OVERRIDE: dict[str, object] = {}
+
+
+def load_solver_override(path: Path | str | None) -> dict:
+    """Point :data:`SOLVER_OVERRIDE` at a JSON file of solver knobs (``None`` clears it).
+
+    The file is a flat ``{field: value}`` map over :class:`SolverConfig` fields (e.g.
+    ``results/gsr_v7_solver_override.json``); unknown keys are rejected rather than ignored, so a
+    typo cannot silently ship the incumbent.
+
+    Args:
+        path: Override file, or ``None`` to restore the frozen defaults.
+
+    Returns:
+        The override dict now in force.
+    """
+    from dataclasses import fields  # noqa: PLC0415
+
+    from generator.identity_solve import SolverConfig  # noqa: PLC0415
+
+    global SOLVER_OVERRIDE  # noqa: PLW0603 - one switch for the whole arm chain, as with EMBEDDER
+
+    if path is None:
+        SOLVER_OVERRIDE = {}
+        return SOLVER_OVERRIDE
+    blob = json.loads(Path(path).read_text(encoding="utf-8"))
+    known = {f.name for f in fields(SolverConfig)}
+    over = {k: v for k, v in blob.items() if not k.startswith("_") and k != "version"}
+    if bad := sorted(set(over) - known):
+        raise SystemExit(f"{path}: not SolverConfig fields: {bad}")
+    SOLVER_OVERRIDE = over
+    return SOLVER_OVERRIDE
+
+
 def solver_config(app_gain: float | None = None, sim_none: float | None = None):
     """The frozen solver config with its appearance scale optionally overridden.
 
     ``app_gain`` and ``sim_none`` are in **cosine-similarity units** and were fitted to PRTreID's
     distribution, so a different embedding space needs them re-scaled (``results/GSR_V5.md``).
-    Both ``None`` returns the on-disk config untouched, which is what every on-record arm used.
+    Both ``None`` **and** an empty :data:`SOLVER_OVERRIDE` returns the on-disk config untouched,
+    which is what every on-record arm used. Explicit arguments win over the override file.
 
     Args:
         app_gain: Inverse temperature on the appearance likelihood, or ``None`` to keep the frozen
@@ -135,7 +172,8 @@ def solver_config(app_gain: float | None = None, sim_none: float | None = None):
     from tools.gsr_deleak import SOLVER_CONFIG  # noqa: PLC0415
 
     cfg = SolverConfig.load(SOLVER_CONFIG)
-    over = {k: v for k, v in (("app_gain", app_gain), ("sim_none", sim_none)) if v is not None}
+    over = {**SOLVER_OVERRIDE,
+            **{k: v for k, v in (("app_gain", app_gain), ("sim_none", sim_none)) if v is not None}}
     return replace(cfg, **over) if over else cfg
 
 
@@ -202,6 +240,7 @@ def solve_v4_arm(data_dir: Path, out_dir: Path, seqs: list[str], *, tag: str, fl
     payload["v4"] = {
         "key": key, "floor": floor, "tau": tau, "jersey_gate": gate, "variant": variant,
         "confusion_refit": refit, "app_gain": cfg.app_gain, "sim_none": cfg.sim_none,
+        "solver_override": dict(SOLVER_OVERRIDE),
         "merge_precision": {"correct": c, "total": t, "precision": c / t if t else float("nan")},
         "n_merges": int(sum(v.get("n_merges", 0) for v in st.values())),
         "frags_after": int(sum(v.get("n_fragments_after", 0) for v in st.values())),
@@ -474,6 +513,29 @@ def _demo() -> None:
     tuned = solver_config(3.0, 0.67)
     assert (tuned.app_gain, tuned.sim_none) == (3.0, 0.67), tuned
     assert tuned.p_correct == frozen["p_correct"], tuned  # nothing else moves
+    # The override file is default-preserving too, and explicit arguments still win over it.
+    import tempfile  # noqa: PLC0415
+
+    with tempfile.TemporaryDirectory() as tmp:
+        p = Path(tmp) / "over.json"
+        p.write_text(json.dumps({"version": "x", "r_abstain": 0.05, "app_gain": 7.0}),
+                     encoding="utf-8")
+        try:
+            load_solver_override(p)
+            assert solver_config().r_abstain == 0.05, solver_config()
+            assert solver_config().app_gain == 7.0, solver_config()
+            assert solver_config(3.0).app_gain == 3.0, solver_config(3.0)
+            assert solver_config().p_correct == frozen["p_correct"]
+            p.write_text(json.dumps({"nope": 1}), encoding="utf-8")
+            try:
+                load_solver_override(p)
+                raise AssertionError("unknown override key was accepted")
+            except SystemExit:
+                pass
+        finally:
+            load_solver_override(None)
+    assert solver_config() == solver_config(None, None)
+    assert solver_config().r_abstain == frozen["r_abstain"], solver_config()
     print("gsr_v4 self-check OK")
 
 
