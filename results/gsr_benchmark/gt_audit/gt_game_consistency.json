@@ -1,0 +1,3814 @@
+{
+  "per_seq": {
+    "SNGS-060": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 00:00",
+      "n_left": 72,
+      "n_right": 74,
+      "lab_left": [
+        82.7,
+        0.0,
+        -3.5
+      ],
+      "lab_right": [
+        83.5,
+        -6.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 6.2,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-061": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 08:10",
+      "n_left": 56,
+      "n_right": 67,
+      "lab_left": [
+        84.1,
+        -1.0,
+        -2.0
+      ],
+      "lab_right": [
+        83.9,
+        -6.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 4.6,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-062": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 09:31",
+      "n_left": 74,
+      "n_right": 79,
+      "lab_left": [
+        86.9,
+        0.0,
+        -2.0
+      ],
+      "lab_right": [
+        82.4,
+        -6.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 5.2,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-063": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 15:43",
+      "n_left": 66,
+      "n_right": 68,
+      "lab_left": [
+        84.5,
+        -0.8,
+        -2.0
+      ],
+      "lab_right": [
+        83.1,
+        -6.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 4.9,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-064": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 23:32",
+      "n_left": 96,
+      "n_right": 86,
+      "lab_left": [
+        80.6,
+        0.0,
+        -4.5
+      ],
+      "lab_right": [
+        83.3,
+        -6.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 5.2,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-065": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 24:17",
+      "n_left": 75,
+      "n_right": 79,
+      "lab_left": [
+        85.5,
+        -1.0,
+        -1.0
+      ],
+      "lab_right": [
+        81.2,
+        -6.0,
+        4.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 3.5,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-066": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 29:35",
+      "n_left": 90,
+      "n_right": 89,
+      "lab_left": [
+        81.4,
+        -1.0,
+        -3.0
+      ],
+      "lab_right": [
+        83.9,
+        -6.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 4.0,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-067": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 42:51",
+      "n_left": 76,
+      "n_right": 86,
+      "lab_left": [
+        84.1,
+        1.0,
+        -4.0
+      ],
+      "lab_right": [
+        81.3,
+        -5.0,
+        1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 6.3,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-068": {
+      "game": "4",
+      "half": "1",
+      "clock": "1 - 43:28",
+      "n_left": 74,
+      "n_right": 83,
+      "lab_left": [
+        85.3,
+        0.5,
+        -4.0
+      ],
+      "lab_right": [
+        83.1,
+        -5.0,
+        1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 4.7,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-069": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 01:16",
+      "n_left": 77,
+      "n_right": 66,
+      "lab_left": [
+        81.2,
+        -5.0,
+        0.5
+      ],
+      "lab_right": [
+        83.9,
+        0.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 5.6,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-070": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 05:17",
+      "n_left": 60,
+      "n_right": 68,
+      "lab_left": [
+        77.5,
+        -5.0,
+        2.0
+      ],
+      "lab_right": [
+        82.0,
+        0.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 6.0,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-071": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 08:23",
+      "n_left": 78,
+      "n_right": 97,
+      "lab_left": [
+        82.7,
+        -5.0,
+        0.0
+      ],
+      "lab_right": [
+        83.5,
+        1.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 3.9,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-072": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 12:18",
+      "n_left": 76,
+      "n_right": 80,
+      "lab_left": [
+        80.0,
+        -5.0,
+        1.0
+      ],
+      "lab_right": [
+        84.7,
+        0.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 6.3,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-073": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 13:36",
+      "n_left": 71,
+      "n_right": 85,
+      "lab_left": [
+        79.6,
+        -6.0,
+        1.0
+      ],
+      "lab_right": [
+        82.4,
+        0.0,
+        -5.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 6.8,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-074": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 14:12",
+      "n_left": 88,
+      "n_right": 92,
+      "lab_left": [
+        78.3,
+        -5.8,
+        1.0
+      ],
+      "lab_right": [
+        83.2,
+        1.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 6.2,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-075": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 26:58",
+      "n_left": 73,
+      "n_right": 99,
+      "lab_left": [
+        80.4,
+        -4.0,
+        0.0
+      ],
+      "lab_right": [
+        82.4,
+        1.0,
+        -5.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 3.9,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-076": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 39:55",
+      "n_left": 89,
+      "n_right": 96,
+      "lab_left": [
+        76.9,
+        -6.0,
+        0.5
+      ],
+      "lab_right": [
+        84.3,
+        1.0,
+        -6.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 5.5,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-077": {
+      "game": "4",
+      "half": "2",
+      "clock": "2 - 47:42",
+      "n_left": 87,
+      "n_right": 68,
+      "lab_left": [
+        78.4,
+        -6.0,
+        0.5
+      ],
+      "lab_right": [
+        83.7,
+        0.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 6.0,
+      "degenerate": false,
+      "kit_sep": 8.1
+    },
+    "SNGS-097": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 05:57",
+      "n_left": 63,
+      "n_right": 82,
+      "lab_left": [
+        33.3,
+        0.0,
+        1.0
+      ],
+      "lab_right": [
+        37.9,
+        26.5,
+        22.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 27.0,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-098": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 08:00",
+      "n_left": 47,
+      "n_right": 51,
+      "lab_left": [
+        32.5,
+        -1.0,
+        3.0
+      ],
+      "lab_right": [
+        39.0,
+        24.0,
+        24.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 28.8,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-099": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 11:28",
+      "n_left": 50,
+      "n_right": 51,
+      "lab_left": [
+        34.6,
+        -1.0,
+        3.0
+      ],
+      "lab_right": [
+        40.8,
+        24.0,
+        22.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 27.3,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-100": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 12:42",
+      "n_left": 77,
+      "n_right": 74,
+      "lab_left": [
+        34.5,
+        -2.0,
+        5.0
+      ],
+      "lab_right": [
+        42.4,
+        22.0,
+        24.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 28.6,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-101": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 19:10",
+      "n_left": 44,
+      "n_right": 50,
+      "lab_left": [
+        38.8,
+        -2.5,
+        7.0
+      ],
+      "lab_right": [
+        42.8,
+        18.5,
+        27.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 25.5,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-102": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 20:37",
+      "n_left": 68,
+      "n_right": 73,
+      "lab_left": [
+        34.5,
+        -2.0,
+        5.0
+      ],
+      "lab_right": [
+        41.2,
+        24.0,
+        26.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 31.0,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-103": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 25:59",
+      "n_left": 89,
+      "n_right": 85,
+      "lab_left": [
+        35.9,
+        -2.0,
+        6.0
+      ],
+      "lab_right": [
+        41.6,
+        23.0,
+        24.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 29.7,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-104": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 31:09",
+      "n_left": 83,
+      "n_right": 92,
+      "lab_left": [
+        37.6,
+        -2.0,
+        6.0
+      ],
+      "lab_right": [
+        40.4,
+        27.2,
+        26.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 31.4,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-105": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 38:00",
+      "n_left": 65,
+      "n_right": 80,
+      "lab_left": [
+        40.2,
+        -2.0,
+        4.0
+      ],
+      "lab_right": [
+        42.2,
+        25.5,
+        26.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 31.3,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-106": {
+      "game": "6",
+      "half": "1",
+      "clock": "1 - 39:52",
+      "n_left": 86,
+      "n_right": 48,
+      "lab_left": [
+        37.1,
+        -1.0,
+        3.0
+      ],
+      "lab_right": [
+        40.8,
+        24.5,
+        23.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 29.1,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-107": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 02:06",
+      "n_left": 57,
+      "n_right": 65,
+      "lab_left": [
+        46.3,
+        24.0,
+        32.0
+      ],
+      "lab_right": [
+        42.7,
+        -3.0,
+        7.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 27.0,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-108": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 03:38",
+      "n_left": 59,
+      "n_right": 56,
+      "lab_left": [
+        45.9,
+        23.0,
+        29.0
+      ],
+      "lab_right": [
+        45.5,
+        -3.0,
+        6.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 25.1,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-109": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 04:54",
+      "n_left": 76,
+      "n_right": 75,
+      "lab_left": [
+        45.3,
+        24.0,
+        29.0
+      ],
+      "lab_right": [
+        40.4,
+        -2.0,
+        5.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 30.4,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-110": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 13:42",
+      "n_left": 82,
+      "n_right": 69,
+      "lab_left": [
+        42.4,
+        21.0,
+        25.0
+      ],
+      "lab_right": [
+        38.0,
+        -2.0,
+        7.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 28.2,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-111": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 15:31",
+      "n_left": 62,
+      "n_right": 59,
+      "lab_left": [
+        38.1,
+        -2.0,
+        3.5
+      ],
+      "lab_right": [
+        40.8,
+        22.0,
+        25.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 29.3,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-112": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 20:02",
+      "n_left": 61,
+      "n_right": 69,
+      "lab_left": [
+        42.7,
+        25.0,
+        27.0
+      ],
+      "lab_right": [
+        36.9,
+        -2.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 33.4,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-113": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 24:22",
+      "n_left": 86,
+      "n_right": 74,
+      "lab_left": [
+        39.3,
+        25.0,
+        26.0
+      ],
+      "lab_right": [
+        31.6,
+        -2.0,
+        2.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 30.3,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-114": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 47:46",
+      "n_left": 57,
+      "n_right": 43,
+      "lab_left": [
+        46.7,
+        22.5,
+        30.0
+      ],
+      "lab_right": [
+        45.5,
+        -3.0,
+        4.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 26.8,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-115": {
+      "game": "6",
+      "half": "2",
+      "clock": "2 - 49:36",
+      "n_left": 73,
+      "n_right": 73,
+      "lab_left": [
+        42.5,
+        26.0,
+        27.0
+      ],
+      "lab_right": [
+        36.9,
+        -2.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 33.4,
+      "degenerate": false,
+      "kit_sep": 33.9
+    },
+    "SNGS-151": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 00:36",
+      "n_left": 58,
+      "n_right": 54,
+      "lab_left": [
+        62.5,
+        2.0,
+        -7.0
+      ],
+      "lab_right": [
+        34.9,
+        3.0,
+        1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 19.0,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-152": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 05:16",
+      "n_left": 85,
+      "n_right": 99,
+      "lab_left": [
+        76.1,
+        3.0,
+        -6.0
+      ],
+      "lab_right": [
+        32.5,
+        10.0,
+        4.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 38.3,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-153": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 07:47",
+      "n_left": 49,
+      "n_right": 48,
+      "lab_left": [
+        73.3,
+        3.0,
+        -6.0
+      ],
+      "lab_right": [
+        35.9,
+        5.0,
+        5.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 37.3,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-154": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 22:29",
+      "n_left": 80,
+      "n_right": 64,
+      "lab_left": [
+        64.1,
+        2.0,
+        -4.0
+      ],
+      "lab_right": [
+        31.0,
+        3.0,
+        7.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 21.4,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-155": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 28:09",
+      "n_left": 72,
+      "n_right": 51,
+      "lab_left": [
+        66.9,
+        2.0,
+        -4.0
+      ],
+      "lab_right": [
+        27.8,
+        5.0,
+        7.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 26.8,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-156": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 34:15",
+      "n_left": 93,
+      "n_right": 53,
+      "lab_left": [
+        67.1,
+        3.0,
+        -5.0
+      ],
+      "lab_right": [
+        30.2,
+        4.0,
+        7.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 27.3,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-157": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 34:50",
+      "n_left": 60,
+      "n_right": 47,
+      "lab_left": [
+        73.6,
+        1.0,
+        -3.0
+      ],
+      "lab_right": [
+        31.0,
+        3.5,
+        7.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 39.4,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-158": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 35:59",
+      "n_left": 48,
+      "n_right": 64,
+      "lab_left": [
+        76.9,
+        1.0,
+        -1.5
+      ],
+      "lab_right": [
+        28.4,
+        7.0,
+        8.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 41.7,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-159": {
+      "game": "9",
+      "half": "1",
+      "clock": "1 - 39:05",
+      "n_left": 74,
+      "n_right": 54,
+      "lab_left": [
+        71.8,
+        3.0,
+        -6.0
+      ],
+      "lab_right": [
+        30.2,
+        4.0,
+        5.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 36.0,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-160": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 02:26",
+      "n_left": 61,
+      "n_right": 55,
+      "lab_left": [
+        42.7,
+        2.0,
+        -5.0
+      ],
+      "lab_right": [
+        77.3,
+        2.0,
+        -7.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 17.1,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-161": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 11:03",
+      "n_left": 61,
+      "n_right": 58,
+      "lab_left": [
+        31.4,
+        6.0,
+        3.0
+      ],
+      "lab_right": [
+        82.7,
+        2.0,
+        -7.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 39.7,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-162": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 17:42",
+      "n_left": 75,
+      "n_right": 80,
+      "lab_left": [
+        32.9,
+        7.0,
+        9.0
+      ],
+      "lab_right": [
+        76.9,
+        3.0,
+        -7.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 41.8,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-163": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 24:10",
+      "n_left": 56,
+      "n_right": 54,
+      "lab_left": [
+        35.5,
+        6.5,
+        6.0
+      ],
+      "lab_right": [
+        79.2,
+        2.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 38.6,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-164": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 26:08",
+      "n_left": 81,
+      "n_right": 66,
+      "lab_left": [
+        35.7,
+        5.0,
+        10.0
+      ],
+      "lab_right": [
+        78.8,
+        3.0,
+        -5.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 38.7,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-165": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 31:38",
+      "n_left": 67,
+      "n_right": 59,
+      "lab_left": [
+        29.8,
+        8.0,
+        9.0
+      ],
+      "lab_right": [
+        78.4,
+        3.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 42.7,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-166": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 39:46",
+      "n_left": 69,
+      "n_right": 69,
+      "lab_left": [
+        31.4,
+        7.0,
+        9.0
+      ],
+      "lab_right": [
+        81.8,
+        3.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 42.7,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-167": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 43:30",
+      "n_left": 70,
+      "n_right": 77,
+      "lab_left": [
+        35.3,
+        4.5,
+        11.2
+      ],
+      "lab_right": [
+        80.8,
+        1.0,
+        2.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 38.6,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-168": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 48:15",
+      "n_left": 68,
+      "n_right": 80,
+      "lab_left": [
+        37.1,
+        3.0,
+        15.0
+      ],
+      "lab_right": [
+        83.0,
+        1.0,
+        0.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 34.0,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-169": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 49:51",
+      "n_left": 56,
+      "n_right": 64,
+      "lab_left": [
+        40.0,
+        4.0,
+        15.0
+      ],
+      "lab_right": [
+        75.6,
+        0.0,
+        3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 30.0,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-170": {
+      "game": "9",
+      "half": "2",
+      "clock": "2 - 50:42",
+      "n_left": 71,
+      "n_right": 61,
+      "lab_left": [
+        38.0,
+        4.0,
+        14.0
+      ],
+      "lab_right": [
+        82.0,
+        0.0,
+        2.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 33.4,
+      "degenerate": false,
+      "kit_sep": 43.4
+    },
+    "SNGS-021": {
+      "game": "2",
+      "half": "1",
+      "clock": "1 - 01:16",
+      "n_left": 72,
+      "n_right": 68,
+      "lab_left": [
+        35.3,
+        17.0,
+        -36.5
+      ],
+      "lab_right": [
+        81.2,
+        1.0,
+        -7.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 45.8,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-022": {
+      "game": "2",
+      "half": "1",
+      "clock": "1 - 04:06",
+      "n_left": 61,
+      "n_right": 60,
+      "lab_left": [
+        38.8,
+        13.0,
+        -31.0
+      ],
+      "lab_right": [
+        82.4,
+        1.0,
+        -5.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 49.2,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-023": {
+      "game": "2",
+      "half": "1",
+      "clock": "1 - 04:50",
+      "n_left": 91,
+      "n_right": 100,
+      "lab_left": [
+        37.3,
+        15.0,
+        -33.0
+      ],
+      "lab_right": [
+        82.0,
+        1.0,
+        -6.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 48.0,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-024": {
+      "game": "2",
+      "half": "1",
+      "clock": "1 - 08:55",
+      "n_left": 53,
+      "n_right": 39,
+      "lab_left": [
+        38.8,
+        12.0,
+        -30.0
+      ],
+      "lab_right": [
+        82.2,
+        0.0,
+        -5.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 48.8,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-025": {
+      "game": "2",
+      "half": "1",
+      "clock": "1 - 17:33",
+      "n_left": 87,
+      "n_right": 64,
+      "lab_left": [
+        41.2,
+        15.0,
+        -34.0
+      ],
+      "lab_right": [
+        85.0,
+        1.0,
+        -6.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 50.6,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-026": {
+      "game": "2",
+      "half": "1",
+      "clock": "1 - 34:52",
+      "n_left": 47,
+      "n_right": 49,
+      "lab_left": [
+        41.2,
+        15.0,
+        -35.0
+      ],
+      "lab_right": [
+        85.5,
+        1.0,
+        -6.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 50.3,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-027": {
+      "game": "2",
+      "half": "1",
+      "clock": "1 - 38:04",
+      "n_left": 83,
+      "n_right": 60,
+      "lab_left": [
+        40.0,
+        16.0,
+        -35.0
+      ],
+      "lab_right": [
+        85.9,
+        2.0,
+        -6.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 50.9,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-028": {
+      "game": "2",
+      "half": "1",
+      "clock": "1 - 42:26",
+      "n_left": 46,
+      "n_right": 55,
+      "lab_left": [
+        40.4,
+        12.0,
+        -30.8
+      ],
+      "lab_right": [
+        84.7,
+        1.0,
+        -5.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 49.7,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-029": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 02:31",
+      "n_left": 48,
+      "n_right": 63,
+      "lab_left": [
+        85.5,
+        2.0,
+        -8.0
+      ],
+      "lab_right": [
+        42.0,
+        15.0,
+        -36.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 48.9,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-030": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 09:38",
+      "n_left": 54,
+      "n_right": 79,
+      "lab_left": [
+        84.5,
+        1.0,
+        -5.5
+      ],
+      "lab_right": [
+        38.8,
+        18.0,
+        -38.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 50.2,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-031": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 12:54",
+      "n_left": 71,
+      "n_right": 49,
+      "lab_left": [
+        85.1,
+        1.0,
+        -4.0
+      ],
+      "lab_right": [
+        43.1,
+        11.0,
+        -29.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 43.8,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-032": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 13:48",
+      "n_left": 55,
+      "n_right": 59,
+      "lab_left": [
+        84.3,
+        1.0,
+        -5.0
+      ],
+      "lab_right": [
+        43.1,
+        12.0,
+        -29.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 44.5,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-033": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 29:33",
+      "n_left": 32,
+      "n_right": 49,
+      "lab_left": [
+        85.4,
+        2.0,
+        -5.0
+      ],
+      "lab_right": [
+        42.0,
+        13.0,
+        -29.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 46.5,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-034": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 35:41",
+      "n_left": 72,
+      "n_right": 96,
+      "lab_left": [
+        83.5,
+        1.0,
+        -5.0
+      ],
+      "lab_right": [
+        45.5,
+        9.0,
+        -26.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 36.2,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-035": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 36:51",
+      "n_left": 72,
+      "n_right": 69,
+      "lab_left": [
+        84.3,
+        1.0,
+        -4.0
+      ],
+      "lab_right": [
+        46.3,
+        10.0,
+        -28.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 37.3,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-036": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 37:31",
+      "n_left": 81,
+      "n_right": 72,
+      "lab_left": [
+        85.1,
+        2.0,
+        -7.0
+      ],
+      "lab_right": [
+        42.2,
+        13.5,
+        -31.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 48.9,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-037": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 43:56",
+      "n_left": 47,
+      "n_right": 65,
+      "lab_left": [
+        83.9,
+        1.0,
+        -5.0
+      ],
+      "lab_right": [
+        40.0,
+        12.0,
+        -30.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 49.0,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-038": {
+      "game": "2",
+      "half": "2",
+      "clock": "2 - 44:51",
+      "n_left": 48,
+      "n_right": 78,
+      "lab_left": [
+        82.5,
+        2.0,
+        -5.5
+      ],
+      "lab_right": [
+        40.0,
+        13.0,
+        -31.8
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 48.8,
+      "degenerate": false,
+      "kit_sep": 52.0
+    },
+    "SNGS-039": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 05:35",
+      "n_left": 88,
+      "n_right": 78,
+      "lab_left": [
+        75.0,
+        -3.0,
+        3.0
+      ],
+      "lab_right": [
+        67.6,
+        -10.0,
+        43.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 39.8,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-040": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 08:19",
+      "n_left": 75,
+      "n_right": 91,
+      "lab_left": [
+        78.8,
+        -2.0,
+        3.0
+      ],
+      "lab_right": [
+        75.3,
+        -12.0,
+        51.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 37.2,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-041": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 16:23",
+      "n_left": 70,
+      "n_right": 61,
+      "lab_left": [
+        79.0,
+        -3.0,
+        3.0
+      ],
+      "lab_right": [
+        75.5,
+        -12.0,
+        58.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 37.0,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-042": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 29:18",
+      "n_left": 77,
+      "n_right": 93,
+      "lab_left": [
+        81.6,
+        -3.0,
+        3.0
+      ],
+      "lab_right": [
+        78.8,
+        -11.0,
+        47.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 35.2,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-043": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 31:16",
+      "n_left": 76,
+      "n_right": 76,
+      "lab_left": [
+        79.2,
+        -4.0,
+        4.2
+      ],
+      "lab_right": [
+        75.5,
+        -11.0,
+        45.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 35.0,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-044": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 32:49",
+      "n_left": 78,
+      "n_right": 84,
+      "lab_left": [
+        77.2,
+        -3.0,
+        4.0
+      ],
+      "lab_right": [
+        74.5,
+        -11.0,
+        46.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 36.8,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-045": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 35:03",
+      "n_left": 71,
+      "n_right": 74,
+      "lab_left": [
+        50.6,
+        -2.0,
+        -8.0
+      ],
+      "lab_right": [
+        48.2,
+        -7.0,
+        36.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 20.4,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-046": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 38:32",
+      "n_left": 86,
+      "n_right": 69,
+      "lab_left": [
+        72.9,
+        -3.0,
+        3.0
+      ],
+      "lab_right": [
+        67.8,
+        -8.0,
+        39.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 31.3,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-047": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 42:38",
+      "n_left": 78,
+      "n_right": 69,
+      "lab_left": [
+        75.8,
+        -3.0,
+        2.5
+      ],
+      "lab_right": [
+        71.0,
+        -11.0,
+        48.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 39.9,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-048": {
+      "game": "3",
+      "half": "1",
+      "clock": "1 - 43:41",
+      "n_left": 85,
+      "n_right": 85,
+      "lab_left": [
+        52.0,
+        -2.0,
+        -6.0
+      ],
+      "lab_right": [
+        55.7,
+        -9.0,
+        41.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 30.9,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-049": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 01:58",
+      "n_left": 83,
+      "n_right": 82,
+      "lab_left": [
+        74.3,
+        -12.0,
+        46.0
+      ],
+      "lab_right": [
+        81.8,
+        -3.2,
+        5.2
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 32.3,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-050": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 05:31",
+      "n_left": 99,
+      "n_right": 91,
+      "lab_left": [
+        58.0,
+        -10.0,
+        48.0
+      ],
+      "lab_right": [
+        72.2,
+        -2.0,
+        1.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 40.4,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-051": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 08:26",
+      "n_left": 61,
+      "n_right": 75,
+      "lab_left": [
+        76.3,
+        -12.0,
+        48.0
+      ],
+      "lab_right": [
+        81.2,
+        -3.0,
+        3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 35.5,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-052": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 17:11",
+      "n_left": 78,
+      "n_right": 90,
+      "lab_left": [
+        75.8,
+        -12.0,
+        54.0
+      ],
+      "lab_right": [
+        78.4,
+        -3.0,
+        5.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 33.9,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-053": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 18:25",
+      "n_left": 90,
+      "n_right": 72,
+      "lab_left": [
+        56.9,
+        -9.5,
+        48.0
+      ],
+      "lab_right": [
+        59.0,
+        -3.0,
+        -7.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 39.5,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-054": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 20:50",
+      "n_left": 68,
+      "n_right": 68,
+      "lab_left": [
+        64.9,
+        -10.0,
+        43.5
+      ],
+      "lab_right": [
+        72.0,
+        -3.5,
+        4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 39.4,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-055": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 28:03",
+      "n_left": 72,
+      "n_right": 65,
+      "lab_left": [
+        71.6,
+        -11.0,
+        50.5
+      ],
+      "lab_right": [
+        75.7,
+        -4.0,
+        5.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 35.9,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-056": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 36:48",
+      "n_left": 43,
+      "n_right": 69,
+      "lab_left": [
+        61.2,
+        -9.0,
+        43.0
+      ],
+      "lab_right": [
+        51.0,
+        -1.0,
+        -9.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 36.4,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-057": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 43:24",
+      "n_left": 85,
+      "n_right": 83,
+      "lab_left": [
+        69.0,
+        -10.0,
+        48.0
+      ],
+      "lab_right": [
+        70.2,
+        -3.0,
+        -1.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 45.8,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-058": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 45:48",
+      "n_left": 65,
+      "n_right": 69,
+      "lab_left": [
+        61.2,
+        -10.0,
+        44.0
+      ],
+      "lab_right": [
+        65.5,
+        -3.0,
+        -2.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 38.7,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-059": {
+      "game": "3",
+      "half": "2",
+      "clock": "2 - 47:58",
+      "n_left": 74,
+      "n_right": 80,
+      "lab_left": [
+        53.7,
+        -8.0,
+        46.0
+      ],
+      "lab_right": [
+        58.4,
+        -2.0,
+        -7.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 35.2,
+      "degenerate": false,
+      "kit_sep": 46.7
+    },
+    "SNGS-078": {
+      "game": "5",
+      "half": "1",
+      "clock": "1 - 04:52",
+      "n_left": 54,
+      "n_right": 56,
+      "lab_left": [
+        75.1,
+        -2.0,
+        -5.0
+      ],
+      "lab_right": [
+        41.6,
+        12.0,
+        -30.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 42.3,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-079": {
+      "game": "5",
+      "half": "1",
+      "clock": "1 - 09:05",
+      "n_left": 69,
+      "n_right": 78,
+      "lab_left": [
+        76.9,
+        -1.0,
+        -5.0
+      ],
+      "lab_right": [
+        42.1,
+        15.0,
+        -35.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 44.5,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-080": {
+      "game": "5",
+      "half": "1",
+      "clock": "1 - 09:56",
+      "n_left": 50,
+      "n_right": 72,
+      "lab_left": [
+        79.6,
+        -1.0,
+        -6.0
+      ],
+      "lab_right": [
+        41.4,
+        17.0,
+        -40.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 45.6,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-081": {
+      "game": "5",
+      "half": "1",
+      "clock": "1 - 18:34",
+      "n_left": 69,
+      "n_right": 72,
+      "lab_left": [
+        79.2,
+        -1.0,
+        -3.0
+      ],
+      "lab_right": [
+        43.9,
+        11.0,
+        -30.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 41.8,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-082": {
+      "game": "5",
+      "half": "1",
+      "clock": "1 - 22:47",
+      "n_left": 74,
+      "n_right": 88,
+      "lab_left": [
+        76.1,
+        -1.0,
+        -6.0
+      ],
+      "lab_right": [
+        39.6,
+        16.0,
+        -37.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 42.1,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-083": {
+      "game": "5",
+      "half": "1",
+      "clock": "1 - 25:33",
+      "n_left": 73,
+      "n_right": 61,
+      "lab_left": [
+        77.6,
+        -2.0,
+        -4.0
+      ],
+      "lab_right": [
+        40.4,
+        12.0,
+        -35.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 47.2,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-084": {
+      "game": "5",
+      "half": "1",
+      "clock": "1 - 33:35",
+      "n_left": 72,
+      "n_right": 63,
+      "lab_left": [
+        78.8,
+        -1.0,
+        -3.0
+      ],
+      "lab_right": [
+        46.3,
+        14.0,
+        -34.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 42.7,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-085": {
+      "game": "5",
+      "half": "1",
+      "clock": "1 - 34:52",
+      "n_left": 73,
+      "n_right": 82,
+      "lab_left": [
+        81.2,
+        -1.0,
+        -4.0
+      ],
+      "lab_right": [
+        38.0,
+        17.0,
+        -39.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 48.9,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-086": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 03:51",
+      "n_left": 94,
+      "n_right": 77,
+      "lab_left": [
+        38.0,
+        17.0,
+        -36.0
+      ],
+      "lab_right": [
+        81.2,
+        -1.0,
+        -2.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 50.7,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-087": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 07:32",
+      "n_left": 66,
+      "n_right": 64,
+      "lab_left": [
+        43.9,
+        13.0,
+        -35.0
+      ],
+      "lab_right": [
+        83.5,
+        -1.2,
+        0.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 46.5,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-088": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 14:35",
+      "n_left": 71,
+      "n_right": 83,
+      "lab_left": [
+        40.0,
+        14.0,
+        -33.0
+      ],
+      "lab_right": [
+        77.6,
+        -2.0,
+        0.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 49.3,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-089": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 16:50",
+      "n_left": 78,
+      "n_right": 75,
+      "lab_left": [
+        41.6,
+        11.0,
+        -28.5
+      ],
+      "lab_right": [
+        77.3,
+        -1.0,
+        -1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 41.9,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-090": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 24:04",
+      "n_left": 51,
+      "n_right": 70,
+      "lab_left": [
+        40.8,
+        11.5,
+        -28.0
+      ],
+      "lab_right": [
+        78.8,
+        -1.0,
+        -1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 42.2,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-091": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 29:10",
+      "n_left": 76,
+      "n_right": 67,
+      "lab_left": [
+        37.3,
+        14.0,
+        -31.0
+      ],
+      "lab_right": [
+        75.5,
+        -2.0,
+        1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 46.5,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-092": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 33:37",
+      "n_left": 73,
+      "n_right": 74,
+      "lab_left": [
+        76.1,
+        -1.0,
+        -1.0
+      ],
+      "lab_right": [
+        36.4,
+        14.0,
+        -29.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 46.5,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-093": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 34:20",
+      "n_left": 77,
+      "n_right": 61,
+      "lab_left": [
+        36.9,
+        13.0,
+        -29.5
+      ],
+      "lab_right": [
+        73.9,
+        -1.0,
+        -1.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 43.0,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-094": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 47:51",
+      "n_left": 81,
+      "n_right": 75,
+      "lab_left": [
+        45.5,
+        12.0,
+        -31.0
+      ],
+      "lab_right": [
+        84.3,
+        -2.0,
+        -1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 40.7,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-095": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 48:38",
+      "n_left": 52,
+      "n_right": 56,
+      "lab_left": [
+        42.5,
+        14.0,
+        -31.5
+      ],
+      "lab_right": [
+        83.1,
+        -3.0,
+        2.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 46.9,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-096": {
+      "game": "5",
+      "half": "2",
+      "clock": "2 - 50:08",
+      "n_left": 97,
+      "n_right": 83,
+      "lab_left": [
+        40.4,
+        15.0,
+        -35.0
+      ],
+      "lab_right": [
+        83.3,
+        -3.0,
+        -1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 51.0,
+      "degenerate": false,
+      "kit_sep": 51.4
+    },
+    "SNGS-116": {
+      "game": "7",
+      "half": "1",
+      "clock": "1 - 16:09",
+      "n_left": 57,
+      "n_right": 70,
+      "lab_left": [
+        74.9,
+        1.0,
+        -4.0
+      ],
+      "lab_right": [
+        37.2,
+        29.8,
+        21.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 46.1,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-117": {
+      "game": "7",
+      "half": "1",
+      "clock": "1 - 17:30",
+      "n_left": 50,
+      "n_right": 48,
+      "lab_left": [
+        76.5,
+        1.0,
+        -4.0
+      ],
+      "lab_right": [
+        40.6,
+        24.0,
+        21.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 46.2,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-118": {
+      "game": "7",
+      "half": "1",
+      "clock": "1 - 18:09",
+      "n_left": 47,
+      "n_right": 65,
+      "lab_left": [
+        77.1,
+        1.0,
+        -4.0
+      ],
+      "lab_right": [
+        37.3,
+        29.5,
+        22.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 49.7,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-119": {
+      "game": "7",
+      "half": "1",
+      "clock": "1 - 18:45",
+      "n_left": 43,
+      "n_right": 41,
+      "lab_left": [
+        76.1,
+        0.0,
+        -4.0
+      ],
+      "lab_right": [
+        36.9,
+        31.0,
+        21.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 48.6,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-120": {
+      "game": "7",
+      "half": "1",
+      "clock": "1 - 22:44",
+      "n_left": 62,
+      "n_right": 60,
+      "lab_left": [
+        77.6,
+        0.0,
+        -4.0
+      ],
+      "lab_right": [
+        38.2,
+        29.5,
+        22.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 51.0,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-121": {
+      "game": "7",
+      "half": "1",
+      "clock": "1 - 23:30",
+      "n_left": 58,
+      "n_right": 70,
+      "lab_left": [
+        79.2,
+        1.0,
+        -4.0
+      ],
+      "lab_right": [
+        38.0,
+        34.0,
+        23.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 53.0,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-122": {
+      "game": "7",
+      "half": "1",
+      "clock": "1 - 24:33",
+      "n_left": 64,
+      "n_right": 65,
+      "lab_left": [
+        74.5,
+        1.0,
+        -3.0
+      ],
+      "lab_right": [
+        40.8,
+        25.0,
+        22.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 44.7,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-123": {
+      "game": "7",
+      "half": "1",
+      "clock": "1 - 32:02",
+      "n_left": 62,
+      "n_right": 74,
+      "lab_left": [
+        79.4,
+        0.0,
+        -4.5
+      ],
+      "lab_right": [
+        43.8,
+        26.0,
+        22.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 45.7,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-124": {
+      "game": "7",
+      "half": "2",
+      "clock": "2 - 01:06",
+      "n_left": 54,
+      "n_right": 56,
+      "lab_left": [
+        47.6,
+        24.0,
+        23.0
+      ],
+      "lab_right": [
+        81.6,
+        0.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 38.5,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-125": {
+      "game": "7",
+      "half": "2",
+      "clock": "2 - 16:27",
+      "n_left": 49,
+      "n_right": 53,
+      "lab_left": [
+        44.7,
+        31.0,
+        15.0
+      ],
+      "lab_right": [
+        82.7,
+        1.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 43.7,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-126": {
+      "game": "7",
+      "half": "2",
+      "clock": "2 - 23:00",
+      "n_left": 45,
+      "n_right": 60,
+      "lab_left": [
+        81.6,
+        1.0,
+        -6.0
+      ],
+      "lab_right": [
+        42.5,
+        30.5,
+        17.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 48.7,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-127": {
+      "game": "7",
+      "half": "2",
+      "clock": "2 - 26:45",
+      "n_left": 83,
+      "n_right": 87,
+      "lab_left": [
+        34.1,
+        36.0,
+        16.0
+      ],
+      "lab_right": [
+        79.2,
+        2.0,
+        -9.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 50.8,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-128": {
+      "game": "7",
+      "half": "2",
+      "clock": "2 - 30:45",
+      "n_left": 77,
+      "n_right": 77,
+      "lab_left": [
+        36.7,
+        37.0,
+        17.0
+      ],
+      "lab_right": [
+        81.2,
+        2.0,
+        -7.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 51.3,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-129": {
+      "game": "7",
+      "half": "2",
+      "clock": "2 - 34:07",
+      "n_left": 79,
+      "n_right": 63,
+      "lab_left": [
+        47.8,
+        27.0,
+        16.0
+      ],
+      "lab_right": [
+        81.0,
+        0.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 37.4,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-130": {
+      "game": "7",
+      "half": "2",
+      "clock": "2 - 39:42",
+      "n_left": 57,
+      "n_right": 70,
+      "lab_left": [
+        43.5,
+        29.0,
+        17.0
+      ],
+      "lab_right": [
+        84.7,
+        0.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 46.5,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-131": {
+      "game": "7",
+      "half": "2",
+      "clock": "2 - 47:08",
+      "n_left": 72,
+      "n_right": 89,
+      "lab_left": [
+        83.3,
+        1.0,
+        -4.0
+      ],
+      "lab_right": [
+        41.6,
+        33.0,
+        20.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 52.1,
+      "degenerate": false,
+      "kit_sep": 54.1
+    },
+    "SNGS-132": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 00:06",
+      "n_left": 66,
+      "n_right": 57,
+      "lab_left": [
+        73.3,
+        1.0,
+        -5.0
+      ],
+      "lab_right": [
+        43.5,
+        2.0,
+        5.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 22.0,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-133": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 09:29",
+      "n_left": 71,
+      "n_right": 52,
+      "lab_left": [
+        72.5,
+        4.0,
+        -11.0
+      ],
+      "lab_right": [
+        27.2,
+        6.0,
+        3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 35.8,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-134": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 10:56",
+      "n_left": 56,
+      "n_right": 35,
+      "lab_left": [
+        77.5,
+        3.0,
+        -10.0
+      ],
+      "lab_right": [
+        35.7,
+        6.0,
+        8.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 38.4,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-135": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 13:36",
+      "n_left": 69,
+      "n_right": 68,
+      "lab_left": [
+        71.8,
+        4.0,
+        -11.0
+      ],
+      "lab_right": [
+        27.5,
+        6.0,
+        -1.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 34.8,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-136": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 17:56",
+      "n_left": 57,
+      "n_right": 45,
+      "lab_left": [
+        75.3,
+        4.0,
+        -11.0
+      ],
+      "lab_right": [
+        31.4,
+        7.0,
+        -0.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 37.8,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-137": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 18:35",
+      "n_left": 41,
+      "n_right": 52,
+      "lab_left": [
+        73.7,
+        3.0,
+        -5.0
+      ],
+      "lab_right": [
+        32.0,
+        6.0,
+        7.5
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 40.0,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-138": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 20:53",
+      "n_left": 68,
+      "n_right": 71,
+      "lab_left": [
+        73.7,
+        3.0,
+        -9.0
+      ],
+      "lab_right": [
+        28.2,
+        6.0,
+        2.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 38.7,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-139": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 24:14",
+      "n_left": 50,
+      "n_right": 69,
+      "lab_left": [
+        79.0,
+        3.0,
+        -6.0
+      ],
+      "lab_right": [
+        30.2,
+        7.0,
+        5.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 44.3,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-140": {
+      "game": "8",
+      "half": "1",
+      "clock": "1 - 44:44",
+      "n_left": 70,
+      "n_right": 79,
+      "lab_left": [
+        76.1,
+        3.0,
+        -7.0
+      ],
+      "lab_right": [
+        28.2,
+        6.0,
+        4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 43.0,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-141": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 02:51",
+      "n_left": 48,
+      "n_right": 68,
+      "lab_left": [
+        30.0,
+        2.0,
+        10.0
+      ],
+      "lab_right": [
+        78.0,
+        -0.5,
+        0.5
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 43.4,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-142": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 05:36",
+      "n_left": 73,
+      "n_right": 54,
+      "lab_left": [
+        35.7,
+        3.0,
+        8.0
+      ],
+      "lab_right": [
+        76.9,
+        0.0,
+        0.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 38.4,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-143": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 09:46",
+      "n_left": 37,
+      "n_right": 42,
+      "lab_left": [
+        35.3,
+        2.0,
+        14.0
+      ],
+      "lab_right": [
+        80.2,
+        -2.0,
+        1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 37.4,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-144": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 12:51",
+      "n_left": 49,
+      "n_right": 58,
+      "lab_left": [
+        27.8,
+        3.0,
+        10.0
+      ],
+      "lab_right": [
+        80.6,
+        -1.0,
+        2.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 43.4,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-145": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 15:37",
+      "n_left": 62,
+      "n_right": 51,
+      "lab_left": [
+        33.9,
+        3.0,
+        14.0
+      ],
+      "lab_right": [
+        79.6,
+        -2.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 39.6,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-146": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 21:39",
+      "n_left": 41,
+      "n_right": 40,
+      "lab_left": [
+        27.5,
+        2.0,
+        12.0
+      ],
+      "lab_right": [
+        79.0,
+        0.0,
+        2.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 42.7,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-147": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 22:34",
+      "n_left": 31,
+      "n_right": 26,
+      "lab_left": [
+        26.3,
+        4.0,
+        11.0
+      ],
+      "lab_right": [
+        76.5,
+        0.0,
+        -1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 43.7,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-148": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 29:23",
+      "n_left": 62,
+      "n_right": 55,
+      "lab_left": [
+        28.4,
+        2.0,
+        11.0
+      ],
+      "lab_right": [
+        80.4,
+        -1.0,
+        3.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 42.4,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-149": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 30:44",
+      "n_left": 59,
+      "n_right": 59,
+      "lab_left": [
+        31.4,
+        3.0,
+        11.0
+      ],
+      "lab_right": [
+        82.0,
+        -1.0,
+        2.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 44.0,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-150": {
+      "game": "8",
+      "half": "2",
+      "clock": "2 - 37:56",
+      "n_left": 54,
+      "n_right": 60,
+      "lab_left": [
+        31.0,
+        3.0,
+        9.0
+      ],
+      "lab_right": [
+        82.4,
+        0.0,
+        -1.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 46.1,
+      "degenerate": false,
+      "kit_sep": 47.5
+    },
+    "SNGS-187": {
+      "game": "11",
+      "half": "1",
+      "clock": "1 - 00:52",
+      "n_left": 78,
+      "n_right": 93,
+      "lab_left": [
+        44.0,
+        18.0,
+        8.0
+      ],
+      "lab_right": [
+        74.9,
+        1.0,
+        -5.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 26.3,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-188": {
+      "game": "11",
+      "half": "1",
+      "clock": "1 - 05:13",
+      "n_left": 99,
+      "n_right": 102,
+      "lab_left": [
+        42.7,
+        15.0,
+        10.0
+      ],
+      "lab_right": [
+        74.9,
+        2.0,
+        -7.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 26.1,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-189": {
+      "game": "11",
+      "half": "1",
+      "clock": "1 - 06:03",
+      "n_left": 70,
+      "n_right": 71,
+      "lab_left": [
+        45.5,
+        16.5,
+        10.5
+      ],
+      "lab_right": [
+        69.8,
+        1.0,
+        -4.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 17.5,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-190": {
+      "game": "11",
+      "half": "1",
+      "clock": "1 - 11:20",
+      "n_left": 69,
+      "n_right": 52,
+      "lab_left": [
+        45.9,
+        18.0,
+        11.0
+      ],
+      "lab_right": [
+        82.7,
+        1.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 37.8,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-191": {
+      "game": "11",
+      "half": "1",
+      "clock": "1 - 12:25",
+      "n_left": 63,
+      "n_right": 79,
+      "lab_left": [
+        45.1,
+        17.0,
+        12.0
+      ],
+      "lab_right": [
+        78.8,
+        1.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 32.5,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-192": {
+      "game": "11",
+      "half": "1",
+      "clock": "1 - 18:19",
+      "n_left": 68,
+      "n_right": 54,
+      "lab_left": [
+        51.7,
+        12.5,
+        14.5
+      ],
+      "lab_right": [
+        82.1,
+        1.0,
+        -2.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 32.3,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-193": {
+      "game": "11",
+      "half": "1",
+      "clock": "1 - 19:28",
+      "n_left": 74,
+      "n_right": 64,
+      "lab_left": [
+        47.3,
+        20.0,
+        15.0
+      ],
+      "lab_right": [
+        80.6,
+        1.0,
+        -2.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 35.3,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-194": {
+      "game": "11",
+      "half": "1",
+      "clock": "1 - 27:34",
+      "n_left": 83,
+      "n_right": 85,
+      "lab_left": [
+        51.4,
+        17.0,
+        12.0
+      ],
+      "lab_right": [
+        78.8,
+        1.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 32.5,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-195": {
+      "game": "11",
+      "half": "2",
+      "clock": "2 - 02:39",
+      "n_left": 81,
+      "n_right": 64,
+      "lab_left": [
+        92.2,
+        0.0,
+        0.0
+      ],
+      "lab_right": [
+        56.7,
+        16.5,
+        16.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 28.4,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-196": {
+      "game": "11",
+      "half": "2",
+      "clock": "2 - 03:17",
+      "n_left": 62,
+      "n_right": 54,
+      "lab_left": [
+        88.2,
+        1.0,
+        -1.0
+      ],
+      "lab_right": [
+        57.3,
+        13.0,
+        17.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 25.2,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-197": {
+      "game": "11",
+      "half": "2",
+      "clock": "2 - 04:23",
+      "n_left": 86,
+      "n_right": 71,
+      "lab_left": [
+        47.8,
+        19.0,
+        13.0
+      ],
+      "lab_right": [
+        85.5,
+        1.0,
+        -3.0
+      ],
+      "kit_of_left": 1,
+      "kit_of_right": 0,
+      "margin": 39.0,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-198": {
+      "game": "11",
+      "half": "2",
+      "clock": "2 - 08:24",
+      "n_left": 83,
+      "n_right": 79,
+      "lab_left": [
+        91.8,
+        1.0,
+        -1.0
+      ],
+      "lab_right": [
+        54.9,
+        21.0,
+        14.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 31.8,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-199": {
+      "game": "11",
+      "half": "2",
+      "clock": "2 - 10:07",
+      "n_left": 81,
+      "n_right": 88,
+      "lab_left": [
+        84.7,
+        1.0,
+        -2.0
+      ],
+      "lab_right": [
+        57.3,
+        14.0,
+        13.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 24.9,
+      "degenerate": false,
+      "kit_sep": 39.4
+    },
+    "SNGS-200": {
+      "game": "11",
+      "half": "2",
+      "clock": "2 - 15:41",
+      "n_left": 75,
+      "n_right": 51,
+      "lab_left": [
+        92.5,
+        0.0,
+        0.0
+      ],
+      "lab_right": [
+        56.1,
+        20.0,
+        16.0
+      ],
+      "kit_of_left": 0,
+      "kit_of_right": 1,
+      "margin": 30.4,
+      "degenerate": false,
+      "kit_sep": 39.4
+    }
+  },
+  "groups": {
+    "game11_half1": {
+      "n": 8,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 8
+      },
+      "kit_sep": 39.4,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game11_half2": {
+      "n": 6,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 5,
+        "1": 1
+      },
+      "kit_sep": 39.4,
+      "minority": [
+        "SNGS-197"
+      ],
+      "n_degenerate": 0
+    },
+    "game2_half1": {
+      "n": 8,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 8
+      },
+      "kit_sep": 52.0,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game2_half2": {
+      "n": 10,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 10
+      },
+      "kit_sep": 52.0,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game3_half1": {
+      "n": 10,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 10
+      },
+      "kit_sep": 46.7,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game3_half2": {
+      "n": 11,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 11
+      },
+      "kit_sep": 46.7,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game4_half1": {
+      "n": 9,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 9
+      },
+      "kit_sep": 8.1,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game4_half2": {
+      "n": 9,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 9
+      },
+      "kit_sep": 8.1,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game5_half1": {
+      "n": 8,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 8
+      },
+      "kit_sep": 51.4,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game5_half2": {
+      "n": 11,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 10,
+        "1": 1
+      },
+      "kit_sep": 51.4,
+      "minority": [
+        "SNGS-092"
+      ],
+      "n_degenerate": 0
+    },
+    "game6_half1": {
+      "n": 10,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 10
+      },
+      "kit_sep": 33.9,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game6_half2": {
+      "n": 9,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 8,
+        "1": 1
+      },
+      "kit_sep": 33.9,
+      "minority": [
+        "SNGS-111"
+      ],
+      "n_degenerate": 0
+    },
+    "game7_half1": {
+      "n": 8,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 8
+      },
+      "kit_sep": 54.1,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game7_half2": {
+      "n": 8,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 6,
+        "0": 2
+      },
+      "kit_sep": 54.1,
+      "minority": [
+        "SNGS-126",
+        "SNGS-131"
+      ],
+      "n_degenerate": 0
+    },
+    "game8_half1": {
+      "n": 9,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 9
+      },
+      "kit_sep": 47.5,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game8_half2": {
+      "n": 10,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 10
+      },
+      "kit_sep": 47.5,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game9_half1": {
+      "n": 9,
+      "majority_kit_of_left": 0,
+      "counts": {
+        "0": 9
+      },
+      "kit_sep": 43.4,
+      "minority": [],
+      "n_degenerate": 0
+    },
+    "game9_half2": {
+      "n": 11,
+      "majority_kit_of_left": 1,
+      "counts": {
+        "1": 11
+      },
+      "kit_sep": 43.4,
+      "minority": [],
+      "n_degenerate": 0
+    }
+  },
+  "minority_clips": [
+    "SNGS-092",
+    "SNGS-111",
+    "SNGS-126",
+    "SNGS-131",
+    "SNGS-197"
+  ]
+}

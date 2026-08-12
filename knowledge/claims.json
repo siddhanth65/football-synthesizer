@@ -3586,7 +3586,8 @@
       "caveats": [
         "The oracle is the accuracy of the RULE given exact inputs, not a hard bound on our estimator: a noisy estimator can beat it by being wrong in a compensating way, and does (we get SNGS-038 and SNGS-195 right, and SNGS-034/-097/-105/-129 wrong, where the oracle does the opposite). The counts coincide on both graded splits; the clips do not.",
         "The early GT-oracle scan was run over all 164 sequences in one pass, so the fact that three of four test failures are GT inversions was seen before the freeze. It set no threshold and selected no candidate -- every selection was computed on train+valid -- but the exposure is on record.",
-        "18 train sequences (SNGS-060...077) have a degenerate kit clustering and are excluded from the our-positions pools; they are kept in the GT oracle pool, where kit clustering plays no part."
+        "18 train sequences (SNGS-060...077) have a degenerate kit clustering and are excluded from the our-positions pools; they are kept in the GT oracle pool, where kit clustering plays no part.",
+        "CORRECTED 2026-08-13 by gsr-gt-001: the 'ground-truth geometry inverts because GT inherits the broadcast's framing' explanation holds for SNGS-038 (+0.95 m) and SNGS-195 (+0.69 m) only. SNGS-092, SNGS-111, SNGS-126, SNGS-131 and SNGS-197 are whole-clip GT team side SWAPS (second-half clips carrying the first-half convention), confirmed by a 164-sequence cross-clip scan and independently stated by the WACV 2026 Broadcast2Pitch paper for the three test clips. The 112/115 and 45/49 oracle counts are unaffected; only the diagnosis of the residuals changes."
       ],
       "date": "2026-08-01",
       "tags": [
@@ -3600,6 +3601,7 @@
       "supersedes": [],
       "superseded_by": [],
       "depends_on": [
+        "gsr-gt-001",
         "ident-034",
         "ident-037"
       ]
@@ -5331,6 +5333,117 @@
         "The DEV-20 row is quoted from GSR_V7_V3.md 2.9, where grading used the ungated positions_v6det ids rather than positions_gate_v6det; the TEST-38 comparison between the two readers is internally consistent (one partition, one GT cache), but the DEV-vs-TEST density levels are not strictly comparable across that difference.",
         "Both readers lose density and precision going from DEV-20 to TEST-38 (0.41 -> 0.35, and 0.9365/0.9438 -> 0.9079/0.9009), so part of the shift is split difficulty. What split difficulty does not explain is the sign flip of the DIFFERENCE between the two readers measured on one split.",
         "Single measurement per reader per split; no bootstrap on the precision estimate."
+      ]
+    },
+    {
+      "id": "gsr-gt-001",
+      "statement": "FIVE SoccerNet-GSR SEQUENCES CARRY A WHOLE-CLIP TEAM SIDE SWAP IN THE GROUND TRUTH, AND THE THREE ON THE TEST SPLIT ARE EXACTLY THE THREE THE BENCHMARK LEADER NAMES. This is OUR measurement plus THEIR published statement, and the two agree independently. THEIR statement: the WACV 2026 Broadcast2Pitch paper (GS-HOTA 61.48 test, the current leader) writes that test samples SNGS-126, SNGS-131 and SNGS-197 'have incorrect team annotations in the SoccerNet-GSR test set'; the paper names no mechanism, no dev-split clip and no count. OUR measurement, made without reading their code: all 164 labelled GSR sequences were scanned with a cross-clip test -- teams change ends once, at half time, so every clip of one (game, half) must give the same kit the same left/right label. 159 of 164 clips obey it. The five that do not are SNGS-092 (valid), SNGS-111 (train), SNGS-126, SNGS-131, SNGS-197 (test). The error has a signature: all five are SECOND-half clips and each carries its own game's FIRST-half team-to-side mapping, i.e. the annotator's convention was not updated after the ends changed. Zero first-half clips dissent. Each dissenter is a confident assignment (kit-prototype margin 29.3 to 52.1 against a per-game kit separation of 33.9 to 54.1; 0 of 164 clips degenerate). The swap is a WHOLE-CLIP swap, not scattered mislabelling: in all ten clips audited crop-by-crop, kit clustering agrees with the GT team split at 1.00 track-level and 0.915-0.993 crop-level, so not one individual player is filed under the wrong team.",
+      "value": 5,
+      "unit": "sequences of 164 with a swapped team-to-side convention",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_GT_AUDIT.md#3. The decisive scan: all 164 sequences",
+        "results/gsr_benchmark/gt_audit/gt_game_consistency.json",
+        "results/gsr_benchmark/gt_audit/gt_audit.json",
+        "results/gsr_benchmark/gt_audit/SNGS-126_contact.png",
+        "results/gsr_benchmark/gt_audit/SNGS-131_contact.png",
+        "results/gsr_benchmark/gt_audit/SNGS-197_contact.png",
+        "tools/gsr_gt_audit.py",
+        "results/GSR_GT_AUDIT.md#2. Per-sequence verdicts",
+        "docs/WINNER_REPO_RECON.md",
+        "results/GSR_TEAMSIDE.md#3. Family 2 -- the rules, on our positions and on ground truth"
+      ],
+      "method": "tools/gsr_gt_audit.py, laptop CPU. Three instruments. (1) Every side rule of tools.gsr_teamside.side_scores run on GT positions, including gk_self ('a keeper's own team defends the goal he stands in'), whole clip and per third. (2) Player crops sampled every 15th frame from boxes >= 40 px tall, summarised by generator.teams.jersey_color (median CIELAB of non-grass torso pixels) and clustered KMeans(2) against the GT team split, with a separability ratio and per-track majority. (3) The decisive one: per-clip median CIELAB per GT side, then per-GAME KMeans(2) over those side-signatures to name each clip's left side by which of the match's two kits it wears, then a majority vote within each (game, half). Two alternative explanations were tested and closed: a 180-degree rotated GT pitch frame (the per-frame correlation of GT bbox_pitch x with GT bbox_image x_center is POSITIVE on all 49 test clips, 0.37 to 0.96) and a reverse-angle camera (the per-frame correlation of GT pitch-y with image foot-y is POSITIVE on all 49, 0.79 to 0.97). Contact sheets written for visual confirmation. Self-check: python -m tools.gsr_gt_audit --demo.",
+      "n": 164,
+      "caveats": [
+        "gk_self -- the definitional keeper rule, 113/113 on dev -- returns 'consistent' on ALL FIVE swapped clips and would have closed this audit with the opposite answer. A whole-clip swap moves the keeper's label with everyone else's, so a rule that compares a keeper only with his own position cannot see it. The first pass of this act did exactly that and reported 'their claim is not reproduced'.",
+        "The cross-clip test cannot grade a clip in isolation and assumes the error is a MINORITY event within a game-half. A whole game-half annotated with a swapped convention would be adopted by the majority vote and missed. Detecting that needs a physical anchor outside the annotation.",
+        "An earlier version of the kit handle ('the redder side', higher a*) produced one false positive, SNGS-160, whose two kits differ in lightness but have identical a* (2.0 vs 2.0). Every number quoted is from the fixed per-game LAB-prototype version.",
+        "Game 4 has weakly separated kits (prototype separation 8.1 vs 33.9-54.1 elsewhere); it is unanimous in both halves anyway, but its evidence is weaker than the rest.",
+        "We have not read the leader's predictions. Whether their submission emits the physically correct side on these clips (and therefore loses them, as their paper implies) is checkable in their public repo and was NOT checked here."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "ident-038",
+        "ident-039"
+      ],
+      "tags": [
+        "gsr",
+        "benchmark-data-quality",
+        "team-side",
+        "external-corroboration"
+      ]
+    },
+    {
+      "id": "gsr-gt-002",
+      "statement": "SNGS-130 -- OUR FOURTH TEST FLIP, AND THE ONE THE LEADER DOES NOT NAME -- IS NOT A GROUND-TRUTH ERROR. IT IS OURS. Its GT is consistent by every instrument: it sits with the majority of game 7's second half (6 of 8 clips), its keeper is labelled by his own goal (gk_self -47.75), its kit clustering agrees with the GT team split 1.00 at track level, and its gk_anchor is correctly signed (-0.73) where the three swapped test clips are wrong (+2.76, +3.77, +1.51). What makes it lose is that its GT mean-pitch-x separation is -0.11 m -- eleven centimetres over 750 frames, the tightest margin in the whole test split (next tightest correct clip: SNGS-191 at -2.30 m). Our estimator landed on the wrong side of a knife edge, and no better side rule reaches it: meanx is already at its GT-oracle ceiling. The mirror-image case is SNGS-195, GT-consistent with a +0.69 m depth inversion (broadcast framing, like SNGS-038 at +0.95 m) that the GT ORACLE gets wrong and our noisy estimator gets right by luck. This splits the shared 45/49 of GSR_TEAMSIDE into three distinct failure modes: three annotation errors (126, 131, 197), one framing artefact (195), one noise-floor coin flip (130).",
+      "value": -0.11,
+      "unit": "GT mean pitch-x separation on SNGS-130, metres (negative = label correct)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_GT_AUDIT.md#3. The decisive scan: all 164 sequences",
+        "results/gsr_benchmark/gt_audit/gt_game_consistency.json",
+        "results/gsr_benchmark/gt_audit/gt_audit.json",
+        "results/gsr_benchmark/gt_audit/SNGS-126_contact.png",
+        "results/gsr_benchmark/gt_audit/SNGS-131_contact.png",
+        "results/gsr_benchmark/gt_audit/SNGS-197_contact.png",
+        "tools/gsr_gt_audit.py",
+        "results/GSR_GT_AUDIT.md#4. SNGS-130 vs SNGS-195 -- the discrepancy in our list against theirs",
+        "results/gsr_benchmark/gsr_v6_legitimacy_audit.json",
+        "results/GSR_TEAMSIDE.md#7. Verification and package status"
+      ],
+      "method": "Same three instruments as gsr-gt-001, applied to the v6 flip set (SNGS-126, 130, 131, 197) plus controls SNGS-116 (healthy), SNGS-129 (the v4/v5-era flip the v6 detector fixed), SNGS-195 (GT-oracle inversion that is not one of our flips) and the three dev inversions SNGS-038 / 092 / 111. GT meanx values are tools.gsr_teamside.side_scores on GT positions.",
+      "n": 10,
+      "caveats": [
+        "SNGS-130 has no measured correct-side GS-HOTA counterfactual at v6; the DELEAK per-clip table predates the v6 detector, whose flip set moved from SNGS-129 to SNGS-130.",
+        "gk_anchor is corroboration, not proof: its GT ceiling is only 0.690 and it is positive (wrong) on two healthy clips in this pool, SNGS-129 and SNGS-195."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "gsr-gt-001"
+      ],
+      "tags": [
+        "gsr",
+        "team-side",
+        "error-attribution"
+      ]
+    },
+    {
+      "id": "gsr-gt-003",
+      "statement": "THE ANNOTATION ERROR COSTS US ~2.45 GS-HOTA THAT NO CORRECT METHOD CAN RECOVER -- AND IT COSTS THE LEADER MORE, SO IT WIDENS THE GAP RATHER THAN CLOSING IT. Using the only measured correct-side counterfactual we have (results/GSR_DELEAK.md, v4-era leaky vs GT-free arms, leak-adjusted by the -1.94 the roster leak is worth on the 45 non-flipped clips), the three swapped test clips cost SNGS-126 -45.83, SNGS-131 -26.44 and SNGS-197 -47.58 on their own sequences, i.e. -2.45 on the 49-clip mean: our v6 test score 53.09 would be ~55.5 against a corrected ground truth. Recovering that means predicting the wrong side on purpose, so it is unreachable by construction, not by weakness. The leader's 61.48 is scored on the same three clips; a flipped clip does not degrade but annihilates (GS-HOTA identity is (team, jersey), so ours score 5.36-6.78 when flipped), so if they lose all three their 46 healthy clips average ~65.1 and the three cost them ~-3.6 -- MORE than us, because the penalty scales with how good the clip would otherwise have been. Annotation-corrected, the gap goes from 8.39 to ~9.6. Dev-pool consequence: 2 of 115 dev sequences carry the same error, so any side rule graded on dev has a hard ceiling of 113/115 = 0.9826, BELOW the 0.98 target the N1b brief set, and meanx's true error rate on well-annotated dev clips is 1 in 113, not 3 in 115.",
+      "value": -2.45,
+      "unit": "GS-HOTA of our test-49 mean attributable to the three swapped clips",
+      "status": "pending",
+      "evidence": [
+        "results/GSR_GT_AUDIT.md#5. Implications -- how much of the loss is unreachable by anyone",
+        "results/GSR_DELEAK.md#Where the 4.02 goes",
+        "results/gsr_benchmark/gt_audit/gt_audit.json",
+        "docs/WINNER_REPO_RECON.md"
+      ],
+      "method": "Arithmetic on measured per-clip GS-HOTA, not a new measurement. Our figure uses the v4-era DELEAK per-clip pair (leaky side-correct vs GT-free side-flipped) minus the -1.94 roster-leak term, summed over three clips and divided by 49. The leader's figure assumes their flipped clips score in the same 5-7 band ours do and that they do not reproduce the annotation error.",
+      "n": 3,
+      "caveats": [
+        "STATUS PENDING BECAUSE THIS IS AN ESTIMATE, NOT A MEASUREMENT. The established fact is the annotation error (gsr-gt-001); everything downstream of it here is arithmetic.",
+        "Our -2.45 rests on a v4-era counterfactual. The v6 chain is stronger, so the true recoverable figure is probably larger, not smaller.",
+        "The leader's ~-3.6 assumes they LOSE those clips. If their pipeline instead reproduces the annotation error, up to ~3.6 of the 8.39 gap is unreachable-by-correct-methods and the true capability gap is ~4.8. We have no evidence for that reading; publishing the observation is weak evidence against it.",
+        "SNGS-130 (a further -0.5 to -1.0 at the same per-clip scale) is NOT in this figure: it is our own error and it is real headroom.",
+        "No action follows. Nothing was rebuilt, no GT was edited, and deliberately emitting a wrong side to match a buggy label is not proposed."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "gsr-gt-001",
+        "gsr-gt-002"
+      ],
+      "tags": [
+        "gsr",
+        "benchmark-data-quality",
+        "scoring"
       ]
     }
   ]

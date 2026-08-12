@@ -1,0 +1,3144 @@
+{
+  "pool": [
+    "SNGS-126",
+    "SNGS-130",
+    "SNGS-131",
+    "SNGS-197",
+    "SNGS-116",
+    "SNGS-129",
+    "SNGS-195",
+    "SNGS-038",
+    "SNGS-092",
+    "SNGS-111"
+  ],
+  "flip_set": [
+    "SNGS-126",
+    "SNGS-130",
+    "SNGS-131",
+    "SNGS-197"
+  ],
+  "cross_clip_minority": [
+    "SNGS-092",
+    "SNGS-111",
+    "SNGS-126",
+    "SNGS-131",
+    "SNGS-197"
+  ],
+  "per_seq": {
+    "SNGS-126": {
+      "oracle": {
+        "rules": {
+          "n_rows": 8233.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": 3.9929,
+          "medx": 4.6134,
+          "x_span": 52.7661,
+          "frame_mean": 1.625,
+          "frame_vote": 0.256,
+          "frame_t": 15.5803,
+          "cent_t": 2.552,
+          "deep1": 3.2886,
+          "high1": 0.3289,
+          "deep3": 2.9837,
+          "high3": -0.085,
+          "extreme_owner": 0.5707,
+          "n_ball_frames": 739.0,
+          "ball_rel": 1.0161,
+          "n_poss": 526.0,
+          "poss_drift": 0.7885,
+          "poss_share": 0.3733,
+          "poss_rel": 4.0588,
+          "n_gk_frames": 605.0,
+          "gk_anchor": 2.7551,
+          "gk_self": -48.0199
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": 2.302952886764224,
+            "gk_self": -47.46937778591261,
+            "n_rows": 1776.0,
+            "n_gk_frames": 250.0
+          },
+          {
+            "third": 1,
+            "meanx": 2.2969242234404916,
+            "gk_self": -46.46807761918869,
+            "n_rows": 3148.0,
+            "n_gk_frames": 105.0
+          },
+          {
+            "third": 2,
+            "meanx": 1.760989691855464,
+            "gk_self": -49.222197167240054,
+            "n_rows": 3309.0,
+            "n_gk_frames": 250.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "left",
+            "n_frames": 605,
+            "mean_pitch_x_centred": -48.02
+          }
+        ],
+        "n_player_rows": {
+          "left": 3585,
+          "right": 4648
+        }
+      },
+      "kit": {
+        "n_crops": 547,
+        "n_tracks": 21,
+        "crop_agreement": 0.9799,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            79.9,
+            0.6,
+            -5.0
+          ],
+          [
+            43.0,
+            28.9,
+            17.5
+          ]
+        ],
+        "centroid_sep": 51.72,
+        "mean_within_dist": 8.01,
+        "separability": 6.46,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": true,
+      "verdict": "GT SIDE-SWAPPED",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 13,
+          "jersey": "50",
+          "frame": 210,
+          "role": "player",
+          "x": 1749,
+          "y": 744,
+          "w": 156,
+          "h": 165
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "44",
+          "frame": 270,
+          "role": "player",
+          "x": 635,
+          "y": 673,
+          "w": 111,
+          "h": 155
+        },
+        {
+          "team": "left",
+          "track": 12,
+          "jersey": "4",
+          "frame": 299,
+          "role": "player",
+          "x": 1800,
+          "y": 555,
+          "w": 98,
+          "h": 155
+        },
+        {
+          "team": "left",
+          "track": 8,
+          "jersey": "27",
+          "frame": 316,
+          "role": "player",
+          "x": 691,
+          "y": 427,
+          "w": 79,
+          "h": 138
+        },
+        {
+          "team": "left",
+          "track": 25,
+          "jersey": NaN,
+          "frame": 396,
+          "role": "player",
+          "x": 1820,
+          "y": 494,
+          "w": 99,
+          "h": 124
+        },
+        {
+          "team": "left",
+          "track": 8,
+          "jersey": "27",
+          "frame": 450,
+          "role": "player",
+          "x": 194,
+          "y": 478,
+          "w": 103,
+          "h": 118
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "44",
+          "frame": 466,
+          "role": "player",
+          "x": 88,
+          "y": 669,
+          "w": 125,
+          "h": 169
+        },
+        {
+          "team": "left",
+          "track": 21,
+          "jersey": NaN,
+          "frame": 472,
+          "role": "player",
+          "x": 1797,
+          "y": 513,
+          "w": 91,
+          "h": 144
+        },
+        {
+          "team": "left",
+          "track": 13,
+          "jersey": "50",
+          "frame": 502,
+          "role": "player",
+          "x": 1081,
+          "y": 604,
+          "w": 125,
+          "h": 130
+        },
+        {
+          "team": "left",
+          "track": 12,
+          "jersey": "4",
+          "frame": 708,
+          "role": "player",
+          "x": 1763,
+          "y": 653,
+          "w": 102,
+          "h": 171
+        },
+        {
+          "team": "right",
+          "track": 5,
+          "jersey": NaN,
+          "frame": 28,
+          "role": "player",
+          "x": 1699,
+          "y": 704,
+          "w": 93,
+          "h": 176
+        },
+        {
+          "team": "right",
+          "track": 4,
+          "jersey": "31",
+          "frame": 232,
+          "role": "player",
+          "x": 745,
+          "y": 658,
+          "w": 134,
+          "h": 146
+        },
+        {
+          "team": "right",
+          "track": 1,
+          "jersey": "14",
+          "frame": 304,
+          "role": "player",
+          "x": 412,
+          "y": 436,
+          "w": 99,
+          "h": 155
+        },
+        {
+          "team": "right",
+          "track": 15,
+          "jersey": "8",
+          "frame": 330,
+          "role": "player",
+          "x": 1811,
+          "y": 540,
+          "w": 75,
+          "h": 168
+        },
+        {
+          "team": "right",
+          "track": 20,
+          "jersey": "33",
+          "frame": 364,
+          "role": "player",
+          "x": 1665,
+          "y": 620,
+          "w": 110,
+          "h": 145
+        },
+        {
+          "team": "right",
+          "track": 4,
+          "jersey": "31",
+          "frame": 448,
+          "role": "player",
+          "x": 244,
+          "y": 610,
+          "w": 114,
+          "h": 129
+        },
+        {
+          "team": "right",
+          "track": 18,
+          "jersey": "10",
+          "frame": 472,
+          "role": "player",
+          "x": 1627,
+          "y": 516,
+          "w": 94,
+          "h": 123
+        },
+        {
+          "team": "right",
+          "track": 1,
+          "jersey": "14",
+          "frame": 481,
+          "role": "player",
+          "x": 672,
+          "y": 477,
+          "w": 110,
+          "h": 129
+        },
+        {
+          "team": "right",
+          "track": 20,
+          "jersey": "33",
+          "frame": 536,
+          "role": "player",
+          "x": 1618,
+          "y": 695,
+          "w": 134,
+          "h": 175
+        },
+        {
+          "team": "right",
+          "track": 15,
+          "jersey": "8",
+          "frame": 599,
+          "role": "player",
+          "x": 562,
+          "y": 576,
+          "w": 103,
+          "h": 155
+        }
+      ]
+    },
+    "SNGS-130": {
+      "oracle": {
+        "rules": {
+          "n_rows": 9479.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": -0.1051,
+          "medx": 0.1634,
+          "x_span": 35.275,
+          "frame_mean": 0.3146,
+          "frame_vote": -0.0827,
+          "frame_t": 3.1831,
+          "cent_t": 0.8401,
+          "deep1": -1.0404,
+          "high1": 3.4668,
+          "deep3": -0.1538,
+          "high3": 1.4944,
+          "extreme_owner": 0.2307,
+          "n_ball_frames": 405.0,
+          "ball_rel": 2.1113,
+          "n_poss": 313.0,
+          "poss_drift": -1.2883,
+          "poss_share": -0.8142,
+          "poss_rel": 5.2919,
+          "n_gk_frames": 629.0,
+          "gk_anchor": -0.7294,
+          "gk_self": -47.7524
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": 2.672571200593964,
+            "gk_self": -46.94383382609563,
+            "n_rows": 3733.0,
+            "n_gk_frames": 129.0
+          },
+          {
+            "third": 1,
+            "meanx": -1.4700582451624769,
+            "gk_self": -49.82997361743888,
+            "n_rows": 2966.0,
+            "n_gk_frames": 250.0
+          },
+          {
+            "third": 2,
+            "meanx": -0.8021802821863702,
+            "gk_self": -46.0921171563476,
+            "n_rows": 2780.0,
+            "n_gk_frames": 250.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "right",
+            "n_frames": 629,
+            "mean_pitch_x_centred": 47.75
+          }
+        ],
+        "n_player_rows": {
+          "left": 4191,
+          "right": 5288
+        }
+      },
+      "kit": {
+        "n_crops": 630,
+        "n_tracks": 18,
+        "crop_agreement": 0.9587,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            84.0,
+            0.7,
+            -3.8
+          ],
+          [
+            43.7,
+            32.3,
+            17.6
+          ]
+        ],
+        "centroid_sep": 55.49,
+        "mean_within_dist": 8.4,
+        "separability": 6.6,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": false,
+      "verdict": "GT CONSISTENT",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 1,
+          "jersey": "25",
+          "frame": 20,
+          "role": "player",
+          "x": 1694,
+          "y": 449,
+          "w": 103,
+          "h": 151
+        },
+        {
+          "team": "left",
+          "track": 16,
+          "jersey": NaN,
+          "frame": 130,
+          "role": "player",
+          "x": 274,
+          "y": 305,
+          "w": 85,
+          "h": 136
+        },
+        {
+          "team": "left",
+          "track": 21,
+          "jersey": "33",
+          "frame": 170,
+          "role": "player",
+          "x": 1680,
+          "y": 380,
+          "w": 94,
+          "h": 123
+        },
+        {
+          "team": "left",
+          "track": 5,
+          "jersey": "9",
+          "frame": 206,
+          "role": "player",
+          "x": 961,
+          "y": 321,
+          "w": 98,
+          "h": 93
+        },
+        {
+          "team": "left",
+          "track": 8,
+          "jersey": "8",
+          "frame": 335,
+          "role": "player",
+          "x": 73,
+          "y": 773,
+          "w": 134,
+          "h": 225
+        },
+        {
+          "team": "left",
+          "track": 12,
+          "jersey": "31",
+          "frame": 371,
+          "role": "player",
+          "x": 1279,
+          "y": 828,
+          "w": 118,
+          "h": 226
+        },
+        {
+          "team": "left",
+          "track": 12,
+          "jersey": "31",
+          "frame": 449,
+          "role": "player",
+          "x": 994,
+          "y": 830,
+          "w": 114,
+          "h": 249
+        },
+        {
+          "team": "left",
+          "track": 8,
+          "jersey": "8",
+          "frame": 506,
+          "role": "player",
+          "x": 637,
+          "y": 501,
+          "w": 107,
+          "h": 192
+        },
+        {
+          "team": "left",
+          "track": 5,
+          "jersey": "9",
+          "frame": 726,
+          "role": "player",
+          "x": 689,
+          "y": 447,
+          "w": 78,
+          "h": 153
+        },
+        {
+          "team": "left",
+          "track": 21,
+          "jersey": "33",
+          "frame": 744,
+          "role": "player",
+          "x": 1390,
+          "y": 422,
+          "w": 63,
+          "h": 156
+        },
+        {
+          "team": "right",
+          "track": 13,
+          "jersey": "10",
+          "frame": 39,
+          "role": "player",
+          "x": 166,
+          "y": 461,
+          "w": 128,
+          "h": 153
+        },
+        {
+          "team": "right",
+          "track": 6,
+          "jersey": "8",
+          "frame": 131,
+          "role": "player",
+          "x": 1209,
+          "y": 388,
+          "w": 120,
+          "h": 140
+        },
+        {
+          "team": "right",
+          "track": 3,
+          "jersey": "4",
+          "frame": 208,
+          "role": "player",
+          "x": 293,
+          "y": 789,
+          "w": 135,
+          "h": 225
+        },
+        {
+          "team": "right",
+          "track": 2,
+          "jersey": "50",
+          "frame": 308,
+          "role": "player",
+          "x": 1405,
+          "y": 633,
+          "w": 101,
+          "h": 171
+        },
+        {
+          "team": "right",
+          "track": 3,
+          "jersey": "4",
+          "frame": 468,
+          "role": "player",
+          "x": 385,
+          "y": 610,
+          "w": 96,
+          "h": 215
+        },
+        {
+          "team": "right",
+          "track": 18,
+          "jersey": NaN,
+          "frame": 509,
+          "role": "goalkeeper",
+          "x": 1473,
+          "y": 364,
+          "w": 107,
+          "h": 163
+        },
+        {
+          "team": "right",
+          "track": 6,
+          "jersey": "8",
+          "frame": 528,
+          "role": "player",
+          "x": 390,
+          "y": 478,
+          "w": 98,
+          "h": 169
+        },
+        {
+          "team": "right",
+          "track": 9,
+          "jersey": "33",
+          "frame": 529,
+          "role": "player",
+          "x": 1276,
+          "y": 399,
+          "w": 83,
+          "h": 160
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "14",
+          "frame": 718,
+          "role": "player",
+          "x": 64,
+          "y": 361,
+          "w": 98,
+          "h": 150
+        },
+        {
+          "team": "right",
+          "track": 2,
+          "jersey": "50",
+          "frame": 740,
+          "role": "player",
+          "x": 1598,
+          "y": 545,
+          "w": 75,
+          "h": 177
+        }
+      ]
+    },
+    "SNGS-131": {
+      "oracle": {
+        "rules": {
+          "n_rows": 11615.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": 3.7773,
+          "medx": 4.2452,
+          "x_span": 29.5687,
+          "frame_mean": 3.9995,
+          "frame_vote": 1.0,
+          "frame_t": 72.2941,
+          "cent_t": 11.6766,
+          "deep1": 1.664,
+          "high1": 4.1903,
+          "deep3": 3.5525,
+          "high3": 3.7886,
+          "extreme_owner": 0.6373,
+          "n_ball_frames": 514.0,
+          "ball_rel": 1.6981,
+          "n_poss": 415.0,
+          "poss_drift": -1.3522,
+          "poss_share": -0.1393,
+          "poss_rel": 3.731,
+          "n_gk_frames": 675.0,
+          "gk_anchor": 3.7725,
+          "gk_self": -48.6827
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": 2.758813277904059,
+            "gk_self": -50.31236634749519,
+            "n_rows": 4291.0,
+            "n_gk_frames": 250.0
+          },
+          {
+            "third": 1,
+            "meanx": 3.6695428740359937,
+            "gk_self": -48.49719074979439,
+            "n_rows": 3862.0,
+            "n_gk_frames": 175.0
+          },
+          {
+            "third": 2,
+            "meanx": 5.709959516614788,
+            "gk_self": -47.18282554342855,
+            "n_rows": 3462.0,
+            "n_gk_frames": 250.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "left",
+            "n_frames": 675,
+            "mean_pitch_x_centred": -48.68
+          }
+        ],
+        "n_player_rows": {
+          "left": 5184,
+          "right": 6431
+        }
+      },
+      "kit": {
+        "n_crops": 775,
+        "n_tracks": 19,
+        "crop_agreement": 0.9729,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            81.9,
+            1.1,
+            -3.3
+          ],
+          [
+            43.2,
+            32.0,
+            19.9
+          ]
+        ],
+        "centroid_sep": 54.74,
+        "mean_within_dist": 7.66,
+        "separability": 7.14,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": true,
+      "verdict": "GT SIDE-SWAPPED",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 4,
+          "jersey": "4",
+          "frame": 223,
+          "role": "player",
+          "x": 1735,
+          "y": 701,
+          "w": 101,
+          "h": 165
+        },
+        {
+          "team": "left",
+          "track": 5,
+          "jersey": "10",
+          "frame": 224,
+          "role": "player",
+          "x": 590,
+          "y": 864,
+          "w": 130,
+          "h": 215
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "50",
+          "frame": 335,
+          "role": "player",
+          "x": 1331,
+          "y": 567,
+          "w": 117,
+          "h": 159
+        },
+        {
+          "team": "left",
+          "track": 6,
+          "jersey": "27",
+          "frame": 359,
+          "role": "player",
+          "x": 146,
+          "y": 284,
+          "w": 102,
+          "h": 116
+        },
+        {
+          "team": "left",
+          "track": 21,
+          "jersey": "8",
+          "frame": 365,
+          "role": "player",
+          "x": 688,
+          "y": 439,
+          "w": 104,
+          "h": 143
+        },
+        {
+          "team": "left",
+          "track": 5,
+          "jersey": "10",
+          "frame": 415,
+          "role": "player",
+          "x": 1356,
+          "y": 730,
+          "w": 101,
+          "h": 187
+        },
+        {
+          "team": "left",
+          "track": 4,
+          "jersey": "4",
+          "frame": 446,
+          "role": "player",
+          "x": 1206,
+          "y": 619,
+          "w": 107,
+          "h": 138
+        },
+        {
+          "team": "left",
+          "track": 21,
+          "jersey": "8",
+          "frame": 598,
+          "role": "player",
+          "x": 927,
+          "y": 703,
+          "w": 153,
+          "h": 167
+        },
+        {
+          "team": "left",
+          "track": 6,
+          "jersey": "27",
+          "frame": 612,
+          "role": "player",
+          "x": 420,
+          "y": 509,
+          "w": 135,
+          "h": 147
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "50",
+          "frame": 671,
+          "role": "player",
+          "x": 1570,
+          "y": 817,
+          "w": 168,
+          "h": 206
+        },
+        {
+          "team": "right",
+          "track": 22,
+          "jersey": "9",
+          "frame": 241,
+          "role": "player",
+          "x": 1443,
+          "y": 561,
+          "w": 139,
+          "h": 146
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "21",
+          "frame": 317,
+          "role": "player",
+          "x": 968,
+          "y": 616,
+          "w": 143,
+          "h": 171
+        },
+        {
+          "team": "right",
+          "track": 14,
+          "jersey": NaN,
+          "frame": 357,
+          "role": "player",
+          "x": 1334,
+          "y": 350,
+          "w": 106,
+          "h": 122
+        },
+        {
+          "team": "right",
+          "track": 13,
+          "jersey": "16",
+          "frame": 360,
+          "role": "player",
+          "x": 18,
+          "y": 447,
+          "w": 105,
+          "h": 143
+        },
+        {
+          "team": "right",
+          "track": 12,
+          "jersey": "31",
+          "frame": 370,
+          "role": "player",
+          "x": 176,
+          "y": 428,
+          "w": 100,
+          "h": 110
+        },
+        {
+          "team": "right",
+          "track": 22,
+          "jersey": "9",
+          "frame": 380,
+          "role": "player",
+          "x": 1838,
+          "y": 586,
+          "w": 81,
+          "h": 158
+        },
+        {
+          "team": "right",
+          "track": 11,
+          "jersey": NaN,
+          "frame": 506,
+          "role": "player",
+          "x": 1059,
+          "y": 458,
+          "w": 87,
+          "h": 130
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "21",
+          "frame": 536,
+          "role": "player",
+          "x": 1393,
+          "y": 541,
+          "w": 151,
+          "h": 144
+        },
+        {
+          "team": "right",
+          "track": 13,
+          "jersey": "16",
+          "frame": 607,
+          "role": "player",
+          "x": 667,
+          "y": 555,
+          "w": 124,
+          "h": 146
+        },
+        {
+          "team": "right",
+          "track": 12,
+          "jersey": "31",
+          "frame": 616,
+          "role": "player",
+          "x": 384,
+          "y": 544,
+          "w": 124,
+          "h": 137
+        }
+      ]
+    },
+    "SNGS-197": {
+      "oracle": {
+        "rules": {
+          "n_rows": 11684.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": 5.3682,
+          "medx": 5.0962,
+          "x_span": 53.7512,
+          "frame_mean": 1.0498,
+          "frame_vote": 0.4907,
+          "frame_t": 8.0353,
+          "cent_t": 1.4105,
+          "deep1": -1.2668,
+          "high1": 1.0024,
+          "deep3": -0.8858,
+          "high3": 2.2681,
+          "extreme_owner": 0.2307,
+          "n_ball_frames": 750.0,
+          "ball_rel": 1.3442,
+          "n_poss": 688.0,
+          "poss_drift": -0.161,
+          "poss_share": 0.0514,
+          "poss_rel": 6.9817,
+          "n_gk_frames": 372.0,
+          "gk_anchor": 1.5132,
+          "gk_self": -45.9496
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": 4.248885026991481,
+            "gk_self": NaN,
+            "n_rows": 4653.0,
+            "n_gk_frames": 0.0
+          },
+          {
+            "third": 1,
+            "meanx": 2.4420940528378594,
+            "gk_self": -48.582234111320815,
+            "n_rows": 3985.0,
+            "n_gk_frames": 122.0
+          },
+          {
+            "third": 2,
+            "meanx": -1.1202669474522793,
+            "gk_self": -44.66493226658059,
+            "n_rows": 3046.0,
+            "n_gk_frames": 250.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "right",
+            "n_frames": 372,
+            "mean_pitch_x_centred": 45.95
+          }
+        ],
+        "n_player_rows": {
+          "left": 6474,
+          "right": 5210
+        }
+      },
+      "kit": {
+        "n_crops": 780,
+        "n_tracks": 20,
+        "crop_agreement": 0.9923,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            84.3,
+            1.2,
+            -3.2
+          ],
+          [
+            48.6,
+            18.8,
+            13.8
+          ]
+        ],
+        "centroid_sep": 43.28,
+        "mean_within_dist": 8.46,
+        "separability": 5.12,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": true,
+      "verdict": "GT SIDE-SWAPPED",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 1,
+          "jersey": "30",
+          "frame": 69,
+          "role": "player",
+          "x": 1167,
+          "y": 806,
+          "w": 102,
+          "h": 103
+        },
+        {
+          "team": "left",
+          "track": 9,
+          "jersey": NaN,
+          "frame": 88,
+          "role": "player",
+          "x": 394,
+          "y": 584,
+          "w": 82,
+          "h": 79
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "34",
+          "frame": 132,
+          "role": "player",
+          "x": 1622,
+          "y": 518,
+          "w": 81,
+          "h": 92
+        },
+        {
+          "team": "left",
+          "track": 10,
+          "jersey": "33",
+          "frame": 544,
+          "role": "player",
+          "x": 732,
+          "y": 755,
+          "w": 99,
+          "h": 124
+        },
+        {
+          "team": "left",
+          "track": 5,
+          "jersey": "14",
+          "frame": 644,
+          "role": "player",
+          "x": 669,
+          "y": 612,
+          "w": 68,
+          "h": 127
+        },
+        {
+          "team": "left",
+          "track": 1,
+          "jersey": "30",
+          "frame": 662,
+          "role": "player",
+          "x": 1794,
+          "y": 930,
+          "w": 78,
+          "h": 149
+        },
+        {
+          "team": "left",
+          "track": 2,
+          "jersey": "16",
+          "frame": 688,
+          "role": "player",
+          "x": 1034,
+          "y": 930,
+          "w": 79,
+          "h": 149
+        },
+        {
+          "team": "left",
+          "track": 8,
+          "jersey": "7",
+          "frame": 726,
+          "role": "player",
+          "x": 194,
+          "y": 577,
+          "w": 87,
+          "h": 127
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "34",
+          "frame": 726,
+          "role": "player",
+          "x": 1325,
+          "y": 604,
+          "w": 70,
+          "h": 121
+        },
+        {
+          "team": "left",
+          "track": 7,
+          "jersey": "24",
+          "frame": 744,
+          "role": "player",
+          "x": 469,
+          "y": 927,
+          "w": 82,
+          "h": 136
+        },
+        {
+          "team": "right",
+          "track": 12,
+          "jersey": NaN,
+          "frame": 94,
+          "role": "player",
+          "x": 238,
+          "y": 608,
+          "w": 94,
+          "h": 93
+        },
+        {
+          "team": "right",
+          "track": 11,
+          "jersey": "27",
+          "frame": 332,
+          "role": "player",
+          "x": 1138,
+          "y": 838,
+          "w": 79,
+          "h": 122
+        },
+        {
+          "team": "right",
+          "track": 13,
+          "jersey": "10",
+          "frame": 338,
+          "role": "player",
+          "x": 621,
+          "y": 600,
+          "w": 68,
+          "h": 97
+        },
+        {
+          "team": "right",
+          "track": 15,
+          "jersey": "22",
+          "frame": 363,
+          "role": "player",
+          "x": 192,
+          "y": 646,
+          "w": 72,
+          "h": 109
+        },
+        {
+          "team": "right",
+          "track": 11,
+          "jersey": "27",
+          "frame": 457,
+          "role": "player",
+          "x": 1490,
+          "y": 734,
+          "w": 97,
+          "h": 115
+        },
+        {
+          "team": "right",
+          "track": 13,
+          "jersey": "10",
+          "frame": 557,
+          "role": "player",
+          "x": 884,
+          "y": 833,
+          "w": 114,
+          "h": 119
+        },
+        {
+          "team": "right",
+          "track": 14,
+          "jersey": "15",
+          "frame": 619,
+          "role": "player",
+          "x": 888,
+          "y": 441,
+          "w": 75,
+          "h": 88
+        },
+        {
+          "team": "right",
+          "track": 21,
+          "jersey": "14",
+          "frame": 644,
+          "role": "player",
+          "x": 814,
+          "y": 636,
+          "w": 73,
+          "h": 121
+        },
+        {
+          "team": "right",
+          "track": 22,
+          "jersey": "9",
+          "frame": 737,
+          "role": "player",
+          "x": 1330,
+          "y": 613,
+          "w": 66,
+          "h": 128
+        },
+        {
+          "team": "right",
+          "track": 15,
+          "jersey": "22",
+          "frame": 738,
+          "role": "player",
+          "x": 40,
+          "y": 859,
+          "w": 70,
+          "h": 145
+        }
+      ]
+    },
+    "SNGS-116": {
+      "oracle": {
+        "rules": {
+          "n_rows": 9547.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": -4.8406,
+          "medx": -6.3466,
+          "x_span": 62.2364,
+          "frame_mean": -1.9204,
+          "frame_vote": -0.5547,
+          "frame_t": -25.1004,
+          "cent_t": -2.1616,
+          "deep1": -0.9019,
+          "high1": -2.0587,
+          "deep3": -1.8375,
+          "high3": -1.6902,
+          "extreme_owner": -0.4067,
+          "n_ball_frames": 724.0,
+          "ball_rel": -1.7083,
+          "n_poss": 520.0,
+          "poss_drift": -1.7036,
+          "poss_share": -0.4051,
+          "poss_rel": -2.4073,
+          "n_gk_frames": 601.0,
+          "gk_anchor": -1.6213,
+          "gk_self": -44.0686
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": -2.215342791999049,
+            "gk_self": -50.70039809599038,
+            "n_rows": 4061.0,
+            "n_gk_frames": 243.0
+          },
+          {
+            "third": 1,
+            "meanx": -1.452247401889153,
+            "gk_self": -39.734151945445205,
+            "n_rows": 3006.0,
+            "n_gk_frames": 250.0
+          },
+          {
+            "third": 2,
+            "meanx": -3.641385769634745,
+            "gk_self": -39.18069276780297,
+            "n_rows": 2480.0,
+            "n_gk_frames": 108.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "right",
+            "n_frames": 601,
+            "mean_pitch_x_centred": 44.07
+          }
+        ],
+        "n_player_rows": {
+          "left": 4314,
+          "right": 5233
+        }
+      },
+      "kit": {
+        "n_crops": 636,
+        "n_tracks": 23,
+        "crop_agreement": 0.9497,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            74.5,
+            1.2,
+            -2.8
+          ],
+          [
+            37.7,
+            27.1,
+            18.1
+          ]
+        ],
+        "centroid_sep": 49.57,
+        "mean_within_dist": 9.36,
+        "separability": 5.3,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": false,
+      "verdict": "GT CONSISTENT",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 2,
+          "jersey": "93",
+          "frame": 188,
+          "role": "player",
+          "x": 67,
+          "y": 595,
+          "w": 106,
+          "h": 163
+        },
+        {
+          "team": "left",
+          "track": 17,
+          "jersey": "36",
+          "frame": 260,
+          "role": "player",
+          "x": 1390,
+          "y": 513,
+          "w": 102,
+          "h": 171
+        },
+        {
+          "team": "left",
+          "track": 15,
+          "jersey": "8",
+          "frame": 278,
+          "role": "player",
+          "x": 979,
+          "y": 430,
+          "w": 105,
+          "h": 152
+        },
+        {
+          "team": "left",
+          "track": 1,
+          "jersey": "4",
+          "frame": 345,
+          "role": "player",
+          "x": 0,
+          "y": 624,
+          "w": 116,
+          "h": 191
+        },
+        {
+          "team": "left",
+          "track": 14,
+          "jersey": "33",
+          "frame": 361,
+          "role": "player",
+          "x": 120,
+          "y": 467,
+          "w": 115,
+          "h": 147
+        },
+        {
+          "team": "left",
+          "track": 17,
+          "jersey": "36",
+          "frame": 423,
+          "role": "player",
+          "x": 0,
+          "y": 753,
+          "w": 172,
+          "h": 240
+        },
+        {
+          "team": "left",
+          "track": 15,
+          "jersey": "8",
+          "frame": 433,
+          "role": "player",
+          "x": 16,
+          "y": 413,
+          "w": 104,
+          "h": 158
+        },
+        {
+          "team": "left",
+          "track": 1,
+          "jersey": "4",
+          "frame": 561,
+          "role": "player",
+          "x": 258,
+          "y": 512,
+          "w": 96,
+          "h": 147
+        },
+        {
+          "team": "left",
+          "track": 2,
+          "jersey": "93",
+          "frame": 725,
+          "role": "player",
+          "x": 1217,
+          "y": 733,
+          "w": 101,
+          "h": 191
+        },
+        {
+          "team": "left",
+          "track": 6,
+          "jersey": "11",
+          "frame": 738,
+          "role": "player",
+          "x": 1766,
+          "y": 394,
+          "w": 117,
+          "h": 145
+        },
+        {
+          "team": "right",
+          "track": 3,
+          "jersey": "25",
+          "frame": 249,
+          "role": "player",
+          "x": 9,
+          "y": 514,
+          "w": 111,
+          "h": 152
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "20",
+          "frame": 254,
+          "role": "player",
+          "x": 656,
+          "y": 497,
+          "w": 120,
+          "h": 165
+        },
+        {
+          "team": "right",
+          "track": 18,
+          "jersey": "8",
+          "frame": 266,
+          "role": "player",
+          "x": 1428,
+          "y": 392,
+          "w": 101,
+          "h": 150
+        },
+        {
+          "team": "right",
+          "track": 9,
+          "jersey": "33",
+          "frame": 267,
+          "role": "player",
+          "x": 666,
+          "y": 400,
+          "w": 93,
+          "h": 146
+        },
+        {
+          "team": "right",
+          "track": 19,
+          "jersey": NaN,
+          "frame": 272,
+          "role": "goalkeeper",
+          "x": 955,
+          "y": 409,
+          "w": 92,
+          "h": 152
+        },
+        {
+          "team": "right",
+          "track": 7,
+          "jersey": "34",
+          "frame": 466,
+          "role": "player",
+          "x": 1653,
+          "y": 509,
+          "w": 94,
+          "h": 171
+        },
+        {
+          "team": "right",
+          "track": 18,
+          "jersey": "8",
+          "frame": 511,
+          "role": "player",
+          "x": 423,
+          "y": 446,
+          "w": 96,
+          "h": 151
+        },
+        {
+          "team": "right",
+          "track": 11,
+          "jersey": "10",
+          "frame": 620,
+          "role": "player",
+          "x": 56,
+          "y": 636,
+          "w": 103,
+          "h": 175
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "20",
+          "frame": 621,
+          "role": "player",
+          "x": 1783,
+          "y": 880,
+          "w": 115,
+          "h": 192
+        },
+        {
+          "team": "right",
+          "track": 16,
+          "jersey": "36",
+          "frame": 625,
+          "role": "player",
+          "x": 106,
+          "y": 851,
+          "w": 121,
+          "h": 228
+        }
+      ]
+    },
+    "SNGS-129": {
+      "oracle": {
+        "rules": {
+          "n_rows": 10278.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": -9.34,
+          "medx": -29.6761,
+          "x_span": 87.4456,
+          "frame_mean": 0.1311,
+          "frame_vote": 0.2347,
+          "frame_t": 1.549,
+          "cent_t": 0.0836,
+          "deep1": -2.4693,
+          "high1": 0.6299,
+          "deep3": -1.5013,
+          "high3": 1.2015,
+          "extreme_owner": -0.292,
+          "n_ball_frames": 495.0,
+          "ball_rel": 1.8965,
+          "n_poss": 470.0,
+          "poss_drift": -0.649,
+          "poss_share": -0.3546,
+          "poss_rel": 0.769,
+          "n_gk_frames": 497.0,
+          "gk_anchor": 1.1652,
+          "gk_self": -101.1716
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": -1.295497640639681,
+            "gk_self": -51.115927804441554,
+            "n_rows": 4498.0,
+            "n_gk_frames": 55.0
+          },
+          {
+            "third": 1,
+            "meanx": 1.4592840618949587,
+            "gk_self": -50.01842848779091,
+            "n_rows": 2628.0,
+            "n_gk_frames": 192.0
+          },
+          {
+            "third": 2,
+            "meanx": -2.6340267352335056,
+            "gk_self": -50.08420077923729,
+            "n_rows": 3152.0,
+            "n_gk_frames": 250.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "left",
+            "n_frames": 442,
+            "mean_pitch_x_centred": -50.06
+          },
+          {
+            "gt_team": "right",
+            "n_frames": 55,
+            "mean_pitch_x_centred": 51.12
+          }
+        ],
+        "n_player_rows": {
+          "left": 5856,
+          "right": 4422
+        }
+      },
+      "kit": {
+        "n_crops": 685,
+        "n_tracks": 20,
+        "crop_agreement": 0.9153,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            46.4,
+            28.5,
+            16.3
+          ],
+          [
+            79.2,
+            1.6,
+            -2.3
+          ]
+        ],
+        "centroid_sep": 46.3,
+        "mean_within_dist": 9.54,
+        "separability": 4.85,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": false,
+      "verdict": "GT CONSISTENT",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 13,
+          "jersey": "36",
+          "frame": 22,
+          "role": "player",
+          "x": 397,
+          "y": 444,
+          "w": 112,
+          "h": 122
+        },
+        {
+          "team": "left",
+          "track": 24,
+          "jersey": "33",
+          "frame": 172,
+          "role": "player",
+          "x": 1518,
+          "y": 780,
+          "w": 207,
+          "h": 196
+        },
+        {
+          "team": "left",
+          "track": 19,
+          "jersey": "20",
+          "frame": 182,
+          "role": "player",
+          "x": 1158,
+          "y": 544,
+          "w": 124,
+          "h": 144
+        },
+        {
+          "team": "left",
+          "track": 16,
+          "jersey": "14",
+          "frame": 369,
+          "role": "player",
+          "x": 1708,
+          "y": 499,
+          "w": 136,
+          "h": 158
+        },
+        {
+          "team": "left",
+          "track": 12,
+          "jersey": "31",
+          "frame": 373,
+          "role": "player",
+          "x": 1774,
+          "y": 548,
+          "w": 129,
+          "h": 167
+        },
+        {
+          "team": "left",
+          "track": 16,
+          "jersey": "14",
+          "frame": 376,
+          "role": "player",
+          "x": 1632,
+          "y": 493,
+          "w": 137,
+          "h": 154
+        },
+        {
+          "team": "left",
+          "track": 19,
+          "jersey": "20",
+          "frame": 378,
+          "role": "player",
+          "x": 622,
+          "y": 522,
+          "w": 106,
+          "h": 150
+        },
+        {
+          "team": "left",
+          "track": 24,
+          "jersey": "33",
+          "frame": 385,
+          "role": "player",
+          "x": 959,
+          "y": 556,
+          "w": 120,
+          "h": 157
+        },
+        {
+          "team": "left",
+          "track": 12,
+          "jersey": "31",
+          "frame": 389,
+          "role": "player",
+          "x": 1631,
+          "y": 537,
+          "w": 115,
+          "h": 161
+        },
+        {
+          "team": "left",
+          "track": 15,
+          "jersey": "8",
+          "frame": 469,
+          "role": "player",
+          "x": 1794,
+          "y": 462,
+          "w": 109,
+          "h": 169
+        },
+        {
+          "team": "right",
+          "track": 4,
+          "jersey": NaN,
+          "frame": 19,
+          "role": "player",
+          "x": 405,
+          "y": 441,
+          "w": 114,
+          "h": 131
+        },
+        {
+          "team": "right",
+          "track": 8,
+          "jersey": "44",
+          "frame": 79,
+          "role": "player",
+          "x": 1071,
+          "y": 538,
+          "w": 125,
+          "h": 153
+        },
+        {
+          "team": "right",
+          "track": 7,
+          "jersey": "27",
+          "frame": 141,
+          "role": "player",
+          "x": 920,
+          "y": 461,
+          "w": 111,
+          "h": 141
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "50",
+          "frame": 181,
+          "role": "player",
+          "x": 1047,
+          "y": 663,
+          "w": 152,
+          "h": 178
+        },
+        {
+          "team": "right",
+          "track": 1,
+          "jersey": "4",
+          "frame": 194,
+          "role": "player",
+          "x": 340,
+          "y": 534,
+          "w": 109,
+          "h": 149
+        },
+        {
+          "team": "right",
+          "track": 2,
+          "jersey": "14",
+          "frame": 232,
+          "role": "player",
+          "x": 1748,
+          "y": 495,
+          "w": 114,
+          "h": 132
+        },
+        {
+          "team": "right",
+          "track": 3,
+          "jersey": NaN,
+          "frame": 376,
+          "role": "player",
+          "x": 1470,
+          "y": 415,
+          "w": 105,
+          "h": 145
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "50",
+          "frame": 404,
+          "role": "player",
+          "x": 292,
+          "y": 503,
+          "w": 119,
+          "h": 156
+        },
+        {
+          "team": "right",
+          "track": 1,
+          "jersey": "4",
+          "frame": 410,
+          "role": "player",
+          "x": 826,
+          "y": 473,
+          "w": 105,
+          "h": 137
+        },
+        {
+          "team": "right",
+          "track": 2,
+          "jersey": "14",
+          "frame": 513,
+          "role": "player",
+          "x": 1716,
+          "y": 575,
+          "w": 130,
+          "h": 173
+        }
+      ]
+    },
+    "SNGS-195": {
+      "oracle": {
+        "rules": {
+          "n_rows": 10756.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": 0.686,
+          "medx": 0.6587,
+          "x_span": 46.2328,
+          "frame_mean": 0.8959,
+          "frame_vote": 0.2027,
+          "frame_t": 11.5514,
+          "cent_t": 1.5285,
+          "deep1": 1.7207,
+          "high1": 1.3849,
+          "deep3": 0.8915,
+          "high3": 1.5351,
+          "extreme_owner": 0.2773,
+          "n_ball_frames": 728.0,
+          "ball_rel": 0.2655,
+          "n_poss": 640.0,
+          "poss_drift": 0.3903,
+          "poss_share": 0.214,
+          "poss_rel": 10.025,
+          "n_gk_frames": 549.0,
+          "gk_anchor": 1.1953,
+          "gk_self": -46.4635
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": -1.0681631699944916,
+            "gk_self": -45.43074058939086,
+            "n_rows": 3922.0,
+            "n_gk_frames": 78.0
+          },
+          {
+            "third": 1,
+            "meanx": 0.4527392480641801,
+            "gk_self": -48.592265024285375,
+            "n_rows": 3221.0,
+            "n_gk_frames": 221.0
+          },
+          {
+            "third": 2,
+            "meanx": 2.2583322654152838,
+            "gk_self": -44.90394939119976,
+            "n_rows": 3613.0,
+            "n_gk_frames": 250.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "left",
+            "n_frames": 549,
+            "mean_pitch_x_centred": -46.46
+          }
+        ],
+        "n_player_rows": {
+          "left": 6053,
+          "right": 4703
+        }
+      },
+      "kit": {
+        "n_crops": 716,
+        "n_tracks": 18,
+        "crop_agreement": 0.993,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            57.7,
+            18.3,
+            16.3
+          ],
+          [
+            91.0,
+            0.3,
+            -0.3
+          ]
+        ],
+        "centroid_sep": 41.37,
+        "mean_within_dist": 6.87,
+        "separability": 6.02,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": false,
+      "verdict": "GT CONSISTENT (depth inverts)",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 16,
+          "jersey": "10",
+          "frame": 11,
+          "role": "player",
+          "x": 1588,
+          "y": 848,
+          "w": 85,
+          "h": 125
+        },
+        {
+          "team": "left",
+          "track": 8,
+          "jersey": "27",
+          "frame": 97,
+          "role": "player",
+          "x": 286,
+          "y": 864,
+          "w": 72,
+          "h": 140
+        },
+        {
+          "team": "left",
+          "track": 21,
+          "jersey": "15",
+          "frame": 193,
+          "role": "player",
+          "x": 1269,
+          "y": 637,
+          "w": 81,
+          "h": 115
+        },
+        {
+          "team": "left",
+          "track": 5,
+          "jersey": "17",
+          "frame": 389,
+          "role": "player",
+          "x": 745,
+          "y": 541,
+          "w": 99,
+          "h": 99
+        },
+        {
+          "team": "left",
+          "track": 17,
+          "jersey": "14",
+          "frame": 397,
+          "role": "player",
+          "x": 1757,
+          "y": 573,
+          "w": 84,
+          "h": 119
+        },
+        {
+          "team": "left",
+          "track": 8,
+          "jersey": "27",
+          "frame": 473,
+          "role": "player",
+          "x": 985,
+          "y": 665,
+          "w": 74,
+          "h": 132
+        },
+        {
+          "team": "left",
+          "track": 16,
+          "jersey": "10",
+          "frame": 473,
+          "role": "player",
+          "x": 1417,
+          "y": 556,
+          "w": 81,
+          "h": 117
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "3",
+          "frame": 473,
+          "role": "player",
+          "x": 802,
+          "y": 568,
+          "w": 80,
+          "h": 137
+        },
+        {
+          "team": "left",
+          "track": 7,
+          "jersey": "31",
+          "frame": 481,
+          "role": "player",
+          "x": 1299,
+          "y": 452,
+          "w": 74,
+          "h": 136
+        },
+        {
+          "team": "left",
+          "track": 11,
+          "jersey": "22",
+          "frame": 494,
+          "role": "player",
+          "x": 1654,
+          "y": 647,
+          "w": 61,
+          "h": 154
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "7",
+          "frame": 1,
+          "role": "player",
+          "x": 987,
+          "y": 681,
+          "w": 89,
+          "h": 117
+        },
+        {
+          "team": "right",
+          "track": 20,
+          "jersey": NaN,
+          "frame": 111,
+          "role": "player",
+          "x": 1523,
+          "y": 661,
+          "w": 116,
+          "h": 96
+        },
+        {
+          "team": "right",
+          "track": 15,
+          "jersey": "16",
+          "frame": 139,
+          "role": "player",
+          "x": 1207,
+          "y": 675,
+          "w": 83,
+          "h": 115
+        },
+        {
+          "team": "right",
+          "track": 4,
+          "jersey": "33",
+          "frame": 284,
+          "role": "player",
+          "x": 380,
+          "y": 667,
+          "w": 94,
+          "h": 119
+        },
+        {
+          "team": "right",
+          "track": 6,
+          "jersey": "9",
+          "frame": 343,
+          "role": "player",
+          "x": 1097,
+          "y": 424,
+          "w": 91,
+          "h": 97
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "7",
+          "frame": 384,
+          "role": "player",
+          "x": 765,
+          "y": 571,
+          "w": 93,
+          "h": 100
+        },
+        {
+          "team": "right",
+          "track": 6,
+          "jersey": "9",
+          "frame": 415,
+          "role": "player",
+          "x": 1119,
+          "y": 388,
+          "w": 83,
+          "h": 101
+        },
+        {
+          "team": "right",
+          "track": 4,
+          "jersey": "33",
+          "frame": 425,
+          "role": "player",
+          "x": 306,
+          "y": 799,
+          "w": 86,
+          "h": 149
+        },
+        {
+          "team": "right",
+          "track": 12,
+          "jersey": "24",
+          "frame": 473,
+          "role": "player",
+          "x": 523,
+          "y": 535,
+          "w": 76,
+          "h": 124
+        },
+        {
+          "team": "right",
+          "track": 19,
+          "jersey": NaN,
+          "frame": 489,
+          "role": "player",
+          "x": 1729,
+          "y": 379,
+          "w": 74,
+          "h": 113
+        }
+      ]
+    },
+    "SNGS-038": {
+      "oracle": {
+        "rules": {
+          "n_rows": 9346.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": 0.9529,
+          "medx": 0.7863,
+          "x_span": 23.0432,
+          "frame_mean": 1.341,
+          "frame_vote": 0.4827,
+          "frame_t": 18.1409,
+          "cent_t": 9.5235,
+          "deep1": -1.2848,
+          "high1": 3.6192,
+          "deep3": 2.205,
+          "high3": 0.6436,
+          "extreme_owner": 0.2573,
+          "n_ball_frames": 564.0,
+          "ball_rel": 1.4832,
+          "n_poss": 491.0,
+          "poss_drift": -0.5227,
+          "poss_share": -0.3173,
+          "poss_rel": 13.4237,
+          "n_gk_frames": 631.0,
+          "gk_anchor": 0.1841,
+          "gk_self": -49.3991
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": -0.686063151194162,
+            "gk_self": -47.93679882109002,
+            "n_rows": 3175.0,
+            "n_gk_frames": 250.0
+          },
+          {
+            "third": 1,
+            "meanx": 2.516802708544006,
+            "gk_self": -50.04904252432287,
+            "n_rows": 3152.0,
+            "n_gk_frames": 250.0
+          },
+          {
+            "third": 2,
+            "meanx": 1.7367881415229505,
+            "gk_self": -50.9494313070895,
+            "n_rows": 3019.0,
+            "n_gk_frames": 131.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "right",
+            "n_frames": 631,
+            "mean_pitch_x_centred": 49.4
+          }
+        ],
+        "n_player_rows": {
+          "left": 3608,
+          "right": 5738
+        }
+      },
+      "kit": {
+        "n_crops": 621,
+        "n_tracks": 14,
+        "crop_agreement": 0.9597,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            41.4,
+            13.0,
+            -29.8
+          ],
+          [
+            81.5,
+            2.3,
+            -5.5
+          ]
+        ],
+        "centroid_sep": 48.06,
+        "mean_within_dist": 8.56,
+        "separability": 5.61,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": false,
+      "verdict": "GT CONSISTENT (depth inverts)",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 16,
+          "jersey": "6",
+          "frame": 100,
+          "role": "player",
+          "x": 28,
+          "y": 598,
+          "w": 63,
+          "h": 115
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "9",
+          "frame": 208,
+          "role": "player",
+          "x": 380,
+          "y": 568,
+          "w": 73,
+          "h": 113
+        },
+        {
+          "team": "left",
+          "track": 13,
+          "jersey": "11",
+          "frame": 282,
+          "role": "player",
+          "x": 610,
+          "y": 496,
+          "w": 53,
+          "h": 94
+        },
+        {
+          "team": "left",
+          "track": 17,
+          "jersey": "23",
+          "frame": 357,
+          "role": "player",
+          "x": 14,
+          "y": 473,
+          "w": 57,
+          "h": 88
+        },
+        {
+          "team": "left",
+          "track": 14,
+          "jersey": "22",
+          "frame": 607,
+          "role": "player",
+          "x": 1096,
+          "y": 549,
+          "w": 71,
+          "h": 110
+        },
+        {
+          "team": "left",
+          "track": 16,
+          "jersey": "6",
+          "frame": 619,
+          "role": "player",
+          "x": 3,
+          "y": 533,
+          "w": 61,
+          "h": 108
+        },
+        {
+          "team": "left",
+          "track": 17,
+          "jersey": "23",
+          "frame": 638,
+          "role": "player",
+          "x": 126,
+          "y": 520,
+          "w": 59,
+          "h": 103
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "9",
+          "frame": 694,
+          "role": "player",
+          "x": 99,
+          "y": 703,
+          "w": 79,
+          "h": 142
+        },
+        {
+          "team": "left",
+          "track": 15,
+          "jersey": "26",
+          "frame": 713,
+          "role": "player",
+          "x": 825,
+          "y": 471,
+          "w": 62,
+          "h": 84
+        },
+        {
+          "team": "left",
+          "track": 13,
+          "jersey": "11",
+          "frame": 719,
+          "role": "player",
+          "x": 300,
+          "y": 494,
+          "w": 63,
+          "h": 94
+        },
+        {
+          "team": "right",
+          "track": 1,
+          "jersey": NaN,
+          "frame": 124,
+          "role": "goalkeeper",
+          "x": 1535,
+          "y": 537,
+          "w": 76,
+          "h": 109
+        },
+        {
+          "team": "right",
+          "track": 4,
+          "jersey": "5",
+          "frame": 207,
+          "role": "player",
+          "x": 259,
+          "y": 581,
+          "w": 85,
+          "h": 119
+        },
+        {
+          "team": "right",
+          "track": 7,
+          "jersey": "8",
+          "frame": 276,
+          "role": "player",
+          "x": 479,
+          "y": 596,
+          "w": 94,
+          "h": 94
+        },
+        {
+          "team": "right",
+          "track": 6,
+          "jersey": "3",
+          "frame": 291,
+          "role": "player",
+          "x": 795,
+          "y": 523,
+          "w": 96,
+          "h": 106
+        },
+        {
+          "team": "right",
+          "track": 4,
+          "jersey": "5",
+          "frame": 501,
+          "role": "player",
+          "x": 198,
+          "y": 636,
+          "w": 77,
+          "h": 116
+        },
+        {
+          "team": "right",
+          "track": 7,
+          "jersey": "8",
+          "frame": 600,
+          "role": "player",
+          "x": 209,
+          "y": 515,
+          "w": 77,
+          "h": 99
+        },
+        {
+          "team": "right",
+          "track": 9,
+          "jersey": "19",
+          "frame": 612,
+          "role": "player",
+          "x": 758,
+          "y": 507,
+          "w": 75,
+          "h": 99
+        },
+        {
+          "team": "right",
+          "track": 11,
+          "jersey": "15",
+          "frame": 620,
+          "role": "player",
+          "x": 631,
+          "y": 658,
+          "w": 81,
+          "h": 139
+        },
+        {
+          "team": "right",
+          "track": 10,
+          "jersey": "34",
+          "frame": 638,
+          "role": "player",
+          "x": 1155,
+          "y": 692,
+          "w": 79,
+          "h": 142
+        },
+        {
+          "team": "right",
+          "track": 6,
+          "jersey": "3",
+          "frame": 675,
+          "role": "player",
+          "x": 942,
+          "y": 603,
+          "w": 88,
+          "h": 118
+        }
+      ]
+    },
+    "SNGS-092": {
+      "oracle": {
+        "rules": {
+          "n_rows": 11118.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": 3.7646,
+          "medx": 5.7287,
+          "x_span": 47.9439,
+          "frame_mean": 2.8967,
+          "frame_vote": 0.7413,
+          "frame_t": 32.3529,
+          "cent_t": 4.8515,
+          "deep1": 1.4088,
+          "high1": 2.6781,
+          "deep3": 2.3034,
+          "high3": 2.825,
+          "extreme_owner": 0.628,
+          "n_ball_frames": 746.0,
+          "ball_rel": 2.6276,
+          "n_poss": 553.0,
+          "poss_drift": -0.7735,
+          "poss_share": -0.1581,
+          "poss_rel": 7.7922,
+          "n_gk_frames": 364.0,
+          "gk_anchor": 0.8544,
+          "gk_self": -85.3889
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": 3.131751458443766,
+            "gk_self": -85.9919118948877,
+            "n_rows": 3294.0,
+            "n_gk_frames": 98.0
+          },
+          {
+            "third": 1,
+            "meanx": 1.8754117340846506,
+            "gk_self": -35.98957437138591,
+            "n_rows": 4038.0,
+            "n_gk_frames": 88.0
+          },
+          {
+            "third": 2,
+            "meanx": 5.308449830407348,
+            "gk_self": -48.10902019790484,
+            "n_rows": 3786.0,
+            "n_gk_frames": 178.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "left",
+            "n_frames": 199,
+            "mean_pitch_x_centred": -47.99
+          },
+          {
+            "gt_team": "right",
+            "n_frames": 165,
+            "mean_pitch_x_centred": 37.4
+          }
+        ],
+        "n_player_rows": {
+          "left": 5544,
+          "right": 5574
+        }
+      },
+      "kit": {
+        "n_crops": 735,
+        "n_tracks": 20,
+        "crop_agreement": 0.9592,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            37.5,
+            13.6,
+            -30.1
+          ],
+          [
+            73.9,
+            -1.8,
+            0.6
+          ]
+        ],
+        "centroid_sep": 50.07,
+        "mean_within_dist": 9.69,
+        "separability": 5.17,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": true,
+      "verdict": "GT SIDE-SWAPPED",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "50",
+          "frame": 13,
+          "role": "player",
+          "x": 574,
+          "y": 760,
+          "w": 113,
+          "h": 149
+        },
+        {
+          "team": "left",
+          "track": 2,
+          "jersey": "4",
+          "frame": 19,
+          "role": "player",
+          "x": 548,
+          "y": 658,
+          "w": 92,
+          "h": 139
+        },
+        {
+          "team": "left",
+          "track": 4,
+          "jersey": "27",
+          "frame": 26,
+          "role": "player",
+          "x": 611,
+          "y": 621,
+          "w": 96,
+          "h": 147
+        },
+        {
+          "team": "left",
+          "track": 22,
+          "jersey": "8",
+          "frame": 38,
+          "role": "player",
+          "x": 1616,
+          "y": 779,
+          "w": 99,
+          "h": 152
+        },
+        {
+          "team": "left",
+          "track": 4,
+          "jersey": "27",
+          "frame": 501,
+          "role": "player",
+          "x": 618,
+          "y": 555,
+          "w": 94,
+          "h": 156
+        },
+        {
+          "team": "left",
+          "track": 5,
+          "jersey": "44",
+          "frame": 701,
+          "role": "player",
+          "x": 37,
+          "y": 643,
+          "w": 137,
+          "h": 208
+        },
+        {
+          "team": "left",
+          "track": 12,
+          "jersey": "10",
+          "frame": 732,
+          "role": "player",
+          "x": 777,
+          "y": 560,
+          "w": 121,
+          "h": 172
+        },
+        {
+          "team": "left",
+          "track": 22,
+          "jersey": "8",
+          "frame": 738,
+          "role": "player",
+          "x": 1698,
+          "y": 469,
+          "w": 91,
+          "h": 196
+        },
+        {
+          "team": "left",
+          "track": 3,
+          "jersey": "50",
+          "frame": 750,
+          "role": "player",
+          "x": 1367,
+          "y": 795,
+          "w": 116,
+          "h": 253
+        },
+        {
+          "team": "left",
+          "track": 18,
+          "jersey": "14",
+          "frame": 750,
+          "role": "player",
+          "x": 1852,
+          "y": 244,
+          "w": 67,
+          "h": 169
+        },
+        {
+          "team": "right",
+          "track": 1,
+          "jersey": "19",
+          "frame": 25,
+          "role": "player",
+          "x": 337,
+          "y": 701,
+          "w": 120,
+          "h": 136
+        },
+        {
+          "team": "right",
+          "track": 23,
+          "jersey": "20",
+          "frame": 76,
+          "role": "player",
+          "x": 1303,
+          "y": 788,
+          "w": 136,
+          "h": 149
+        },
+        {
+          "team": "right",
+          "track": 7,
+          "jersey": "5",
+          "frame": 388,
+          "role": "player",
+          "x": 718,
+          "y": 560,
+          "w": 107,
+          "h": 151
+        },
+        {
+          "team": "right",
+          "track": 23,
+          "jersey": "20",
+          "frame": 488,
+          "role": "player",
+          "x": 1165,
+          "y": 495,
+          "w": 98,
+          "h": 131
+        },
+        {
+          "team": "right",
+          "track": 1,
+          "jersey": "19",
+          "frame": 713,
+          "role": "player",
+          "x": 800,
+          "y": 528,
+          "w": 149,
+          "h": 196
+        },
+        {
+          "team": "right",
+          "track": 6,
+          "jersey": "27",
+          "frame": 719,
+          "role": "player",
+          "x": 159,
+          "y": 475,
+          "w": 79,
+          "h": 194
+        },
+        {
+          "team": "right",
+          "track": 13,
+          "jersey": "13",
+          "frame": 725,
+          "role": "player",
+          "x": 856,
+          "y": 354,
+          "w": 114,
+          "h": 189
+        },
+        {
+          "team": "right",
+          "track": 11,
+          "jersey": "17",
+          "frame": 738,
+          "role": "player",
+          "x": 1098,
+          "y": 168,
+          "w": 65,
+          "h": 144
+        },
+        {
+          "team": "right",
+          "track": 8,
+          "jersey": "42",
+          "frame": 744,
+          "role": "player",
+          "x": 564,
+          "y": 451,
+          "w": 102,
+          "h": 178
+        },
+        {
+          "team": "right",
+          "track": 16,
+          "jersey": "24",
+          "frame": 750,
+          "role": "player",
+          "x": 1805,
+          "y": 194,
+          "w": 74,
+          "h": 139
+        }
+      ]
+    },
+    "SNGS-111": {
+      "oracle": {
+        "rules": {
+          "n_rows": 9041.0,
+          "n_frames_cal": 750.0,
+          "cal_cov": 1.0,
+          "meanx": 8.8149,
+          "medx": 27.2701,
+          "x_span": 70.722,
+          "frame_mean": 1.0903,
+          "frame_vote": 0.36,
+          "frame_t": 11.7289,
+          "cent_t": 0.8807,
+          "deep1": 1.5924,
+          "high1": -0.2672,
+          "deep3": 1.6383,
+          "high3": 0.0343,
+          "extreme_owner": 0.1813,
+          "n_ball_frames": 723.0,
+          "ball_rel": 0.9726,
+          "n_poss": 706.0,
+          "poss_drift": 1.4715,
+          "poss_share": 0.3144,
+          "poss_rel": 0.5052,
+          "n_gk_frames": 461.0,
+          "gk_anchor": -7.5366,
+          "gk_self": -95.2749
+        },
+        "thirds": [
+          {
+            "third": 0,
+            "meanx": -0.5356898900017768,
+            "gk_self": -49.44903615026054,
+            "n_rows": 3204.0,
+            "n_gk_frames": 173.0
+          },
+          {
+            "third": 1,
+            "meanx": 6.305448066515879,
+            "gk_self": -96.39334070058945,
+            "n_rows": 3031.0,
+            "n_gk_frames": 38.0
+          },
+          {
+            "third": 2,
+            "meanx": 2.031841326681576,
+            "gk_self": -45.71860084416865,
+            "n_rows": 2806.0,
+            "n_gk_frames": 250.0
+          }
+        ],
+        "keepers": [
+          {
+            "gt_team": "left",
+            "n_frames": 273,
+            "mean_pitch_x_centred": -45.9
+          },
+          {
+            "gt_team": "right",
+            "n_frames": 188,
+            "mean_pitch_x_centred": 49.38
+          }
+        ],
+        "n_player_rows": {
+          "left": 4554,
+          "right": 4487
+        }
+      },
+      "kit": {
+        "n_crops": 598,
+        "n_tracks": 22,
+        "crop_agreement": 0.9498,
+        "track_agreement": 1.0,
+        "centroids_Lab": [
+          [
+            40.8,
+            22.9,
+            25.9
+          ],
+          [
+            40.5,
+            -2.1,
+            6.1
+          ]
+        ],
+        "centroid_sep": 31.83,
+        "mean_within_dist": 10.49,
+        "separability": 3.03,
+        "disagreeing_tracks": []
+      },
+      "cross_clip_minority": true,
+      "verdict": "GT SIDE-SWAPPED",
+      "sheet_crops": [
+        {
+          "team": "left",
+          "track": 4,
+          "jersey": "27",
+          "frame": 63,
+          "role": "player",
+          "x": 1279,
+          "y": 677,
+          "w": 94,
+          "h": 168
+        },
+        {
+          "team": "left",
+          "track": 13,
+          "jersey": "3",
+          "frame": 98,
+          "role": "player",
+          "x": 1238,
+          "y": 457,
+          "w": 111,
+          "h": 119
+        },
+        {
+          "team": "left",
+          "track": 6,
+          "jersey": "33",
+          "frame": 107,
+          "role": "player",
+          "x": 696,
+          "y": 744,
+          "w": 99,
+          "h": 180
+        },
+        {
+          "team": "left",
+          "track": 18,
+          "jersey": "24",
+          "frame": 125,
+          "role": "player",
+          "x": 54,
+          "y": 533,
+          "w": 87,
+          "h": 129
+        },
+        {
+          "team": "left",
+          "track": 19,
+          "jersey": "9",
+          "frame": 145,
+          "role": "player",
+          "x": 142,
+          "y": 807,
+          "w": 105,
+          "h": 231
+        },
+        {
+          "team": "left",
+          "track": 22,
+          "jersey": "7",
+          "frame": 153,
+          "role": "player",
+          "x": 14,
+          "y": 671,
+          "w": 80,
+          "h": 167
+        },
+        {
+          "team": "left",
+          "track": 8,
+          "jersey": "6",
+          "frame": 228,
+          "role": "player",
+          "x": 796,
+          "y": 477,
+          "w": 123,
+          "h": 111
+        },
+        {
+          "team": "left",
+          "track": 22,
+          "jersey": "7",
+          "frame": 382,
+          "role": "player",
+          "x": 1116,
+          "y": 549,
+          "w": 109,
+          "h": 117
+        },
+        {
+          "team": "left",
+          "track": 6,
+          "jersey": "33",
+          "frame": 417,
+          "role": "player",
+          "x": 992,
+          "y": 727,
+          "w": 147,
+          "h": 160
+        },
+        {
+          "team": "left",
+          "track": 4,
+          "jersey": "27",
+          "frame": 750,
+          "role": "player",
+          "x": 1842,
+          "y": 791,
+          "w": 77,
+          "h": 168
+        },
+        {
+          "team": "right",
+          "track": 5,
+          "jersey": "16",
+          "frame": 63,
+          "role": "player",
+          "x": 478,
+          "y": 746,
+          "w": 82,
+          "h": 191
+        },
+        {
+          "team": "right",
+          "track": 15,
+          "jersey": "24",
+          "frame": 67,
+          "role": "player",
+          "x": 1653,
+          "y": 534,
+          "w": 92,
+          "h": 123
+        },
+        {
+          "team": "right",
+          "track": 21,
+          "jersey": "34",
+          "frame": 228,
+          "role": "player",
+          "x": 814,
+          "y": 480,
+          "w": 110,
+          "h": 111
+        },
+        {
+          "team": "right",
+          "track": 20,
+          "jersey": "31",
+          "frame": 256,
+          "role": "player",
+          "x": 464,
+          "y": 794,
+          "w": 124,
+          "h": 178
+        },
+        {
+          "team": "right",
+          "track": 24,
+          "jersey": NaN,
+          "frame": 312,
+          "role": "player",
+          "x": 57,
+          "y": 496,
+          "w": 98,
+          "h": 133
+        },
+        {
+          "team": "right",
+          "track": 26,
+          "jersey": "4",
+          "frame": 345,
+          "role": "player",
+          "x": 83,
+          "y": 565,
+          "w": 101,
+          "h": 143
+        },
+        {
+          "team": "right",
+          "track": 20,
+          "jersey": "31",
+          "frame": 378,
+          "role": "player",
+          "x": 768,
+          "y": 659,
+          "w": 113,
+          "h": 138
+        },
+        {
+          "team": "right",
+          "track": 9,
+          "jersey": "10",
+          "frame": 408,
+          "role": "player",
+          "x": 985,
+          "y": 551,
+          "w": 134,
+          "h": 89
+        },
+        {
+          "team": "right",
+          "track": 5,
+          "jersey": "16",
+          "frame": 488,
+          "role": "player",
+          "x": 1826,
+          "y": 506,
+          "w": 80,
+          "h": 132
+        },
+        {
+          "team": "right",
+          "track": 28,
+          "jersey": NaN,
+          "frame": 670,
+          "role": "player",
+          "x": 1760,
+          "y": 777,
+          "w": 99,
+          "h": 154
+        }
+      ]
+    }
+  }
+}

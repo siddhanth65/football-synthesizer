@@ -1,5 +1,34 @@
 # STATUS
 
+## 2026-08-13 — v8 W0: FIVE GSR sequences have side-swapped ground truth — measured, diagnosed, two beyond the winner's own list
+
+results/GSR_GT_AUDIT.md, kb gsr-gt-001/002 (confirmed) + -003 (pending: the arithmetic is an
+estimate). The winner's published claim (SNGS-126/131/197 "incorrect team annotations")
+REPRODUCES 3-for-3 by an instrument built here without reading their code — and the full-corpus
+scan found TWO MORE they don't name: SNGS-092 (valid) and SNGS-111 (train). **The signature is
+diagnostic: all five are SECOND-HALF clips carrying their game's FIRST-HALF side mapping — the
+annotator's convention was not updated when the teams changed ends.** 159/164 sequences obey
+within-(game,half) kit-side consistency; exactly these five dissent; rotated-frame and
+reverse-camera escape hatches closed on all 49 test clips.
+
+Instrument lesson, on the record: the per-clip instruments (gk_self 113/113, kit coherence
+~1.00) are STRUCTURALLY BLIND to a whole-clip swap — the keeper's label swaps with everyone
+else's, so the clip is internally flawless; only cross-clip consistency catches it. The
+worker's first pass said "GT fine" on their strength, then retracted itself and built the third
+instrument. SNGS-130 (ours, not theirs): OUR error — a 0.11 m meanx margin, below the
+positional noise floor; no side rule reaches it. SNGS-195: GT fine, the ORACLE is wrong
+(framing) — our 45/49 and the oracle's 45/49 were different 45s, now fully decomposed as
+3 GT errors + 1 framing artefact + 1 coin flip. GSR_TEAMSIDE §3's framing explanation for 092
+RETRACTED (caveat on ident-038); dev side-rule ceiling corrected to 113/115.
+
+**Implications:** ~2.45 of our flip loss is benchmark noise unreachable by correct methods (a
+correct pipeline must predict the TRUE side and be punished); corrected-GT score ~55.5. The gap
+to 61.48 likely WIDENS under corrected GT (the leader eats the same three clips) UNLESS their
+pipeline reproduces the annotation error — checkable, not checked. Real remaining side headroom
+= SNGS-130 only (~0.6-1.0). ORGANIZER REPORT = Sid's decision (recommended: it is the most
+legible data contribution this project owns, corroborated by the SOTA paper itself).
+W1 (the seam experiment) still in flight.
+
 ## 2026-08-07 (final) — THE PUSH fails its registration; the GSR campaign closes at 53.09
 
 results/GSR_V7_PUSH.md, kb v7-push-001..003 (all refuted). Registration frozen 6m13s before the
