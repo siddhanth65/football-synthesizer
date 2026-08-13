@@ -27,7 +27,45 @@ to 61.48 likely WIDENS under corrected GT (the leader eats the same three clips)
 pipeline reproduces the annotation error — checkable, not checked. Real remaining side headroom
 = SNGS-130 only (~0.6-1.0). ORGANIZER REPORT = Sid's decision (recommended: it is the most
 legible data contribution this project owns, corroborated by the SOTA paper itself).
-W1 (the seam experiment) still in flight.
+
+**W2 (results/GSR_V8_W2.md, kb v8-w2-001 refuted, -002..004 confirmed): the calibration-transfer
+read FAILS by 0.0117 — and INVERTS the premise.** GT-anchored on identical rows: OUR estimator
+is 12% MORE accurate than theirs (median 0.475 vs 0.536 m; inside-gate 0.9972 vs 0.9905) — the
++10.28 in their ablation was off their own weak baseline; our calibgate campaign had already
+captured it. The registered union arm hit +0.4883 (8/1 helped, p=0.0078) vs the >=0.50 bar —
+question CLOSED per registration. **What the probe actually found: the gain is pure COVERAGE —
+their calibration reaches 78.2% of the rows where our chain has NO pitch coordinate, and on our
+fill-bridged frames a real homography beats an interpolated one 1.97m -> 0.45m.** The
+escalation analysis names the one unexploited idea in their own paper: a LINE-based solve
+(their Table 4: line-only 56.39 vs keypoint-only 48.23 — we have NO line solver). W2b
+dispatched: paper-derived dead-frame calibration fallback (line-fit first, sn-banner NBJW
+second), ship-clean, new registration. Process fault self-reported (concurrent nohup runs —
+killed, deleted, clean rerun). Their Issue-#1 fallback never fired at HEAD; 0.34 s/frame.
+
+**v8 mid-campaign synthesis: three of the leader's four supposed edges have now fallen under
+direct measurement — reader (ours 10x at high precision), calibration accuracy (ours +12%),
+team module (theirs needs an oracle permutation to hit 0.838). Their 61.48 must rest on IDATR
+(+2.97) + unpriced substrate + the three GT-swapped clips both pipelines eat. Our largest
+REAL gap remains association (+11.9 connector-achievable).**
+
+**W1 (results/GSR_V8_W1.md, kb v8-w1-001..004): the registered fusion gate FAILS (1 of 4
+targets) — and a STRICTER seam claim survives.** Mechanism of the fail (transferable negative):
+their head's no-number sentinel carries diffuse mass (0.574 mean, 72% of crops argmax to it);
+ADDITIVE evidential fusion accumulates it until no-number wins on 88% of tracklets — our V3
+fusion was calibrated for a LEARNED p_none and is not drop-in for a foreign head. The survivor:
+**our percrop_votes (argmax-gated confidence-mass accumulation) beats their majority vote on
+THEIR OWN head's outputs — +0.107 tracklet accuracy at their shipped rule, 13/20 sequences,
+p=0.0017, 37-vs-4 flips (p=1e-7), monotone in the confidence floor, living exactly in the crops
+their torch.max discards**; survives the density objection (our aggregation on 15 crops beats
+theirs on 425). On OUR reader the same effect is 4x smaller — already harvested. Head-to-head
+ROUT: our v6 reader gives **10-11x their CLIP head's tracklet coverage at 0.90+ precision**
+(d 0.716 vs 0.063); their role head is decent (0.90), their colour->team rule weak (0.838 WITH
+an oracle permutation). Ensemble not worth building. Their train-split fitting posture =
+legitimate, same as ours. **Strategic redirect: their reader is NOT their edge — their 61.48
+must rest on calibration (+10.28 their ablation) + IDATR + the LLaMA shipping config. W2 (the
+calibration-transfer probe) is now the campaign's money session — dispatched.** Instrument
+hygiene held: everything of theirs in scratchpad only, clean-room reimplementations in our
+files, laptop GPU ~34 min.
 
 ## 2026-08-07 (final) — THE PUSH fails its registration; the GSR campaign closes at 53.09
 

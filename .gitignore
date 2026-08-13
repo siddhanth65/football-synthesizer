@@ -55,6 +55,9 @@ PMSR-*.pdf
 # (data/raw|processed|video are ignored above; data/ball_annotations is not — keep it that way.)
 !data/ball_annotations/
 
+# GSR ground-truth audit contact sheets are claim-referenced evidence — keep tracked.
+!results/gsr_benchmark/gt_audit/*.png
+
 # Keep small sample assets explicitly with: git add -f
 
 docs/papers/

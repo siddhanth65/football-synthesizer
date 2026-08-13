@@ -5445,6 +5445,243 @@
         "benchmark-data-quality",
         "scoring"
       ]
+    },
+    {
+      "id": "v8-w1-001",
+      "statement": "PRE-REGISTERED GATE FAILS: our Dirichlet evidential fusion does NOT beat the leader's majority vote on the leader's own per-crop outputs. On 473 DEV-20 GT tracklets fed by the Broadcast2Pitch CLIP identity head (CLIP_Jersey.pth, run as a private instrument with the logits preserved), fusion beats majority vote at 1 of 4 pre-registered coverage targets (0 of 4 on the registered grid without the declared max_u ablation), against a gate of >= 3 of 4. Fusion cannot even reach coverage 0.50 on their head.",
+      "value": 1,
+      "unit": "of 4 coverage targets won (gate required 3)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W1.md#2.5 THE GATE -- three aggregators on THEIR per-crop outputs",
+        "results/gsr_benchmark/gsr_v8_w1.json"
+      ],
+      "method": "Pre-registered in results/GSR_V8_W1.md section 1.5 before any comparison was run. Three aggregator families (their majority vote reimplemented clean-room from the recon's prose, our fuse_tracklet, our percrop_votes) graded by identical code on identical tracklets with tools/ocr_density.py's d / read_precision definitions.",
+      "n": 473,
+      "caveats": [
+        "The post-hoc max_p_none diagnostic (90 extra rules) did not move the fusion frontier by a point, so the failure is structural, not a grid artefact.",
+        "Tracklet unit = GT tracks, not their DeepEIoU+IDATR tracklets."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "identity",
+        "aggregation",
+        "pre-registered",
+        "negative"
+      ]
+    },
+    {
+      "id": "v8-w1-002",
+      "statement": "THE SEAM IS REAL, VIA CONFIDENCE-WEIGHTED COUNTING RATHER THAN DIRICHLET FUSION: at the leader's own shipped operating point, replacing Counter.most_common(1) with our percrop_votes confidence-mass aggregation on the SAME per-crop outputs and the SAME 350 read tracklets raises tracklet read precision 0.3107 -> 0.4175 (+0.1068, +34% relative; 96 -> 129 correctly named of 309 auditable reads). 13 of 20 sequences helped / 1 hurt / 6 tied, Wilcoxon p = 0.00172; tracklet flips 37 vs 4, binomial p = 1.03e-7. The gap is monotone in the per-crop confidence floor and reaches zero at floor 0.7-0.9, i.e. it lives entirely in the crops whose confidence their torch.max discards. It survives 28x more crops: at full density (29,765 crops, ~425/tracklet, 3 sequences) 0.4286 -> 0.4898 (+0.0612), and our aggregation on 15 crops (0.4681) still beats their aggregation on 425 (0.4286).",
+      "value": 0.1068,
+      "unit": "absolute tracklet read precision, at identical coverage on their head's outputs",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W1.md#2.6 The result that survives: at their OWN operating point, mass beats counting",
+        "results/GSR_V8_W1.md#2.9 The crop-density objection, tested -- and the sharpest single number in the session",
+        "results/gsr_benchmark/gsr_v8_w1.json",
+        "results/gsr_benchmark/gsr_v8_w1_sub3_full.json"
+      ],
+      "method": "Paired at the tracklet: the revote-majority rule and percrop_votes keep exactly the same crops, so at every knob setting both families read the identical tracklets and differ only in count vs summed confidence mass. DEV-20 GT crops (7,055 crops / 473 tracks / 331 numbered), GSR jersey GT.",
+      "n": 331,
+      "caveats": [
+        "This is tracklet read precision on GT tracks, NOT a GS-HOTA delta. Nothing end-to-end was run (GSR_S3_READER.md section 6: a better tracklet rule can score worse end-to-end).",
+        "The effect is 4x smaller on our own (stronger) reader: +0.0275 at the same operating point. Confidence-weighted aggregation buys most where the per-crop reader is worst.",
+        "The leader's 61.48 headline uses their LLaMA variant, which emits free text and has no per-crop confidence, so this seam does not exist on their shipping configuration.",
+        "Full-density probe is 3 sequences / 49 auditable tracklets: the +0.0612 is 3 tracklets."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w1-001"
+      ],
+      "tags": [
+        "gsr",
+        "identity",
+        "aggregation",
+        "pre-registered"
+      ]
+    },
+    {
+      "id": "v8-w1-003",
+      "statement": "HEAD-TO-HEAD: our v6 reader outreads the leader's CLIP identity head by 2.4x per crop on the identical 7,055 DEV-20 GT crops -- 0.8330 vs 0.3406 precision at the matched emit rate 0.2761, and 0.9919 vs 0.8105 on each head's top 5% of reads. At tracklet level our reader carries 10-11x their coverage at every read-precision floor from 0.90 up (d 0.7160 vs 0.0634 at 0.90). Their head is measurably complementary but only weakly: an ORACLE union would add 99 correct crops (+8.7% relative) that ours misses, buried in 1,367 wrong reads, so no ensemble was built. Their role head is strong (0.9015 crop accuracy) and their colour->team rule reaches 83.8% of player/GK tracks with an oracle side permutation.",
+      "value": 0.3406,
+      "unit": "their per-crop read precision at emit 0.2761 (ours 0.8330 on the same crops)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W1.md#2.4 Their head on our DEV-20 GT crops -- per-crop",
+        "results/GSR_V8_W1.md#2.8 Head-to-head -- their identity head vs our v6 reader",
+        "results/gsr_benchmark/gsr_v8_w1.json"
+      ],
+      "method": "Both heads run on the identical crop set; our side reproduces the on-record S2/V3 bar first (1,371 reads at emit 0.2761, precision 0.8330 vs the recorded 0.8344). Each side is measured as its authors ship it: theirs on the whole person crop at CLIP 224x224, ours behind the ResNet34 legibility gate and a KeypointRCNN torso RoI.",
+      "n": 4965,
+      "caveats": [
+        "Their head is fitted on GSR train and generalises worse off it (train 0.4730 vs validation 0.2681 read precision, role 0.9877 vs 0.9015) -- legitimate, but it means these are validation-generalisation numbers. Ours is also train-fitted (3,888 GSR-train rows) and validation-tested.",
+        "Preprocessing differs by design; the 12 of 7,055 crops our 256x128 crop law aspect-distorts (0.17%) were measured and no control run was made.",
+        "GT crops, 15 per tracklet; their pipeline sees every frame."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "identity",
+        "reader",
+        "benchmark"
+      ]
+    },
+    {
+      "id": "v8-w1-004",
+      "statement": "MECHANISM / TRANSFER NEGATIVE: additive Dirichlet evidence fusion collapses on a head whose abstention class is diffusely over-weighted. The leader's CLIP head puts mean 0.5740 per-crop mass on its no-number sentinel (72.3% of crops argmax to it); summing that mass across a tracklet makes the fused no-number class win on 375 of 426 tracklets (88.0%), so fuse_tracklet abstains. Per-crop argmax is invariant to how much mass the loser holds and is therefore ROBUST to exactly this miscalibration. The winning hybrid is what percrop_votes already is: a relative per-crop argmax gate plus confidence-mass accumulation over the survivors. Our V3 fusion was fitted against a learned calibrated p_none and is NOT drop-in for a foreign head.",
+      "value": 0.88,
+      "unit": "fraction of tracklets abstaining under unfiltered additive fusion on their head",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W1.md#2.7 Why the Dirichlet fusion fails on their head -- the negative worth keeping",
+        "results/gsr_benchmark/gsr_v8_w1.json"
+      ],
+      "method": "Direct measurement of per-crop and fused no-number mass on 426 DEV-20 player/GK tracklets, plus a 90-rule post-hoc max_p_none sweep (0.4-0.9) that failed to move the frontier by a single point.",
+      "n": 426,
+      "caveats": [
+        "The max_u channel remains useful even here: it is the only knob that raises fusion coverage on their head (d 0.3967 -> 0.4366 at max_u 0.6), consistent with GSR_V7_V3.md section 2.9's isolated +0.3598 GS-HOTA.",
+        "Says nothing about fusion on our own reader, where it ties or beats votes."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w1-001"
+      ],
+      "tags": [
+        "gsr",
+        "identity",
+        "aggregation",
+        "negative",
+        "methodology"
+      ]
+    },
+    {
+      "id": "v8-w2-001",
+      "statement": "PRE-REGISTERED READ FAILS BY 0.0117: swapping the benchmark leader's calibration (Broadcast2Pitch SFR, SoccernetGSR_EfficientNet_Best.pth, kpts.py @ dbfb65c0, run as a private instrument) into our v6 chain on a 10-sequence DEV probe moves GS-HOTA by a mean paired +0.4883 at best of three pre-declared arms, against a >= +0.50 escalation bar. Our calibgate campaign already captured whatever their +10.28 homography ablation represents; no SFR build is commissioned.",
+      "value": 0.4883,
+      "unit": "mean paired GS-HOTA gain over 10 DEV sequences (bar: +0.50)",
+      "status": "refuted",
+      "evidence": [
+        "results/GSR_V8_W2.md#2.5 THE DECISIVE TABLE -- paired GS-HOTA on the probe",
+        "results/gsr_benchmark/gsr_v8_w2_arms.json"
+      ],
+      "method": "Pre-registered in results/GSR_V8_W2.md section 1.5 before any arm was built. Probe = the 10 DEV-20 sequences with the worst composite rank of control GS-HOTA and measured loc_assoc GS-AssA. Same detections, track ids, OCR evidence, CLIP embeddings, box cache, EIoU association (provably unchanged: 584->1323 tracks in all four arms), GTA connector at tau 0.450 and MILP solver; the pitch coordinate of each detection row is the only variable. Control re-derived this session and reproducing gsr_v7_control_dev.json per sequence to delta 0.0. Gate deliberately taken as the max over three arms (theirs-faithful / theirs+our fill / union), biasing toward escalation.",
+      "n": 10,
+      "caveats": [
+        "The margin is 0.0117 -- a fail by a hair, recorded as such; nothing was re-run.",
+        "The winning arm (T3, union) is a pure COVERAGE effect: it writes only the rows our chain leaves without any pitch coordinate. Its mechanism is reachable without their model.",
+        "T1 (the faithful swap) is a coin toss: mean +0.4687 but median -0.7430, 4 helped / 6 hurt, Wilcoxon p = 1.000, its mean carried by SNGS-024 (+11.84) against SNGS-039 (-6.21).",
+        "Probe is the hard half of DEV-20 (mean control 42.94 vs 51.88); no DEV-20, TEST-38 or test-49 number was produced."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w1-004"
+      ],
+      "tags": [
+        "gsr",
+        "calibration",
+        "negative",
+        "pre-registered"
+      ]
+    },
+    {
+      "id": "v8-w2-002",
+      "statement": "Our calibration is MORE accurate than the benchmark leader's on the probe. On 95,927 GT-matched player/GK detections across 10 DEV sequences, our on-record pitch coordinate (PnLCalib + the calibgate trust rule + fill) sits 0.475 m from ground truth (p90 1.379, 99.722% inside the evaluator's 5 m gate); the SAME detections through their homography sit 0.536 m away (p90 1.554, 99.049% inside the gate). 844 rows clear the 5 m gate under ours alone against 199 under theirs alone.",
+      "value": 0.475,
+      "unit": "median GT-anchored position error, metres (theirs: 0.536)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W2.md#2.4 GT-anchored accuracy -- the table that says which one is *right*",
+        "results/gsr_benchmark/gsr_v8_w2_deltas.json"
+      ],
+      "method": "Our player/GK detections matched to the nearest GT person in image space (accepted under 60 px), then the error in metres against that GT row's bbox_pitch computed for BOTH coordinate sets on the identical matched rows. Their kpts.predict was called unmodified; the axis convention was fixed once against GT (0.414 m vs 13.35 m under a flipped y) before any comparison.",
+      "n": 95927,
+      "caveats": [
+        "Per sequence it splits: theirs is better on SNGS-024 and SNGS-048, ours on 027/039/051/054/057; pooled, ours wins (paired Wilcoxon p ~ 0, mean 0.692 m vs 0.814 m).",
+        "The matcher is an image-space 60 px nearest neighbour, not the evaluator's Hungarian assignment; identical for both sides by construction, so the paired comparison is safe and the absolute level inherits the gate's bias.",
+        "Rows with no GT partner (~19% of people rows) are excluded from both sides."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w2-001"
+      ],
+      "tags": [
+        "gsr",
+        "calibration",
+        "measurement"
+      ]
+    },
+    {
+      "id": "v8-w2-003",
+      "statement": "MECHANISM: the per-sequence outcome of a calibration swap is a read-out of which calibration is more accurate on that clip -- Spearman +0.903 (p = 0.0003) between the GT-anchored p90 error advantage and the end-to-end GS-HOTA delta over 10 sequences (+0.794 on the median, +0.855 on share-within-5 m). The team-side map is NOT the mechanism: resolve_team_map_free returns the GT-correct side on 10 of 10 probe sequences in every arm.",
+      "value": 0.903,
+      "unit": "Spearman rho (p90 accuracy advantage vs GS-HOTA delta)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W2.md#2.6 Mechanism -- the swap's per-sequence outcome is a calibration-accuracy read-out",
+        "results/gsr_benchmark/gsr_v8_w2_deltas.json"
+      ],
+      "method": "Rank correlation over the 10 probe sequences between (theirs minus ours) GT-anchored accuracy and the T1 paired GS-HOTA delta; free team maps recomputed per arm from the arm's own positions and compared against resolve_team_map on GT.",
+      "n": 10,
+      "caveats": [
+        "n = 10 sequences; the correlation is carried at the ends (SNGS-024 +11.84, SNGS-039 -6.21).",
+        "SNGS-054's free-map margin does drop 0.42 m -> 0.08 m under the swap and still resolves correctly -- a near-miss on the campaign's known coin-flip risk."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w2-001"
+      ],
+      "tags": [
+        "gsr",
+        "calibration",
+        "mechanism"
+      ]
+    },
+    {
+      "id": "v8-w2-004",
+      "statement": "A frame's own homography beats an interpolated neighbour's, measured against an external calibrator: on the frames our chain leaves dead (coordinate present only via fill_calibration_gaps), their per-frame homography is more accurate on 8 of the 9 probe sequences that have such frames -- on SNGS-024, 1.97 m -> 0.45 m and 94.2% -> 100% inside the 5 m gate over 703 rows. Their model emits a usable homography on 7,500/7,500 probe frames (line-based path 100%, DLT point fallback 0, identity fallback 0 -- the Issue-#1 failure mode never fires at dbfb65c0) and reaches 1,324 of the 1,693 detection rows (78.2%) our chain leaves with no pitch coordinate.",
+      "value": 78.2,
+      "unit": "% of our un-calibrated detection rows their calibration reaches",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W2.md#2.7 The bridged frames -- the one place their calibration is clearly better than ours",
+        "results/gsr_benchmark/gsr_v8_w2_positions.json"
+      ],
+      "method": "Bridged frames identified as those absent from the pre-gate positions_v6det live set; GT-anchored error computed on that subset for both coordinate sets. Branch tagging by wrapping their Levenberg-Marquardt estimator and testing the emitted matrix for exact identity.",
+      "n": 7500,
+      "caveats": [
+        "The coverage advantage is worth +0.4883 GS-HOTA (v8-w2-001) and does not clear the escalation bar.",
+        "Their projections are not free of cost: 478 of 118,224 (0.40%) are rejected off-pitch by our clamp_to_pitch, and the swap loses 109 rows our control has.",
+        "SNGS-057 is the counter-example: theirs covers 849 bridged rows to our 289 but at 2.57 m median against our 1.47 m."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w2-001"
+      ],
+      "tags": [
+        "gsr",
+        "calibration",
+        "coverage"
+      ]
     }
   ]
 }

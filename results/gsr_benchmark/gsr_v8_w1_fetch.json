@@ -1,0 +1,64 @@
+{
+  "session": "v8 W1 (the seam experiment)",
+  "note": "Provenance record for the PRIVATE MEASUREMENT INSTRUMENT of results/GSR_V8_W1.md. Nothing listed here is vendored into this repo; the clone and the checkpoint live in the session scratchpad only (plan v8 claims-hygiene rule).",
+  "fetched_utc": "2026-08-12",
+  "repo": {
+    "url": "https://github.com/yinmayoo185/SoccernetGSR",
+    "head_commit": "dbfb65c05c847e8e50baa47aa91ace960cc5e600",
+    "head_date": "2026-06-02 11:26:05 +0900",
+    "head_subject": "update keypoint extraction with robust line/circle fitting and fix opencv dependency",
+    "clone_bytes_approx": 28311552,
+    "files_used": {
+      "jersey_model/CLIPFinetune.py": {
+        "sha256": "f79638f3fc071dd42b1338d4ab4d536cb39ad2b00da40c79dcdcb4a5bd99477f",
+        "lines": 81
+      },
+      "inference_soccernetGSR.py": {
+        "lines": 731,
+        "read_for": "predict_role_and_jersey_batch_clip + get_number + the 13 colour names"
+      }
+    }
+  },
+  "weights": {
+    "CLIP_Jersey.pth": {
+      "drive_id": "11HA90V7h6GDeoqUAl2-4ZcOPmUJKK6nz",
+      "bytes": 936987722,
+      "sha256": "c068865c6ff28ff8b2dd7e90d2cfd37b72dfe4e117a3be79eb88a5f98e8afa1e",
+      "md5": "2a9e7fe2e2a6d98e6347bd9770d1f87f",
+      "tensors": 460,
+      "layout": "clip_model.* 446 (fp16 ViT-L/14 vision + text towers) + fp32 heads: role(768->256->5), digit1(768->256->11), digit2(768->256->11), color_projection(768,768)"
+    }
+  },
+  "drive_folder": {
+    "url": "https://drive.google.com/drive/folders/1kgZGxUYGkYhM9AwHzjuSVo7r7FFZ16mh",
+    "listed_only": true,
+    "recon_correction": "seven checkpoints + an 8-file LoRA folder, not five; ClipReid_B16.pth and the stock Market-1501 OSNet were not in docs/WINNER_REPO_RECON.md",
+    "entries": {
+      "CLIP_Jersey.pth": "11HA90V7h6GDeoqUAl2-4ZcOPmUJKK6nz",
+      "ClipReid_B16.pth": "1QNvkoIjsikOiaUXEyPfI4YKgli469k6p",
+      "osnet_x1_0_market_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_labelsmooth_flip.pth": "1cMOr3hGbViGmQYGewKq2Bc0ZA5za1xRI",
+      "SoccernetGSR_EfficientNet_Best.pth": "1xnWOQDizjrjyUoEwwLssjaGv8LkEpuQl",
+      "sports_model.pth.tar-60": "1v0oTBgPXtY-K2Q0G0QSaE07va-dvgiBY",
+      "yolox_soccernet.pth.tar": "1DLbZ8G4vEZZ7MCDoRADjhShB4qhXCIlZ",
+      "lora_model_jersey_role_soccernet/adapter_model.safetensors": "1NTXv08AZQ4qjaHiZ27yZhb7zAhcDkrzy",
+      "lora_model_jersey_role_soccernet/adapter_config.json": "1T6WjbnQN4no7lOHnZX7RZgyuqCN2wV1o",
+      "lora_model_jersey_role_soccernet/chat_template.json": "1m24SyVDMfz864SaegyeBIvfEH_FLKJdX",
+      "lora_model_jersey_role_soccernet/preprocessor_config.json": "1g7Anx1Whks_q9FjWlKTPtiHjX3upsmZp",
+      "lora_model_jersey_role_soccernet/README.md": "1pQNYqaeAMdq1ifyDinnhwb5uRDVnLvRf",
+      "lora_model_jersey_role_soccernet/special_tokens_map.json": "1n8XT9_f4PnUDY1YHnwnGd1uq-_fGniI7",
+      "lora_model_jersey_role_soccernet/tokenizer.json": "1iZ42u6Q4ZTFqZpzgRvVDKVMtl7nQXdIa",
+      "lora_model_jersey_role_soccernet/tokenizer_config.json": "1HLlO-jyQsY09OnpBypnb6YTePmTn124h"
+    }
+  },
+  "third_party_runtime": {
+    "openai/CLIP": {
+      "url": "https://github.com/openai/CLIP",
+      "license": "MIT",
+      "commit": "d05afc436d78f1c48dc0dbf8e5980a9d471f35f6",
+      "clip/model.py.sha256": "dc4981bbd17867430890cfe711bb813466232f3b19c5753e26de0b7b047b0926",
+      "clip/clip.py.sha256": "3891eee0ad659a781ec3fd0240f9d69b7f3845837f671ff6670accf0d4bad0a2",
+      "note": "used only for build_model() and the tokenizer; the ViT-L/14 weights come from CLIP_Jersey.pth, so OpenAI's own 890 MB checkpoint was never downloaded"
+    },
+    "pip_installed": ["ftfy (clip tokenizer dependency)"]
+  }
+}
