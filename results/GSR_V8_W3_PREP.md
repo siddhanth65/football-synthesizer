@@ -454,3 +454,115 @@ python -m tools.gsr_w3_corpus --queue                   # CPU, ~2 m 40 s (resuma
 python -m tools.gsr_w3_corpus --ingest outputs/gsr/w3_annotation/labelling_manifest.csv
 pytest tests/test_jersey_id.py tests/test_ocr_density.py
 ```
+
+## 10. Addendum (2026-08-13) — full jersey-2023 legibility pass, interrupted, 21/28 shards local
+
+`tools/gsr_w3_corpus.py` gained `--full-jersey23` (scores every jersey-2023 train crop of a
+**numbered** tracklet — 560,744 crops, the population §4.2/§7.3 sampled — in resumable 20,000-crop
+shards under `outputs/gsr/w3_annotation/j2023_full_shards/shard####.parquet`, skip-existing so a
+rerun only fills gaps) and `--j2023-full-manifest` (glyph-only manifest over the completed pass, a
+sibling of `corpus_manifest.parquet` for the training session to `pd.concat`). The illegible pool
+(403 tracklets / 172,257 crops, §3.2) is intentionally **not** rescored by `--full-jersey23` — it is
+already an admissible human-abstention class on its own label, per the glyph-only rule.
+
+The pass was launched (harness-tracked background job, batch 128, RTX 3050) and ran cleanly at
+~1.5-2 min/shard. **Killed by request at 21/28 shards** (Sid needed the laptop GPU immediately, not
+a fault) — landed cleanly mid-shard-21, no partial `shard0021.parquet` was left on disk.
+
+**Verified before writing this addendum:**
+- No orphan process: `tasklist` / `Get-CimInstance Win32_Process` show no `python.exe` running
+  `gsr_w3_corpus` after the kill. GPU memory 0 MiB used.
+- `shard0000.parquet` .. `shard0020.parquet` (21 files, `outputs/gsr/w3_annotation/j2023_full_shards/`)
+  all load with `pandas.read_parquet`, each exactly 20,000 rows, columns
+  `tracklet, file, label, legibility` — **420,000 crops scored, 0 bad/truncated shards.**
+  `shard0021.parquet` does not exist (nothing to delete).
+- The manifest and the claims-file update were **deliberately not done this session** — the pass is
+  incomplete (420,000 of 560,744 numbered crops, 75%) and neither `build_j2023_full_manifest()` nor
+  a claim should be written against a partial count.
+
+**To resume** (laptop, once the GPU is free again, or on the college cluster — copy
+`data/soccernet/jersey-2023/train/` and `~/jersey-number-pipeline/models/legibility_resnet34_soccer_20240215.pth`,
+same relative paths):
+
+```
+python -m tools.gsr_w3_corpus --full-jersey23      # resumes at shard 21/28 automatically
+python -m tools.gsr_w3_corpus --j2023-full-manifest
+```
+
+Remaining: shards 21-27 (7 shards, ~140,000 crops), est. 12-18 min GPU at the rate observed above.
+
+## 11. Addendum (2026-08-13) — pass FINISHED on the cluster, corpus deliverable complete
+
+The laptop GPU stayed off-limits; the remainder ran on `a100server1` GPU 1 (A100-PCIE-40GB, 4 MiB
+resident at launch, GPU 0 left to its other user).
+
+**Shard arithmetic correction.** §10 says "21/28 shards"; the real partition is **29** shards —
+560,744 = 28 x 20,000 + 744, so `shard0028.parquet` holds 744 rows. Remaining work was shards
+**21-28 (8 shards, 160,744 crops)**, not 7.
+
+**Portability verdict: the shards are machine-independent, so only the missing 8 were recomputed.**
+`_j2023_numbered_rows()` keys every row by `(tracklet, file)` — relative ids, never an absolute path
+— and builds the list by `sorted(gt.items())` then `sorted(dir.iterdir())`, i.e. a deterministic
+enumeration of the same dataset. Verified rather than assumed: the same function run on both machines
+returns **560,744 rows with identical MD5 `5b77db76f8de97da53cbe80802a4b6dd`** over the
+`tracklet/file|label` stream (`train_gt.json` also md5-identical, `8a1913d1...`), first row
+`('0','0_1.jpg',10)`, last `('999','999_750.jpg',55)`, and the local `shard0020.parquet`'s own first
+and last rows (`627/627_550.jpg`, `663/663_670.jpg`) match the server's shard-20 boundary exactly.
+Route taken: **upload the 21 local shards (3.3 MB) to the server so skip-existing resume applies,
+score shards 21-28 there, copy those 8 parquets back.** No code change, no re-scoring of the 420,000
+crops the laptop already paid for.
+
+**Server spend.** Sync: `tools/gsr_w3_corpus.py` (32,520 B) only — `tools/gsr_crops.py` and
+`generator/jersey_id.py` were already byte-identical server-side (md5 `90a0cdcc...`, `a8edbea8...`),
+the legibility weights were already at `~/jersey-number-pipeline/models/` (symlink to
+`~/models/koshkina/`), and `~/data/jersey-2023` was linked in as `data/soccernet/jersey-2023` so the
+tool's relative paths resolve. Plus the 21 shards (3.3 MB) and a 30-line enumeration-hash probe.
+Run: `~/run_w3_j23.sh` under `tmux new -d -s w3j23` (no bare nohup), env `gsr`
+(torch 2.5.1+cu121), `CUDA_VISIBLE_DEVICES=1`, batch 128, 1,424 MiB peak.
+**Wall clock 5 min 44 s for 160,744 crops (~43 s/shard, ~2.2x the laptop's rate);** session killed
+and GPU 1 released afterwards.
+
+**Final measurement (all 29 shards, merged and rebuilt locally, CPU only).** The server's merge and
+the local merge agree to the crop:
+
+| population | crops | tracklets | provenance |
+|---|---:|---:|---|
+| **admissible numbered** (legibility > 0.7) | **140,278** | 926 | identity-carried GT, glyph-gated |
+| model-rejected numbered (leg <= 0.7) | 420,466 | — | *rejected*, NOT an abstention label |
+| human-abstention illegible pool (label -1) | 172,257 | 403 | human tracklet verdict, unscored |
+
+* 560,744 numbered crops scored, **0 decode failures, 0 unscored**; 560,744 + 172,257 = 733,001 =
+  the whole jersey-2023 train split, so every crop is accounted for in exactly one population.
+* **Pass rate 0.2502** against the 20,000-crop sample estimate **0.2533** (n = 15,278 numbered
+  crops in that sample) — the sample was optimistic by **0.31 pp / 1.2%**, and §7.3's "~142,000-crop
+  projection, ±2,000" lands 1,722 crops high, inside its own stated interval.
+* 926 of 1,024 numbered tracklets keep at least one admitted crop; **98 lose every crop** (the gate
+  says no view of that tracklet shows its number). Admitted crops per surviving tracklet:
+  min 1, p25 59, median 121, p75 217, max 702, mean 151.5; 909 tracklets have >= 4 and 871 have
+  >= 15, so the standard 4-per-id / 15-per-tracklet sampling laws are satisfiable on almost all of it.
+* Per-number distribution: **all 44 distinct numbers in the numbered pool survive the gate**, but the
+  tail is thin — median 2,313 crops per number, max 14,286 (number 10), min 5; **7 numbers have < 100
+  admitted crops** and **9 are backed by a single tracklet**, so those classes are identity-shortcut
+  risk, not digit supervision. 30.5% of admitted crops carry a 1-digit label (42,766) and 69.5% a
+  2-digit one (97,512).
+* The rejected population is explicitly **not** relabelled as no-number: v7-V3's refutation
+  (`v7-v3-002`) is that a head trained on `leg <= 0.7` learns its teacher. The abstention class stays
+  the 172,257 human-marked crops.
+
+`jersey23_full_manifest.parquet` (560,744 rows) carries the same 11 columns as
+`corpus_manifest.parquet` — `crop_path, label, source, legibility, sequence, tracklet_id, frame,
+role, label_provenance, admitted, reason` — and is deliberately a **sibling**, not a merge: the two
+sources have different identity spaces (GSR `sequence+track_id` vs a jersey-2023 tracklet folder),
+so the concat is the training session's call. Split hygiene is unchanged: jersey-2023 train and GSR
+train only.
+
+**Not done / unchanged:** no torso RoIs (§7.4 still stands — these are full-body crops); no
+training, no GS-HOTA; no `METRICS_VERSION` change; no commit; `STATUS.md` untouched. Laptop GPU never
+used this session.
+
+**Reproduce (from a state with all 29 shards on disk, CPU only — `--full-jersey23` re-scores nothing
+when every shard exists):**
+
+```
+python -m tools.gsr_w3_corpus --full-jersey23 --j2023-full-manifest   # CPU, ~60 s
+```

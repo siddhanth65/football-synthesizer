@@ -6200,6 +6200,39 @@
         "ground-truth",
         "audit"
       ]
+    },
+    {
+      "id": "v8-w3-006",
+      "statement": "MEASURED, replacing the sampled estimate carried in v8-w3-004's caveat: the full legibility pass over jersey-2023 train's numbered tracklets admits 140,278 of 560,744 crops at the shipped 0.7 threshold -- pass rate 0.2502, against the 20,000-crop sample's 0.2533 (optimistic by 0.31 pp) and inside GSR_V8_W3_PREP.md section 7.3's ~142,000 +/-2,000 projection. 926 of 1,024 numbered tracklets keep at least one admitted crop and 98 lose every crop; 909 keep >= 4 and 871 keep >= 15, so the 4-per-id and 15-per-tracklet sampling laws are satisfiable on almost all of it (median 121 admitted crops per surviving tracklet, max 702). All 44 distinct numbers survive the gate but the tail is thin: 7 numbers hold < 100 admitted crops and 9 are backed by a single tracklet, which is identity-shortcut risk rather than digit supervision. The three populations stay distinct by construction: 140,278 admissible numbered crops, 420,466 model-REJECTED numbered crops (not relabelled as no-number, per v7-v3-002's teacher-imitation refutation), and the 172,257-crop human-abstention pool of the 403 illegible tracklets. Zero decode failures; 560,744 + 172,257 = 733,001 accounts for the whole train split.",
+      "value": 140278,
+      "unit": "jersey-2023 train crops admitted glyph-only at legibility > 0.7 (of 560,744 numbered)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_PREP.md#11 Addendum (2026-08-13) -- pass FINISHED on the cluster",
+        "outputs/gsr/w3_annotation/jersey23_full_manifest.parquet",
+        "outputs/gsr/w3_annotation/legibility_j2023_full.parquet"
+      ],
+      "method": "tools/gsr_w3_corpus.py --full-jersey23 over every crop of every numbered jersey-2023 train tracklet, in 29 resumable 20,000-crop shards, shipped weights legibility_resnet34_soccer_20240215.pth at threshold 0.7, batch 128. Shards 0-20 scored on the laptop RTX 3050; shards 21-28 on a100server1 GPU 1 (A100-40GB, 5 min 44 s for 160,744 crops) after verifying the shard partition is machine-independent -- rows are keyed by relative (tracklet, file) and the enumeration hashes identically on both machines (md5 5b77db76f8de97da53cbe80802a4b6dd over 560,744 rows). Manifest built locally by --j2023-full-manifest; server-side and laptop-side merges return the same 140,278.",
+      "n": 560744,
+      "caveats": [
+        "The 0.7 gate is a model judgment on the POSITIVE side: an admitted crop is one the shipped legibility classifier believes shows a number, not one a human verified. Only the abstention side has human provenance (v8-w3-004).",
+        "Full-body crops. No torso RoI pass has been run, and S2 section 3.4 measured a geometry crossover, so this manifest is not directly trainable against the arm-4t chain yet.",
+        "Label is identity-carried at the tracklet level, so an admitted crop's number is the tracklet's number; the gate is what makes it a per-crop claim.",
+        "Corpus counts only. Nothing here has been shown to move a GS-HOTA."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-004",
+        "v7-v3-002"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "corpus",
+        "cluster"
+      ]
     }
   ]
 }

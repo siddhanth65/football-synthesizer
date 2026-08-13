@@ -1,5 +1,22 @@
 # STATUS
 
+## 2026-08-13 — v8 W3 corpus expansion COMPLETE: jersey-2023 full legibility pass — 140,278 admissible crops (3.7x S2's training sample), finished on the cluster
+
+results/GSR_V8_W3_PREP.md §10-11, kb v8-w3-006, outputs/gsr/w3_annotation/
+jersey23_full_manifest.parquet (560,744 rows). The pass started on the laptop (21/29 shards),
+was killed at 75% on Sid's request to free his GPU, and finished on a100server1 GPU 1 in
+**5 m 44 s** (160,744 crops, 1.4 GB peak — laptop shards verified portable first: enumeration
+md5 5b77db76 identical on both machines, so nothing already paid for was re-scored). Final:
+**admissible numbered 140,278 crops / 926 tracklets** at leg>0.7 (pass rate 0.2502 vs the
+0.2533 sample estimate — the §7.3 projection lands inside its interval); model-rejected
+420,466 (NOT relabelled as abstention, v7-v3-002 rule); human-abstention pool 172,257 crops /
+403 tracklets. Totals reconcile to the whole train split (733,001). Training-relevant flags:
+98/1,024 numbered tracklets lose every crop; 7 numbers < 100 crops and **9 numbers backed by
+a single tracklet (identity-shortcut risk — the 5B lesson applies)**; digit mix 30.5%
+one-digit. Brief correction on record: 29 shards, not 28 (the 744-row tail). W3 training
+corpus is now fully staged locally + server-side; remaining inputs are Sid's two annotation
+evenings, then the cluster retrain.
+
 ## 2026-08-13 — v8 W3 PREP: corpus assembled, Sid's annotation kit turnkey — and 27% of the unnamed pool is GK annotation POLICY, not legibility
 
 results/GSR_V8_W3_PREP.md (§6 = draft registration, registers nothing), tools/gsr_w3_corpus.py,

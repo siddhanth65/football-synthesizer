@@ -130,6 +130,92 @@ def leg_path(tag: str) -> Path:
     return OUT_ROOT / f"legibility_{tag}.parquet"
 
 
+#: Shard size for the full jersey-2023 pass -- small enough that an interrupted run only
+#: re-scores one shard's worth of crops, large enough not to spend GPU time on I/O churn.
+J2023_SHARD = 20_000
+
+
+def _j2023_numbered_rows() -> list[tuple[str, str, int]]:
+    """Every ``(tracklet, file, label)`` row of jersey-2023 train whose label is a real number."""
+    gt = json.loads((J2023_ROOT / "train_gt.json").read_text(encoding="utf-8"))
+    rows: list[tuple[str, str, int]] = []
+    for tid, label in sorted(gt.items()):
+        if int(label) < 0:
+            continue
+        d = J2023_ROOT / "images" / tid
+        if not d.is_dir():
+            continue
+        rows.extend((tid, p.name, int(label)) for p in sorted(d.iterdir()))
+    return rows
+
+
+def run_j2023_full(batch: int = 128, shard: int = J2023_SHARD) -> Path:
+    """Score every jersey-2023 train crop of a numbered tracklet (checkpointed per shard).
+
+    Resumable: each shard's scores persist as their own parquet before the next shard starts, so an
+    interrupted pass only re-does its current shard. The illegible pool (label -1) is not scored
+    here -- it is admitted to the abstention class on the human label alone, per the glyph-only rule.
+    """
+    rows = _j2023_numbered_rows()
+    shard_dir = OUT_ROOT / "j2023_full_shards"
+    shard_dir.mkdir(parents=True, exist_ok=True)
+    n_shards = (len(rows) + shard - 1) // shard
+    for s in range(n_shards):
+        sp = shard_dir / f"shard{s:04d}.parquet"
+        if sp.exists():
+            continue
+        chunk = rows[s * shard: (s + 1) * shard]
+        paths = [J2023_ROOT / "images" / t / f for t, f, _ in chunk]
+        scores = score_paths(paths, batch=batch)
+        pd.DataFrame({"tracklet": [t for t, _, _ in chunk], "file": [f for _, f, _ in chunk],
+                     "label": [lab for _, _, lab in chunk], "legibility": scores}).to_parquet(
+            sp, index=False)
+        logger.info("shard %d/%d done (%d rows) -> %s", s + 1, n_shards, len(chunk), sp)
+    df = pd.concat([pd.read_parquet(shard_dir / f"shard{s:04d}.parquet")
+                    for s in range(n_shards)], ignore_index=True)
+    df.to_parquet(leg_path("j2023_full"), index=False)
+    ok = df["legibility"].notna()
+    passed = ok & (df["legibility"] > LEG_ADMIT)
+    print(f"jersey-2023 train (full, numbered only): {len(rows)} crops, {int(ok.sum())} scored")
+    print(f"  pass@{LEG_ADMIT} {int(passed.sum())} ({passed.sum() / len(rows):.4f})")
+    return leg_path("j2023_full")
+
+
+def build_j2023_full_manifest() -> Path:
+    """Glyph-only manifest rows for the full jersey-2023 numbered-crop pass.
+
+    Same columns as :func:`build_manifest`'s ``corpus_manifest.parquet`` so a training session can
+    ``pd.concat`` the two. Kept as a sibling file (not merged into ``corpus_manifest.parquet``
+    directly) because the two sources have different identity spaces (GSR sequence+tracklet vs.
+    jersey-2023 tracklet folder) and merging is the training session's call.
+    """
+    lp = leg_path("j2023_full")
+    if not lp.exists():
+        raise SystemExit(f"missing {lp} -- run --full-jersey23 first")
+    df = pd.read_parquet(lp)
+    df["source"] = "jersey2023-train"
+    df["crop_path"] = df.apply(
+        lambda r: str(J2023_ROOT / "images" / r["tracklet"] / r["file"]), axis=1)
+    df["label_provenance"] = "identity-carried (tracklet-level GT)"
+    admitted = df["legibility"].notna() & (df["legibility"] > LEG_ADMIT)
+    df["admitted"] = admitted
+    df["reason"] = np.where(
+        df["legibility"].isna(), "unscored (crop failed to decode)",
+        np.where(admitted, f"legibility > {LEG_ADMIT}", f"legibility <= {LEG_ADMIT}"))
+    df = df.rename(columns={"tracklet": "tracklet_id", "file": "frame"})
+    df["sequence"] = "jersey2023-train"
+    df["role"] = "jersey2023"
+    cols = ["crop_path", "label", "source", "legibility", "sequence", "tracklet_id", "frame",
+            "role", "label_provenance", "admitted", "reason"]
+    out = OUT_ROOT / "jersey23_full_manifest.parquet"
+    df[cols].to_parquet(out, index=False)
+    n_tracks = df.loc[admitted, "tracklet_id"].nunique()
+    print(f"jersey23_full manifest rows {len(df)} -> {out}")
+    print(f"  admitted (glyph-only) {int(admitted.sum())} over {n_tracks} tracklets")
+    print(f"  rejected (legibility <= {LEG_ADMIT} or unscored) {int((~admitted).sum())}")
+    return out
+
+
 def run_legibility(split: str, batch: int = 128) -> Path:
     """Score every materialised GT crop of ``split``; persist ``name, legibility``."""
     _assert_train_only(split)
@@ -567,6 +653,10 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--legibility", default=None, help="score a split's GT crops (GPU, short)")
     ap.add_argument("--j2023-sample", type=int, default=0, help="score N jersey-2023 train crops")
+    ap.add_argument("--full-jersey23", action="store_true",
+                    help="score every jersey-2023 numbered-tracklet crop (checkpointed, GPU)")
+    ap.add_argument("--j2023-full-manifest", action="store_true",
+                    help="write the jersey23_full_manifest.parquet from a completed full pass")
     ap.add_argument("--manifest", action="store_true", help="write the glyph-only corpus manifest")
     ap.add_argument("--queue", action="store_true", help="build contact sheets + labelling CSV")
     ap.add_argument("--tier-b", type=int, default=TIER_B_N, help="tier-B queue size")
@@ -579,6 +669,10 @@ if __name__ == "__main__":
         run_legibility(a.legibility)
     if a.j2023_sample:
         run_j2023_sample(a.j2023_sample)
+    if a.full_jersey23:
+        run_j2023_full()
+    if a.j2023_full_manifest:
+        build_j2023_full_manifest()
     if a.manifest:
         build_manifest()
     if a.queue:
