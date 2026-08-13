@@ -17,7 +17,7 @@ def test_load_claims_schema() -> None:
     for c in claims:
         assert required.issubset(c.keys()), c["id"]
         assert c["status"] in {
-            "confirmed", "retracted", "superseded", "pending", "refuted_externally",
+            "confirmed", "retracted", "superseded", "pending", "refuted_externally", "refuted",
         }, c["id"]
         assert c["evidence"], f"{c['id']} has no evidence"
 

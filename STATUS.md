@@ -1,5 +1,34 @@
 # STATUS
 
+## 2026-08-13 — v8 W2b: line-solver dead-frame fallback — registered FAIL at +0.3020 (bar +0.40); fill stays; two premise corrections banked
+
+results/GSR_V8_W2B.md, kb v8-w2b-001 (FAIL) + -002..004 (confirmed). The paper-derived line
+solve (generator/line_calib.py: ridge mask, line_support, ICP point-on-line refit, seeded
+recover_dead_frames) recovers 166/253 pre-fill dead frames (65.6%) on the W2 probe and lands
++0.3020 mean paired GS-HOTA (7/10 helped, p=0.098) — under the registered +0.40 bar, and the
+7/10 is vacuous (four of seven move <= +0.01). Component does NOT enter W5; DEV-20 not run per
+registration; METRICS_VERSION untouched (stage default OFF, shipped chain byte-identical —
+control reproduces v7 at 0.0, gate+fill rebuild matches on-record positions to 0.000000 m).
+Post-registration seed-chain bugfix (arm d, +0.3894) reported, NOT scored — verdict stands on
+the registered arm.
+
+**Two premise corrections found before the eval:** (1) sn-banner NBJW is a mechanical NO-OP —
+its released weights are byte-identical in size to the files our PnLCalib already loads (same
+author); the planned "second fallback" would have re-run the network whose failure creates the
+dead frames. (2) "PnLCalib emits nothing" was half-true: 79/139 post-fill dead frames HOLD a
+0.17-0.21 m hypothesis discarded solely by the onpitch_plausible <3-foot-points veto
+(generator/postprocess.py:93) — a player-count veto on a correct homography; the other 59
+(carrying 866/1,123 dead rows) genuinely return 0 hypotheses on re-run.
+
+What survives the FAIL: accuracy of what IS recovered is real (SNGS-057: 570 GT-matched rows
+at 0.35 m median, p90 0.73; fill-bridged rows 1.53 -> 0.39 m; GS-LocA rises in every arm where
+W2's external-calibrator arm LOWERED it); the line-support test earns more as a GATE than the
+relaxation it guards (refuses 4 catastrophic homographies up to 127 m; threshold set GT-free
+from 400 trusted live frames). Honest next step if ever revisited: a SEEDLESS line-labelling
+solver (ours is seed-dependent; the shortfall is one sparse-markings clip, SNGS-024). Cost:
+37 s GPU + ~50 min CPU. Pre-existing test reds documented (test_kb schema on v7-v4-001 at
+HEAD, 10 dead evidence links, 2 make_demo) — not W2b's; rest of suite 506 green.
+
 ## 2026-08-13 — v8 W0: FIVE GSR sequences have side-swapped ground truth — measured, diagnosed, two beyond the winner's own list
 
 results/GSR_GT_AUDIT.md, kb gsr-gt-001/002 (confirmed) + -003 (pending: the arithmetic is an

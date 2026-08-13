@@ -5066,6 +5066,7 @@
         "The verdict is technical only. The plan's budget contingency stands unaltered: if V2+V3 exceed 30 combined GPU-hours, V4 takes the EIoU-retune path regardless of this ceiling.",
         "The shipped connector has already destroyed part of its own remaining ceiling: the post-connector merge-only bound (0.6936) is BELOW the pre-connector one (0.7415), because its wrong merges (measured merge precision 0.5432) lock in contamination no later merge-only pass can undo."
       ],
+      "date": "2026-08-07",
       "tags": [
         "gsr",
         "association",
@@ -5074,7 +5075,10 @@
         "ceiling",
         "eiou",
         "camel-track"
-      ]
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-v1-001",
@@ -5136,13 +5140,25 @@
         "results/CLUSTER_SESSION_S4.md#S4b.5a Weights parked"
       ],
       "method": "Server a100server1 GPU 1 (~1.5 GPU-h total). Dataset: ~/work/det/build_side_labels.py re-labels the existing images/train_v3 JPEGs from Labels-v3.json (box pixels + imageMetadata width/height, no zip opened, no frame decoded) into a 6-class side scheme plus a 20-game holdout, chosen by index before training; collapsing the side reproduces S4's V3_MAP exactly (--selfcheck assert). Training: ~/work/det/train_det_ft.py --weights ~/runs/det/gsr_v3_ft_b/weights/last.pt (md5 2074d8741f97a6892a1322d0f808244c) --data gsr_v3side_det.yaml --epochs 30 --fliplr 0.0 --save-period 3, imgsz 640 / batch 64 / SGD lr0 0.002 lrf 0.05 / warmup 1.0 / close_mosaic 3 / hsv 0.3-0.9-0.6 / seed 0; judged on last.pt (md5 977622f81faba4b1f4a7fb91b75fb29a), best.pt excluded by the S4 anti-selection rule. Inference: ~/work/det/side_infer_gsr.py over all 72,750 frames of the 97 dev sequences at imgsz 640 conf 0.20 -> 1,262,514 boxes. Grading: python -m tools.gsr_sideoverlay --grade on the laptop, GT map from eval.gsr_score.resolve_team_map (the same oracle map tools/gsr_teamside.py grades against), pool from tools.gsr_teamside.dev_names. Holdout detection quality: ~/work/det/side_holdout_eval.py on the same 1,454 images for both checkpoints with predictions and GT merged to a common taxonomy. Two instrument bugs were found and fixed before the reported numbers (a within-frame index used as a sequence-wide index in the IoU cross-check; referees excluded from the class-agnostic person denominator); both are recorded in the results doc section 7.",
+      "n": 97,
       "caveats": [
         "One architecture (YOLOv8s detection head), one supervision form (a side class per box), one corpus (SoccerNet-v3 stills, 2014-17), one seed. This does not show that no learned side model can work -- it shows that a single-frame box label can only express per-frame geometry, which is what the model learned.",
         "61% of v3 frames are replays (21,222 of 33,986) shot from angles a broadcast main camera never uses, where the match-level left/right attribute is often not expressible at all: the image-x shortcut is 0.6399 on action frames and 0.5420 on replays.",
         "The dev pool has only 6 failures at 97 sequences, so the +4/-4 disagreement split is 8 sequences of evidence; the accuracy tie (91/97 both) is exact but the mechanism reading rests on a small n.",
         "GSR train sequences were deliberately excluded from training because 39 of them are in the grading pool. A model trained WITH GSR side labels was therefore never measured, and cannot be measured on this pool without a fresh held-out split.",
         "No GS-HOTA number was produced. The gate is a component gate; nothing was fused and eval/gsr_score.py was not touched."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "team-side",
+        "detector",
+        "v7",
+        "negative-result"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-v3-001",
@@ -5159,6 +5175,7 @@
         "results/JERSEY_HEAD_VOTER.md#3 Why, and what it means for the roadmap"
       ],
       "method": "Server a100server1 GPU 1, ~1.1 GPU-h total. Trunk: ~/jersey-number-pipeline/models/parseq_v6_arm4t.ckpt, frozen, never backpropagated. Feature per crop = [mean-pool(encoder memory) | max-pool(encoder memory) | decoder positional softmax at positions 0..2] = 801 dims, captured with a forward hook during the single AR decode (~/work/edl/edl_feats.py); 130,454 corpus crops in 129 s and 7,055 DEV-20 crops in 7 s, after which each head config trains in ~40 s (the GoMatching decoupling made structural). Corpus (~/work/edl/edl_corpus.py): 79,109 positives = the S2 plus_v3_torso rows reconstructed row-for-row (deterministic seeds; verified exact against corpus_stats_torso.json: v3 40,823 / jersey2023 34,398 / gsr_train 3,888) + 51,345 no-number negatives = v3 and GSR-train crops FAILING the 0.7 legibility filter, torso-RoI'd by the S2 pose pass (86.2% survival on 59,579 candidates). 130,454 rows, 10,150 players, 90 classes, 39.4% no-number. Loss: Bayes-risk MSE evidential loss + uniform-Dirichlet KL annealed 0->kl_max over 10 epochs; alpha = softplus(logits)+1; u = 100/S. Head selected on the player-disjoint corpus holdout only (kl_max=0 gives a degenerate saturated u, so among the live-u configs none_share 0.3 dominates 0.5 on every holdout column). Grading harness verified by reproducing the S2 bar exactly from the cached features' last 33 dims: 1,371 reads, emit 0.2761, precision 0.8344.",
+      "n": 4965,
       "caveats": [
         "The pre-registered architecture (a free 100-way evidential MLP) FAILED and was replaced mid-session by the gate head. That is an architecture deviation taken after measurement, not a pre-registered design.",
         "The gate head cannot regress the trunk's number ranking BY CONSTRUCTION, so its per-crop 'precision win' is entirely a win on WHICH crops it emits, never on what it reads. It is a learned confidence/abstention layer, not a better recognizer.",
@@ -5166,7 +5183,18 @@
         "Head hyperparameters were chosen after all four DEV-20 rung-1 rows had been computed. The stated criterion is corpus-holdout-only and the four candidates span 0.9547-0.9617 at emit 0.20, but the selection was not blind to DEV.",
         "One trunk, one corpus, one head architecture, one seed. No adapter was trained on the trunk even though the plan allowed one.",
         "DEV-20 per-crop GT is inherited from the track, so a crop whose number is genuinely hidden still counts as numbered -- every per-crop precision here is a pessimistic bound, identically for every arm."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "jersey",
+        "ocr",
+        "evidential",
+        "v7"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-v3-002",
@@ -5182,12 +5210,25 @@
         "results/JERSEY_HEAD_VOTER.md#1.1 Abstention quality -- the design bet, measured"
       ],
       "method": "Same head, corpus and features as v7-v3-001. The invisible-class label on DEV-20 is 'the GT track carries no jersey number', the same definition JERSEY_HEAD_VOTER used (base rate 0.2962 on DEV-20). AUC computed by a tie-averaged rank statistic (generator.evidential_jersey.roc_auc, unit-tested to return exactly 0.5 on a constant score). All four detectors are scored on the identical 5,879 crops that produced a pose torso RoI and a trunk feature.",
+      "n": 5879,
       "caveats": [
         "The DEV-20 invisible label is track-level, so a crop of a numbered player whose back is turned counts as 'numbered'. This biases all four detectors identically and cannot explain the ordering, but it means none of these AUCs is a per-crop visibility measurement in the strict sense.",
         "The negatives the head trained on came from v3 (2014-17 stills) plus GSR-train; the trunk had never seen them while the head had, so the corpus-holdout AUC comparison is asymmetric in the head's favour. DEV-20 is the only symmetric partition and it is the one quoted.",
         "One negative-mining rule (legibility <= 0.7) was tried. A no-number label from a source independent of the gate -- annotation, or GT visibility -- was NOT tried and is the obvious next experiment.",
         "Despite the poor invisible-AUC, u is still worth +0.3598 GS-HOTA end-to-end as a vote weight (claim v7-v3-004). 'Is a number visible' and 'should this crop vote' are different questions."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "jersey",
+        "ocr",
+        "evidential",
+        "v7",
+        "negative-result"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-v3-003",
@@ -5205,6 +5246,7 @@
         "results/GSR_S3_READER.md#6 The negative: denser is worse"
       ],
       "method": "Chain: positions_gate_v6det, EIoU e0.3/rounds1/w_app0.5/app_max0.30, CLIP, GTA tau 0.450 with the jersey merge gate, team_src=free, roster=self, official scorer; only the per-crop evidence directory and its aggregation rule move, in _v7e-suffixed variant dirs. Harness verified by re-deriving the v6 control through the same code path: GS-HOTA 51.808280888021784 exactly, 0 of 20 sequences differ, 610/870 named and 13.25 identities/sequence reproducing GSR_V7_V1 2.7. Evidential evidence produced server-side (tools.gsr_v6det --reader edl --leg-thresh 0.0, 4 shards, 20/20 sequences in 13 min) and verified against the on-record laptop parquet: 52,113/52,113 crops paired on (track_id, frame), legibility |delta| > 0.01 on 79 crops (0.152%), the leg>0.5 gate flipping on 5 crops (0.0096%), torso-flag agreement 0.9996.",
+      "n": 20,
       "caveats": [
         "Nine DEV arms were scored. p = 0.0355 is uncorrected; Bonferroni over the eight evidential arms puts the threshold at 0.00625, which it does not clear.",
         "The miss is one sequence of breadth, not a large effect gap. The concentration guard passes (top-2 share 0.49 of the net +25.50), so the gain is not two lucky sequences -- it is a broad but unbalanced +30.11 / -4.62 split.",
@@ -5212,7 +5254,20 @@
         "The crop-set equivalence is 0.01%-level rather than bit-exact, because the evidential pass ran on the server while the on-record control was extracted on the laptop.",
         "No TEST-38 read, no test-49 read, no commit, no METRICS_VERSION bump (no shipped metric moved).",
         "The connector tau was not re-swept on the new evidence and the digit-confusion prior was not refit, so these are a lower bound on the lever, as in GSR_EIOU 8.4."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "jersey",
+        "ocr",
+        "evidential",
+        "v7",
+        "negative-result",
+        "pre-registered"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-v3-004",
@@ -5230,13 +5285,26 @@
         "results/EVIDENCE_DENSITY_LAW.md"
       ],
       "method": "450 graded rung-2 points (432 evidential x {Koshkina voting, additive Dirichlet fusion}, 18 v6 reader) on DEV-20 with _v6det track ids, then nine of them run end-to-end through the frozen v6 chain. d and read precision from tools.ocr_density.measure over 1,072 original _v6det player/GK tracks (1,025 auditable, 810 carrying a GT number). The GT jersey cache had to be re-keyed first: track_gt read outputs/gsr/positions unconditionally, so a re-extraction's renumbered tracks were being graded against the original extraction's ids; positions_subdir is now a parameter and the cache file is namespaced, leaving the on-record cache untouched. Fusion = generator.evidential_jersey.fuse_tracklet, additive per-crop evidence sum(alpha - 1) with the u / p_none crop filters; it beats the voting machinery on the SAME evidential rows at every precision floor from 0.90 to 0.95 (+0.013 to +0.035 of d), which is the Koshkina voting-beats-fusion control answered in fusion's favour here.",
+      "n": 20,
       "caveats": [
         "Nine points on 20 sequences. The precision->GS-HOTA rate is a local slope near the incumbent operating point, not a law; the -3.63 arm shows the relationship inverts once the roster starves.",
         "The pre-registered rung-2 bar (d >= 0.35 at precision >= 0.92) was written against arm A's 0.3139 @ 0.9256, which was measured on a DIFFERENT track partition. On the _v6det partition the v6 incumbent already sits at 0.4114 @ 0.9365, so the bar passes literally and is uninformative; the same-partition comparison is the one quoted.",
         "The incumbent aggregation rule emits ZERO reads on evidential evidence (min_crop_conf 0.90 is unreachable for a Dirichlet mean, which is capped near 0.68 by construction), so the rule had to be re-swept per arm. Evidential outputs are not drop-in for a chain calibrated on softmax confidences.",
         "max_u and max_p_none are INERT in the voting family -- percrop_votes already gates on argmax != ILLEGIBLE plus a confidence floor, which subsumes both. The uncertainty channel only acts inside fusion.",
         "The admissible-set conclusion is a null over nine arms whose slots/sequence span 10.85-13.65; it does not show roster size never matters, only that it does not order GS-HOTA here."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "jersey",
+        "ocr",
+        "evidential",
+        "v7",
+        "evidence-density-law"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-v4-002",
@@ -5256,6 +5324,7 @@
         "results/gsr_benchmark/gsr_v7_control_dev.json"
       ],
       "method": "CAMELTrack (github.com/TrackingLaboratory/CAMELTrack, commit 46a74bb2, Apache-2.0, LICENSE md5 86d3f3a95c324c9479bd8986968f4327) run unmodified server-side on a100server1 GPU 1 as a drop-in replacement for tools.gsr_eiou.associate: it consumes the cached v6det detections (positions_gate_v6det + detbox_cache_v6det + detembed_cache_clip_v6det) and emits one {(old_track_id, frame): new_track_id} remap per sequence, which tools.gsr_v7_camel then runs through the IDENTICAL laptop CPU chain that produced the V0 control (EIoU replaced; GTA connector tau 0.450, jersey votes and MILP solver rebuilt per arm, official sn-trackeval scorer). min_det_conf and min_init_det_conf set to 0.0 so no row is dropped -- verified: 230,753 variant rows against 230,753 source rows, singleton_fallback 0 on every sequence, so GS-DetA stays comparable. Arm F trained 10 epochs x 700 steps x batch 8 (24 min, one A100) on 690,624 GT person rows from GSR train-57 CLIP-embedded at frame stride 2, 51 train / 6 held-out sequences, after a toy unit-check that asserts association accuracy rises 0.141 -> 1.000 and which caught that the paper's init_lr 1e-4 collapses the GAFFE embedding here (std 1e-4, accuracy at chance) while 3e-5 does not, and that the NTXent loss plateaus at ln(15) and is not a progress signal. Partition quantities (purity, fragments per GT identity, assa_hat / assa_merge_only / assa_perfect_link) from tools.gsr_eiou.partition_purity and tools.gsr_assoc_diag.partition_report; the server screen and the laptop diagnosis agree to every printed digit on z1_sportsmot.",
+      "n": 20,
       "caveats": [
         "The appearance cue was never tested zero-shot: no released checkpoint can read a 256-d global CLIP vector, so every multi-cue arm ran through its own drop_app/drop_kps path. The verdict is therefore 'CAMELTrack WITHOUT appearance fails on this chain', not 'CAMELTrack fails on this chain'. A faithful zero-shot arm needs KPReID part embeddings plus a pose model for its keypoint prompts.",
         "Arm F's training corpus is GROUND-TRUTH boxes with GT ids, not our detector's boxes matched to GT. The model never saw a false positive or a box on the wrong player, and CAMELTrack's own SwapSporadic / SwapOccluded augmentations were not implemented. This is the most likely single cause of the transfer failure and separating it from 'the CLIP cue is too weak' needs a ~4 GPU-hour train-57 re-extraction.",
@@ -5264,7 +5333,20 @@
         "The fallback's +0.4853 is uncorrected over six swept points and does not survive Bonferroni; it is also the size of effect that turned into -0.05 on TEST-38 in results/GSR_V5.md, which is why the conservative-freeze rule keeps the incumbent.",
         "Z2 (camel_bbox_app_kps_global @0.5) and sportsmot @0.7 were screened, not scored end-to-end; the 0.7 point was killed at 6/20 sequences to free the GPU.",
         "DEV-20 only. No TEST-38 or test-49 read, and valid-58 is still not measurable on the v6det detector."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "association",
+        "tracking",
+        "v7",
+        "camel-track",
+        "negative-result",
+        "pre-registered"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-push-001",
@@ -5284,12 +5366,27 @@
         "results/gsr_benchmark/gsr_v6det_t38_v6det.json"
       ],
       "method": "Pre-registered one-shot confirmatory retest on the held-out TEST-38 split (38 valid sequences never used to select any v7 hyperparameter). Evidential per-crop pass on a100server1 GPU 1 (4 shards, --leg-thresh 0.0, head ~/data/edl/edl_head_v7e.pt md5 4cfdaea31b0a9febf984d524da25097c on the frozen trunk parseq_v6_arm4t md5 39c0c15defafda072ca0cefd0a4b8e18); every CPU stage (EIoU re-link, vote densification, GTA connector, MILP solver, official SoccerNet GS-HOTA scorer) on the laptop, same-machine pairing per results/CLUSTER_MIGRATION.md. Only the per-crop evidence and its aggregation rule differ from the control; detector gsr_v3_ft_b_last.pt md5 2074d8741f97a6892a1322d0f808244c, connector tau 0.450, team_src free, roster self and aggregation floor 0.80 are the frozen v6 values. Crop-set equivalence verified first: 99,932/99,932 crops paired on (track_id, frame), max |delta legibility| 0.000244, 0 crops over 0.01, torso agreement 0.99935.",
+      "n": 38,
       "caveats": [
         "ARM 1's gain is concentrated: two of 38 sequences (SNGS-029 +9.16, SNGS-022 +6.14) carry 76% of the net +20.22, and the median per-sequence delta is exactly 0.000 because eight sequences are unchanged to four decimals.",
         "The one-sided p is the more permissive convention; every earlier v7 session quoted the two-sided p, under which this arm sits at 0.4405.",
         "One seed, one head, one run per arm. No repeat and no confidence interval beyond the paired signed-rank.",
         "TEST-38 is a held-out valid split, not the official test-49 split; no test-49 read was spent, because the gate closed it."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "jersey",
+        "ocr",
+        "evidential",
+        "v7",
+        "negative-result",
+        "pre-registered",
+        "confirmatory"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-push-002",
@@ -5307,12 +5404,26 @@
         "results/GSR_V6.md#3 TEST-38 -- the single pre-declared gate"
       ],
       "method": "Same pre-registered harness and same-machine pairing as v7-push-001; the only difference from ARM 1 is the EIoU appearance weight (0.5 -> 0.7), with every downstream cache (identity bundles, GTA connector arm, densified votes) rebuilt per arm by clear_arm_caches so no arm inherits another's partition. tools.gsr_eiou.BOX_SUBDIR rebound to detbox_cache_v6det with a hard failure if the cache is absent (the GSR_V7_V3.md 2.7 landmine).",
+      "n": 38,
       "caveats": [
         "This exact combination was never measured on DEV-20; its two halves come from two different sessions, so the TEST-38 read is its first read of any kind -- no DEV selection exposure, but also no prior.",
         "SNGS-082 loses 7.838 GS-HOTA on this arm (the worst single-sequence regression of the session) and is hurt by both arms. Not diagnosed.",
         "The appearance weight has now moved the score in the right direction on two independent splits but is under-powered at every measurement (DEV p 0.0401 over six swept points; TEST-38 isolated p 0.1102). It has never been the registered headline of a properly powered single-knob test.",
         "The connector tau was still not re-swept on any of these partitions (GSR_EIOU.md negative 4)."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "association",
+        "jersey",
+        "v7",
+        "negative-result",
+        "pre-registered",
+        "confirmatory"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "v7-push-003",
@@ -5329,11 +5440,25 @@
         "results/gsr_benchmark/gsr_v7_push_t38.json"
       ],
       "method": "tools.ocr_density.measure over the TEST-38 per-crop evidence of both readers on one shared GT cache keyed to positions_gate_v6det, so both readers are graded on the identical track partition; each reader runs at the aggregation rule its own registered arm ships (v6 = conf 0.9 / votes 3 / leg 0.5; evidential = conf 0.5 / votes 2 / leg 0.5 / max_u 0.60 / max_p_none 0.30 / fuse). Read precision is measured only over auditable tracks carrying a GT number (793 and 797 respectively).",
+      "n": 38,
       "caveats": [
         "The DEV-20 row is quoted from GSR_V7_V3.md 2.9, where grading used the ungated positions_v6det ids rather than positions_gate_v6det; the TEST-38 comparison between the two readers is internally consistent (one partition, one GT cache), but the DEV-vs-TEST density levels are not strictly comparable across that difference.",
         "Both readers lose density and precision going from DEV-20 to TEST-38 (0.41 -> 0.35, and 0.9365/0.9438 -> 0.9079/0.9009), so part of the shift is split difficulty. What split difficulty does not explain is the sign flip of the DIFFERENCE between the two readers measured on one split.",
         "Single measurement per reader per split; no bootstrap on the precision estimate."
-      ]
+      ],
+      "date": "2026-08-07",
+      "tags": [
+        "gsr",
+        "jersey",
+        "ocr",
+        "evidential",
+        "v7",
+        "negative-result",
+        "confirmatory"
+      ],
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": []
     },
     {
       "id": "gsr-gt-001",
@@ -5681,6 +5806,125 @@
         "gsr",
         "calibration",
         "coverage"
+      ]
+    },
+    {
+      "id": "v8-w2b-001",
+      "statement": "The dead-frame line-calibration fallback FAILS its pre-registered read: on the same 10-sequence probe as W2, the best registered arm (line-support gate + donor-seeded line solve, dead frames only) is worth mean paired +0.3020 GS-HOTA against a >= +0.40 bar (7 helped / 2 hurt, worst -0.0056, Wilcoxon p = 0.098; pooled 42.9371 -> 43.1756). A post-registration bug fix to the seed chain lifts it to +0.3894, still short by 0.0106. The component does not enter the W5 bundle; fill_calibration_gaps stays. Both sides of the calibration-coverage term are now priced and agree it is real, small and concentrated in two sequences: an external SFR network was worth +0.4883 (v8-w2-001), our own CPU line solver 62-80% of that.",
+      "value": 0.302,
+      "unit": "GS-HOTA, mean paired gain over the 10-sequence probe (bar +0.40)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W2B.md#2.6 THE DECISIVE TABLE -- paired GS-HOTA on the probe",
+        "results/gsr_benchmark/gsr_v8_w2b_arms.json"
+      ],
+      "method": "Four arms re-derived through tools.gsr_eiou.run_point at the frozen v6 point, only the pitch coordinates of dead-frame rows varying; the control reproduces gsr_v7_control_dev.json to 0.0 per sequence and the rebuilt control chain is byte-identical (max 0.000000 m) to the on-record positions_gate_v6det.",
+      "n": 10,
+      "caveats": [
+        "The >= 7/10-helped clause passes vacuously: four of the seven move by <= +0.01 GS-HOTA.",
+        "The shortfall is one clip: SNGS-024 gains +1.150 (arm c) where the external calibrator gained +3.004, and 66 of its 107 dead frames are unrecovered.",
+        "No DEV-20 confirmation was run -- the registration conditions it on a probe pass.",
+        "METRICS_VERSION was NOT bumped: the stage is default OFF and no shipped artifact moves."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w2-001",
+        "v8-w2-004"
+      ],
+      "tags": [
+        "gsr",
+        "calibration",
+        "coverage",
+        "negative-result"
+      ]
+    },
+    {
+      "id": "v8-w2b-002",
+      "statement": "A classical line-based homography solver -- pitch-model lines, a grass-restricted top-hat ridge mask, and point-on-line constraints l^T (H p) = 0 solved by SVD from a neighbouring frame's homography (ICP) -- recovers 90.6% of the detection rows our chain leaves empty on dead frames, on the CPU, with no new dependency and no weights. On the 62 SNGS-057 frames the keypoint chain could not solve (41 of them measured as returning ZERO hypotheses, the other 21 alive only through the fill), it writes 719 rows -- 570 GT-matched -- at median 0.35 m / p90 0.73 m / 100% inside the evaluator's 5 m gate -- more accurate than our shipped chain's pooled 0.475 m and than the benchmark leader's 0.536 m. On fill-bridged frames it reproduces the 'a frame's own homography is sharper than its neighbour's' effect with our own estimator: SNGS-057 1.53 m -> 0.39 m over 272 paired rows, and GS-LocA rises in every arm.",
+      "value": 0.35,
+      "unit": "m, median GT-anchored error of line-solved rows on SNGS-057 (n = 570 GT-matched)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W2B.md#2.4 Accuracy of what was written -- GT-anchored, on the rows each arm added",
+        "results/gsr_benchmark/gsr_v8_w2b_gt_probe.json"
+      ],
+      "method": "Detections matched to the nearest GT person in image space under 60 px (the W2 instrument); error in metres against that GT row's bbox_pitch. Ground truth read only to score. Recovery counted on frames carrying no pitch coordinate before the stage.",
+      "n": 1018,
+      "caveats": [
+        "Accuracy is population-dependent: SNGS-024's recovered rows are 0.57 m median but p90 3.35-4.65 m with 4-7% outside the 5 m gate. 0.35 m is the best clip, not the method.",
+        "Every recovery is seeded from a neighbouring frame's homography; a sequence that opens dead, or a dead run longer than the ICP's 40 px coarse radius can absorb, gets nothing.",
+        "min_support = 0.804 and the image knobs (21 px top-hat, ridge >= 24) are sized for 1080p SoccerNet frames and were not swept.",
+        "The end-to-end value of all this is +0.3020 GS-HOTA and fails its bar (v8-w2b-001)."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w2b-001"
+      ],
+      "tags": [
+        "gsr",
+        "calibration",
+        "coverage",
+        "methodology"
+      ]
+    },
+    {
+      "id": "v8-w2b-003",
+      "statement": "Line evidence is worth more as an ACCEPTANCE TEST than as the relaxation it guards. generator.postprocess.onpitch_plausible refuses any frame with fewer than TRUST_MIN_PLAYERS foot points whatever its homography is, so 79 probe frames whose hypothesis fits the pitch keypoints to 0.17-0.21 m (median 0.46 m from GT) are dead for lack of players -- but 4 of those 79 carry a catastrophic homography (up to 127 m) and no player-based test can tell them apart. Relaxing the rule alone is a coin toss (+0.1125 mean, 2 helped / 2 hurt, one clip at -0.712); additionally requiring line support >= 0.804 refuses 30 of the 88 relaxed frames and turns that -0.712 into +0.001 (worst case -0.026). On 400 frames the chain already trusts, line support is median 0.981 / p05 0.804 -- the instrument validating itself, GT-free.",
+      "value": 0.981,
+      "unit": "median line support of homographies the shipped chain already accepts (n = 400)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W2B.md#3.1 The line-support instrument validates itself on frames we already trust",
+        "results/gsr_benchmark/gsr_v8_w2b_support_probe.json"
+      ],
+      "method": "Support = share of in-image pitch-model line samples within 8 px of a ridge pixel. Live-frame homographies re-derived from their own projected rows by the DLT fill_calibration_gaps uses to pick donors; threshold fixed at the pooled p05 before any arm was built, without ground truth and without a score.",
+      "n": 400,
+      "caveats": [
+        "Per-sequence p05 ranges 0.710 to 0.978, so the pooled threshold is already a compromise.",
+        "Support is conservative by construction: a correct homography on a frame showing little marked pitch scores low, which is one source of the 66 unrecovered SNGS-024 frames.",
+        "This is a component measurement; the end-to-end arm still fails its bar (v8-w2b-001)."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w2b-001"
+      ],
+      "tags": [
+        "gsr",
+        "calibration",
+        "methodology"
+      ]
+    },
+    {
+      "id": "v8-w2b-004",
+      "statement": "The 'sn-banner NBJW weights we did not know existed' escalation is a mechanical no-op: the NBJW v1.0.0 release assets SV_kp (264,964,645 B) and SV_lines (264,857,893 B) are byte-for-byte the size of the weights our PnLCalib calibrator already loads from ~/PnLCalib/weights -- same author (mguti97), served from PnLCalib's own release of the same files. Running them as a 'second fallback calibrator on dead frames' would re-run the exact network whose failure created those frames. ~2 GPU-h not spent. Confirmed at the frame level: on the 59 probe dead frames never cached, PnLCalib returns ZERO hypotheses (all 18 solves fail), the same population GSR_CALIBGATE.md sized at 13.2% of dead frames.",
+      "value": 0,
+      "unit": "hypotheses PnLCalib returns on the 59 uncached dead probe frames",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W2B.md#1.0 Two facts established before registration, and how they changed the plan",
+        "results/gsr_benchmark/gsr_v8_w2b_cache_probe.json"
+      ],
+      "method": "curl -sIL on the two NBJW release URLs for Content-Length against the local weight files; PnLCalibCalibrator.candidates() re-run on the 59 dead frames (GPU, 37 s), counting emitted hypotheses.",
+      "n": 59,
+      "caveats": [
+        "The size match was not verified by hash -- the files were deliberately not re-downloaded (nothing to gain, ~530 MB to spend).",
+        "The rest of the sn-banner sweep entry stands: the Mask2Former SoccerNet weights and the stacked cam-param filter are untouched by this."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "calibration",
+        "methodology",
+        "negative-result"
       ]
     }
   ]

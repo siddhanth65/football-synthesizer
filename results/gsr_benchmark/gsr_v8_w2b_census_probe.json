@@ -1,0 +1,92 @@
+{
+ "SNGS-024": {
+  "frames": 747,
+  "dead_after_gate": 107,
+  "dead_after_fill": 64,
+  "rows_on_dead_frames": 335,
+  "rows_empty_on_live_frames": 106,
+  "dead_with_candidates": 46,
+  "dead_rows_total": 335
+ },
+ "SNGS-027": {
+  "frames": 747,
+  "dead_after_gate": 1,
+  "dead_after_fill": 0,
+  "rows_on_dead_frames": 0,
+  "rows_empty_on_live_frames": 208,
+  "dead_with_candidates": 0,
+  "dead_rows_total": 0
+ },
+ "SNGS-039": {
+  "frames": 747,
+  "dead_after_gate": 1,
+  "dead_after_fill": 0,
+  "rows_on_dead_frames": 0,
+  "rows_empty_on_live_frames": 9,
+  "dead_with_candidates": 0,
+  "dead_rows_total": 0
+ },
+ "SNGS-042": {
+  "frames": 747,
+  "dead_after_gate": 0,
+  "dead_after_fill": 0,
+  "rows_on_dead_frames": 0,
+  "rows_empty_on_live_frames": 12,
+  "dead_with_candidates": 0,
+  "dead_rows_total": 0
+ },
+ "SNGS-045": {
+  "frames": 747,
+  "dead_after_gate": 13,
+  "dead_after_fill": 0,
+  "rows_on_dead_frames": 0,
+  "rows_empty_on_live_frames": 10,
+  "dead_with_candidates": 0,
+  "dead_rows_total": 0
+ },
+ "SNGS-048": {
+  "frames": 747,
+  "dead_after_gate": 1,
+  "dead_after_fill": 0,
+  "rows_on_dead_frames": 0,
+  "rows_empty_on_live_frames": 42,
+  "dead_with_candidates": 0,
+  "dead_rows_total": 0
+ },
+ "SNGS-051": {
+  "frames": 747,
+  "dead_after_gate": 22,
+  "dead_after_fill": 21,
+  "rows_on_dead_frames": 53,
+  "rows_empty_on_live_frames": 65,
+  "dead_with_candidates": 21,
+  "dead_rows_total": 53
+ },
+ "SNGS-054": {
+  "frames": 747,
+  "dead_after_gate": 22,
+  "dead_after_fill": 6,
+  "rows_on_dead_frames": 25,
+  "rows_empty_on_live_frames": 27,
+  "dead_with_candidates": 6,
+  "dead_rows_total": 25
+ },
+ "SNGS-057": {
+  "frames": 747,
+  "dead_after_gate": 63,
+  "dead_after_fill": 42,
+  "rows_on_dead_frames": 693,
+  "rows_empty_on_live_frames": 39,
+  "dead_with_candidates": 1,
+  "dead_rows_total": 693
+ },
+ "SNGS-078": {
+  "frames": 740,
+  "dead_after_gate": 23,
+  "dead_after_fill": 6,
+  "rows_on_dead_frames": 17,
+  "rows_empty_on_live_frames": 52,
+  "dead_with_candidates": 6,
+  "dead_rows_total": 17
+ }
+}

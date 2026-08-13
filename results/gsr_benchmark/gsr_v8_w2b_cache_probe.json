@@ -1,0 +1,38 @@
+{
+ "SNGS-024": {
+  "n_frames": 18,
+  "n_candidates": 0,
+  "frames_with_none": 18,
+  "seconds": 20.9
+ },
+ "SNGS-027": {
+  "n_frames": 0
+ },
+ "SNGS-039": {
+  "n_frames": 0
+ },
+ "SNGS-042": {
+  "n_frames": 0
+ },
+ "SNGS-045": {
+  "n_frames": 0
+ },
+ "SNGS-048": {
+  "n_frames": 0
+ },
+ "SNGS-051": {
+  "n_frames": 0
+ },
+ "SNGS-054": {
+  "n_frames": 0
+ },
+ "SNGS-057": {
+  "n_frames": 41,
+  "n_candidates": 0,
+  "frames_with_none": 41,
+  "seconds": 16.4
+ },
+ "SNGS-078": {
+  "n_frames": 0
+ }
+}
