@@ -6067,6 +6067,139 @@
         "methodology",
         "correction"
       ]
+    },
+    {
+      "id": "v8-w3-001",
+      "statement": "SoccerNet-GSR's jersey label is identity-carried with zero exceptions: of 1,224 GSR-train player/GK tracklets, 0 mix numbered and un-numbered boxes and 0 carry two different numbers. The field is a property of the identity, replicated to every box of it, and contains no per-frame visibility information -- the same hazard CLUSTER_SESSION_S2.md section 1.2 found in SoccerNet-v3's ID field.",
+      "value": 0,
+      "unit": "tracklets with mixed or multi-valued jersey labels (of 1,224)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_PREP.md#3.1 GSR train: identity-carried, with zero exceptions"
+      ],
+      "method": "Label-only pass over all 57 GSR-train Labels-GameState.json, grouping every player/GK bbox_image annotation by track_id and counting distinct jersey values and null/non-null mixes per track. No image opened.",
+      "n": 1224,
+      "caveats": [
+        "Measured on GSR train and (for the goalkeeper split) validation; GSR test was not opened.",
+        "Confirms rather than refutes the task premise; it fixes the resolution at 'zero exceptions' rather than 'mostly'."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "jersey",
+        "data",
+        "ground-truth"
+      ]
+    },
+    {
+      "id": "v8-w3-002",
+      "statement": "SoccerNet-GSR never labels a goalkeeper's jersey number: 0 of 79 train GKs and 0 of 77 validation GKs carry one, against 933 of 1,145 train players. 27% of the unnamed-tracklet pool that campaign v8 targets is therefore an annotation-policy absence, not a legibility failure -- no reader or filter can recover those numbers from this dataset, and they cap the ceiling of every reader measured on it.",
+      "value": 0,
+      "unit": "goalkeeper tracklets carrying a jersey number (of 79 train + 77 validation)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_PREP.md#3.3 The goalkeeper policy -- the finding that resizes the W3 target",
+        "results/GSR_S3_READER.md#7"
+      ],
+      "method": "Same label-only pass as v8-w3-001, cross-tabulating the attributes.role field against jersey presence per tracklet, on GSR train and validation.",
+      "n": 156,
+      "caveats": [
+        "GSR_S3_READER.md section 7.8 noted the policy in passing; this is the first exact count and the first confirmation that it holds on both splits.",
+        "GSR test was not opened, so the policy is confirmed on 2 of 3 labelled splits."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-001"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "data",
+        "ground-truth"
+      ]
+    },
+    {
+      "id": "v8-w3-003",
+      "statement": "The server-side S2 glyph-only corpus figure reproduces exactly on the laptop: 4,175 of 13,994 numbered GSR-train GT crops pass the shipped ResNet34 legibility classifier at the shipped 0.7 threshold, matching CLUSTER_SESSION_S2.md section 3.3's 'GSR train: 4,175 of 13,994' to the crop, on a different machine through an independently written scorer.",
+      "value": 4175,
+      "unit": "GSR-train crops admitted glyph-only (of 13,994 numbered)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_PREP.md#4.1 GSR train, assembled and validated against the server number",
+        "results/CLUSTER_SESSION_S2.md#3.3"
+      ],
+      "method": "tools/gsr_w3_corpus.py --legibility train over the 20,067 GT crops of tools/gsr_crops.py's published crop law, then --manifest restricted to player/GK crops carrying a GT number. Shipped weights legibility_resnet34_soccer_20240215.pth, threshold 0.7.",
+      "n": 13994,
+      "caveats": [
+        "The filter is reproduced; the corpus it fed is not -- SoccerNet-v3 (42,479 of the S2 corpus rows) is 45 GB and server-only against 33 GB free locally.",
+        "Full-body crops. S2 section 3.4 measured a geometry crossover, so these rows are not trainable against the arm-4t chain until a pose-torso pass converts them."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "jersey",
+        "corpus",
+        "reproduction"
+      ]
+    },
+    {
+      "id": "v8-w3-004",
+      "statement": "The shipped legibility classifier and human tracklet-level abstention judgments agree 99.5% on the negative class: of jersey-2023 train crops belonging to the 403 tracklets a human marked illegible (-1), only 0.51% score above the 0.7 threshold. This validates the 0.7 gate as a glyph-only proxy against an independent human label, and means ~171,000 human-sourced no-number crops are already on disk -- the anti-teacher-imitation rule can be honoured without any model-derived abstention labels.",
+      "value": 0.0051,
+      "unit": "share of human-marked-illegible crops scoring above legibility 0.7",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_PREP.md#3.2 jersey-2023: also identity-carried, but its abstention class is human and usable"
+      ],
+      "method": "tools/gsr_w3_corpus.py --j2023-sample 20000 (seed 0) over the 733,001-crop jersey-2023 train split; 4,722 of the sampled crops belong to -1 tracklets. Shipped legibility weights at 0.7.",
+      "n": 4722,
+      "caveats": [
+        "Sampled, not exhaustive: 20,000 of 733,001 crops. The companion numbered-crop pass rate 0.2533 agrees with S2's 0.2590 to within 1.6 standard errors.",
+        "A -1 is a tracklet-level human judgment ('no number legible anywhere in this tracklet'), not a per-crop one; it is a stronger claim than per-crop, but its provenance is the sn-jersey annotation process and is not independently verifiable here."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "jersey",
+        "corpus",
+        "abstention"
+      ]
+    },
+    {
+      "id": "v8-w3-005",
+      "statement": "A further SoccerNet-GSR ground-truth error, found the same way W0's five side-swaps were: in SNGS-065 at frame 000254, player track 6 (772,352,38,85) and referee track 22 (773,354,36,92) are the same body, IoU ~0.85, with both boxes smooth across their temporal neighbours. Existence proof only -- no systematic duplicate-box audit was run.",
+      "value": 1,
+      "unit": "duplicate-identity GT box pair found (unaudited population)",
+      "status": "pending",
+      "evidence": [
+        "results/GSR_V8_W3_PREP.md#7 Negatives, limits, and what was NOT done"
+      ],
+      "method": "Visual inspection of a generated annotation contact sheet, then a label-only check of the two tracks' box trajectories around the frame and an overlap search over all player/GK/referee boxes at that frame.",
+      "n": 1,
+      "caveats": [
+        "One instance, found by eye while checking sheet usability. Not a count, not a rate, and not evidence about any other sequence.",
+        "The cheap systematic version (all-pairs IoU between player/GK and referee tracks per frame over the 57 train sequences) was NOT run."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "ground-truth",
+        "audit"
+      ]
     }
   ]
 }

@@ -1,5 +1,33 @@
 # STATUS
 
+## 2026-08-13 — v8 W3 PREP: corpus assembled, Sid's annotation kit turnkey — and 27% of the unnamed pool is GK annotation POLICY, not legibility
+
+results/GSR_V8_W3_PREP.md (§6 = draft registration, registers nothing), tools/gsr_w3_corpus.py,
+outputs/gsr/w3_annotation/ (499 contact sheets + labelling_manifest.csv + HOWTO.md, 52 MB).
+Inventory correction: docs/SOCCERNET_DATA_INVENTORY.md is STALE — GSR train (57 seqs, full
+labels) has been local since 2026-07-31. Assembled glyph-only corpus: GSR-train 4,175 crops /
+861 tracklets at leg>0.7 (laptop reproduces S2's server-side figure TO THE CROP; 9,819
+carried-but-illegible rejected; leakage vs valid/test = none). jersey-2023: ~142k admissible
+of 560,744 (0.2533 on a 20k seeded sample) — 3.7x what S2 trained on, local, one ~1h47m
+legibility pass away (LAUNCHED post-session). SoccerNet-v3 (S2's measured whole-effect source,
+45,620 crops) is SERVER-ONLY and cannot fit locally (45 GB vs 33 GB free): the W3 retrain is a
+cluster job or it drops its largest source — Sid books the slot.
+
+**Queue: 499 tracklets ~= 2 hours ~= two evenings.** Tier A = ALL 289 surviving unnamed
+GSR-train tracklets (the whole trainable population, 57/57 seqs, 38,909 readable-size boxes;
+projected yield ~4-5.5k glyph crops + ~2.1k human abstention crops). Tier B = 210 tracklets
+ranked by legibility-model uncertainty -> 2,520 per-crop glyph-visibility labels (supervision
+for the gate that still blocks 81% of crops — the retrain S2 never ran). Premise corrections:
+(1) **GSR never labels goalkeeper numbers (0/79 train, 0/77 valid GKs) — 27% of the unnamed
+pool is unrecoverable by ANY reader; every reader ceiling on this benchmark carries that cap.**
+(2) anchor_wire is the WRONG machinery on GSR train — Sid labels a GT track_id, propagation is
+exact and free; --ingest adapter written, with number-carries/none-bounded asymmetry.
+(3) Confirmed at zero exceptions: no train tracklet mixes numbered/un-numbered GT (n=1,224).
+Bonus: SNGS-065 player track 6 = referee track 22 at frame 000254 (IoU ~0.85) — a SIXTH GSR
+GT error, filed pending, no systematic overlap audit run. Self-caught process bug on record:
+first queue build clustered views in 1.4 s; time-stratification fixed what a "none" means.
+kb +5 claims. GPU ~5 min.
+
 ## 2026-08-13 — v8 W4: BN-stats test-time adaptation — registered FAIL at -17.56 (0/10 helped); TTA premise largely absent in-domain; stack-drift hazard discovered
 
 results/GSR_V8_W4.md, kb v8-w4-001..005. The registered arm (cumulative BN running-stat
