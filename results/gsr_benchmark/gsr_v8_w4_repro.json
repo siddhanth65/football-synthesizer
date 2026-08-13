@@ -1,0 +1,103 @@
+{
+  "SNGS-024": {
+    "vs_onrecord": {
+      "rows_a": 7704,
+      "rows_b": 7484,
+      "tracks_a": 48,
+      "tracks_b": 45,
+      "identical": false
+    },
+    "vs_rerun_same_stack": {
+      "rows_a": 7704,
+      "rows_b": 7704,
+      "tracks_a": 48,
+      "tracks_b": 48,
+      "identical": true,
+      "max_abs_numeric": 0.0,
+      "track_id_mismatches": 0,
+      "role_mismatches": 0,
+      "team_mismatches": 0
+    }
+  },
+  "SNGS-027": {
+    "vs_onrecord": {
+      "rows_a": 12185,
+      "rows_b": 11986,
+      "tracks_a": 77,
+      "tracks_b": 66,
+      "identical": false
+    }
+  },
+  "SNGS-039": {
+    "vs_onrecord": {
+      "rows_a": 14258,
+      "rows_b": 13902,
+      "tracks_a": 87,
+      "tracks_b": 58,
+      "identical": false
+    }
+  },
+  "SNGS-042": {
+    "vs_onrecord": {
+      "rows_a": 14219,
+      "rows_b": 13970,
+      "tracks_a": 89,
+      "tracks_b": 65,
+      "identical": false
+    }
+  },
+  "SNGS-045": {
+    "vs_onrecord": {
+      "rows_a": 11732,
+      "rows_b": 11365,
+      "tracks_a": 87,
+      "tracks_b": 74,
+      "identical": false
+    }
+  },
+  "SNGS-048": {
+    "vs_onrecord": {
+      "rows_a": 14992,
+      "rows_b": 14793,
+      "tracks_a": 70,
+      "tracks_b": 49,
+      "identical": false
+    }
+  },
+  "SNGS-051": {
+    "vs_onrecord": {
+      "rows_a": 11298,
+      "rows_b": 11033,
+      "tracks_a": 76,
+      "tracks_b": 50,
+      "identical": false
+    }
+  },
+  "SNGS-054": {
+    "vs_onrecord": {
+      "rows_a": 11088,
+      "rows_b": 10899,
+      "tracks_a": 66,
+      "tracks_b": 54,
+      "identical": false
+    }
+  },
+  "SNGS-057": {
+    "vs_onrecord": {
+      "rows_a": 13802,
+      "rows_b": 13499,
+      "tracks_a": 93,
+      "tracks_b": 76,
+      "identical": false
+    }
+  },
+  "SNGS-078": {
+    "vs_onrecord": {
+      "rows_a": 9485,
+      "rows_b": 9293,
+      "tracks_a": 57,
+      "tracks_b": 57,
+      "identical": false
+    }
+  }
+}

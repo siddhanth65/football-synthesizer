@@ -5926,6 +5926,147 @@
         "methodology",
         "negative-result"
       ]
+    },
+    {
+      "id": "v8-w4-001",
+      "statement": "REGISTERED FAIL. Per-sequence BatchNorm test-time adaptation of the detector (full cumulative recomputation of all 57 BatchNorm2d running_mean/running_var on each test sequence's own frames, stride 5, momentum=None, reset per sequence, no labels, no gradients) costs -17.5645 mean paired GS-HOTA on the 10-sequence v8 DEV probe against a same-stack control, 0 sequences helped / 10 hurt, worst -31.54, best -6.58, Wilcoxon p=0.00195. The registered kill bar was >= +0.10, so DEV-20 was not run. Pooled over the probe: GS-HOTA 41.6728 -> 25.1791, GS-DetA 29.7643 -> 14.4075. Against the on-record control the arm reads -18.7041 (same verdict). The stage ships default OFF (generator.extract.BN_STATS is None) and METRICS_VERSION was not bumped.",
+      "value": -17.5645,
+      "unit": "mean paired GS-HOTA vs same-stack control, 10-sequence DEV probe",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W4.md#2. RESULTS",
+        "results/gsr_benchmark/gsr_v8_w4_summary_w4bn_vs_w4off.json",
+        "results/gsr_benchmark/gsr_v8_w4_w4bn_probe.json",
+        "results/gsr_benchmark/gsr_v8_w4_w4off_probe.json"
+      ],
+      "method": "generator/bn_adapt.py adapt_yolo: ultralytics fusion suppressed for the adaptation pass (it folds Conv+BN in place at first predict, leaving 0 BN modules), BN layers reset + train mode + momentum=None, frames through the detector's normal call so preprocessing matches inference, predictor dropped so the next predict re-fuses with the adapted buffers. Stats cached per sequence and re-applied in EVERY GPU stage (extract, per-crop OCR, box cache, CLIP embeddings), since all of them re-detect and match back to the persisted foot points. Both lineages (adapted and flag-OFF control) re-extracted on this laptop, scored through the frozen v6 EIoU chain (e=0.3, rounds=1, w_app=0.5, app_max=0.30, floor 0.80, tau 0.450), paired per sequence.",
+      "n": 10,
+      "caveats": [
+        "Registered arm only. Momentum-damped, layer-subset and larger-batch variants were NOT run: any of them would have been chosen by looking at the probe deltas.",
+        "The adaptation pass runs one frame per forward, so each BN's per-batch variance estimate comes from a single image; the pass structure was registered a priori.",
+        "Corpus-specific: the S4b detector was fine-tuned on SoccerNet GSR train, so the DEV probe is in-domain and there is little train->test shift for the lever to close. This is not evidence about a genuine domain transfer (e.g. EPL/ManU footage)."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "detector",
+        "domain-adaptation",
+        "negative-result",
+        "registered"
+      ]
+    },
+    {
+      "id": "v8-w4-002",
+      "statement": "Mechanism of the W4 failure, measured at the detector: recomputing BN statistics on a sequence's own clean frames drops 4.7-25.7% of per-frame person detections, cuts the median detection confidence from ~0.76 to 0.56-0.66, and raises the share of people classified as referee by 2-6 points. End to end that is -23.5% positions rows (120,763 -> 92,433) and +37% raw tracks (750 -> 1,029) over the probe. The downstream chain's thresholds (DETECT_CONF, ByteTrack's high/low split, the EIoU appearance gate, the connector tau) are all calibrated against the shipped detector's confidence distribution, so a uniform confidence drop is read as weak evidence and tracks fragment. Statistics only move a median 3.9-5.1% (means) and 17-22% (variances).",
+      "value": -23.5,
+      "unit": "percent change in positions rows, probe total, adapted vs flag-OFF control",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W4.md#2.4 Mechanism -- measured at the detector, not inferred",
+        "results/gsr_benchmark/gsr_v8_w4_stats.json"
+      ],
+      "method": "50 frames per sequence (stride 15) on SNGS-024/039/045/057, the shipped detector built twice via generator.extract._build_detector with and without the sequence's cached BN snapshot, same thresholds, no tracking and no scoring; row/track counts from the two positions lineages; BN shift = relative L2 of each buffer against the checkpoint's.",
+      "n": 10,
+      "caveats": [
+        "The per-frame probe covers 4 of 10 sequences and 50 frames each; it explains direction and rough magnitude, it is not a detection benchmark and no mAP was computed.",
+        "Attribution to YOLO's mosaic/HSV/scale augmentation (training-time BN statistics are the statistics of augmented batches, not of clean letterboxed frames) is a mechanism argument, not a measured ablation."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w4-001"
+      ],
+      "tags": [
+        "gsr",
+        "detector",
+        "diagnostics",
+        "negative-result"
+      ]
+    },
+    {
+      "id": "v8-w4-003",
+      "statement": "SECONDARY ARM, FAIL. The CLIP appearance embedder is NOT BatchNorm-free: the ViT-B/16 trunk is LayerNorm-only, but the trained head is Linear(768->256) -> BatchNorm1d(256) -> L2 (a BNNeck), and the epoch-8 checkpoint carries its running stats (num_batches_tracked=10000). Per-sequence recomputation of those 256 buffers, on the SHIPPED detections, costs -13.5219 mean paired GS-HOTA on the same probe, 0 helped / 10 hurt, p=0.00195. The per-sequence statistics are wildly different from the checkpoint's (relative L2 shift of running_mean 0.87-0.97), and under the frozen app_max=0.30 cosine gate the re-association shattered: 584 tracklets in, 11,977 out, against 1,422 for the control.",
+      "value": -13.5219,
+      "unit": "mean paired GS-HOTA vs on-record control, 10-sequence DEV probe",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W4.md#2.3 The secondary arm fails too, but for a different and partly instrumental reason",
+        "results/gsr_benchmark/gsr_v8_w4_summary_w4neck_vs_onrecord.json",
+        "results/gsr_benchmark/gsr_v8_w4_w4neck_probe.json"
+      ],
+      "method": "generator.bn_adapt.recomputing on ClipEmbedder.bn; two passes over the sequence's own crops (pass 1 at frame stride 10 collects the statistics and discards its embeddings, pass 2 embeds at the shipped stride 2), BNNeck state reset from the checkpoint before each sequence. Detections, boxes and OCR evidence are the on-record v6det artifacts, so the arm differs from the control in 256 BN buffers alone.",
+      "n": 10,
+      "caveats": [
+        "Part of the loss is threshold coupling, not representation quality: re-whitening the features moves every cosine distance while app_max and tau stay frozen. A re-calibrated operating point was NOT tested (the registration forbids tuning against the probe), so no claim is made about BNNeck adaptation with re-fitted thresholds."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "reid",
+        "appearance",
+        "domain-adaptation",
+        "negative-result"
+      ]
+    },
+    {
+      "id": "v8-w4-004",
+      "statement": "CAMPAIGN HAZARD. The on-record v6det DEV GPU artifacts cannot be reproduced on the current laptop stack (python 3.14.0, supervision 0.30.0, ultralytics 8.4.56, torch 2.11.0+cu128) - a flag-OFF re-extraction differs from positions_v6det on ALL 10 probe sequences (rows +1.3% to +2.6%, tracks systematically higher, e.g. SNGS-039 87 vs 58). End to end that stack drift is worth -1.1395 mean paired GS-HOTA (3 helped / 7 hurt, p=0.105). Extraction is nevertheless bit-deterministic run to run on one stack (same sequence extracted twice: identical=True, max_abs 0.0 over 7,704 rows, 48/48 tracks), so the experimental noise floor is exactly zero. Any session that RE-EXTRACTS must build its own same-stack control instead of pairing against gsr_v7_control_dev.json; sessions that reuse the cached detections (W2, W2b) are unaffected.",
+      "value": -1.1395,
+      "unit": "mean paired GS-HOTA of a flag-OFF re-extraction vs the on-record control",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W4.md#2.1 Control obligations -- one failed, one passed, and both matter",
+        "results/gsr_benchmark/gsr_v8_w4_repro.json",
+        "results/gsr_benchmark/gsr_v8_w4_summary_w4off_vs_onrecord.json"
+      ],
+      "method": "tools.gsr_w4_bnstats stage 'repro': row-for-row parquet diff of positions_w4off (BN_STATS None, the identical shipped code path) against positions_v6det, and against a second independent flag-OFF run of SNGS-024; the end-to-end cost from scoring the w4off lineage through the frozen v6 chain and pairing per sequence.",
+      "n": 10,
+      "caveats": [
+        "Which package changed (supervision's ByteTrack, ultralytics' NMS, torch kernels) was NOT isolated - the session only needed to know that pairing across stacks is invalid.",
+        "The -1.1395 is measured on the hard 10-sequence probe; the drift on full DEV-20 or on TEST-38 was not measured."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "methodology",
+        "reproducibility",
+        "infrastructure"
+      ]
+    },
+    {
+      "id": "v8-w4-005",
+      "statement": "CORRECTION to a repeatedly cited prior. The repo's 'BN-stats adaptation +0.18 free' gem (STATUS.md, and the W4 brief's 'precedent: +0.18 from BN-stats on the detector') was never a detector result and never a GS-HOTA result: CLUSTER_SESSION1.md section 8 measured +0.18 VALID IDENTITY mAP (56.93 -> 57.11) on the prtreid re-ID backbone, as a by-product of frozen-backbone training leaving BN in train mode. Measured on the detector end to end for the first time in W4, the same operation is worth -17.56 GS-HOTA.",
+      "value": 0.18,
+      "unit": "valid identity mAP on prtreid (the actual scope of the cited precedent)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W4.md#0.3 The precedent, stated accurately",
+        "results/CLUSTER_SESSION1.md#8"
+      ],
+      "method": "Read of the on-record cluster-session log against the claim as cited in STATUS.md and in the W4 task brief.",
+      "n": 1,
+      "caveats": [
+        "The +0.18 prtreid number itself is not disputed; only its scope (re-ID mAP, not detector, not GS-HOTA) is corrected."
+      ],
+      "date": "2026-08-13",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "methodology",
+        "correction"
+      ]
     }
   ]
 }

@@ -1,5 +1,34 @@
 # STATUS
 
+## 2026-08-13 — v8 W4: BN-stats test-time adaptation — registered FAIL at -17.56 (0/10 helped); TTA premise largely absent in-domain; stack-drift hazard discovered
+
+results/GSR_V8_W4.md, kb v8-w4-001..005. The registered arm (cumulative BN running-stat
+recomputation on each sequence's own frames, detector only) scores **-17.5645** mean paired
+GS-HOTA on the 10-seq probe (0 helped / 10 hurt, p=0.00195) vs a +0.10 escalation bar; DEV-20
+never run per registration; stage ships default OFF (generator.extract.BN_STATS=None), no
+METRICS_VERSION bump, chain untouched. Secondary arm (embedder BNNeck re-whitening) -13.52 —
+partly instrumental (app_max=0.30 frozen while every cosine distance moves; 584 -> 11,977
+re-associations; a re-calibrated point would be score-chosen, not tested). Mechanism, measured:
+BN buffers move only ~4-5% (means) yet median detector confidence drops 0.76 -> ~0.6,
+detections -23.5% of rows, +37% track fragments — every downstream threshold (DETECT_CONF,
+ByteTrack split, app_max, tau) is calibrated to the SHIPPED confidence distribution, so
+uniform confidence deflation reads as weak evidence. Premise correction: S4b is fine-tuned on
+GSR train, DEV is in-domain — there is little shift to adapt away; and the briefed "+0.18
+detector BN precedent" was misattributed (it was prtreid identity mAP, not detector GS-HOTA;
+kb v8-w4-005). TTA re-registration is only warranted on a genuinely out-of-domain corpus
+(EPL/ManU era).
+
+**Escalation for W5 (kb v8-w4-004): the on-record v6det DEV extraction is NOT reproducible on
+today's dependency stack** (py 3.14 / ultralytics 8.4.56 / torch 2.11 vs the 0.28-era
+artifacts): all 10 probe sequences differ, worth **-1.1395 paired GS-HOTA from version churn
+alone**. Extraction IS bit-deterministic within one stack (repeat run: max_abs 0.0), so any
+future session that RE-EXTRACTS must build a full same-stack control lineage before pairing —
+W2/W2b were safe only because they reused cached detections. Also: ultralytics fuses Conv+BN
+in place at first predict; run heavy stages as separate processes (one _ArrayMemoryError near
+host-RAM ceiling, non-fatal). Cost ~4.6 GPU-h. **v8 scoreboard so far: W2b FAIL, W4 FAIL —
+the v8 bundle currently contains no new shipped component; W5's score path now rests entirely
+on W3 (the data track).**
+
 ## 2026-08-13 — v8 W2b: line-solver dead-frame fallback — registered FAIL at +0.3020 (bar +0.40); fill stays; two premise corrections banked
 
 results/GSR_V8_W2B.md, kb v8-w2b-001 (FAIL) + -002..004 (confirmed). The paper-derived line

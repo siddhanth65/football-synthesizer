@@ -45,6 +45,13 @@ POSITIONS_COLUMNS = (
 #: the same mechanism :data:`eval.gsr_gta.EMBEDDER` uses, and the invariant it exists to protect.
 FOOTBALL_WEIGHTS: str | None = None
 
+#: Process-wide per-sequence BatchNorm test-time statistics for the football detector: a path to a
+#: :func:`generator.bn_adapt.stats_of` snapshot, or ``None`` (the shipped default -- the checkpoint's
+#: own training-corpus statistics). Rebound by the caller for the duration of ONE sequence, exactly
+#: like :data:`FOOTBALL_WEIGHTS`, so extraction, crop recovery, box caching and embedding all build
+#: the same adapted detector. Registered arm: ``results/GSR_V8_W4.md``.
+BN_STATS: str | Path | None = None
+
 DETECT_CONF = 0.20  # player detection confidence
 BALL_CONF = 0.10  # the ball is small/fast -> a lower threshold recovers more ball frames
 
@@ -195,7 +202,13 @@ def _build_detector(device: str, name: str = "yolo", *, weights: str | None = No
     - ``rfdetr``: RF-DETR (DINOv2 transformer, NMS-free; SOTA on COCO, ICLR 2026). COCO-pretrained.
     """
     if name == "football":
-        return _FootballRoleDetector(weights=weights or FOOTBALL_WEIGHTS, device=device)
+        det = _FootballRoleDetector(weights=weights or FOOTBALL_WEIGHTS, device=device)
+        if BN_STATS is not None:  # test-time BN adaptation, default OFF (generator.bn_adapt)
+            from generator.bn_adapt import apply_stats  # noqa: PLC0415
+
+            n = apply_stats(det.yolo.model, BN_STATS)
+            logger.info("detector: applied %d BN test-time buffers from %s", n, BN_STATS)
+        return det
     if name == "rfdetr":
         return _RFDetrDetector(device=device)
     from ultralytics import YOLO  # noqa: PLC0415
