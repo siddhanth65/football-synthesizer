@@ -533,7 +533,7 @@ def ingest(csv_path: Path, split: str = "train") -> Path:
     leg = (pd.read_parquet(leg_path(split)).set_index("name")["legibility"].to_dict()
            if leg_path(split).exists() else {})
     rows = []
-    stats = {"A_number": 0, "A_none": 0, "A_unsure": 0, "B_visible": 0, "B_hidden": 0}
+    stats = {"A_number": 0, "A_none": 0, "A_unsure": 0, "B_visible": 0, "B_hidden": 0, "B_unsure": 0}
     with csv_path.open(encoding="utf-8", newline="") as fh:
         for rec in csv.DictReader(fh):
             crops = boxes.get(rec["sequence"], {}).get(int(rec["tracklet_id"]), [])
@@ -559,6 +559,9 @@ def ingest(csv_path: Path, split: str = "train") -> Path:
                         "admitted": ok, "reason": why,
                     })
             else:
+                if rec["label"].strip().lower() in ("", "unsure"):
+                    stats["B_unsure"] += 1
+                    continue
                 vis = set(_parse_b(rec["label"], int(rec["n_cells"])))
                 by_frame = {c.frame: c for c in crops}
                 for i, frame in enumerate(cells):
