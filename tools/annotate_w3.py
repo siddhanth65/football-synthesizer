@@ -237,7 +237,10 @@ header { padding:6px 12px; background:#1c1f22; border-bottom:1px solid #2b2f33;
 #gt { font-size:26px; font-weight:800; color:#7fd1ff; }
 #saved { color:#8de08d; }
 #pend { font-size:22px; font-weight:800; color:#ffd166; min-width:70px; }
-#err { color:#ff8b7a; font-weight:600; }
+#err.bad { color:#ff8b7a; font-weight:600; }
+#err.ok { color:#8de08d; font-weight:600; }
+#err.hint { color:#9aa3ab; }
+#mode { color:#ffd166; font-weight:700; }
 main { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 #wrap { position:relative; overflow:hidden; }
 #inner { position:relative; display:inline-block; transform-origin:var(--ox) var(--oy); }
@@ -254,6 +257,7 @@ footer { padding:5px 12px; background:#1c1f22; border-top:1px solid #2b2f33; col
          font-size:12px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
 input { background:#0f1113; color:#dfe3e6; border:1px solid #3a4045; border-radius:3px;
         padding:4px 6px; font:13px system-ui,sans-serif; width:320px; }
+input:focus { outline:none; border-color:#ffd166; box-shadow:0 0 0 2px rgba(255,209,102,.35); }
 </style></head><body>
 <header>
   <span id="pos"></span><span id="meta"></span><span id="gt"></span>
@@ -265,7 +269,7 @@ input { background:#0f1113; color:#dfe3e6; border:1px solid #3a4045; border-radi
 </div></div></main>
 <footer>
   <span>note (Tab):</span><input id="note" placeholder="optional -- wrong person / wrong number">
-  <span id="keys"></span>
+  <span id="mode"></span><span id="keys"></span>
 </footer>
 <script>
 const R = __ROWS__;
@@ -283,9 +287,14 @@ function go(k) {
   if (r.tier === "B" && r.label && !["all","none","unsure"].includes(r.label))
     r.label.split(",").forEach(c => cells.add(+c));
   $("note").value = r.note || "";
-  $("err").textContent = "";
+  $("err").textContent = ""; $("err").className = "";
   render();
 }
+
+// The answer buffer holds digits OR a word ("none"/"unsure"/"all"): whatever a key puts in it,
+// Enter commits. Letters commit at once as well, so both habits produce the same label.
+const word = w => { pend = w; render(); commit(w); };
+const hint = m => { $("err").className = "hint"; $("err").textContent = m; };
 
 function render() {
   const r = R[i], A = r.tier === "A";
@@ -295,45 +304,49 @@ function render() {
     ` &middot; ${r.n_frames} frames`;
   $("gt").textContent = A ? "" : "GT " + r.gt_number;
   $("saved").textContent = r.label ? "saved: " + r.label : "";
-  $("pend").textContent = A ? (pend ? pend + "_" : "") :
-    (cells.size ? [...cells].sort((a, b) => a - b).join(",") : "");
+  $("pend").textContent = pend ? (/^[0-9]+$/.test(pend) ? pend + "_" : pend)
+    : (!A && cells.size ? [...cells].sort((a, b) => a - b).join(",") : "");
   const a = R.filter(x => x.tier === "A"), b = R.filter(x => x.tier === "B");
   $("prog").textContent = `A ${a.filter(x => x.label).length}/${a.length}  ` +
     `B ${b.filter(x => x.label).length}/${b.length}`;
   $("sheet").src = "/sheets/" + r.sheet;
   $("ov").classList.toggle("hide", A);
   $("keys").textContent = A
-    ? "digits+Enter = number | n none | u unsure | <- -> move | g next blank | hold Shift = zoom"
-    : "1-9 0 - = toggle cells 1-12 | Enter commit | a all | n none | u unsure | <- -> | g | Shift zoom";
+    ? "type 1-99 then Enter | n = none | u = unsure (n/u save on their own too) | <- -> move | "
+      + "g = next blank | Tab = note | hold Shift = zoom"
+    : "1-9 0 - = toggle cells 1-12 (or click) | Enter = commit | a all | n none | u unsure | "
+      + "<- -> | g | Tab = note | hold Shift = zoom";
   if (!A) [...$("ov").children].forEach((d, k) => d.classList.toggle("sel", cells.has(k + 1)));
 }
 
-async function commit(label) {
+async function commit(label, stay) {
   const r = R[i];
-  $("err").textContent = "";
   const res = await fetch("/label", {method: "POST", headers: {"Content-Type": "application/json"},
     body: JSON.stringify({id: r.queue_id, label: label, note: $("note").value,
                           ts: new Date().toISOString()})});
   const j = await res.json();
-  if (!j.ok) { $("err").textContent = "rejected: " + j.error; return; }
+  if (!j.ok) { $("err").className = "bad"; $("err").textContent = "rejected: " + j.error; return; }
   r.label = j.label; r.note = j.note;
   const n = nextUn(i + 1);
-  go(n < 0 ? i + 1 : n);
+  if (stay) render(); else go(n < 0 ? i + 1 : n);
+  $("err").className = "ok";  // set after go(), which clears the line
+  $("err").textContent = `${r.queue_id} = ${j.label} saved`;
 }
 
 function commitPending() {
   const r = R[i];
-  if (r.tier === "A") { if (pend) commit(pend); else $("err").textContent = "type a number first"; }
-  else if (cells.size) commit([...cells].sort((a, b) => a - b).join(","));
-  else $("err").textContent = "no cells selected -- press n for none, a for all, u for unsure";
+  if (pend) commit(pend);
+  else if (r.tier === "B" && cells.size) commit([...cells].sort((a, b) => a - b).join(","));
+  else if ($("err").className !== "ok")  // never nag straight after a successful save
+    hint(r.tier === "A" ? "type a number, then Enter -- or n = none, u = unsure"
+                        : "click or type cells, then Enter -- or a = all, n = none, u = unsure");
 }
 
 document.addEventListener("keydown", e => {
   if (e.ctrlKey || e.altKey || e.metaKey) return;
-  if (e.target.id === "note") {
+  if (e.target.id === "note") {  // a text field: every letter belongs to the note, not to labelling
     if (e.key === "Escape" || e.key === "Enter") { $("note").blur(); e.preventDefault(); }
-    if (e.key === "Enter") { if (R[i].label) commit(R[i].label); else commitPending(); }
-    return;
+    return;  // the blur handler saves the note
   }
   if (e.key === "Tab") { $("note").focus(); e.preventDefault(); return; }
   const r = R[i], A = r.tier === "A";
@@ -341,17 +354,26 @@ document.addEventListener("keydown", e => {
   if (k === "ArrowLeft") go(i - 1);
   else if (k === "ArrowRight") go(i + 1);
   else if (k === "g") { const n = nextUn(i + 1); if (n >= 0) go(n); }
-  else if (k === "n") commit("none");
-  else if (k === "u") commit("unsure");
+  else if (k === "n") word("none");
+  else if (k === "u") word("unsure");
   else if (k === "Enter") commitPending();
   else if (A && k >= "0" && k <= "9") { pend = (pend + k).slice(-2); render(); }
   else if (A && k === "Backspace") { pend = pend.slice(0, -1); render(); }
-  else if (!A && k === "a") commit("all");
+  else if (!A && k === "a") word("all");
   else if (!A && KEYMAP.includes(k)) {
     const c = KEYMAP.indexOf(k) + 1;
     if (c <= +r.n_cells) { cells.has(c) ? cells.delete(c) : cells.add(c); render(); }
   } else return;
   e.preventDefault();
+});
+
+$("note").addEventListener("focus", () => {
+  $("mode").textContent = "NOTE MODE -- letters go in the box; Esc returns to labelling";
+});
+$("note").addEventListener("blur", () => {
+  $("mode").textContent = "";
+  const r = R[i];  // an answered row would otherwise lose a note typed after the answer
+  if (r.label && $("note").value !== r.note) commit(r.label, true);
 });
 
 const ov = $("ov");
