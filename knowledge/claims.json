@@ -6464,6 +6464,139 @@
         "corpus",
         "validation"
       ]
+    },
+    {
+      "id": "v8-w3-014",
+      "statement": "REFUTED, the registered primary hypothesis of the v8-W3 retrain: a purity-tiered jersey corpus does NOT produce a better reader than the volume corpus. Two PARSeq arms were trained on the identical S2 arm-4t recipe (shipped init, pose-torso geometry, 25 epochs, batch 128, last.ckpt, same caps) and differ only in the legibility admission tier: ARM P at >0.99 (51,803 train rows, 82 numbers) and ARM V at the shipped >0.7 (83,812 rows, 89 numbers). On DEV-20 -- GSR validation, in neither arm's nor the incumbent's corpus -- at the incumbent's own emit rate 0.2761 over 1,371 reads: incumbent arm-4t 0.8344, ARM V 0.8293, ARM P 0.8133. Head to head purity loses to volume by -0.0160 (paired exact McNemar 43 candidate-only-correct vs 65 incumbent-only-correct, p=0.0428) and loses to the incumbent by -0.0211 (40/69, p=0.0070); ARM V is indistinguishable from the incumbent (-0.0051, 38/45, p=0.51). The obvious artifact is excluded by measurement: only one DEV-20 GT number (59, 45 of 4,965 crops) falls outside ARM P's vocabulary, and removing those crops leaves both deltas and both McNemar tables unchanged (-0.0161 / -0.0212, identical discordant counts). Removing the ~27% positive-class label noise that v8-w3-013 estimates in the 0.7 pool therefore makes the reader WORSE, not better: the v6 'bank the headroom as precision' lesson (s3-reader-003) is about the tracklet aggregation operating point and does not transfer to the corpus admission threshold.",
+      "value": -0.016,
+      "unit": "per-crop precision, ARM P (tier 0.99) minus ARM V (tier 0.7), DEV-20 at matched emit",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_TRAIN.md#5 The registered DEV-20 secondary",
+        "outputs/gsr/w3_readers/H1_P_vs_V.json",
+        "outputs/gsr/w3_readers/vocabctl_H1.json",
+        "outputs/gsr/w3_readers/rung1sec_armP.json",
+        "outputs/gsr/w3_readers/rung1sec_armV.json"
+      ],
+      "method": "Corpora assembled server-side by ~/work/w3/build_w3_corpus.py reusing S2's build_corpus.cap_per_group verbatim; torso RoIs from dev20_torso.torso_from_keypoints over a cache shared by both arms (109,316 of 118,136 crops, 92.5%). Both arms trained on a100server1 GPU 1 under tmux. Scored by ~/work/w3/w3_component.py, which imports dev20_arm.py's decode and gating unchanged, on the fixed ~/data/dev20 torso set at legibility 0.5; the incumbent reproduces its on-record CLUSTER_SESSION_S2.md 3.5 numbers (emit 0.2761, precision 0.8344) to four decimals in the same run, which is the harness-validity check. Significance by exact paired McNemar on per-crop correctness; Wilson 95% intervals reported alongside.",
+      "n": 1371,
+      "caveats": [
+        "PURITY AND VOLUME ARE CONFOUNDED and this was declared before training: ARM P holds 61% of ARM V's rows and ~55% of its per-number support. The result prices the purity tier as a package (purity plus its volume cost), not purity alone. The disentangling arm (0.99 tier with the per-tracklet cap raised to match volume) was NOT run.",
+        "One seed and one recipe per arm, no repeats: PARSeq run-to-run training variance is unmeasured in this project and could be of the same order as the -0.016. The McNemar p-values quantify crop-level pairing, not training-seed noise.",
+        "Measured at the component level only. The ladder stopped at rung 1, so no tracklet density and no GS-HOTA number exists for either arm.",
+        "DEV-20 is used here as the clean comparison; it is registered in the session's section 1.5 as a non-gating secondary, and the gating rung-1 slice (GSR train) was compromised by v8-w3-016."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-013",
+        "v8-w3-006",
+        "s3-reader-003"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "corpus",
+        "reader",
+        "negative-result",
+        "cluster"
+      ]
+    },
+    {
+      "id": "v8-w3-015",
+      "statement": "NULL RESULT on the corpus the whole of v8-W3 was built to produce. ARM V retrains the shipped PARSeq reader on the full jersey-2023 legibility pass (48,567 rows against S2's 38,133 from a sample), plus SoccerNet-v3 42,479, plus 896 of Sid's human-sourced rows, minus 12 held-out GSR-train sequences -- 83,812 train rows at the identical arm-4t recipe -- and scores 0.8293 per-crop precision on DEV-20 against the incumbent's 0.8344 at the same 0.2761 emit: -0.0051, paired exact McNemar 38 vs 45 discordant, p=0.51. The expanded corpus neither helps nor hurts. W3's measured value is its two annotation findings (v8-w3-007, v8-w3-010) and the corpus itself, not a better component.",
+      "value": -0.0051,
+      "unit": "per-crop precision, ARM V minus incumbent arm-4t, DEV-20 at matched emit 0.2761",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_TRAIN.md#5.3 The other negative",
+        "outputs/gsr/w3_readers/rung1sec_armV.json",
+        "outputs/gsr/w3_readers/corpus_stats_w3.json"
+      ],
+      "method": "Same harness and same run as v8-w3-014; ARM V is the volume arm at the shipped 0.7 tier. Corpus integrity (rung 0) verified mechanically before training: 0 rows from any valid/test/challenge path, 0 rows from a held-out sequence, 0 empty labels, 0 missing files.",
+      "n": 1371,
+      "caveats": [
+        "A null is not equivalence: the 95% Wilson intervals (0.8085-0.8483 vs 0.8138-0.8532) still admit a real effect of roughly +/-0.02 in either direction.",
+        "ARM V differs from arm 4t in three ways at once (full jersey-2023 pass, Sid's rows, 12 sequences removed), so it prices the package and cannot attribute the null to any one of them.",
+        "Sid's human rows are 0.9% of ARM V; the session cannot say whether human labels help, only that nothing moves at this dose.",
+        "Single seed, no repeats (see v8-w3-014)."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-006",
+        "v8-w3-011"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "corpus",
+        "reader",
+        "negative-result",
+        "cluster"
+      ]
+    },
+    {
+      "id": "v8-w3-016",
+      "statement": "METHODOLOGY HAZARD, measured: a held-out GSR-train sequence slice cannot referee a new reader against the shipped incumbent, because the incumbent trained on all 57 train sequences. CLUSTER_SESSION_S2.md's build_corpus.gsr_train() applies no sequence filter, and re-running it shows that 831 of the 877 crops passing the eval gate on the registered 12-sequence holdout -- 94.75% -- are rows of arm 4t's own training corpus. The incumbent scores 0.9692 per-crop precision there against 0.8344 on DEV-20, i.e. the holdout measures training-set recall. The registered rung-1 verdict (both W3 arms FAIL, -0.0331 and -0.0752 against a +0.02 bar) stands as registered but is near-uninformative about reader quality; the informative read is the DEV-20 secondary of v8-w3-014. Any future GSR-train component gate must hold sequences out of BOTH readers' corpora -- which for the incumbent means retraining it -- or must use GSR validation instead.",
+      "value": 0.9475,
+      "unit": "share of rung-1 holdout evaluation crops present in the incumbent's training corpus",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_TRAIN.md#4.1 The rung-1 baseline is 94.75% contaminated",
+        "outputs/gsr/w3_readers/rung1_armP.json",
+        "outputs/gsr/w3_readers/rung1_armV.json"
+      ],
+      "method": "~/work/w3/contam.py re-runs build_corpus.gsr_train(legibility 0.7, cap 60) to regenerate arm 4t's exact GSR-train row set (4,175 crops, deterministic under random_state=0) and intersects its basenames with the 877 crops of the holdout torso set that pass legibility>0.5 and carry a pose torso RoI.",
+      "n": 877,
+      "caveats": [
+        "The overlap is by crop filename, which is unique by construction in the GSR crop law; it is an exact set intersection, not an estimate.",
+        "The risk was DECLARED a priori in the session's section 1.3 as an upward bias on the baseline; what was not anticipated was the magnitude, which makes the rung diagnostically weak rather than merely conservative.",
+        "Says nothing about DEV-20, which CLUSTER_SESSION_S2.md 3.3 records as never entering any corpus."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "jersey",
+        "methodology",
+        "leakage",
+        "negative-result"
+      ]
+    },
+    {
+      "id": "v8-w3-017",
+      "statement": "CORRECTION to the framing of v8-w3-006 and STATUS 2026-08-13: the '3.7x what the incumbent reader was trained on' headline does not survive the training recipe, because the arm-4t corpus builder caps jersey-2023 at 60 crops per tracklet. The full pass's 140,278 admitted crops over 926 tracklets yield 48,567 trainable rows after the cap, against the 38,133 S2 took from a 201,313-crop sample -- +27%, not +268%. At the 0.99 purity tier the same cap turns 82,941 crops into 37,098 rows, so a 41% cut in crops is only a 24% cut in rows. The binding constraint on corpus size is the per-tracklet cap, not the number of admitted crops, and any future 'the corpus is now N times larger' claim has to be stated after the cap.",
+      "value": 48567,
+      "unit": "jersey-2023 trainable rows from the full pass at tier 0.7 and cap 60 (S2 took 38,133)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V8_W3_TRAIN.md#1.1 A sizing fact that reshapes the experiment",
+        "outputs/gsr/w3_readers/rung0.json",
+        "outputs/gsr/w3_annotation/jersey23_full_manifest.parquet"
+      ],
+      "method": "Group the full jersey-2023 legibility pass by tracklet above each tier and sum min(n, 60) per tracklet -- the exact arithmetic of build_corpus.cap_per_group, whose cap constants (60 jersey-2023, 60 GSR-train, 12 per v3 game x number) are read from the recorded S2 script rather than assumed. Confirmed against the corpora actually built this session.",
+      "n": 140278,
+      "caveats": [
+        "This is a property of the arm-4t recipe, not of the data: raising the cap would convert more of the pool, and whether that helps is unmeasured (the volume arm at cap 60 is already a null, v8-w3-015).",
+        "Does not touch v8-w3-006's measured counts, only the 'x times larger' framing built on them."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-006"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "corpus",
+        "correction"
+      ]
     }
   ]
 }

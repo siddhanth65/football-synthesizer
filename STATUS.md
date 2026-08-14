@@ -1,5 +1,40 @@
 # STATUS
 
+## 2026-08-14 — v8 W3 RETRAIN: registered FAIL, both arms — and the purity hypothesis is REFUTED; the incumbent reader stands; two corrections to our own record
+
+results/GSR_V8_W3_TRAIN.md (§1 registered before training), kb v8-w3-014..017, ckpts
+outputs/gsr/w3_readers/ (md5-verified both machines). Two arms on the exact S3 arm-4t recipe,
+differing only in the legibility admission tier (ARM P >= 0.99 "purity", ARM V >= 0.7
+"volume"); ~1.4 GPU-h on cluster GPU 1 of 12 budgeted; DEV/TEST/challenge untouched beyond the
+registered DEV-20 component read; no GS-HOTA number exists in this session.
+
+**Verdicts.** Rung 1 (held-out-slice precision) FAIL both arms — but the rung itself is
+diagnostically weak: the worker MEASURED 94.75% of the eval crops to be the incumbent's own
+training rows (v8-w3-016; any future GSR-train component gate must retrain the incumbent or
+use validation). The registered DEV-20 secondary (clean for all three readers; harness
+reproduces S2 §3.5 to 4 decimals) is the informative read: **ARM V -0.0051 vs incumbent
+(p=0.51, NULL) — the corpus all of W3 was built to produce does not move the reader. ARM P
+-0.0211 (p=0.007, WORSE). Head-to-head P-V = -0.0160 (p=0.0428): PURITY LOSES TO VOLUME** —
+the 27%-noise finding (v8-w3-013, still true as a data-quality fact) does NOT convert into a
+better reader by filtering; label noise at this scale is apparently absorbed or even useful
+(consistent with the literature on noisy-label robustness at high volume). Ladder stopped at
+rung 1 per registration; rungs 2-4 not run; incumbent arm-4t still ships; W3 contributes NO
+component to W5.
+
+**Corrections on our own record (worker-caught):** (1) the "3.7x corpus" claim in STATUS/prep
+is WRONG under the recipe's 60-per-tracklet cap — the 140,278-crop pool yields 48,567 training
+rows, **+27% over S2's 38,133** (v8-w3-017); the cap binds, not the crop count. (2) Sizing
+decisions and v3 tiering were fixed in §1 from inventory before training — no score-peeking.
+
+**Declared limits driving the follow-up (dispatched, fresh registration):** purity and volume
+remain confounded (ARM P has 61% of ARM V's rows) — one ~20-min run (0.99 tier, cap raised to
+volume-match) separates them; and PARSeq training-seed variance has NEVER been measured here —
+two repeat ARM V seeds (~45 min) decide whether -0.016 is a result or noise. Both refine
+registered negatives; neither can ship anything. **W5 outlook: with W2b, W4, and W3 all
+failing their gates, there is no v8 bundle — no submission #6 is currently justified; public
+53.09 stands as the board number, and the December story rests on the audit, the seam claim,
+the corpus/gate measurements, and the priced negatives.**
+
 ## 2026-08-14 — v8 W3 annotation ingested + gate verdict at n=2,520: Sid's 499 labels are clean, the unnamed pool is REAL absence, and the legibility gate's error is ADMITTING noise — ~27% of the 140k corpus estimated impure
 
 kb v8-w3-007..013; outputs/gsr/w3_annotation/sid_labels.parquet (11,746 rows, full coverage
