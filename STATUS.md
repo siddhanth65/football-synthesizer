@@ -1,5 +1,57 @@
 # STATUS
 
+## 2026-08-14 — v9 W1 COMPLETE: association data factory built (121k labelled pairs, leakage-checked in code) — and the oracle arithmetic corrects the campaign: merge-only tops out at 57.32; 61+ requires merge AND split
+
+results/GSR_V9_W1.md, kb v9-w1-001..006, tools/gsr_v9_factory.py, outputs/gsr/v9_assoc/v1
+(md5-identical both machines). Licences: TWiX MIT, MOTIP Apache-2.0, SUSHI MIT — **all three
+USABLE-DIRECT, no clean-rooming needed.** Factory: full v6 chain (minus connector) run fresh
+over all 57 GSR-train sequences on cluster GPU 1 (1.63 GPU-h of 15); EIoU re-association
+3,061 -> 5,787 tracklets; dataset = 657,776 rows / 4,709 tracklets / 1,342 GT identities /
+**121,106 candidate pairs (5,561 pos, 72,936 neg, 42,609 unlabelled)**; candidate-generator
+recall 0.9851; purity 0.9576 (train mirrors the eval stack); val slice registered by sequence
+(every 5th, 12 seqs); leakage check is CODE that raises, not a claim — valid/test overlap [].
+
+**Three premise corrections, registered before any model exists:** (1) fragmentation on the
+shipped stack is 7.25-7.91, not the stale ~11.5. (2) **THE BIG ONE (kb v9-w1-005): a PERFECT
+merge-only associator reaches AssA 83.56 -> GS-HOTA 57.32 (+4.24) — 4.2 SHORT of 61.48. Only
+the split+merge oracle (AssA 96.46 -> 61.59) clears the goal: 13.3% of tracklets are <0.8
+pure and must be SPLIT, not merged. The campaign vehicle is merge+split (+likely a DetA
+lever), and W2 costs the splitter on the same labels.** (3) The incumbent connector's hard
+team/role/jersey gates FORBID 19.83% of all true merges (recall ceiling 0.802 at any tau) —
+the measured case for those cues as FEATURES in the learned model, not filters (our candidate
+set keeps 0.985). Port notes banked: TWiX's inter-pair attention kept; its NormCoords dropped
+(rescaling to [-1,1] destroys absolute metric scale — the exact seam of the novelty claim).
+Hazard (kb v9-w1-006): outputs/gsr/positions_gate_v6det_eiou is overwritten in place by every
+EIoU arm — laptop copy is NOT the frozen v6 partition; train artifacts were built fresh
+server-side. **W2 dispatched: TWiX-metric training, 3-seed noise floor, component gate at
+matched merge count vs the GTA connector, splitter costing.**
+
+## 2026-08-14 — Strategy sweep for the Monday prof meeting: 2026 season is OVER (closed Apr 25); GSR test board still live; association attack re-priced CHEAP; brief delivered
+
+docs/PROF_BRIEF_2026-08.md (delivered to Sid). Two web-research agents swept the 2026
+ecosystem + cross-field literature. Corrections: the SoccerNet 2026 challenges CLOSED
+2026-04-25 (results paper arXiv:2607.07320, July — SynLoc winner 97.67 mAP-LocSim/88 teams;
+PCBAS winner 58.94 macro-F1/only 6 teams; VQA saturated 98% via Gemini scaffolding). The
+scrape agent's "GSR fully retired" verdict was WRONG for the test phase — our own Aug 1-6
+submissions prove the GSR test board live; 53.09 stands ~4th with 5 lifetime submissions
+left. LIVE today: GSR test, PCBAS validation+challenge (10 lifetime cap), SynLoc test
+(sandbox), BAA benchmark. 2027 season openings expected ~Sept-Nov (unconfirmed pattern).
+
+**Key re-pricing: the association rebuild is NOT thesis-scale.** DanceTrack lineage
+(TWiX arXiv:2403.08018 coordinates-only pairwise transformer; MOTIP 2403.16848 in-context ID
+prediction; SUSHI 2212.03038 hierarchical GNN) = small models, hours-days per training on one
+A100, appearance-free — sidestepping the CAMELTrack appearance-basis failure. NOVEL ANGLE
+(unpublished anywhere per the sweep): association in METRIC PITCH COORDINATES (camera motion
+removed by our calibration; bounded physical kinematics; jersey reads as sparse long-range
+edges) vs the literature's image coordinates. Targets our measured +11.9 oracle ceiling.
+**DECISION (Sid, 2026-08-14, same day, overriding): SOLE goal = beat 61.48 on the GSR board,
+whatever it takes; the association campaign (v9) starts IMMEDIATELY; no pivot discussion
+unless Sid raises it. CLAUDE.md amended. v9-W1 dispatched (training-data factory on GSR-train
+via our own chain on the cluster + TWiX/MOTIP/SUSHI license check + campaign registration
+skeleton).** Sid also registered a fair process criticism: association was flagged as the
+largest lever weeks ago and was deferred as "expensive" while cheaper probes were run — the
+re-pricing (hours-scale models) removes the excuse; spend priority is now the jugular.
+
 ## 2026-08-14 — v8 W3 follow-up: seed floor measured (0.0059), purity confound RESOLVED — purity itself is harmful; the W3 negatives are now noise-floored; v8 experimental phase CLOSED
 
 results/GSR_V8_W3_TRAIN.md §10 (registration written before any run) + §11; kb v8-w3-018/-019

@@ -6678,6 +6678,188 @@
         "negative-result",
         "cluster"
       ]
+    },
+    {
+      "id": "v9-w1-001",
+      "statement": "MODEL LINEAGE IS BUILDABLE, NOT CLEAN-ROOM. All three DanceTrack-lineage associators carry permissive licences with self-contained training code: TWiX (Guepardow/TWiX, arXiv 2403.08018, MIT (c) 2024 Mehdi Miah, 13 stars, last commit 2024-11-29, src/association/twix/{data,train,twix,loss}.py); MOTIP (MCG-NJU/MOTIP, CVPR 2025, Apache-2.0, 553 stars, last commit 2026-07-30, train.py + configs + vendored TrackEval); SUSHI (dvl-tum/SUSHI, CVPR 2023, MIT, 142 stars, last commit 2024-12-22, src/ + configs + scripts). Verdict USABLE-DIRECT for all three; W2 may build from the code rather than clean-room from the papers. Two source-level notes that change the port: TWiX is not a plain pairwise scorer (inter_pair attention scores each candidate pair in the context of the other pairs in its window), and its NormCoords rescales each window's coordinates to [-1,1] - correct for image coordinates, WRONG for metric ones where absolute scale (a 9 m/s bound, a 105x68 m pitch) is the signal.",
+      "value": 3,
+      "unit": "repos cleared USABLE-DIRECT (permissive licence + self-contained training code)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W1.md#2. Task A -- model-lineage licence check",
+        "https://api.github.com/repos/Guepardow/TWiX",
+        "https://api.github.com/repos/MCG-NJU/MOTIP",
+        "https://api.github.com/repos/dvl-tum/SUSHI"
+      ],
+      "method": "GitHub REST metadata (licence SPDX, stars, last commit date), repo file trees, LICENSE headers on each default branch, the TWiX README training recipe and a read of src/association/twix/twix.py. Nothing was cloned into this repo tree.",
+      "n": 3,
+      "caveats": [
+        "Licence of the CODE only; the benchmark datasets those repos train on (MOT17, DanceTrack, KITTI) carry their own terms and are not needed here."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "v9",
+        "association",
+        "licence",
+        "provenance"
+      ]
+    },
+    {
+      "id": "v9-w1-002",
+      "statement": "THE ASSOCIATOR TRAINING SET EXISTS AND IS LEAKAGE-CLEAN. The frozen v6 chain (S4b detector -> ByteTrack -> PnLCalib -> calibration gate/fill -> EIoU e0.3 r1 w_app0.5 app_max0.30, NO GTA connector, NO solver; jersey reader ON) was extracted over all 57 GSR TRAIN sequences on cluster GPU 1 in 97.6 min = 1.63 GPU-h - nothing for train existed server-side beforehand (0/57 in every artifact directory). EIoU turns 3,061 ByteTrack tracks into 5,787 tracklets (1.89x). The dataset (outputs/gsr/v9_assoc/v1, 33 MB) holds 657,776 labelled detection rows, 4,709 tracklets (82.6 per sequence, 84.4% with a trusted GT identity), 1,342 GT identities and 121,106 candidate tracklet pairs: 5,561 positive / 72,936 negative / 42,609 unlabelled, a 7.08% positive rate among labelled pairs. The physics-only candidate generator (no temporal overlap, gap closable at 9 m/s + 2 m slack) keeps 98.51% of all true same-identity pairs, which is the associator's recall ceiling. Validation is held out BY SEQUENCE (every 5th, 12 sequences); DEV-20, TEST-38, test-49 and challenge were never read - the leakage check is code that raises before the manifest is written and reports zero overlap with the valid and test splits.",
+      "value": 121106,
+      "unit": "candidate tracklet pairs over the 57 GSR train sequences",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W1.md#4. Results -- the dataset",
+        "outputs/gsr/v9_assoc/v1/manifest.json",
+        "outputs/gsr/v9_assoc/v1/per_sequence.csv"
+      ],
+      "method": "tools.gsr_v9_factory --stage eiou then --stage dataset, run on the cluster with the module md5-identical to the laptop copy. Per-row GT ids from eval.gsr_gta.gt_rows at the evaluator's 5 m tolerance (players/GKs via generator.track_relink.load_gt_ids_by_frame, referees via a referee-only map), majority label per tracklet behind a >=5 audited-row floor; pair features are metric kinematics, team/role, jersey evidence and the CLIP tracklet-mean cosine.",
+      "n": 57,
+      "caveats": [
+        "Labels are 5 m GT-proximity labels, not identity truth: 13.3% of tracklets audit below 0.8 purity, so W2 must weight or filter by purity and report the sensitivity.",
+        "35% of candidate pairs are unlabelled (one side has no trusted GT identity); they are kept because inference faces them, but treating them as negatives would be a silent labelling decision.",
+        "New-stack extraction (see v8-w4-004): fine as training data, but any W3 evaluation must build its own same-stack control."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w4-004"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "association",
+        "dataset",
+        "leakage"
+      ]
+    },
+    {
+      "id": "v9-w1-003",
+      "statement": "PREMISE CORRECTION ON FRAGMENTATION. The v9 brief's '~11.5 EIoU fragments per GT identity' is the OLD-detector number (GSR_EIOU.md); on the stack we actually ship, GSR_V7_V4S1.md 3.2 had already measured 7.91 (DEV-20, 'touch' definition: any track id that touches a GT identity counts). The GSR train split measures 7.25 by that same definition, and row-weighted tracklet purity 0.9576 against DEV-20's 0.9395 - i.e. the training distribution matches the evaluation stack to within 0.7 fragments. Under the stricter dominant-label definition (a tracklet counts only for the identity it mostly is) fragmentation is 2.98 per identity: most 'touches' are a handful of rows in passing, not a fragment worth merging.",
+      "value": 7.25,
+      "unit": "fragments per GT identity, touch definition, GSR train, v6 stack",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W1.md#4.1 Dataset stats",
+        "outputs/gsr/v9_assoc/v1/manifest.json",
+        "results/GSR_V7_V4S1.md#3.2 Contamination -- the GT purity audit on the new detector"
+      ],
+      "method": "Both definitions computed in tools.gsr_v9_factory.build_sequence; the touch definition and the row-weighted purity reuse generator.gta_link.tracklet_purity, the same instrument tools.gsr_eiou.partition_purity uses for the on-record numbers.",
+      "n": 57,
+      "caveats": [
+        "Train vs DEV-20 is a cross-split comparison on one code path, not a paired measurement."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w1-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "association",
+        "fragmentation",
+        "premise-check"
+      ]
+    },
+    {
+      "id": "v9-w1-004",
+      "statement": "THE INCUMBENT CONNECTOR'S HARD GATES FORBID 19.83% OF ALL TRUE MERGES. Measured on the 4,039 true same-identity tracklet pairs of the development portion (45 train sequences; the 12-sequence validation slice was not looked at): the GTA connector's same-team requirement alone forbids 16.59% of them, same-role 1.51%, team-or-role 17.63%, the jersey-disagreement veto a further 2.72%, and all three together 19.83%. Its recall ceiling on this distribution is therefore 0.802 at ANY tau, before appearance is consulted, while the physics-only candidate generator keeps 0.985. This is the measured case for carrying team/role/jersey as FEATURES rather than filters in the learned associator: one merge in five sits behind gates the incumbent cannot open.",
+      "value": 0.1983,
+      "unit": "share of true tracklet merges structurally unreachable by the GTA connector",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W1.md#4.4 The finding that changes the W2 case",
+        "outputs/gsr/v9_assoc/v1/manifest.json"
+      ],
+      "method": "Pair table of tools.gsr_v9_factory over the 45 development sequences; the gate definitions read off generator.gta_link.connect (role equality, team equality, jersey-number disagreement veto).",
+      "n": 4039,
+      "caveats": [
+        "Team and role labels are our own predictions, so part of the 16.59% is our team-assignment error rather than a genuinely cross-team merge - which is precisely why a model allowed to override a wrong team label has headroom here.",
+        "Pairwise, not the connector's agglomerative procedure: this is a ceiling on its recall, not a rerun of the connector, and it is not comparable to its on-record 0.5432 merge precision.",
+        "Raw pair table: outputs/gsr/v9_assoc/v1/pairs/*.parquet (57 files, cluster + laptop)."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w1-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "association",
+        "connector",
+        "headroom"
+      ]
+    },
+    {
+      "id": "v9-w1-005",
+      "statement": "PREMISE CONTRADICTION, STATED PLAINLY: A PERFECT MERGER DOES NOT REACH 61.48. Our board entry is GS-HOTA 53.08 = sqrt(DetA 39.32 x AssA 71.67). Carrying V4S1's association oracles into that identity at fixed DetA: the merge-only oracle (+11.89 AssA -> 83.56) gives GS-HOTA 57.32, i.e. +4.24 and about 4.2 points SHORT of the 61.48 target; only the split+merge oracle (+24.79 AssA -> 96.46) reaches 61.59. A merge-only associator realising 100% of its oracle would still miss the campaign goal, so the associator has to be paired with a splitter for contaminated tracklets (13.3% of tracklets audit below 0.8 purity) and/or a GS-DetA lever.",
+      "value": 57.32,
+      "unit": "GS-HOTA reachable at the merge-only oracle with DetA held at 39.32",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W1.md#1. Ceiling math -- what +11.9 is, and what it is not",
+        "results/GSR_V7_V4S1.md#3. Fragmentation or coverage? -- FRAGMENTATION, 2.9 : 1",
+        "STATUS.md"
+      ],
+      "method": "GS-HOTA = sqrt(GS-DetA x GS-AssA) applied to the on-record test-49 components, with the V4S1 oracle deltas added to AssA and DetA held fixed.",
+      "n": 1,
+      "caveats": [
+        "The oracle deltas were measured on DEV-20's loc_assoc proxy scale and are applied additively to test-49; cross-split additivity is an assumption (DEV-20 tracked valid-58 to within 0.008 on the ceiling), and the proxy carries about +-3 AssA.",
+        "The conclusion's direction survives V4S1's alternative linear mapping (+19.36 at split+merge), which is itself below the target's requirement at merge-only.",
+        "STATUS.md 2026-08-06: test-49 read 53.08 / DetA 39.32 / AssA 71.67"
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w1-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "association",
+        "ceiling",
+        "premise-check",
+        "negative"
+      ]
+    },
+    {
+      "id": "v9-w1-006",
+      "statement": "ARTIFACT HAZARD: outputs/gsr/positions_gate_v6det_eiou/ IS OVERWRITTEN IN PLACE BY EVERY EIoU ARM. tools.gsr_eiou.write_variant writes <positions_subdir>_eiou with no arm key, so the directory holds whichever arm ran last. The laptop's SNGS-021 copy audits at row purity 0.7098 with 35 tracklets against its own input's 47 ByteTrack tracks - FEWER tracklets than the input, which EIoU never produces (it fragments 1.89x) - against the on-record DEV-20 figures of 0.9395 purity and 7.91 frag/GT. It is therefore some later session's arm, not the frozen v6 partition. Any session reading those laptop files as 'the v6 tracker output' is reading the wrong artifact; rebuild with tools.gsr_eiou.build_arm_artifacts first. W1's train-split artifacts were built fresh server-side and are unaffected.",
+      "value": 0.7098,
+      "unit": "row purity of the laptop SNGS-021 _eiou artifact against the on-record 0.9395",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W1.md#4.5 Negatives, limits, hazards",
+        "results/GSR_V7_V4S1.md#3.2 Contamination -- the GT purity audit on the new detector"
+      ],
+      "method": "tools.gsr_eiou.partition_purity on the laptop's positions_gate_v6det and positions_gate_v6det_eiou for SNGS-021, compared against the V4S1 on-record table.",
+      "n": 1,
+      "caveats": [
+        "Checked on one sequence; the directory's mtimes span 2026-08-07 to 2026-08-13, so the contents are probably a mixture of arms rather than one single wrong arm."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [],
+      "tags": [
+        "gsr",
+        "v9",
+        "hazard",
+        "artifacts",
+        "provenance"
+      ]
     }
   ]
 }

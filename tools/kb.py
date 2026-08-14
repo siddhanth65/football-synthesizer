@@ -94,6 +94,8 @@ def _find_dead_evidence(claims: list[dict[str, Any]]) -> list[tuple[str, str]]:
     dead = []
     for c in claims:
         for entry in c.get("evidence", []):
+            if entry.startswith("http://") or entry.startswith("https://"):
+                continue  # URLs are citable evidence; this checker only validates local paths.
             path = _evidence_path(entry)
             if path and not (REPO_ROOT / path).exists():
                 dead.append((c["id"], path))

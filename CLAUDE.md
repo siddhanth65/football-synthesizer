@@ -34,6 +34,13 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
 - Scope (2026-07-17 pivot, per Sid): **Manchester United, EPL 2024-25 season** — demo = opposition
   scouting pack for ManU. France/WC material is REFERENCE ONLY (PMSR PDFs stay as method-calibration
   ground truth). Footage source: PL website 24-25 replays, supplied by Sid.
+- **Scope amendment (2026-08-14, per Sid, OVERRIDING): SOLE goal = beat 61.48 GS-HOTA on the
+  live GSR test board. The vehicle is the v9 association campaign (learned association in
+  metric pitch coordinates — TWiX/MOTIP/SUSHI lineage on our cue basis, targeting the measured
+  +11.9 connector-achievable ceiling). Do NOT propose or mention challenge pivots
+  (PCBAS/SynLoc/2027 etc.) unless Sid explicitly raises them. Spend priority: the jugular,
+  not cheap probes.** (Prior 2026-07-31 amendment — GSR focus over ManU corpus — still holds
+  underneath.)
 - **Scope amendment (2026-07-31, per Sid): primary near-term goal = score well on the SoccerNet
   GSR benchmark (GS-HOTA), using the SoccerNet GSR dataset.** ManU-corpus adaptation deferred.
   College GPU cluster is approved (Sid books slots on request); the 4 GB constraint applies to the
