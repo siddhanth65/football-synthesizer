@@ -6860,6 +6860,189 @@
         "artifacts",
         "provenance"
       ]
+    },
+    {
+      "id": "v9-w2-001",
+      "statement": "INCUMBENT BASELINE ON THE REGISTERED VALIDATION SLICE (measured before any training). The shipped GTA connector (generator.gta_link.connect, tau 0.450, jersey gate ON, team/role gates ON, splitter OFF) run on the W1 EIoU partition of the 12 registered train-split validation sequences: 1,095 tracklets (279 GT identities) -> 450 components, 645 merges, pair-level merge precision 0.7492, fragments per GT identity 3.315 -> 1.799, row-weighted purity 0.9490 -> 0.9313, and an implied pair ranking (-clip_cos_dist with its hard gates) of average precision 0.5586 over 20,733 labelled candidate pairs (7.34% positive). These are the a-priori bars for W2's gates G1-G3. NOT comparable to the on-record 0.5432 from GSR_V7_V4S1.md, which is DEV-20, post-splitter, on the shipped chain.",
+      "value": 0.7492,
+      "unit": "pair-level merge precision of the incumbent connector, validation slice",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W2.md#1.2 Incumbent baseline -- measured on the validation slice BEFORE training",
+        "outputs/gsr/v9_assoc/baseline_incumbent.json"
+      ],
+      "method": "python -m tools.gsr_v9_train --stage baseline; merge precision via generator.track_relink.merge_precision over the connector's components, purity via generator.gta_link.tracklet_purity on the remapped rows, fragments per GT identity over tracklets carrying a trusted dominant GT id.",
+      "n": 12,
+      "caveats": [
+        "GT-proximity labels (nearest GT within 5 m), so absolute levels are optimistic; the model and the incumbent are scored against the same labels.",
+        "Connector-only: the splitter is costed separately (v9-w2-005) because it is inert on this chain."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w1-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "baseline",
+        "association",
+        "registered"
+      ]
+    },
+    {
+      "id": "v9-w2-002",
+      "statement": "REGISTERED VERDICT: THE METRIC-SPACE TWiX ASSOCIATOR FAILS ITS W2 GATE. A 72,385-parameter metric-space port of TWiX (MIT, Guepardow/TWiX; NormCoords dropped, (x, y, vx, vy) in m and m/s under constant normalisation, inter_pair attention kept, team/role/jersey/CLIP carried as side FEATURES not filters) trained on 40 GSR-train sequences, epoch chosen on a 5-sequence inner-val slice, measured on the 12 registered validation sequences, 3 seeds. G1 (pair-ranking AP > 0.5586): 0.6579 mean, seeds 0.676/0.622/0.676, noise floor (max-min) 0.0540 -> PASS by +0.0993. G2 (merge precision at the incumbent's matched 645 merges >= 0.7492 + 0.05 = 0.7992): 0.7260 mean (0.741/0.716/0.721), floor 0.0247 -> FAIL, and below the incumbent's own 0.7492. G3 (frag/GT <= 1.799 at purity >= 0.9313): frag 1.746 PASS, purity 0.9309 FAIL by 0.0004 (inside the 0.0068 floor). Pass required all three: FAIL. Cost 0.043 GPU-h.",
+      "value": 0.726,
+      "unit": "merge precision at matched merge count, 3-seed mean (registered bar 0.7992)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W2.md#2.2 Gate verdicts",
+        "outputs/gsr/v9_assoc/train_side.json",
+        "generator/assoc_twix.py",
+        "tools/gsr_v9_train.py"
+      ],
+      "method": "python -m tools.gsr_v9_train --stage train --seeds 0,1,2 on cluster a100server1 GPU 1; merges matched per sequence to the incumbent's count and accepted greedily by score under the temporal-chain feasibility test only (no team/role/jersey gate); AP over the labelled candidate pairs, unlabelled pairs excluded from the loss but kept as inter-pair context.",
+      "n": 3,
+      "caveats": [
+        "Inner-val (5 sequences) is a noisy epoch selector: seed 1 stopped at epoch 3 of 30 and is the worst seed on the validation slice.",
+        "merge_precision is transitive and pair-level, so one wrong link inside a large component is charged many times; applied identically to both arms.",
+        "No GS-HOTA was measured in W2; all numbers are W1 proxy instruments on train-split sequences."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w2-001"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "association",
+        "negative-result",
+        "registered"
+      ]
+    },
+    {
+      "id": "v9-w2-003",
+      "statement": "A BETTER PAIR RANKING DOES NOT SURVIVE TRANSITIVE LINKAGE. On the same validation rows the trained associator ranks candidate pairs clearly better than the incumbent: raw precision of the top-645 pairs 0.883 mean (0.902/0.854/0.894) against 0.809, and AP 0.716 vs 0.667 even on the same-team subset where the incumbent's gates do not bind. That advantage is worth +0.03 merge precision at 324 merges, ~0.00 at 483 and ~0.00 at 645 -- it gets spent on links that glue large components together. Also measured: 0.011 of the incumbent's 0.7492 is its mean-recomputing agglomerative PROCEDURE, not its ranking (its own scores through our greedy single-linkage merger give 0.7381). Of the model's 645 merges, 8.6% cross a team boundary -- structurally impossible for the incumbent -- at 0.594 precision on the labelled ones.",
+      "value": 0.883,
+      "unit": "raw precision of the model's top-645 candidate pairs (incumbent 0.809)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W2.md#2.3 Why G1 passes and G2 fails"
+      ],
+      "method": "Post-hoc diagnostics on the 6 pulled checkpoints, laptop CPU: precision@k over the pooled labelled validation pairs, merge precision at 0.5x/0.75x/1.0x/1.5x the incumbent's merge count, and the team/role/jersey composition of the accepted merges.",
+      "n": 3,
+      "caveats": [
+        "About 135 of the 645 accepted merges are unlabelled pairs, unauditable in either direction (the incumbent spends 138).",
+        "Component-level precision depends on linkage order; only the greedy path was measured for the model."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w2-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "association",
+        "diagnostics"
+      ]
+    },
+    {
+      "id": "v9-w2-004",
+      "statement": "THE METRIC-COORDINATE NOVELTY IS NOT SUPPORTED STANDALONE. The registered kinematics-only ablation (identical model with the side features -- team, role, jersey, CLIP -- removed, so it sees only metric positions, velocities and time) scores val pair-AP 0.2707 (seed spread 0.0116) and merge precision 0.3276, against the incumbent's appearance-with-gates 0.5586/0.7492 and the full model's 0.6579/0.7260. Metric kinematics alone are roughly half as informative as appearance on this distribution. The supported claim is NOT 'metric coordinates beat image-space association' but 'learning the combination beats gating on one signal, at ranking' (+0.099 AP over the incumbent).",
+      "value": 0.2707,
+      "unit": "val pair-ranking AP, kinematics-only arm (full model 0.6579)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W2.md#2.4 Ablation -- metric kinematics alone are NOT competitive",
+        "outputs/gsr/v9_assoc/train_kin.json"
+      ],
+      "method": "python -m tools.gsr_v9_train --stage train --seeds 0,1,2 --no-side, identical data, schedule and evaluation to the main arm.",
+      "n": 3,
+      "caveats": [
+        "The kinematic tokens cover a 1.4 s window per side (8 observations at stride 5); a longer or denser trajectory encoding was not tried.",
+        "Candidate generation already applies a 9 m/s physical filter, so the easiest kinematic negatives are absent from the pool the ablation is scored on."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w2-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "association",
+        "ablation",
+        "negative-result"
+      ]
+    },
+    {
+      "id": "v9-w2-005",
+      "statement": "THE SHIPPED GTA SPLITTER IS INERT ON THE CLIP-EMBEDDING CHAIN, AND LOOSENING IT MAKES THINGS WORSE. Measured over all 57 GSR-train sequences (4,709 tracklets, 632,710 audited rows, 772 tracklets = 16.4% below 0.8 purity, row-weighted purity 0.9547): at its shipped eps 0.30 the DBSCAN splitter splits 2 tracklets in 57 sequences (purity 0.9547 -> 0.9548); at eps 0.40, none. Its eps was tuned for PRTreID embeddings while the chain now runs CLIP, whose cosine distances are far wider. At eps 0.20 it splits 597 tracklets but reaches only 77 of the 772 contaminated ones (10.0%), 280 cuts land on >= 0.99-pure tracklets, it manufactures 1,052 new fragments (+22.3%), the count of contaminated tracklets RISES 141 -> 183, and purity gains only +0.0046. A per-row GT ORACLE cut splitter splits 872 tracklets, reaches purity 0.9871 (71.5% of the impurity mass) at a cost of +2,642 fragments -- so 28.5% of contamination is interleaved rather than contiguous and NO cut-based splitter can repair it.",
+      "value": 2.0,
+      "unit": "tracklets split by the shipped splitter (eps 0.30) across 57 sequences",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W2.md#3. Results -- splitter costing",
+        "outputs/gsr/v9_assoc/splitter_cost.json"
+      ],
+      "method": "python -m tools.gsr_v9_train --stage split: generator.gta_link.split_tracklets over the mirrored per-detection CLIP caches at eps 0.20/0.30/0.40 (min_samples 5, min_run 5), plus a GT oracle that cuts at every audited identity change with runs under 5 rows absorbed; purity from generator.gta_link.tracklet_purity before and after.",
+      "n": 57,
+      "caveats": [
+        "The eps sweep is a measurement on train-split labels and selects nothing; no arm was carried forward.",
+        "min_samples/min_run were left at the shipped 5/5; a joint re-tune of the splitter for CLIP was not attempted."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w1-005"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "splitter",
+        "negative-result",
+        "artifacts"
+      ]
+    },
+    {
+      "id": "v9-w2-006",
+      "statement": "PREMISE CONTRADICTION SHARPENED: THE SPLIT+MERGE BAND DOES NOT REACH 61.48 EITHER, SO DetA IS THE BINDING CONSTRAINT. W1 registered that a perfect merger reaches GS-HOTA 57.32 and that only the split+merge oracle (61.59) clears the 61.48 target. W2 measured what a splitter can actually deliver: apportioning W1's +12.90 AssA split leg by the fraction of impurity mass removed (assumption stated, and optimistic -- it charges nothing for the fragments a split creates), the shipped splitter gives GS-HOTA 57.33, eps 0.20 gives 57.77, and a GROUND-TRUTH cut splitter paired with a PERFECT merger reaches only 60.40 -- still 1.08 short of 61.48. The 61.59 figure needs row-level correction of interleaved contamination, i.e. a tracker replacement, not a splitter. Conversely, hitting 61.48 needs DetA 45.23 with a perfect merger, 40.74 with perfect merge + oracle-cut split, or 52.74 at today's AssA 71.67 -- against today's DetA 39.32. W3 should be a detection/coverage session, not another association session.",
+      "value": 60.4,
+      "unit": "GS-HOTA of an oracle-cut splitter + a perfect merger at DetA 39.32",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W2.md#3.1 Updated ceiling arithmetic",
+        "results/GSR_V9_W1.md#1. Ceiling math -- what +11.9 is, and what it is not"
+      ],
+      "method": "GS-HOTA = sqrt(DetA x AssA) on the board entry 53.08 = sqrt(39.32 x 71.67); W1's oracles (AssA 83.56 merge-only, 96.46 split+merge) with the split leg apportioned by the measured impurity-mass removal of each splitter arm (0.2% / 10.2% / 71.5%).",
+      "n": 57,
+      "caveats": [
+        "Linear apportionment of the AssA split leg to impurity mass is an assumption, not a measurement, and it is optimistic (no charge for the extra fragments a split creates).",
+        "Inherits W1's cross-split additivity assumption (DEV-20 proxy deltas applied to test-49 levels).",
+        "No end-to-end GS-HOTA was run in W2."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w1-005",
+        "v9-w2-005"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "ceiling",
+        "premise-contradiction",
+        "planning"
+      ]
     }
   ]
 }

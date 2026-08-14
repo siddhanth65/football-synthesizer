@@ -1,5 +1,29 @@
 # STATUS
 
+## 2026-08-14 — v9 W2: TwixMetric FAILS its component gates (G2/G3) — and the ceiling arithmetic re-aims the campaign at DETECTION: even oracle split+merge lands ~60.4; 61.48 requires DetA
+
+results/GSR_V9_W2.md (§1 registered pre-training), kb v9-w2-001..006, ckpts
+outputs/gsr/v9_assoc/ckpts (md5 both sides). Cost: **0.043 GPU-h** (2.6 min, six runs).
+TwixMetric (72k params, constant metric normalisation, inter-pair attention, 9 side features,
+3 seeds, noise floor 0.025-0.054): **G1 PASS** — val pair-AP 0.6579 vs incumbent 0.5586
+(+0.0993, 1.8x floor; top-645 raw pair precision 0.883 vs 0.809) — the learned ranking IS
+better. **G2 FAIL** (merge precision 0.7260 at matched count vs bar 0.7992 — below the
+incumbent itself: the ranking edge dies under transitive linkage). **G3 FAIL** (frag leg
+passes; purity leg misses by 0.0004, inside floor). Registered verdict FAIL; incumbent
+connector stands. Novelty correction (v9-w2-claims): kinematics-only ablation AP 0.2707 —
+**metric coordinates do NOT beat image space standalone**; the defensible claim is "learned
+combination beats hard gating, at ranking". Also measured: shipped splitter is INERT on the
+CLIP chain (eps tuned for PRTreID; splits 2/4,709), and at any eps it mostly cuts clean
+tracklets.
+
+**THE ARITHMETIC THAT RE-AIMS EVERYTHING (v9-w2, registered): a per-row GT-oracle cut
+splitter removes only 71.5% of impurity mass — 28.5% of contamination is interleaved and
+UNCUTTABLE. Oracle-cut + perfect merger = ~60.40, still 1.08 short of 61.48. Reaching 61.48
+needs GS-DetA ~40.7 (with oracle split + perfect merge) to ~45.2 (perfect merge only)
+against today's 39.32. W3 = a DETECTION-side session (DetA decomposition -> attack the
+largest lever), not another association session.** Association gains remain real and get
+integrated as far as they honestly go, but DetA is now the campaign's gating axis.
+
 ## 2026-08-14 — v9 W1 COMPLETE: association data factory built (121k labelled pairs, leakage-checked in code) — and the oracle arithmetic corrects the campaign: merge-only tops out at 57.32; 61+ requires merge AND split
 
 results/GSR_V9_W1.md, kb v9-w1-001..006, tools/gsr_v9_factory.py, outputs/gsr/v9_assoc/v1
