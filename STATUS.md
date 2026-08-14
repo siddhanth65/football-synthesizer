@@ -1,5 +1,31 @@
 # STATUS
 
+## 2026-08-14 — v8 W3 follow-up: seed floor measured (0.0059), purity confound RESOLVED — purity itself is harmful; the W3 negatives are now noise-floored; v8 experimental phase CLOSED
+
+results/GSR_V8_W3_TRAIN.md §10 (registration written before any run) + §11; kb v8-w3-018/-019
+(new), -014/-015 hardened; ckpts + JSONs in outputs/gsr/w3_readers/ (md5 both sides);
+~1.29 GPU-h on cluster GPU 1. Q1 — PARSeq training-seed variance, measured for the first time:
+three ARM V runs (the recipe sets NO seed anywhere — the original draw is unrecoverable,
+documented not papered over), DEV-20 precision spread **0.0059** with the harness returning
+the incumbent at 0.8344 to four decimals in every pass. Both registered branches fired:
+**H1 (purity loses, -0.0160) STANDS — 2.7x the full seed range; and ARM V's null (-0.0051) is
+INSIDE seed noise — the W3 corpus's gap to the shipped reader is smaller than retraining the
+same corpus with nothing changed (sign not even stable: seed 1 = +0.0008).** Q2 — the
+volume-matched purity arm P100 (0.99 tier, cap 240, 97,347 rows = 1.02x ARM V, actually +3.1%
+larger post-torso): **-0.0255 vs ARM V, McNemar p=0.0020 — registered branch "purity itself is
+harmful" fires; the volume escape hatch is closed** (4.3x seed spread, below the lowest ARM V
+seed). Surviving interpretation limit, stated: mixture could not be matched (0.99 holds only
+18,535 v3 crops), so the defensible claim is "at matched row count, the best corpus the 0.99
+tier CAN build is significantly worse than the 0.7 tier's." Unregistered observation, claimed
+as nothing: P100 landed below even ARM P. Ops note for future ckpt handling: PARSeq infers
+model class from a substring of the checkpoint PATH — copies must keep a `parseq_` prefix.
+
+**v8 experimental phase is CLOSED.** Gates: W0/W1/W2 productive, W2b/W4/W3-retrain registered
+FAILs, all noise-floored and mechanism-diagnosed. No bundle, no submission #6; public 53.09
+stands. Remaining: Sid's organizer report (six GT errors) and optional author email; December
+assets = the audit, the seam claim, the gate/corpus measurements, the priced negatives, and
+the discipline record itself.
+
 ## 2026-08-14 — v8 W3 RETRAIN: registered FAIL, both arms — and the purity hypothesis is REFUTED; the incumbent reader stands; two corrections to our own record
 
 results/GSR_V8_W3_TRAIN.md (§1 registered before training), kb v8-w3-014..017, ckpts

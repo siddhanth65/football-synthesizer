@@ -14,6 +14,12 @@ this session.
 > (p = 0.51, indistinguishable), ARM P (purity) -0.0211 (p = 0.0070, a real regression)**, and head
 > to head **purity loses to volume by -0.0160 (p = 0.043)**. No rung 2, no rung 3, no TEST-38.
 > **Banking the negative: tightening the legibility gate from 0.7 to 0.99 makes the reader worse.**
+>
+> **FOLLOW-UP (same day, §10 registration / §11 results), closing §7's limits 3 and 4:** the
+> run-to-run seed spread of ARM V over three retrains is **0.0059**, so the -0.0160 above is 2.7x
+> seed noise and **H1 stays refuted**, while ARM V's -0.0051 null is **inside** the noise floor. A
+> volume-matched purity arm (ARM P100, 0.99 tier at 4x caps, 97,347 rows = 1.02x ARM V) still loses
+> to ARM V by **-0.0255, p = 0.0020**: the purity loss is **not** a volume artifact.
 
 ---
 
@@ -362,11 +368,16 @@ under `v8-w4-004`: the control must be re-derived on the same host.
    component gate on GSR train must hold sequences out of *both* readers' corpora — which for the
    incumbent means retraining it — or must simply use DEV-20, as §5 did.
 3. **Purity and volume are confounded (§5.2)** and the disentangling arm was not run.
+   **[CLOSED in §11.3:** ARM P100 ran it — at matched volume purity still loses, -0.0255,
+   p = 0.0020, so the confound resolved *against* purity.**]**
 4. **Single seed, single recipe.** One `last.ckpt` per arm, no repeats, no variance estimate across
    training runs. The DEV-20 deltas (-0.005, -0.016, -0.021) are of the same order as run-to-run
    PARSeq variance plausibly is, and that variance is **unmeasured** in this project. The McNemar
    p-values quantify crop-level pairing, **not** training-seed noise; a -0.016 at p = 0.043 on one
    seed is directional evidence, not a settled ordering.
+   **[CLOSED in §11.2:** two more ARM V retrains put the seed spread at **0.0059** — below the
+   -0.016 (which therefore survives) and above the -0.0051 null (which is therefore inside the
+   noise floor).**]**
 5. **The legibility gate was not retrained**, so Sid's 5,037 per-crop human negatives — the most
    novel supervision W3 produced — are still unused. They are gate supervision, and the gate is the
    component the ladder never touched.
@@ -434,3 +445,292 @@ python w3_component.py --torso ~/data/dev20/torso.parquet --torso-dir ~/data/dev
   --leg-parquet ~/data/dev20/leg_shipped.parquet --ckpt-a <arm4t> --ckpt-b <arm> --out <json>
 python contam.py && python vocab.py
 ```
+
+---
+
+## 10. Follow-up registration (a priori)
+
+*This is the section the follow-up brief calls "§5". It is appended rather than inserted so the
+§1-§9 numbering that `knowledge/claims.json` cites stays valid.*
+
+**Everything in §10 was written and saved before a single GPU job of the follow-up session ran.**
+The only computation that precedes it is the cap scan of §10.2, which is a CPU pass over the corpus
+manifests and is required by the brief to be stated here before training.
+
+This session closes the two limits §7 declared (items 3 and 4). It ships nothing: **no rung 2, no
+rung 3, no GS-HOTA, no TEST read, at any outcome.** Both questions are read on the *same* DEV-20
+component harness §5 used — `~/work/w3/w3_component.py`, unmodified, `~/data/dev20/torso.parquet`,
+4,965 numbered crops, eval legibility 0.5, torso gate on — and every pass re-scores the incumbent
+`parseq_v6_arm4t.ckpt` in the same run as its harness-validity check (**it must reproduce emit
+0.2761 / precision 0.8344**; if it does not, that pass is reported as void, not as a result).
+
+### 10.1 Q1 — seed variance of ARM V (the binding unknown)
+
+ARM V is retrained **twice more on the byte-identical corpus** — the LMDB built on 2026-08-14 13:32
+is reused, not rebuilt (`armV/train/real/shard{000,001,002}/data.mdb` md5
+`b2f341e8f20872c3b7acbe231afdc656`, `016b42d78e7726be59b99a1581f68cbe`,
+`f00d3cdbf18cd2859d7883775ef48c38`; `armV/val/shard000/data.mdb`
+`ca230adeda9a86121207a773d81f0f54`) — at the identical §1.4 recipe and the identical command line.
+**The only difference between the three runs is the training RNG.**
+
+**Stated honestly, because it changes what "seed" means here:** the arm-4t recipe
+(`~/src/jersey-number-pipeline/str/parseq/train.py` + `configs/main.yaml`) **sets no seed at all** —
+there is no `seed_everything` call and no `seed` config key, so the original ARM V run drew
+PyTorch's default non-deterministic seed and **did not record it**. The three runs are therefore:
+
+| run | training seed | provenance |
+|---|---|---|
+| **ARM V seed U** (the original, §3/§5) | unset, unrecorded (torch default entropy) | ckpt md5 `8b80904a099adafe8e3fe22a8a557f6b`, run dir `2026-08-14_13-47-17` |
+| **ARM V seed 1** (new) | `seed_everything(1)` | this session |
+| **ARM V seed 2** (new) | `seed_everything(2)` | this session |
+
+The seeding is applied by a 10-line wrapper, `~/work/w3/train_seeded.py`, which calls
+`pytorch_lightning.seed_everything(int($W3_SEED))` and then execs `train.py` with the unchanged
+argument list. `train.py` itself is not edited. cuDNN non-determinism is left as it is in the
+recipe, so the spread measured below is **run-to-run variance of the shipped recipe**, which is
+exactly the quantity the interpretation rules need — it is not a claim that seed 1 is reproducible
+bit-for-bit.
+
+**Readout:** DEV-20 per-crop precision at the incumbent's matched emit, for all three ARM V runs
+(seed U's is on record at **0.8293**). Let `spread = max - min` across the three.
+
+**Registered interpretation, fixed now:**
+
+* `spread >= 0.016` -> the H1 head-to-head delta (ARM P - ARM V = **-0.0160**) is **DOWNGRADED to
+  within-seed-noise**, and claim `v8-w3-015`'s H1 verdict (and `v8-w3-014`'s) carries that caveat.
+* `spread < 0.016` -> **H1 stands as measured.**
+* `spread >= 0.0051` -> ARM V's own null vs the incumbent (**-0.0051**) is "indistinguishable from
+  the incumbent at seed noise", which **strengthens** the null claim rather than weakening it, and
+  will be said plainly in those words.
+* `spread < 0.0051` -> the null is a measured non-zero difference smaller than the noise floor is
+  able to explain, and is reported as such.
+
+No other quantity gates anything. The three-run spread is n=3; it is a coarse range, not a variance
+estimate with an interval, and will be reported as a range.
+
+### 10.2 Q2 — ARM P100, the purity/volume deconfound
+
+**ARM P100 = the 0.99 legibility tier with every per-group cap raised by a common multiplier until
+the total row count matches ARM V's 95,184 pre-torso rows to within +/-10%.**
+
+Computed before training by `~/work/w3/p100.py --stage cap`, which drives `build_w3_corpus.build_rows`
+unmodified (same tier logic, same `cap_per_group(random_state=0)`, same dedup, same holdout filter)
+with the caps multiplied. **The full scan, recorded here in advance:**
+
+| mult | cap j2023 / GSR / tier-A | cap v3 | rows | jersey-2023 | v3 | GSR | Sid | ratio to ARM V |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 (= ARM P) | 60 | 12 | 58,059 | 37,098 | 18,375 | 1,931 | 655 | 0.610 |
+| 2 | 120 | 24 | 79,399 | 58,278 | 18,535 | 1,931 | 655 | 0.834 |
+| 3 | 180 | 36 | 91,120 | 69,999 | 18,535 | 1,931 | 655 | 0.957 |
+| **4 (CHOSEN)** | **240** | **48** | **97,347** | **76,226** | **18,535** | **1,931** | **655** | **1.0227** |
+| 5 | 300 | 60 | 100,585 | 79,464 | 18,535 | 1,931 | 655 | 1.057 |
+| 6 | 360 | 72 | 102,367 | 81,246 | 18,535 | 1,931 | 655 | 1.076 |
+| 8 | 480 | 96 | 103,853 | 82,732 | 18,535 | 1,931 | 655 | 1.091 |
+| 10 / uncapped | 600 / inf | 120 / inf | 104,062 | 82,941 | 18,535 | 1,931 | 655 | 1.093 |
+
+**Cap chosen: x4 (240 per jersey-2023 tracklet, 240 per GSR track, 240 per tier-A tracklet, 48 per
+v3 game x number) -> 97,347 rows = 1.0227x ARM V.** Rule used: the in-band multiplier minimising
+`|rows - 95,184|` (x4 is off by 2,163; x3 by 4,064). Volume-match is achievable — the uncapped 0.99
+tier reaches 104,062 rows, 1.093x ARM V — so the brief's fallback branch does not apply.
+`~/data/w3corpus/p100_cap.json`. Training seed for P100: **`seed_everything(1)`**, i.e. one of the
+two seeds Q1 measures, so Q1's spread is the yardstick for reading Q2's delta.
+
+**Three limits of P100, declared before it is trained:**
+
+1. **Total volume is matched; the source mixture is not, and cannot be.** v3 at the 0.99 tier holds
+   only 18,535 crops in total, so raising its cap adds 160 rows and nothing more. All the recovered
+   volume comes from jersey-2023 (37,098 -> 76,226). P100 is 78.3% jersey-2023 / 19.0% v3 against
+   ARM V's 51.0% / 44.6% (pre-torso row shares). Since S2 measured v3 as the dominant source of the
+   reader's gain
+   (arm 2 -> arm 4 = +0.3078), **a P100 loss cannot be attributed to purity alone** — it is
+   "purity at matched row count with the mixture that the purity tier permits".
+2. **Matched rows are not matched diversity.** P100 reaches volume by sampling up to 240 crops per
+   jersey-2023 tracklet instead of 60, over 831 tracklets rather than ARM V's 926, so its rows are
+   more correlated. This is unavoidable: deeper per-tracklet sampling is the *only* way to
+   volume-match a purity tier, and it is the honest price of the deconfound.
+3. **Vocabulary is 82 numbers, as ARM P's was** (the tier costs the same 7). §5.1 already measured
+   that this is not the driver of ARM P's loss (identical discordant counts with the one affected
+   DEV-20 number removed), so it is recorded, not re-litigated.
+
+**Readout:** DEV-20 per-crop precision, and the **head-to-head paired exact McNemar against ARM V
+seed U** (the same pairing `H1_P_vs_V.json` used: `--ckpt-a` = ARM V, `--ckpt-b` = P100). P100 vs
+the incumbent is run as context, not as a gate.
+
+**Registered interpretation, fixed now:**
+
+* **P100 < ARM V at p < 0.05** -> **purity itself is harmful**: filtering at 0.99 discards useful
+  hard examples, and the volume it costs was not the mechanism.
+* **P100 ~ ARM V (p >= 0.05)** -> the ARM P loss was a **volume artifact**, and `v8-w3-015` /
+  `v8-w3-014`'s "purity loses" is softened to **"purity buys nothing at matched volume"**.
+* **P100 > ARM V at p < 0.05** -> reported **loudly**; it revives a purity direction, and anything
+  built on it requires fresh registration in a later session. Nothing is shipped on it here.
+
+### 10.3 Rung 0 for P100, and what else is fixed
+
+P100 passes the same mechanical integrity check as §2 before it is trained (`p100.py --stage rows`
+calls `build_w3_corpus.rung0`): zero rows from a `valid` / `test` / `challenge` path, zero rows from
+any of the 12 held-out sequences (§1.3), zero empty labels, zero missing files. Torso RoIs come from
+the **same shared content-addressed cache** as ARM P / ARM V (109,316 entries already written), so
+crops the two earlier arms converted are not reconverted and P100's geometry is the geometry the
+other arms were trained on. `last.ckpt` selection, 25 epochs, batch 128, shipped-Koshkina init,
+95/5 split at `seed=0` — all unchanged from §1.4.
+
+**Budget and stop rule:** ~2 GPU-h on GPU 1 of `a100server1`, occupancy checked immediately before
+every launch, everything under `tmux`. Order of work is fixed now so a budget stop is not a
+selection: P100 torso/LMDB, then **ARM V seed 1, ARM V seed 2** (Q1 first — it is the binding
+unknown), then **P100**, then the scoring passes in the order Q1-seed-1, Q1-seed-2, Q2-vs-ARM-V,
+Q2-vs-incumbent. Anything not reached is reported as a budget stop with the GPU-h spent, never
+dropped.
+
+---
+
+## 11. Follow-up results
+
+*The brief's "§6". Everything registered in §10 was run, in the registered order, and nothing else
+was run. Ladder state is unchanged: rung 2, rung 3 and TEST-38 are still NOT RUN, no GS-HOTA number
+exists, `METRICS_VERSION` unchanged, the incumbent `parseq_v6_arm4t.ckpt` is still the reader.*
+
+> **RESULT: both declared limits close, and they close in opposite directions.**
+> **Q1: the seed spread is 0.0059** — smaller than the 0.016 H1 delta (so **H1 stands as
+> measured**) and larger than ARM V's 0.0051 null (so the null is **indistinguishable from the
+> incumbent at seed noise**, which strengthens it).
+> **Q2: purity itself is harmful.** At matched volume the 0.99 tier still loses to ARM V,
+> **-0.0255, McNemar p = 0.0020** — the earlier purity loss was *not* a volume artifact.
+
+### 11.1 Harness validity, checked in every pass
+
+All four scoring passes re-scored the incumbent on `~/data/dev20` and every one returned
+**emit 0.2761, precision 0.8344, 1,144 / 1,371 correct** — S2 §3.5's on-record numbers, identical
+across passes to four decimals. No pass is void. Both checkpoints under comparison decode the same
+1,397 gated crops in the same order, so all emit rates are 0.2761 by construction and the registered
+matched-emit floor is 0 in every case, as it was in §5.
+
+### 11.2 Q1 — seed variance of ARM V: spread = 0.0059
+
+Three runs, identical corpus (LMDB md5s of §10.1, not rebuilt), identical recipe, identical command
+line, differing only in the training RNG. Each was scored against the incumbent on DEV-20.
+
+| ARM V run | training seed | wall clock | ckpt md5 | reads | DEV-20 precision | correct | vs incumbent | McNemar (cand / inc) |
+|---|---|---|---|---:|---:|---:|---:|---|
+| **seed U** (original, §5) | unset | 22 m 59 s | `8b80904a099adafe8e3fe22a8a557f6b` | 1,371 | **0.8293** | 1,137 | -0.0051 | 38 / 45, p = 0.51 |
+| **seed 1** | 1 | 23 m 27 s | `6227f9f9b4a2b856d74194da52250a55` | 1,371 | **0.8352** | 1,145 | +0.0008 | 43 / 42, p = 1.00 |
+| **seed 2** | 2 | 23 m 00 s | `e4a830da571716c0f7f70cf76f906e8a` | 1,371 | **0.8293** | 1,137 | -0.0051 | 42 / 49, p = 0.53 |
+
+> **spread = max - min = 0.8352 - 0.8293 = 0.0059** (8 correct crops out of 1,371).
+
+Applying §10.1's registered rules, both branches, in the order they were registered:
+
+1. **`spread = 0.0059 < 0.016` -> H1 STANDS AS MEASURED.** The ARM P - ARM V delta of **-0.0160**
+   is **2.7x** the full range of three same-recipe retrains, so it is not explained by training-seed
+   noise. `v8-w3-014`'s H1 verdict needs no downgrade; the "single seed, unmeasured variance"
+   caveat that §7 item 4 attached to it is **retired and replaced by a measurement**.
+2. **`spread = 0.0059 >= 0.0051` -> ARM V's null is indistinguishable from the incumbent at seed
+   noise.** Said plainly, as registered: **the -0.0051 gap between ARM V and the shipped reader is
+   smaller than the range you get by retraining ARM V three times with nothing changed at all.**
+   This **strengthens** `v8-w3-015`. The W3 corpus is not "slightly worse than the incumbent"; on
+   this instrument it is **not distinguishable from it**, and the p = 0.51 McNemar now has a
+   physical scale to go with it. Note the coincidence that makes the point concrete: seed 2 lands
+   on exactly the incumbent-relative delta seed U did (-0.0051) while seed 1 lands on +0.0008 — the
+   sign of the ARM V - incumbent difference is not stable across retrains.
+
+**Corpus-val accuracy at epoch 24, for the record and not as a result:** seed U 93.02, seed 1 92.63,
+seed 2 < 92.61 (its epoch 24 fell outside its own top-3 checkpoint list, so only a bound is
+recoverable). The 0.4 pp corpus-val spread is an independent, coarser sighting of the same noise.
+
+**What this does not license.** n = 3 is a range, not a variance estimate with an interval; 0.0059
+is a *point estimate of the range*, and a fourth run could widen it. It is measured on one corpus
+(ARM V) at one recipe, and there is no reason to assume a smaller corpus (ARM P at 58 k rows) has
+the same noise floor. Two of the three runs are explicitly seeded and one is not (§10.1), so the
+three are independent draws rather than a designed seed sweep.
+
+### 11.3 Q2 — ARM P100, the deconfound: purity itself is harmful
+
+**Corpus, built to the §10.2 cap and rung-0 clean:** 97,347 pre-torso rows (**1.0227x** ARM V's
+95,184, inside the +/-10% band), torso survival 0.9343 -> **86,400 train / 4,547 val** against ARM V's
+83,812 / 4,411 (**+3.1%** trainable rows — P100 is, if anything, marginally the *larger* corpus).
+Integrity checks all zero: non-train-split rows 0, held-out-sequence rows 0, empty labels 0, missing
+files 0 (`rung0_p100.json`). 28,303 new torso RoIs were converted into the shared cache; the other
+62,644 rows reused the RoIs ARM P / ARM V trained on. Sources: jersey-2023 70,327, v3 18,154,
+GSR-train 1,842, Sid 624; 82 distinct numbers.
+
+| comparison | precision | delta | 95% Wilson | McNemar (cand-only / other-only) | p |
+|---|---:|---:|---|---|---:|
+| ARM V seed U (the registered `--ckpt-a`) | 0.8293 | — | [0.8085, 0.8483] | — | — |
+| **ARM P100 vs ARM V** | **0.8038** | **-0.0255** | [0.7819, 0.8240] | **44 / 79** | **0.0020** |
+| ARM P100 vs incumbent (context) | 0.8038 | -0.0306 | [0.7819, 0.8240] | 43 / 85 | 0.00026 |
+
+> **Registered branch taken: P100 < V at p < 0.05 -> PURITY ITSELF IS HARMFUL.** Filtering the
+> corpus at legibility 0.99 discards useful hard examples; the volume it cost was **not** the
+> mechanism of ARM P's loss. `v8-w3-014`'s "purity loses" is **upheld and hardened**, not softened —
+> the softening branch ("purity buys nothing at matched volume") did not fire.
+
+The verdict is robust to which ARM V seed it is read against: P100's 0.8038 sits **0.0255 below the
+lowest of the three ARM V runs**, i.e. **4.3x the §11.2 seed spread**, so no reachable seed of ARM V
+would reverse it.
+
+**The direction of the residual is the surprise.** Restoring the volume did not partially recover
+ARM P's loss — P100 (-0.0306 vs the incumbent) is *further down* than ARM P (-0.0211), by 0.0095
+against a 0.0059 seed spread. **This is an observation, not a registered comparison:** P100 and ARM P
+were never paired against each other in a McNemar pass, the gap is only ~1.6x the seed range, and
+nothing here is claimed from it beyond "the extra 28 k purity-tier rows did not buy back any of the
+purity loss". If the tier's problem is that it removes hard examples, then sampling *more* crops
+from the same easy tracklets is the one thing that cannot fix it, and that is consistent with what
+the number does — but the session did not test that mechanism and does not claim it.
+
+**The §10.2 limits still bind on the interpretation.** Volume is matched; the mixture is not
+(post-torso, P100 is 77.3% jersey-2023 / 20.0% v3 against ARM V's 49.3% / 46.3%),
+because the 0.99 tier holds only 18,535 v3 crops in total. A share of the -0.0255 belongs to the
+thinner v3 support, which S2 measured as the dominant source of the reader's accuracy. The honest
+statement of the finding is therefore: **at matched row count, the best corpus the 0.99 tier can
+build is significantly worse than the 0.7 tier's** — which is the practically relevant question,
+because that is the only corpus the tier can actually deliver.
+
+### 11.4 What happened to the earlier claims
+
+| claim | before | after this session |
+|---|---|---|
+| `v8-w3-014` (H1 refuted, purity -0.0160) | verdict + "single seed, variance unmeasured" caveat | **verdict stands, caveat retired**: 0.0160 is 2.7x the measured seed spread; and the P100 arm removes the confound caveat's escape hatch |
+| `v8-w3-015` (ARM V null, -0.0051) | null with unmeasured noise floor | **strengthened**: the delta is *below* the seed spread — ARM V is indistinguishable from the incumbent, not slightly worse |
+| `v8-w3-016` (rung-1 contamination) | untouched | untouched; this session read DEV-20 only |
+| `v8-w3-017` (cap, not crop count, binds) | untouched | reinforced in passing: raising the cap 4x converted 37,098 -> 76,226 jersey-2023 rows exactly as its arithmetic predicted |
+| **new `v8-w3-018`** | — | the seed-variance measurement (spread 0.0059 over three ARM V retrains) |
+| **new `v8-w3-019`** | — | the purity/volume deconfound (P100 -0.0255 vs ARM V at matched volume, p = 0.0020) |
+
+### 11.5 Spend, artifacts, and what was deliberately not done
+
+**Cluster spend: ~1.29 GPU-h on GPU 1** (P100 torso 5 m 35 s; three trainings 23 m 27 s + 23 m 00 s
++ 23 m 30 s = 69 m 57 s; four DEV-20 scoring passes 18 s each = 1 m 12 s; one aborted scoring launch
+~30 s). LMDB writing and the cap scan were CPU. GPU 0 (585 MiB, another user) was never touched;
+GPU 1 was verified at 4 MiB immediately before each of the three launches and is at 4 MiB at session
+end. No two GPU jobs ever overlapped. Budget was ~2 GPU-h.
+
+**One thing broke and is recorded:** the first scoring launch failed instantly on all arms with
+`InvalidModelError: Unable to find model class for '.../armV_seed1.ckpt'` — PARSeq's
+`strhub.models.utils._get_model_class` infers the architecture from a **substring of the checkpoint
+path**, and the pulled-back copies were not named `parseq*`. Renaming the copies fixed it; no
+harness code was touched. Anyone copying a PARSeq checkpoint out of its `outputs/parseq/...` tree
+must keep `parseq` in the filename.
+
+**Checkpoints (gitignored, pulled back, md5 verified on both sides):**
+- `outputs/gsr/w3_readers/parseq_w3_armV_volume_seed1.ckpt` — md5 `6227f9f9b4a2b856d74194da52250a55`,
+  server origin `~/data/w3out/ckpt/parseq_armV_seed1.ckpt` = `.../outputs/parseq/2026-08-14_17-54-22/checkpoints/last.ckpt`
+- `outputs/gsr/w3_readers/parseq_w3_armV_volume_seed2.ckpt` — md5 `e4a830da571716c0f7f70cf76f906e8a`,
+  origin `.../2026-08-14_18-17-50/checkpoints/last.ckpt`
+- `outputs/gsr/w3_readers/parseq_w3_armP100_purity_volmatched_seed1.ckpt` — md5
+  `ee62d21a6a68d65a1bff86f8d14cbe0e`, origin `.../2026-08-14_18-40-51/checkpoints/last.ckpt`
+
+**Result JSONs (gitignored, `outputs/gsr/w3_readers/`):** `fu_dev20_armV_seed1.json`,
+`fu_dev20_armV_seed2.json`, `fu_P100_vs_armV.json`, `fu_dev20_armP100.json`, `p100_cap.json`,
+`rung0_p100.json`, `corpus_stats_p100.json`.
+
+**Server-side additions (`~/work/w3/`, nothing vendored):** `p100.py` (drives `build_w3_corpus.py`
+with raised caps; does not modify it), `train_seeded.py` (10-line `seed_everything` wrapper around
+the stock `train.py`), `run_p100_corpus.sh`, `run_w3fu_train.sh`, `run_w3fu_score.sh`. Data:
+`~/data/w3corpus/armP100/` (327 MB), `~/data/w3out/ckpt/` (1.1 GB), logs `~/logs/w3fu_*.log`,
+`~/work/w3/{p100_corpus.log, fu_chain.log, fu_score.log}`.
+
+**Not done, on purpose:** no rung 2, no rung 3, no GS-HOTA, no TEST-38 / test-49 / challenge read,
+no operating-point sweep, no seed-vs-seed McNemar pairing (the registered Q1 readout is the
+precision spread; pairing two ARM V seeds against each other was not registered and was not run), no
+third repeat of ARM P or P100, and no tier between 0.7 and 0.99 (§7 item 7 stands unmeasured).
+Nothing shipped.
