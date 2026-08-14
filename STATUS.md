@@ -1,5 +1,31 @@
 # STATUS
 
+## 2026-08-14 — v8 W3 annotation ingested + gate verdict at n=2,520: Sid's 499 labels are clean, the unnamed pool is REAL absence, and the legibility gate's error is ADMITTING noise — ~27% of the 140k corpus estimated impure
+
+kb v8-w3-007..013; outputs/gsr/w3_annotation/sid_labels.parquet (11,746 rows, full coverage
+after the full-density unblock). Sid annotated ALL 499 queue rows via the new local tool
+(tools/annotate_w3.py, committed bf4de8a + keyfix e3c7401): zero blanks, zero invalid, audit
+log reconciles at 0 mismatches. Tier A: 15 numbers (13 confident; 2 carry a stray unsure) /
+274 none — **94.8% of the unnamed pool is genuine glyph absence** (not view-size: 206/274 had
+median view >= 89 px), so SoccerNet's annotators were right and the "unlabelled treasure"
+premise deflates ~20x. 7/79 GK tracklets numbered (six "1", one "18" — caveated cluster; the
+benchmark contains zero GK numbers anywhere). Tier B: 2,520 per-crop visibility labels
+(771 visible / 1,749 hidden) — the project's first human per-crop gate supervision. Zero
+GT-error notes across 5,988 views (null result, v8-w3-012).
+
+Full-density unblock (11,076 missing crops cut on laptop CPU 18 min; scored on CLUSTER GPU 1
+in 26.1 s per Sid's new all-GPU-on-cluster rule — a laptop launch was killed pre-output and
+redone on the server; cross-machine agreement 100/100 at max delta 1.5e-3): admitted yield
+**6,470 = 1,433 positives / 5,037 human negatives**; tier-A carried positives 662 (projection
+~820 was 19% optimistic — the re-ID subsample favours big boxes). **THE FINDING (v8-w3-010
+confirmed, n=2,520): gate recall 0.964 / specificity 0.841 / precision 0.728 — the legibility
+gate loses only 3.6% of readable glyphs but ~27% of what it admits shows no readable number.
+Transferred to jersey-2023: ~38,300 of 140,278 admitted crops (27%) estimated positive-class
+label noise (v8-w3-013, pending — transfer estimate). Threshold is a purity dial: 0.99 keeps
+82,941 at est. 0.889 precision.** W3 retrain premise REDIRECTED: purity of the corpus, not
+volume of new positives, is the lever — consistent with v6's "bank reader headroom as
+precision" lesson. Retrain session dispatched with fresh registration.
+
 ## 2026-08-13 — v8 W3 corpus expansion COMPLETE: jersey-2023 full legibility pass — 140,278 admissible crops (3.7x S2's training sample), finished on the cluster
 
 results/GSR_V8_W3_PREP.md §10-11, kb v8-w3-006, outputs/gsr/w3_annotation/

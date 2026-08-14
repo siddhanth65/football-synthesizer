@@ -6233,6 +6233,234 @@
         "corpus",
         "cluster"
       ]
+    },
+    {
+      "id": "v8-w3-007",
+      "statement": "Sid answered all 499 rows of the W3 annotation queue with zero blanks and zero 'unsure', and the tier-A result is mostly a NEGATIVE: of the 289 GSR-train player/GK tracklets SoccerNet's own annotators left without a number, a human reading 12 stratified closest-views per tracklet recovered a number on only 15 (5.2%) and returned 'none' on 274 (94.8%). This is not a view-size artifact -- 206 of the 274 'none' tracklets had a median shown view of >= 89 px (median 97 px, median 413 GT boxes), and every one of the 15 numbered tracklets cleared 89 px (median view 109 px). Read the other way it validates the benchmark: SoccerNet's unnumbered pool is overwhelmingly unnumbered because the glyph is genuinely unreadable in broadcast, not because its annotators gave up. The 15 numbers sit behind 5,938 GT boxes (2,988 at >= 89 px) and span 8 distinct values.",
+      "value": 15,
+      "unit": "GSR-train tracklets given a human jersey number out of 289 unnumbered (274 none)",
+      "status": "confirmed",
+      "evidence": [
+        "outputs/gsr/w3_annotation/labelling_manifest.csv",
+        "outputs/gsr/w3_annotation/labels_audit.jsonl (437 records over 427 queue ids)",
+        "outputs/gsr/w3_annotation/sid_labels.parquet"
+      ],
+      "method": "tools/gsr_w3_corpus.py --queue built 12-cell time-stratified contact sheets (tallest box per twelfth, MIN_VIEW_H 89 px); labelled via tools/annotate_w3.py (417 rows) and Excel (72 pre-tool rows, A0001-A0072); consumed with --ingest. Counts recomputed independently from the CSV and reconciled row-for-row against sid_labels.parquet.",
+      "n": 289,
+      "caveats": [
+        "Single annotator, no second pass, no inter-annotator agreement.",
+        "7 of the 15 numbers are '1' and 6 of those 7 are goalkeepers -- the most common real GK number, but also the shortest keystroke; not independently re-checked.",
+        "2 of the 15 (A0085='30', A0103='36') carry a stray 'u' in their note field, committed in the same audit event as the label -- most plausibly an 'unsure' keypress that landed in the note box, so treat those two as annotator-flagged.",
+        "'none' is a statement about the 12 views shown, not about the whole tracklet."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-001"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "corpus",
+        "annotation",
+        "negative-result"
+      ]
+    },
+    {
+      "id": "v8-w3-008",
+      "statement": "First goalkeeper jersey numbers ever attached to SoccerNet-GSR: 7 of the 79 GSR-train GK tracklets now carry a human-read number (six '1', one '18'), against the 0 of 79 the benchmark ships (v8-w3-002). 72 GKs returned 'none'. The 7 sit behind 2,368 GT boxes (933 at >= 89 px). GK numbers exist nowhere in SoccerNet-GSR train or validation, so this is supervision no competitor can have from the benchmark alone -- but it is 7 tracklets and 2 distinct values, an existence proof and a GK-'1' prior, not a GK number distribution.",
+      "value": 7,
+      "unit": "GSR-train goalkeeper tracklets given a human jersey number (of 79; benchmark has 0)",
+      "status": "confirmed",
+      "evidence": [
+        "outputs/gsr/w3_annotation/labelling_manifest.csv",
+        "outputs/gsr/w3_annotation/sid_labels.parquet"
+      ],
+      "method": "Same queue and sheets as v8-w3-007, filtered to manifest rows with role == 'goalkeeper': A0054 SNGS-153 t3 ='1', A0061 SNGS-106 t7 ='18', A0077 SNGS-165 t26 ='1', A0128 SNGS-105 t24 ='1', A0144 SNGS-108 t26 ='1', A0192 SNGS-158 t26 ='1', A0204 SNGS-163 t25 ='1'.",
+      "n": 79,
+      "caveats": [
+        "6 of 7 are '1'. A reader trained on this alone would learn 'goalkeeper -> 1', a role shortcut rather than glyph reading.",
+        "Not cross-checked against any external squad list; no second annotator.",
+        "A0054 and A0128 were labelled in Excel before the tool existed and never re-confirmed through the tool's audit log."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-002",
+        "v8-w3-007"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "goalkeeper",
+        "annotation"
+      ]
+    },
+    {
+      "id": "v8-w3-009",
+      "statement": "The project's first per-crop glyph-visibility supervision: all 210 tier-B tracklets were answered (189 cell-lists, 21 'none', 0 'all', 0 'unsure'), yielding 2,520 human-judged crops -- 771 positives (the known GT number is readable in that exact view) and 1,749 negatives (it is not). Base rate 30.6%: even on tracklets whose number the benchmark knows, and even at the CLOSEST view of each twelfth of the clip, the digits are unreadable in ~7 of 10 views. Visibility rises monotonically with box height across quartiles of the shown median view: 0.244 / 0.235 / 0.330 / 0.414 (77-111, 111-124, 124-139, 139-210 px). Unlike jersey-2023's abstention pool (v8-w3-004), which is a tracklet-level human judgment, these 1,749 negatives are per-crop.",
+      "value": 2520,
+      "unit": "human per-crop glyph-visibility labels (771 visible / 1,749 hidden)",
+      "status": "confirmed",
+      "evidence": [
+        "outputs/gsr/w3_annotation/labelling_manifest.csv",
+        "outputs/gsr/w3_annotation/sid_labels.parquet"
+      ],
+      "method": "tools/gsr_w3_corpus.py --queue tier B: 210 numbered GSR-train tracklets ranked by ascending mean |legibility - 0.5| (gate-uncertainty selection -- the model chooses who is SHOWN, never the label), 12 cells each; --ingest expands each answered row to 12 per-crop rows in sid_labels.parquet.",
+      "n": 2520,
+      "caveats": [
+        "The 210 tracklets were selected to sit near the legibility gate's decision boundary, so 30.6% is NOT the GSR-train visibility rate -- it is the rate on the gate's hardest tracklets.",
+        "Single annotator, no agreement measurement.",
+        "2,396 of the 2,520 crops are not yet materialised on disk (see v8-w3-011)."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-004"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "legibility",
+        "annotation",
+        "corpus"
+      ]
+    },
+    {
+      "id": "v8-w3-010",
+      "statement": "SETTLED at full n (2,520 of 2,520 tier-B cells now scored; the n=124 read is confirmed in direction and close in magnitude). Against Sid's per-crop human visibility truth, the shipped 0.7 legibility gate scores: human-visible 771, gate passes 743 (recall 0.964, 28 misses); human-hidden 1,749, gate wrongly passes 278 (specificity 0.841). Precision 743/1,021 = 0.728, NPV 1,471/1,499 = 0.981. The gate's error is overwhelmingly ADMITTING unreadable crops, not discarding readable ones: it loses 3.6% of the glyphs a human can read, and 27.2% of what it admits shows no readable number to a human. The W3 HOWTO's 'the gate throws away 79% of our crops' framing is refuted -- what it throws away is mostly genuinely unreadable, and the cost of the gate is positive-class label noise. Prior n=124 numbers: recall 0.973, specificity 0.805, precision 0.679.",
+      "value": 0.964,
+      "unit": "recall of the 0.7 legibility gate against human per-crop visibility (n=2,520 cells)",
+      "status": "confirmed",
+      "evidence": [
+        "outputs/gsr/w3_annotation/sid_labels.parquet",
+        "outputs/gsr/w3_annotation/labelling_manifest.csv",
+        "outputs/gsr/w3_annotation/legibility_train.parquet (31,143 rows)"
+      ],
+      "method": "Cut the 11,076 label-named full-density crops missing from outputs/gsr/gt_crops/train (tools/gsr_w3_corpus.py --cut-labelled, CPU), scored them with the shipped legibility_resnet34_soccer_20240215.pth on a100server1 GPU 1, merged into legibility_train.parquet (31,143 rows, 0 decode failures), re-ran --ingest, then a 2x2 of (label != '<none>') against (legibility > 0.7) over all 2,520 tier-B rows.",
+      "n": 2520,
+      "caveats": [
+        "SELECTED, but only once now: the 210 tier-B tracklets were chosen for gate uncertainty (mean |leg - 0.5| ascending), so this is the gate's behaviour on its hardest tracklets. The second selection (re-ID subsampling) that made the n=124 read doubly-biased is gone -- every cell Sid judged is now scored.",
+        "Human base rate 0.306 on all 2,520 cells vs 0.298 on the old 124, and gate pass rate 0.405; the earlier subsample was not skewed on the label side, which is why the two reads agree.",
+        "Single annotator, no inter-annotator agreement, and 'visible in this exact view' is a stricter question than the tracklet-level legible/illegible labels the gate was trained on -- part of the 278 false admits may be definitional rather than model error.",
+        "95% Wilson CIs: recall [0.948, 0.975], specificity [0.823, 0.857], precision [0.700, 0.754]."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-009"
+      ],
+      "tags": [
+        "annotation",
+        "corpus",
+        "gsr",
+        "legibility",
+        "validation"
+      ]
+    },
+    {
+      "id": "v8-w3-011",
+      "statement": "REALISED, the propagation promise is now paid: the W3 ingest admits 6,470 crop rows (1,433 positive, 5,037 negative) of 11,746 label rows, every one of them materialised on disk and scored. Of the 5,938 GT boxes behind the 15 tier-A human numbers, 662 pass the 0.7 gate -- up from 31 when 5,713 of them had no score at all. The unblock was exactly the diagnosed one (score coverage, not the gate): 11,076 missing crops cut on CPU in 18.0 min (9,713 full-frame decodes), scored in 26.1 s on a100server1 GPU 1, 0 decode failures. The realised carried pass rate is 0.1115 (662/5,938) against the 0.138 projected from the 225 re-ID-subsampled crops -- the projection of ~820 was optimistic by 19%, because the re-ID subsampler favours temporal spread over the small boxes that dominate a full tracklet. 13 of the 15 numbered tracklets keep at least one admitted crop, 12 keep >= 4, 8 keep >= 15 (0, 0, 2, 9, 13, 14, 14, 18, 31, 34, 45, 57, 136, 138, 151), spanning 8 distinct numbers. Against the standing corpus (GSR-train 4,175 + jersey-2023 140,278 + server-side v3 45,620 = 190,073) the 662 genuinely-new positives are +0.35%; the 1,433 total positives +0.75%. The real contribution remains the 5,037 PER-CROP human negatives, a class the corpus previously held only at tracklet level.",
+      "value": 6470,
+      "unit": "admitted crop rows from the W3 human annotation pass (1,433 pos / 5,037 neg)",
+      "status": "confirmed",
+      "evidence": [
+        "outputs/gsr/w3_annotation/sid_labels.parquet",
+        "ingest stdout: 11746 crop rows; {'A_number': 15, 'A_none': 274, 'A_unsure': 0, 'B_visible': 771, 'B_hidden': 1749, 'B_unsure': 0}",
+        "outputs/gsr/w3_annotation/legibility_train.parquet"
+      ],
+      "method": "tools/gsr_w3_corpus.py --cut-labelled (new; cuts only the crops named by sid_labels.parquet, resolved through _all_boxes, via tools.gsr_crops.cut_crops) -> 11,076 JPEGs / 35.0 MB, all 11,076 resolved and cut, 0 unresolvable; scored on a100server1 GPU 1 (A100-PCIE-40GB, 4 MiB resident at launch, GPU 0 left to its other user) under tmux, env gsr, batch 128, 26.1 s, 0 NaN; merged into legibility_train.parquet (20,067 + 11,076 = 31,143 rows, no name collision); python -m tools.gsr_w3_corpus --ingest outputs/gsr/w3_annotation/labelling_manifest.csv; then a groupby of sid_labels.parquet on (source, label_provenance, admitted, reason).",
+      "n": 11746,
+      "caveats": [
+        "1,433 positives includes the 771 tier-B cells, whose label is the GT number the benchmark already had; only the 662 tier-A crops carry a number new to SoccerNet-GSR.",
+        "The 662 are glyph-gated by a classifier now measured at precision 0.728 on human truth (v8-w3-010), so a comparable minority of them plausibly show no readable number.",
+        "Crops are full-body at the S2 crop law's geometry; the pose-torso conversion S2 section 3.4 requires before these rows train against the arm-4t chain has not been run.",
+        "2 of the 15 numbered tracklets keep zero admitted crops: their number was read by a human from a contact-sheet view, but no box of the tracklet clears the gate."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-003",
+        "v8-w3-006",
+        "v8-w3-007",
+        "v8-w3-009"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "corpus",
+        "legibility",
+        "blocked"
+      ]
+    },
+    {
+      "id": "v8-w3-012",
+      "statement": "Benchmark-audit yield from the annotation pass is ZERO: across 499 contact sheets (5,988 individual views) a human explicitly invited to flag wrong-person cells and cells contradicting gt_number filed no such note. The note column holds exactly two entries, both the single character 'u' (A0085, A0103), and labels_audit.jsonl shows each committed in the same event as a numeric label -- a stray 'unsure' keypress caught by the note box, not a finding. v8-w3-005's SNGS-065 duplicate-identity pair remains the only GT error surfaced by this route, and it was found before the queue existed.",
+      "value": 0,
+      "unit": "new SoccerNet-GSR ground-truth errors reported by the annotator (499 sheets)",
+      "status": "pending",
+      "evidence": [
+        "outputs/gsr/w3_annotation/labelling_manifest.csv",
+        "outputs/gsr/w3_annotation/labels_audit.jsonl",
+        "outputs/gsr/w3_annotation/HOWTO.md#The note column"
+      ],
+      "method": "Full harvest of the note column of the completed labelling_manifest.csv and of every new_note in labels_audit.jsonl (437 records over 427 queue ids).",
+      "n": 499,
+      "caveats": [
+        "Absence of evidence: the annotator's task was labelling, not auditing, and filing a note required leaving the keyboard flow for the note box -- whose awkwardness is itself evidenced by the two stray 'u' keystrokes. A zero here does NOT establish that the 499 tracklets are error-free.",
+        "Tier-A rows have no gt_number to contradict by construction, so only the 210 tier-B rows could produce a number-mismatch note at all."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-005"
+      ],
+      "tags": [
+        "gsr",
+        "ground-truth",
+        "audit",
+        "negative-result"
+      ]
+    },
+    {
+      "id": "v8-w3-013",
+      "statement": "The 140,278-crop jersey-2023 'admissible' corpus (v8-w3-006) carries an estimated 27% positive-class label noise, and the legibility threshold is a directly calibrated size/purity dial. Applying v8-w3-010's per-band precision of the same gate against human per-crop truth to the jersey-2023 admitted score distribution (band precisions 0.239 / 0.329 / 0.461 / 0.601 / 0.889 over [0.7,0.8) / [0.8,0.9) / [0.9,0.95) / [0.95,0.99) / >=0.99, holding 5,452 / 9,706 / 11,203 / 30,976 / 82,941 jersey-2023 crops) estimates 101,976 of 140,278 truly show a readable number -- 0.727, indistinguishable from the flat precision 0.728 because the two admitted-score distributions nearly coincide (mean legibility 0.967 tier-B vs 0.968 jersey-2023). Moving the gate to 0.99 cuts the corpus to 82,941 crops (-41%) at estimated precision 0.889 and holds ~73,700 true positives, i.e. 72% of the estimated true positives at 28% fewer than half the false ones; to 0.999 it collapses to 31,450 crops (precision 0.959). Threshold 0.5 buys 7,596 more crops at precision 0.689. The 0.7 default maximises estimated true-positive count (102,083), so it is the right choice for a recall-hungry corpus and the wrong one if positive-class purity is what a reader needs.",
+      "value": 0.727,
+      "unit": "estimated share of jersey-2023's 140,278 admitted crops that truly show a number",
+      "status": "pending",
+      "evidence": [
+        "outputs/gsr/w3_annotation/sid_labels.parquet",
+        "outputs/gsr/w3_annotation/legibility_j2023_full.parquet",
+        "outputs/gsr/w3_annotation/legibility_train.parquet"
+      ],
+      "method": "Bin the 1,021 tier-B crops the 0.7 gate admits by legibility band, take the human-visible rate per band as that band's precision, and reweight by the jersey-2023 full-pass score histogram above each threshold; repeat the 2x2 at thresholds 0.5 / 0.7 / 0.9 / 0.95 / 0.99 / 0.999.",
+      "n": 140278,
+      "caveats": [
+        "TRANSFER, not a measurement on jersey-2023: the precisions come from 2,520 human-judged GSR-train broadcast crops on gate-uncertainty-selected tracklets, applied to a different dataset's crops. Band reweighting controls for the score distribution only -- crop geometry, resolution and annotation process all differ. PENDING until a human labels a jersey-2023 sample directly.",
+        "The band precisions rest on 46 / 70 / 76 / 218 / 611 tier-B crops; the two lowest bands are thin, though they carry only 15,158 of the 140,278 jersey-2023 crops.",
+        "jersey-2023's tracklet-level human -1 labels (v8-w3-004) already show the gate agrees 99.5% on the negative class there, so this noise estimate is about the positive class only.",
+        "Selection direction is not established: tier-B tracklets sit near the gate's decision boundary, which plausibly makes 0.728 a floor on the precision the gate reaches on an unselected population."
+      ],
+      "date": "2026-08-14",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v8-w3-006",
+        "v8-w3-010"
+      ],
+      "tags": [
+        "gsr",
+        "jersey",
+        "legibility",
+        "corpus",
+        "validation"
+      ]
     }
   ]
 }

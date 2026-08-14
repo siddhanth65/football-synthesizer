@@ -34,7 +34,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from tools.gsr_crops import GSR_ROOT, Crop, plan_split, split_sequences
+from tools.gsr_crops import GSR_ROOT, Crop, cut_crops, plan_split, split_sequences
 
 logger = logging.getLogger("gsr_w3_corpus")
 
@@ -520,6 +520,33 @@ def _admit(leg: dict[str, float], name: str, *, carried: bool) -> tuple[bool, st
     return (score > LEG_ADMIT, f"legibility {'>' if score > LEG_ADMIT else '<='} {LEG_ADMIT}")
 
 
+def cut_labelled_crops(split: str = "train") -> int:
+    """Materialise every crop named by ``sid_labels.parquet`` that is not on disk yet.
+
+    Sid's labels cover full-density tracklets (:func:`_all_boxes`: every GT box, no crop law), while
+    ``outputs/gsr/gt_crops/<split>`` holds only the re-ID crop law's 15-per-tracklet subsample. The
+    difference reaches :func:`_admit` as ``unscored`` and is refused. Cuts only the named crops --
+    never the whole split -- into the same directory, so ``--legibility`` and ``--ingest`` resolve
+    them by name with no further change.
+
+    Args:
+        split: GSR split the labels came from.
+
+    Returns:
+        Number of the missing crops that are on disk after the pass.
+    """
+    _assert_train_only(split)
+    lab = pd.read_parquet(OUT_ROOT / "sid_labels.parquet")
+    out_dir = CROP_ROOT / split
+    want = set(lab["crop_name"]) - {p.name for p in out_dir.glob("*.jpg")}
+    todo = [c for seq in sorted(lab["sequence"].unique())
+            for crops in _all_boxes(seq).values() for c in crops if c.name in want]
+    cut_crops(todo, out_dir)
+    made = sum((out_dir / c.name).exists() for c in todo)
+    print(f"cut-labelled: {len(want)} missing, {len(todo)} resolved from labels, {made} cut")
+    return made
+
+
 def ingest(csv_path: Path, split: str = "train") -> Path:
     """Turn Sid's filled manifest into corpus rows.
 
@@ -663,6 +690,8 @@ if __name__ == "__main__":
     ap.add_argument("--manifest", action="store_true", help="write the glyph-only corpus manifest")
     ap.add_argument("--queue", action="store_true", help="build contact sheets + labelling CSV")
     ap.add_argument("--tier-b", type=int, default=TIER_B_N, help="tier-B queue size")
+    ap.add_argument("--cut-labelled", action="store_true",
+                    help="cut the full-density crops named by sid_labels.parquet (CPU)")
     ap.add_argument("--ingest", default=None, help="consume a filled labelling manifest CSV")
     ap.add_argument("--demo", action="store_true")
     a = ap.parse_args()
@@ -680,5 +709,7 @@ if __name__ == "__main__":
         build_manifest()
     if a.queue:
         build_queue(tier_b=a.tier_b)
+    if a.cut_labelled:
+        cut_labelled_crops()
     if a.ingest:
         ingest(Path(a.ingest))

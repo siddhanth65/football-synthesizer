@@ -42,8 +42,14 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
   2026-07-28, explicit):** research-dataset video distributed under an NDA that Sid has personally
   signed (e.g. SoccerNet / FOOTPASS) may be downloaded, each fetch with a stated size plan and
   Sid's per-fetch approval on record.
-- **Hardware:** 4 GB GPU laptop — one heavy GPU/data job at a time; never run the full pytest suite
-  during GPU training (OOM killed a fine-tune once); targeted tests only while GPU is busy.
+- **Hardware (amended 2026-08-14, per Sid: "do all gpu sessions on the cluster"):** ALL GPU work
+  runs on the cluster (a100server1 = 192.168.3.19, GPU 1 only, nvidia-smi occupancy check
+  immediately before every launch; GPU 0 belongs to another user; supervised processes only, no
+  bare nohup). The laptop GPU belongs to Sid — workers must not use it. Cluster is reachable
+  ONLY on campus network/IIITDVPN; if unreachable, GPU work queues rather than falling back to
+  the laptop. Laptop CPU work is unrestricted. Legacy rule stays for any laptop run Sid himself
+  approves: one heavy job at a time; never the full pytest suite during GPU training; targeted
+  tests only while a GPU is busy.
 - Free-tier LLM narration only (Ollama / OpenAI-compatible); no paid keys assumed.
 
 ## Engineering discipline
