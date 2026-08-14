@@ -1,5 +1,31 @@
 # STATUS
 
+## 2026-08-15 — v9 W3 PASS: DetA census + track-attribute voting — DEV 51.81 -> 54.80 (+2.99 HOTA, 20/0, p=1.9e-06) at ZERO GPU; jersey is the monster lever; small-box premise refuted
+
+results/GSR_V9_W3.md, kb v9-w3-001..005, tools/gsr_v9_deta.py, eval/gsr_score.py
+(vote_track_attributes, flag VOTE_TRACK_ATTRS default OFF). Harness fidelity proven first
+(re-scores GSR_V6.md to 4 decimals; oracle-all returns exactly 100). **Census (235,174 GT
+rows): we reach 89.93% of GT positionally but only 56.47% attribute-correct. Ranked oracle
+levers: jersey +24.74 (coverage +16.36, achievable ~+8.15 bounded by our own roster — 309/478
+cached tracklets carry NO read: a reader problem, not policy: r_abstain already 0), detection
+misses +6.99 (realistic +2..4.4, needs retrain + same-stack lineage), role+team +6.15,
+localization +3.74, dead-frame veto +1.12 ceiling, FP/dedup +0.18 = DEAD lever.** Premise
+contradictions: small-box recall is NOT the detection story (<40 px = 7.2% of misses; overall
+recall 0.899); named-wrong jersey is DetA-neutral (wrong number costs what null costs).
+
+**Stage 2, registered then built: track-level majority voting of role/team/jersey +a writer
+repair** (gsr_deleak.write_arm only wrote solver numbers onto rows role-labelled player — GK/
+referee rows of NAMED tracks kept jersey=null; that repair alone = +1.05). vote_all: **DetA
++1.7999, HOTA +2.9887, 20 helped/0 hurt — registered PASS** (bar +0.50). Qualifiers on
+record: role-voting ALONE loses DetA (-0.13; kills minority-correct GK rows); deterministic
+(noise floor exactly 0). Ships default OFF; legitimacy audit refactored to vote its own
+expectation (re-derives the on-record test-49 audit IDENTICALLY: 0 violations, flip set
+{126,130,131,197}). New instance of the in-place-overwrite hazard on SNGS-024 cache (6,915 vs
+6,701 rows) — future arms must re-verify base fidelity first (kb v9-w1-006 pattern).
+Detector retrain PRICED not built (6-12 GPU-h + 0.6/arm control lineage; do after role/team).
+**W4 dispatched: the role+team attack (+6.15 oracle; voting banked only +0.75 of it — the
+rest is majority-wrong tracks needing better classification, GK-position logic first).**
+
 ## 2026-08-14 — v9 W2: TwixMetric FAILS its component gates (G2/G3) — and the ceiling arithmetic re-aims the campaign at DETECTION: even oracle split+merge lands ~60.4; 61.48 requires DetA
 
 results/GSR_V9_W2.md (§1 registered pre-training), kb v9-w2-001..006, ckpts

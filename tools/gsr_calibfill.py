@@ -330,9 +330,11 @@ def verify_gtfree(arm_dir: Path, base_arm: Path, data_dir: Path, pos_dir: Path,
     where the free map disagrees with the GT one. Any other row is a violation.
     """
     from eval.gsr_score import (  # noqa: PLC0415
+        VOTE_TRACK_ATTRS,
         load_gt_people_by_frame,
         resolve_team_map,
         resolve_team_map_free,
+        vote_track_attributes,
     )
 
     swap = {"left": "right", "right": "left"}
@@ -350,12 +352,16 @@ def verify_gtfree(arm_dir: Path, base_arm: Path, data_dir: Path, pos_dir: Path,
                          .read_text(encoding="utf-8"))["predictions"]
         if len(base) != len(got):
             raise SystemExit(f"{name}: {len(base)} base rows vs {len(got)} shipped rows")
+        if flip:  # apply the map flip first: the shipped rows are voted under the flipped map
+            for b in base:
+                if b["attributes"].get("team") in swap:
+                    b["attributes"]["team"] = swap[b["attributes"]["team"]]
+        # The per-track vote is a pure function of our own predictions (no label read), so the
+        # expectation is the voted base row. A no-op while VOTE_TRACK_ATTRS is empty (the default).
+        vote_track_attributes(base, VOTE_TRACK_ATTRS)
         for b, g in zip(base, got):
             n_rows += 1
-            want = b["attributes"].get("team")
-            if flip and want in swap:
-                want = swap[want]
-            violations += int(g["attributes"].get("team") != want)
+            violations += int(g["attributes"].get("team") != b["attributes"].get("team"))
     return {"n_sequences": len(names), "n_rows": n_rows, "violations": violations,
             "flipped_sequences": flipped, "n_flipped": len(flipped)}
 

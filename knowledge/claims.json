@@ -7043,6 +7043,162 @@
         "premise-contradiction",
         "planning"
       ]
+    },
+    {
+      "id": "v9-w3-001",
+      "statement": "THE GS-DetA LOSS IS AN ATTRIBUTE PROBLEM, NOT A DETECTION PROBLEM. Census of the shipped v6 chain on DEV-20 (235,174 GT rows, 213,571 prediction rows, attribute-blind Hungarian match at the evaluator's own 5 m gaussian): we put a prediction within 5 m of 89.93% of GT rows, but only 56.47% of GT rows are also attribute-correct. Exclusive buckets: detection miss 10.07% (8.54 live + 1.53 on the 263 dead frames), role wrong 5.34%, team wrong 5.75%, jersey wrong 22.37% (coverage loss 15.37%, named-wrong 5.68%, over-naming 1.32%), false positives 0.88% of GT. On the fully-correct rows a further 3.76% of GT is lost in row-equivalents to the alpha sweep alone (mean alpha fraction 0.9333). Role confusion is dominated by player->referee (7,032 rows) and referee->player (3,377).",
+      "value": 0.5647,
+      "unit": "share of DEV-20 GT rows that are position-matched AND attribute-correct",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W3.md#2. The census -- 235,174 GT rows, 213,571 prediction rows, DEV-20",
+        "results/gsr_benchmark/gsr_v9_w3_census.json",
+        "tools/gsr_v9_deta.py"
+      ],
+      "method": "Per-frame Hungarian match on the evaluator's gaussian pitch similarity (sigma = 2.0428 m, cut at 5 m) ignoring attributes, then exclusive bucketing in the order role -> team -> jersey using the evaluator's own attribute preprocessing (team only for player/GK rows, jersey only for player rows, None == None matches).",
+      "n": 235174,
+      "caveats": [
+        "The census matcher is attribute-blind and unweighted; the evaluator's Hungarian runs on attribute-zeroed similarity weighted by the global alignment score. Point costs come from the official evaluator instead (v9-w3-002).",
+        "DEV-20 is the tuning split."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w2-006"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "deta",
+        "decomposition",
+        "census"
+      ]
+    },
+    {
+      "id": "v9-w3-002",
+      "statement": "THE RANKED DetA LEVER TABLE (oracle counterfactuals scored with the official evaluator, DEV-20, baseline GS-DetA 39.3083 which reproduces GSR_V6.md to 4 decimals; the all-fixed arm returns exactly 100.00). Fixing ONE bucket: jersey +24.74 (coverage loss +16.36, named-wrong +5.06, over-naming +1.16), all detection misses +6.99 (with GT attributes on the inserted rows), role+team together +6.15, localization +3.74, team +3.47, role +1.42, dead-frame rows +1.12, false-positive removal +0.18. Isolated arms understate badly because a broken row is usually broken on two attributes; leave-one-out marginals are role +8.13, team +13.84, jersey +34.58. TWO PLANNING CONSEQUENCES: (1) FP suppression and dedup are DEAD levers (2,074 FP rows in 213,571 -> +0.18); (2) PERFECT ROLE+TEAM ALONE (+6.15) CLEARS the 45.23 DetA that W2's no-splitter path needs, so the attribute-labelling axis, not the detector, is the campaign's cheapest route.",
+      "value": 6.15,
+      "unit": "GS-DetA points from perfect role+team alone on DEV-20 (need: +1.42 to +5.91)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W3.md#3. The lever table -- oracle cost, DEV-20, official evaluator",
+        "results/gsr_benchmark/gsr_v9_w3_oracles.json"
+      ],
+      "method": "Counterfactual submissions that rewrite exactly one bucket (attributes copied from the position-matched GT row, or a prediction inserted on every missed GT row, or matched rows snapped onto GT positions, or unmatched predictions dropped), each scored with eval.gsr_score.gs_hota under the gs_hota_full config.",
+      "n": 20,
+      "caveats": [
+        "Isolated oracles are not additive; both brackets [isolated, marginal] are reported.",
+        "The nomiss arms grant perfect attributes AND perfect association on inserted rows, so their DetA is an upper bound and their GS-HOTA is meaningless.",
+        "DEV-20 is the tuning split; transfer to test-49 rests on DEV-20 DetA 39.31 vs test-49 39.32."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w3-001"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "deta",
+        "oracle",
+        "planning"
+      ]
+    },
+    {
+      "id": "v9-w3-003",
+      "statement": "PREMISE CORRECTION: SMALL-BOX RECALL IS NOT THE DETECTION LEVER. Measured end to end on DEV-20, our recall on GT boxes under 40 px of image height is 0.538 -- which reproduces S4b's on-record 0.55 and validates the instrument -- but boxes under 40 px are only 1.57% of GT rows and 7.2% of all detection misses. Recall is 0.899 overall and still only 0.922 in the top height decile, so the miss mass is spread across every size bin. Perfect recall below 40 px recovers 1,708 of 23,677 missed rows. Crowding (best GT-GT image-box IoU > 0.3) costs ~0.10 recall (0.809 vs 0.906) on 7% of GT.",
+      "value": 0.072,
+      "unit": "share of all DEV-20 detection misses that sit on GT boxes under 40 px",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W3.md#2. The census -- 235,174 GT rows, 213,571 prediction rows, DEV-20",
+        "results/gsr_benchmark/gsr_v9_w3_census.json"
+      ],
+      "method": "GT bbox_image height percentiles over all DEV-20 GT person rows, split by whether the attribute-blind matcher found a prediction within 5 m; occlusion proxied by the best image-box IoU with another GT box in the same frame.",
+      "n": 235174,
+      "caveats": [
+        "Height is GT box height in pixels, a proxy for distance, not a measured range.",
+        "The IoU>0.3 crowding proxy is not the dataset's occlusion label (there is none)."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w3-001"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "detector",
+        "premise-correction"
+      ]
+    },
+    {
+      "id": "v9-w3-004",
+      "statement": "REGISTERED PASS, ZERO GPU: a per-track majority vote on the submission's own attributes is worth +1.7999 GS-DetA and +2.9887 GS-HOTA on DEV-20 (39.3083 -> 41.1082, 51.8083 -> 54.7970), 20 sequences helped / 0 hurt, Wilcoxon p = 1.9e-06, against a registered bar of +0.50 DetA. The control is the same submission untouched (identical GPU artifacts, deterministic operation, noise floor exactly 0). Mechanism: our chain lets one track disagree with itself -- 4.60% of rows carry a minority role, 6.36% a minority team, 2.22% a minority jersey -- while a GT identity has one role and one team for the whole clip. TWO HONEST QUALIFIERS: role voting ALONE is NEGATIVE on DetA (-0.128, it destroys the rows where the minority was right, e.g. a GK correctly detected inside a mostly-player track), and the largest leg (+1.05 DetA) is a WRITER REPAIR -- gsr_deleak.write_arm writes the solver's number only onto rows whose per-row role is 'player', so goalkeeper/referee-labelled rows of a named track kept jersey null. Ships default OFF (eval.gsr_score.VOTE_TRACK_ATTRS = ()); no TEST-38, test-49 or challenge contact.",
+      "value": 1.7999,
+      "unit": "GS-DetA points on DEV-20 from the per-track attribute vote (bar: +0.50)",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W3.md#4. Stage 2 -- the per-track attribute vote",
+        "results/gsr_benchmark/gsr_v9_w3_vote.json",
+        "eval/gsr_score.py",
+        "tests/test_gsr_v9_deta.py"
+      ],
+      "method": "eval.gsr_score.vote_track_attributes collapses each track's role/team/jersey onto its majority non-null value (ties keep the first-seen value); four arms registered a priori (role, team, role+team, role+team+jersey), each scored with the official evaluator against the untouched shipped DEV-20 arm.",
+      "n": 20,
+      "caveats": [
+        "DEV-20 is the tuning split; this is not a board number and no submission was built.",
+        "Transfer to test-49 inherits W1's cross-split assumption (DEV-20 DetA tracked test-49 to 0.01 before this change).",
+        "GS-AssA also rises (+4.76) because the metric already cuts an inconsistent track into pieces; this was a DetA session and the AssA gain is reported, not claimed.",
+        "The component stays default OFF pending a TEST-38 confirmation and a bundle decision."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w3-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "deta",
+        "component",
+        "registered-pass"
+      ]
+    },
+    {
+      "id": "v9-w3-005",
+      "statement": "THE JERSEY-COVERAGE LEVER IS NOT AN OPERATING-POINT PROBLEM. Jersey coverage loss (GT numbered, we emit null) is the single largest DetA bucket -- 15.37% of DEV-20 GT rows, oracle +16.36 GS-DetA -- but three separate bounds cut it down: (a) restricted to numbers our own GT-free chain actually emits somewhere in the sequence, the oracle falls to +8.15; (b) the frozen solver config already carries r_abstain = 0.0, i.e. the abstention dial is fully open and the solver leaves tracklets unnamed for lack of a slot, not for want of payoff; (c) on the 10 cached DEV bundles, 309 of 478 tracklets carry no confident crop read at all and hold 24,543 numbered GT rows (29% of the numbered mass). Under GS-DetA a WRONG number costs exactly what null costs on a numbered GT row, so trading coverage for precision is DetA-neutral at best -- the remaining lever is reader/roster quality, not policy.",
+      "value": 8.15,
+      "unit": "GS-DetA points from oracle jersey coverage restricted to our own emitted roster",
+      "status": "confirmed",
+      "evidence": [
+        "results/GSR_V9_W3.md#3.1 Ranked levers with an honest achievable fraction",
+        "results/gsr_benchmark/gsr_v9_w3_oracles.json",
+        "results/identity_solver_config_percrop.json"
+      ],
+      "method": "Oracle arm jersey_coverage_roster: fix jersey only on rows where the GT number appears in the (team side, number) set the submission itself emits for that sequence; scored with the official evaluator. Read availability from the cached identity bundles of the shipped arm.",
+      "n": 20,
+      "caveats": [
+        "The emitted-number set is a proxy for the solver's self-roster, not its slot set.",
+        "The read-availability figure covers 10 of the 20 DEV bundles cached on the laptop."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w3-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "jersey",
+        "deta",
+        "planning"
+      ]
     }
   ]
 }

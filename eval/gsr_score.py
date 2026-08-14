@@ -36,7 +36,7 @@ import argparse
 import json
 import logging
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -60,6 +60,11 @@ _ROLE_CATEGORY_ID = {"player": 1, "goalkeeper": 2, "referee": 3, "other": 7}
 DEFAULT_DATA_DIR = Path("data/soccernet/gamestate-2024")
 DEFAULT_OUT_DIR = Path("outputs/gsr")
 DEFAULT_RESULTS_DIR = Path("results/gsr_benchmark")
+
+#: Attributes :func:`vote_track_attributes` collapses onto their per-track majority when a
+#: submission is written. Empty = OFF, the shipped default (v9 W3 registered the component behind
+#: this flag; see ``results/GSR_V9_W3.md`` section 4).
+VOTE_TRACK_ATTRS: tuple[str, ...] = ()
 
 #: Attribute configs reported by the benchmark (name -> trackeval USE_* flags).
 EVAL_CONFIGS: dict[str, dict[str, bool]] = {
@@ -153,6 +158,51 @@ def build_submission(
         if pred is not None:
             preds.append(pred)
     return {"predictions": preds}
+
+
+def vote_track_attributes(
+    predictions: list[dict], keys: tuple[str, ...] = ("role", "team"),
+) -> dict[str, int]:
+    """Collapse each track's per-row attributes onto that track's majority value, in place (pure-ish).
+
+    GS-DetA compares ``role``/``team``/``jersey`` **per row**, but a GT identity carries one role and
+    one team for the whole clip, so any disagreement inside one of our tracks is guaranteed error on
+    its minority rows. Voting can only convert a partly-right track into an all-right or an all-wrong
+    one -- it never invents a value the track did not already carry.
+
+    ``None`` is not a candidate: a track that reads ``player`` on some rows and ``goalkeeper`` on
+    others carries ``team``/``jersey`` only where the writer allowed it, so the vote runs over the
+    non-null values and then applies the winner to every row of the track. Ties keep the first-seen
+    value, which makes the result deterministic for a given input order.
+
+    Args:
+        predictions: A submission's ``predictions`` list (mutated in place). Ball rows are skipped.
+        keys: Which attributes to vote on; ``()`` is a no-op.
+
+    Returns:
+        ``{attribute: rows changed}``.
+    """
+    if not keys:
+        return {}
+    tracks: dict[int, list[dict]] = defaultdict(list)
+    for p in predictions:
+        attrs = p.get("attributes") or {}
+        if attrs.get("role") == "ball":
+            continue
+        tracks[int(p["track_id"])].append(p)
+    changed: dict[str, int] = {k: 0 for k in keys}
+    for rows in tracks.values():
+        for key in keys:
+            tally = Counter(str((r["attributes"] or {}).get(key)) for r in rows
+                            if (r["attributes"] or {}).get(key) is not None)
+            if not tally:
+                continue
+            value = tally.most_common(1)[0][0]
+            for r in rows:
+                if r["attributes"].get(key) != value:
+                    r["attributes"][key] = value
+                    changed[key] += 1
+    return changed
 
 
 # === GT helpers ==================================================================================

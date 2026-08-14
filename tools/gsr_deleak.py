@@ -56,10 +56,12 @@ from eval.gsr_score import (
     DEFAULT_DATA_DIR,
     DEFAULT_OUT_DIR,
     EVAL_CONFIGS,
+    VOTE_TRACK_ATTRS,
     gs_hota,
     load_gt_people_by_frame,
     resolve_team_map,
     resolve_team_map_free,
+    vote_track_attributes,
 )
 from generator.identity_solve import Identity, SolverConfig
 
@@ -268,6 +270,9 @@ def write_arm(bundles: dict, assigns: dict, maps: dict, out_dir: Path, arm_dir: 
             if attrs.get("role") == "player":
                 num = number.get(int(p["track_id"]))
                 attrs["jersey"] = None if num is None else str(num)
+        # Registered v9-W3 component, default OFF (VOTE_TRACK_ATTRS = ()): a GT identity carries one
+        # role and one team for the whole clip, so within-track disagreement is guaranteed error.
+        vote_track_attributes(payload["predictions"], VOTE_TRACK_ATTRS)
         (dest / f"{name}.json").write_text(json.dumps(payload), encoding="utf-8")
 
 

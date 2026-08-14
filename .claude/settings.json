@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nvidia-smi)",
+      "Bash(nvidia-smi *)",
+      "Bash(python -m ruff check *)",
+      "PowerShell(Get-CimInstance *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Test-Path *)"
+    ]
+  }
+}
