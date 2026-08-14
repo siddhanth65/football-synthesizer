@@ -6242,7 +6242,7 @@
       "status": "confirmed",
       "evidence": [
         "outputs/gsr/w3_annotation/labelling_manifest.csv",
-        "outputs/gsr/w3_annotation/labels_audit.jsonl (437 records over 427 queue ids)",
+        "outputs/gsr/w3_annotation/labels_audit.jsonl",
         "outputs/gsr/w3_annotation/sid_labels.parquet"
       ],
       "method": "tools/gsr_w3_corpus.py --queue built 12-cell time-stratified contact sheets (tallest box per twelfth, MIN_VIEW_H 89 px); labelled via tools/annotate_w3.py (417 rows) and Excel (72 pre-tool rows, A0001-A0072); consumed with --ingest. Counts recomputed independently from the CSV and reconciled row-for-row against sid_labels.parquet.",
@@ -6251,7 +6251,8 @@
         "Single annotator, no second pass, no inter-annotator agreement.",
         "7 of the 15 numbers are '1' and 6 of those 7 are goalkeepers -- the most common real GK number, but also the shortest keystroke; not independently re-checked.",
         "2 of the 15 (A0085='30', A0103='36') carry a stray 'u' in their note field, committed in the same audit event as the label -- most plausibly an 'unsure' keypress that landed in the note box, so treat those two as annotator-flagged.",
-        "'none' is a statement about the 12 views shown, not about the whole tracklet."
+        "'none' is a statement about the 12 views shown, not about the whole tracklet.",
+        "labels_audit.jsonl carries 437 records over 427 queue ids."
       ],
       "date": "2026-08-14",
       "supersedes": [],
@@ -6338,7 +6339,7 @@
       "evidence": [
         "outputs/gsr/w3_annotation/sid_labels.parquet",
         "outputs/gsr/w3_annotation/labelling_manifest.csv",
-        "outputs/gsr/w3_annotation/legibility_train.parquet (31,143 rows)"
+        "outputs/gsr/w3_annotation/legibility_train.parquet"
       ],
       "method": "Cut the 11,076 label-named full-density crops missing from outputs/gsr/gt_crops/train (tools/gsr_w3_corpus.py --cut-labelled, CPU), scored them with the shipped legibility_resnet34_soccer_20240215.pth on a100server1 GPU 1, merged into legibility_train.parquet (31,143 rows, 0 decode failures), re-ran --ingest, then a 2x2 of (label != '<none>') against (legibility > 0.7) over all 2,520 tier-B rows.",
       "n": 2520,
@@ -6346,7 +6347,8 @@
         "SELECTED, but only once now: the 210 tier-B tracklets were chosen for gate uncertainty (mean |leg - 0.5| ascending), so this is the gate's behaviour on its hardest tracklets. The second selection (re-ID subsampling) that made the n=124 read doubly-biased is gone -- every cell Sid judged is now scored.",
         "Human base rate 0.306 on all 2,520 cells vs 0.298 on the old 124, and gate pass rate 0.405; the earlier subsample was not skewed on the label side, which is why the two reads agree.",
         "Single annotator, no inter-annotator agreement, and 'visible in this exact view' is a stricter question than the tracklet-level legible/illegible labels the gate was trained on -- part of the 278 false admits may be definitional rather than model error.",
-        "95% Wilson CIs: recall [0.948, 0.975], specificity [0.823, 0.857], precision [0.700, 0.754]."
+        "95% Wilson CIs: recall [0.948, 0.975], specificity [0.823, 0.857], precision [0.700, 0.754].",
+        "legibility_train.parquet holds 31,143 rows."
       ],
       "date": "2026-08-14",
       "supersedes": [],
@@ -6370,7 +6372,7 @@
       "status": "confirmed",
       "evidence": [
         "outputs/gsr/w3_annotation/sid_labels.parquet",
-        "ingest stdout: 11746 crop rows; {'A_number': 15, 'A_none': 274, 'A_unsure': 0, 'B_visible': 771, 'B_hidden': 1749, 'B_unsure': 0}",
+        "outputs/gsr/w3_annotation/sid_labels.parquet",
         "outputs/gsr/w3_annotation/legibility_train.parquet"
       ],
       "method": "tools/gsr_w3_corpus.py --cut-labelled (new; cuts only the crops named by sid_labels.parquet, resolved through _all_boxes, via tools.gsr_crops.cut_crops) -> 11,076 JPEGs / 35.0 MB, all 11,076 resolved and cut, 0 unresolvable; scored on a100server1 GPU 1 (A100-PCIE-40GB, 4 MiB resident at launch, GPU 0 left to its other user) under tmux, env gsr, batch 128, 26.1 s, 0 NaN; merged into legibility_train.parquet (20,067 + 11,076 = 31,143 rows, no name collision); python -m tools.gsr_w3_corpus --ingest outputs/gsr/w3_annotation/labelling_manifest.csv; then a groupby of sid_labels.parquet on (source, label_provenance, admitted, reason).",
@@ -6379,7 +6381,8 @@
         "1,433 positives includes the 771 tier-B cells, whose label is the GT number the benchmark already had; only the 662 tier-A crops carry a number new to SoccerNet-GSR.",
         "The 662 are glyph-gated by a classifier now measured at precision 0.728 on human truth (v8-w3-010), so a comparable minority of them plausibly show no readable number.",
         "Crops are full-body at the S2 crop law's geometry; the pose-torso conversion S2 section 3.4 requires before these rows train against the arm-4t chain has not been run.",
-        "2 of the 15 numbered tracklets keep zero admitted crops: their number was read by a human from a contact-sheet view, but no box of the tracklet clears the gate."
+        "2 of the 15 numbered tracklets keep zero admitted crops: their number was read by a human from a contact-sheet view, but no box of the tracklet clears the gate.",
+        "ingest stdout: 11746 crop rows; {'A_number': 15, 'A_none': 274, 'A_unsure': 0, 'B_visible': 771, 'B_hidden': 1749, 'B_unsure': 0}."
       ],
       "date": "2026-08-14",
       "supersedes": [],
