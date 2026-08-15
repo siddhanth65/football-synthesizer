@@ -7816,6 +7816,144 @@
     "tracking",
     "method"
    ]
+  },
+  {
+   "id": "v9-w8-001",
+   "statement": "ATTACH-INHERIT WORKS AS A MECHANISM AND IS STILL NOT WORTH BUILDING. Giving a ByteTrack-discarded detection to an EXISTING track (so it inherits that track's role/team/jersey) fixes the exact failure that killed v9-W7 A2: the attached rows are 65.0% (gap 10) to 67.6% (gap 30) fully attribute-correct, against a control whose own matched rows are 63.28% attribute-correct and against 0.0% attribute yield for the fresh short tracks A2 created. But the mechanism's GT-PERFECT ceiling on DEV-20 -- attach every discarded box that really is a miss, onto the track that really carries its GT identity, with that host's own attributes -- is +0.7800 GS-DetA / +1.0309 GS-HOTA flags OFF (+0.8538 / +1.0899 with the vote+gk_side stack) over the v9-W7 same-stack control, on 6,249 inserted rows of which 4,225 are correct. The registered build bar was +0.75 GS-DetA of REACHABLE value, and reachable value is far below the oracle, so no arm was built and 0 GPU-hours were spent.",
+   "value": 0.78,
+   "unit": "GS-DetA of the GT-perfect attach oracle on DEV-20, flags OFF",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v9_w8_registered.json",
+    "results/gsr_benchmark/gsr_v9_w8_summary.json",
+    "results/gsr_benchmark/gsr_v9_w8_oracle.json",
+    "results/gsr_benchmark/gsr_v9_w8_score.json"
+   ],
+   "method": "tools.gsr_v9_w8 --stage score: supervision.ByteTrack replayed over the cached conf=0.01 detector dump at the shipped settings to recover the discard set, each discard classified against GT and against the control submission, then counterfactual submissions written with the HOST track's own attributes and a pitch point from a homography fitted to the control's own rows in that frame, scored with eval.gsr_score.gs_hota (gs_hota_full) in both post-processing flag states.",
+   "n": 6249,
+   "caveats": [
+    "The oracle is an upper bound in three separate ways: it uses GT to choose which discard to attach and to which host; it inserts rows directly into the final submission, so it assumes the attach survives the EIoU re-association and the identity solver unchanged; and it grants the host's majority attributes rather than what the solver would produce after the input distribution changes.",
+    "2,466 further attachable rows (28% of the gap-30 pool) could not be written at all because their timestep has fewer than 4 surviving rows to fit a homography. Those frames are the calibration-gate bucket, not an attach lever.",
+    "DEV-20 only; TEST-38, test-49 and challenge were not read."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w7-001",
+    "v9-w7-004",
+    "v9-w7-005"
+   ],
+   "tags": [
+    "gsr",
+    "v9",
+    "tracking",
+    "deta",
+    "identity",
+    "oracle",
+    "registered"
+   ]
+  },
+  {
+   "id": "v9-w8-002",
+   "statement": "BYTETRACK'S DISCARD IS MOSTLY CORRECT: ONLY 41.6% OF WHAT IT THROWS AWAY IS RECOVERABLE. Replaying the shipped tracker over the DEV-20 detector dump, 24,418 of 250,705 confident (>=0.20) person boxes are discarded. Classified against GT and against the control submission: 10,150 (41.6%) are a GT row the submission misses -- the recoverable pool; 4,470 (18.3%) duplicate a GT row the submission already covers; and 9,798 (40.1%) match no GT person at any distance, i.e. they are detector false positives the tracker is correctly suppressing. The W7 framing of the discard as boxes the tracker loses under camera pan is therefore only 41.6% true, and no geometry-only gate separates the three classes: the best GT-free rule found anywhere in a 3-gap x 5-radius x 4-separation sweep reaches 47.7% correct picks, on 791 rows.",
+   "value": 0.416,
+   "unit": "fraction of ByteTrack-discarded confident boxes that are recoverable GS-DetA misses",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v9_w8_registered.json",
+    "results/gsr_benchmark/gsr_v9_w8_summary.json",
+    "results/gsr_benchmark/gsr_v9_w8_oracle.json",
+    "results/gsr_benchmark/gsr_v9_w8_score.json"
+   ],
+   "method": "tools.gsr_v9_w8 --stage oracle. Discards from a supervision.ByteTrack replay (kept-set GT recall 0.9242 vs the extraction's measured 0.9240, kb v9-w7-005); GT identity by scale-free image match (foot point within 0.5 GT box heights) run over the FULL confident box set so a discard cannot claim a GT row a kept box already explains; submission coverage by the W3 census matcher (attribute-blind pitch Hungarian, 5 m floor).",
+   "n": 24418,
+   "caveats": [
+    "A discard tagged no_gt could in principle be a real person the GSR annotation omits; the SoccerNet GSR annotation is dense, so this is treated as a detector false positive.",
+    "The classification is per box, not per person: a GT row with two discarded boxes contributes one gt_miss and one gt_covered once the first is notionally attached."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w7-001"
+   ],
+   "tags": [
+    "gsr",
+    "v9",
+    "tracking",
+    "deta",
+    "negative",
+    "anatomy"
+   ]
+  },
+  {
+   "id": "v9-w8-003",
+   "statement": "REGISTERED STOP: THE BEST GT-FREE ATTACH RULE REALISES 20% OF ITS OWN ORACLE AND 21% OF THE BUILD BAR. Nine counterfactual attach arms were scored on DEV-20 against the v9-W7 same-stack control. The best GT-free rule -- pan-compensated nearest gap track, gap 30 timesteps, acceptance radius 1.0 box heights, minimum separation 0.3 box heights from any kept box, only on frames whose global image shift is >= 8 px -- scores +0.1553 GS-DetA / +0.2010 GS-HOTA flags OFF and +0.1760 / +0.2152 with the vote+gk_side stack, on 1,780 attached rows (872 correct, 286 right-identity-wrong-attributes, 291 wrong identity, 90 onto an already-covered GT row, 241 onto no GT row). Its thresholds were chosen by looking at DEV itself, so even this number is optimistic, and it is a CPU simulation that inserts rows straight into the submission rather than letting the chain re-derive them. The pre-registered bar was +0.75 GS-DetA. Note for future registrations: this arm PASSES the a-priori row-audit bar (wrong identity 16.3% of attached rows, bar < 25%) while failing the score bar by 4.8x -- the row audit is not a proxy for value.",
+   "value": 0.1553,
+   "unit": "GS-DetA of the best GT-free attach rule on DEV-20, flags OFF, DEV-tuned",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v9_w8_registered.json",
+    "results/gsr_benchmark/gsr_v9_w8_summary.json",
+    "results/gsr_benchmark/gsr_v9_w8_oracle.json",
+    "results/gsr_benchmark/gsr_v9_w8_score.json"
+   ],
+   "method": "tools.gsr_v9_w8 --stage score over nine (mode, gap, radius, separation, pan) points, each written as a full counterfactual submission and scored with eval.gsr_score.gs_hota (gs_hota_full) against the same control in both flag states. The one-attach-per-host-per-timestep constraint is forced by the evaluator, which refuses a submission emitting one track id twice in a frame.",
+   "n": 20,
+   "caveats": [
+    "Thresholds were swept on DEV-20, which the campaign's own discipline forbids for a shipping arm; they are reported here only to bound the mechanism from above.",
+    "The candidate rule is geometry-only (position, size, pan compensation, separation). Kit colour from the raw crop was not tried: at 41.6% recoverable mass and a 47.7% purity ceiling, appearance would have to be near-perfect to move the arm past +0.75.",
+    "Nothing was re-extracted, so downstream re-derivation of an attached row by the EIoU association and the identity solver is assumed benign rather than measured."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w8-001",
+    "v9-w8-002",
+    "v9-w7-004"
+   ],
+   "tags": [
+    "gsr",
+    "v9",
+    "negative",
+    "tracking",
+    "deta",
+    "registered"
+   ]
+  },
+  {
+   "id": "v9-w8-004",
+   "statement": "CAMERA PAN IS THE RIGHT COVARIATE, AND IT SPLITS THE DISCARD BUCKET CLEANLY. Bucketing DEV-20 discards by the frame's global image shift (median displacement of tracks shared with the previous frame): frames panning >= 8 px/frame hold 42.8% of all discards (10,447) and 57.6% of those are recoverable misses, against 36.0% at < 1 px/frame; the GT-free attach rule is 41.6% correct there versus 7.1-15.6% in the low-pan bands. Restricting the rule to pan >= 8 is the single most valuable gate found (+0.1553 vs +0.1249 GS-DetA for the same rule unrestricted, on 43% fewer rows). The premise that the Kalman prediction drifts off the player under pan is therefore confirmed; it is simply not worth enough, because even in the best pan band a majority of discards are duplicates or phantoms.",
+   "value": 0.576,
+   "unit": "fraction of discards that are recoverable misses on frames panning >= 8 px/frame",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v9_w8_registered.json",
+    "results/gsr_benchmark/gsr_v9_w8_summary.json",
+    "results/gsr_benchmark/gsr_v9_w8_oracle.json",
+    "results/gsr_benchmark/gsr_v9_w8_score.json"
+   ],
+   "method": "tools.gsr_v9_w8 --stage oracle, pan buckets (0-1, 1-3, 3-8, >=8) px/frame from the median frame-to-frame displacement of control submission tracks present in both frames; the pan-gated arm scored by --stage score.",
+   "n": 24418,
+   "caveats": [
+    "The pan estimate is the median track displacement, so it conflates camera pan with a coordinated team shift; on a broadcast tactical camera the two are hard to separate and the estimate was not validated against the GT camera parameters, which the sequences do carry.",
+    "The bucket edges were not pre-registered."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w8-002"
+   ],
+   "tags": [
+    "gsr",
+    "v9",
+    "tracking",
+    "anatomy",
+    "camera"
+   ]
   }
  ]
 }

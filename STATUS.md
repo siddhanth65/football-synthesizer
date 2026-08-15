@@ -1,5 +1,30 @@
 # STATUS
 
+## 2026-08-15 — v9 W8: attach oracle says STOP — mechanism confirmed (65-68% attribute yield) but reachable +0.16 vs bar +0.75; detection bucket CLOSED by three independent measurements; exploration over, FREEZE dispatched
+
+results/gsr_v9_w8_registered.json + results/gsr_benchmark/gsr_v9_w8_*.json, kb v9-w8-001..004,
+tools/gsr_v9_w8.py. Zero GPU; single lineage (W7's fresh A0 control — drift hazard absent by
+construction; control re-scored to 4 dp both flag states). Instrument self-correction on
+record: the first discard-join was WRONG (tolerance-join inflated discards 24,418 -> 46,989)
+— thrown away, replaced by a ByteTrack replay validated at 0.9242 vs 0.9240. **Discard
+anatomy: 41.6% of ByteTrack's discards are recoverable misses; 40.1% are phantoms — the
+discard IS doing real FP suppression. Attach-inherit works as theorised (host attributes
+correct 65-68% vs W7-A2's 0.0%) — but the GT-perfect ceiling is +0.78 GS-DetA and the best
+GT-blind rule (pan-gated, geometry-only) reaches +0.1553: STOP fired, no arm built.**
+Registration lesson banked: the arm PASSES the row-audit bar (16.3% wrong-id < 25%) while
+failing the score bar 4.8x — row audits are not value proxies. Hard evaluator constraint
+documented: duplicate track ids in a timestep are rejected (one attach per host per frame).
+Last unpriced detection-side sliver: the calibration-gate path (2,229 lost_at_gate rows +
+313 sparse timesteps holding 28% of attachable mass) — even granted perfectly, oracle ~+1.09.
+
+**The v9 exploratory map is COMPLETE. Detection: closed (perfect detector +0.57; new-track
+recovery negative; attach-inherit +0.16). Association: capped ~60.4 oracle, models fail
+gates. Jersey coverage: structurally phantom. Attributes: mined (+4.47 DEV, shipped as
+flags). The stack: flags-ON 44.6246 / 57.2095 on the fresh lineage. W9 FREEZE dispatched:
+one-window re-extraction of DEV-20 + TEST-38 + test-49 on the cluster (the drift rule),
+bundle = v6 chain + VOTE_TRACK_ATTRS + GK_SIDE_REPAIR("team"), leave-one-out, freeze JSON,
+registered TEST-38 paired gate, one test-49 run, package for submission #6 (Sid uploads).**
+
 ## 2026-08-15 — v9 W7: the "detector bucket" was never the detector — 66% of misses are CONFIDENT BOXES the chain discards; retrain REFUSED on evidence; both recovery arms FAIL; and same-code re-extraction drifts +1.02 DetA in 8 days
 
 results/gsr_v9_w7_registered.json + results/gsr_benchmark/gsr_v9_w7_*.json, kb v9-w7-001..005,

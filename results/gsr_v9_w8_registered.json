@@ -1,0 +1,53 @@
+{
+  "session": "v9-W8",
+  "declared_at": "2026-08-15T20:20:00+00:00",
+  "declared_before": "any oracle was computed, any counterfactual submission was written and any score was read; the bars below are the ones the session brief set, restated verbatim here so the STOP decision is checkable against a pre-declared threshold",
+  "split": "DEV-20 only; TEST-38 / test-49 / challenge not read, extracted or scored",
+  "premise_as_given": {
+    "text": "66.1% of DEV misses (13,167 rows, oracle +3.85 GS-DetA) are confident detector boxes discarded by ByteTrack's Kalman-IoU rematch. W7's arms failed because they turned recovered boxes into NEW tracks, which the identity machinery names at 0.0%. The untested mechanism: ATTACH each discarded box to an EXISTING track, so it inherits the host's identity.",
+    "verdict": "MECHANISM CONFIRMED, VALUE REFUSED -- see stage1_findings"
+  },
+  "stage1_stop_rule": {
+    "declared": "if reachable value (attachable x host-named x realistic attach-precision) is below +0.75 GS-DetA on DEV-20, STOP after stage 1 and do not build an arm",
+    "measured_reachable": 0.1553,
+    "measured_gt_perfect_ceiling": 0.78,
+    "decision": "STOP"
+  },
+  "stage2_bars_not_exercised": {
+    "primary": ">= +0.75 GS-DetA on DEV-20 over the SAME-STACK control with GS-HOTA not worse",
+    "secondary": "per-sequence paired helped > hurt, Wilcoxon p < 0.05, n = 20",
+    "row_audit": "attached-correct / attached-wrong-identity / attached-onto-GT-null, with wrong-identity < 25% of attached rows",
+    "note": "the best DEV-tuned rule PASSES the wrong-identity audit bar (291 of 1,780 rows = 16.3%) and FAILS the GS-DetA bar by 4.8x, which is why the audit bar alone would not have caught this arm"
+  },
+  "stage1_findings": {
+    "detector_boxes_conf_ge_0.20": 250705,
+    "bytetrack_discarded": 24418,
+    "discard_classes": {"gt_miss": 10150, "gt_covered": 4470, "no_gt": 9798},
+    "attachable_gap10": 6330,
+    "attachable_gap30": 8715,
+    "host_attribute_correct_gap30": 5906,
+    "oracle_gs_deta_flags_off": 0.78,
+    "oracle_gs_deta_flags_on": 0.8538,
+    "best_gt_free_rule_gs_deta_flags_off": 0.1553,
+    "best_gt_free_rule_gs_deta_flags_on": 0.176,
+    "reading": "the mechanism works (attached rows are 65-68% attribute-correct, versus 0.0% attribute yield for the new tracks of v9-W7 A2) but the mass is small and GT-blind selection cannot find it: 58.4% of what ByteTrack discards is a duplicate or a phantom, and no geometry-only gate separates that from a real miss."
+  },
+  "control_lineage": {
+    "control": "outputs/gsr/v9_w7/deleak_v6dev_w7ctl_clip_e0.3r1w0.5a0.3 -- the v9-W7 A0 same-stack control",
+    "why": "kb v9-w7-004: +1.02 GS-DetA drift between identical runs 8 days apart. Nothing was extracted this session, so every arm and its control come from ONE artifact set and the drift hazard is absent by construction.",
+    "control_scores_reproduced_this_session": {
+      "flags_off": {"GS-DetA": 40.3265, "GS-HOTA": 52.89},
+      "flags_on": {"GS-DetA": 44.6246, "GS-HOTA": 57.2095}
+    }
+  },
+  "instrument": {
+    "tool": "tools/gsr_v9_w8.py",
+    "discard_source": "supervision.ByteTrack replayed over the cached conf=0.01 detector dump at DETECT_CONF 0.20 / min_hits 3 / lost_buffer 60, exactly as generator.extract drives it; validated by its kept-set GT recall of 0.9242 against the extraction's measured 0.9240 (kb v9-w7-005)",
+    "rejected_alternative": "matching the detector dump against the control positions parquet by foot-point tolerance: the dump is a separate inference pass and a 2 px join leaves 22,210 of 225,926 positions rows unmatched, which would have misclassified 9.8% of KEPT boxes as discards and inflated the discard count from 24,418 to 46,989",
+    "gt_contact": "measurement only. The counterfactual submissions copy attributes from our own tracks and project boxes with a homography fitted to our own rows; the oracle arms use GT solely to select which discard to attach and to which host, which is the quantity being bounded."
+  },
+  "environment": {
+    "cpu_only": "laptop; no cluster slot was booked and no GPU was used",
+    "scoring": "eval.gsr_score.gs_hota, EVAL_CONFIGS['gs_hota_full'], both post-processing flag states (vote_track_attributes(role,team,jersey) + gk_side_repair(('team',)) ON and OFF) applied identically to control and arms"
+  }
+}

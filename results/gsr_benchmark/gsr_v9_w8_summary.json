@@ -1,0 +1,433 @@
+{
+ "session": "v9-W8",
+ "registration": "results/gsr_v9_w8_registered.json",
+ "verdict": "STOP AFTER STAGE 1. The attach-inherit mechanism is REAL -- attached rows are 65-68% attribute-correct against a control whose matched rows are 63.3% attribute-correct, so the 0.0% attribute yield that killed v9-W7 A2 is solved -- but its GT-PERFECT ceiling on DEV-20 is +0.78 GS-DetA (flags OFF) / +0.85 (ON) and the best GT-free candidate rule, with thresholds chosen on DEV itself, realises +0.16 / +0.18. The registered build bar was +0.75 GS-DetA of REACHABLE value. No GPU arm was built; 0 GPU-hours were spent.",
+ "lineage": {
+  "control": "outputs/gsr/v9_w7/deleak_v6dev_w7ctl_clip_e0.3r1w0.5a0.3 (the v9-W7 A0 same-stack control, a100server1 GPU 1, 2026-08-15)",
+  "control_scores_reproduced": {
+   "flags_off": {
+    "GS-DetA": 40.326522801662264,
+    "GS-HOTA": 52.890016358660304
+   },
+   "flags_on": {
+    "GS-DetA": 44.624608951281814,
+    "GS-HOTA": 57.209519343589896
+   },
+   "w7_on_record": {
+    "flags_off": {
+     "GS-DetA": 40.3265,
+     "GS-HOTA": 52.89
+    },
+    "flags_on": {
+     "GS-DetA": 44.6246,
+     "GS-HOTA": 57.2095
+    }
+   }
+  },
+  "note": "nothing was extracted this session; every number pairs against the SAME W7 control artifacts, so kb v9-w7-002 stack drift cannot enter."
+ },
+ "discard_anatomy": {
+  "detector_boxes_conf_ge_0.20": 250705,
+  "bytetrack_kept": 220125,
+  "bytetrack_discarded": 24418,
+  "replay_kept_gt_recall": 0.9242390740473011,
+  "replay_validation": "0.9242 vs the extraction's measured 0.9240 (kb v9-w7-005)",
+  "classes": {
+   "gt_miss": 10150,
+   "gt_covered": 4470,
+   "no_gt": 9798
+  },
+  "reading": "only 41.6% of the boxes ByteTrack discards are recoverable misses; 40.1% correspond to no GT person at all (the tracker is doing real false-positive suppression) and 18.3% duplicate a GT row the submission already covers."
+ },
+ "attachability": {
+  "gap1": {
+   "attachable": 1414,
+   "share_of_misses": 0.1393103448275862,
+   "host_attribute_correct": 897,
+   "share_of_attachable": 0.6343705799151343,
+   "host_role_correct": 0.9554455445544554,
+   "host_team_correct": 0.8932107496463932,
+   "no_host": 8380,
+   "host_already_present_at_t": 356
+  },
+  "gap3": {
+   "attachable": 3297,
+   "share_of_misses": 0.32482758620689656,
+   "host_attribute_correct": 2135,
+   "share_of_attachable": 0.6475583864118896,
+   "host_role_correct": 0.9617834394904459,
+   "host_team_correct": 0.9035486806187443,
+   "no_host": 6530,
+   "host_already_present_at_t": 323
+  },
+  "gap10": {
+   "attachable": 6330,
+   "share_of_misses": 0.6236453201970443,
+   "host_attribute_correct": 4195,
+   "share_of_attachable": 0.6627172195892576,
+   "host_role_correct": 0.9625592417061611,
+   "host_team_correct": 0.9055292259083728,
+   "no_host": 3574,
+   "host_already_present_at_t": 246
+  },
+  "gap30": {
+   "attachable": 8715,
+   "share_of_misses": 0.8586206896551725,
+   "host_attribute_correct": 5906,
+   "share_of_attachable": 0.6776821572002295,
+   "host_role_correct": 0.9592656339644291,
+   "host_team_correct": 0.9036144578313253,
+   "no_host": 1245,
+   "host_already_present_at_t": 190
+  }
+ },
+ "pan_split": {
+  "0-1": {
+   "discards": 5193,
+   "gt_miss": 1868,
+   "attachable_g10": 1153,
+   "host_named_g10": 730,
+   "rule_g10_t0.5_picks": 884,
+   "rule_g10_t0.5_correct": 138
+  },
+  "1-3": {
+   "discards": 3754,
+   "gt_miss": 653,
+   "attachable_g10": 474,
+   "host_named_g10": 239,
+   "rule_g10_t0.5_picks": 801,
+   "rule_g10_t0.5_correct": 57
+  },
+  "3-8": {
+   "discards": 5024,
+   "gt_miss": 1607,
+   "attachable_g10": 1166,
+   "host_named_g10": 735,
+   "rule_g10_t0.5_picks": 776,
+   "rule_g10_t0.5_correct": 206
+  },
+  ">=8": {
+   "discards": 10447,
+   "gt_miss": 6022,
+   "attachable_g10": 3537,
+   "host_named_g10": 2491,
+   "rule_g10_t0.5_picks": 1826,
+   "rule_g10_t0.5_correct": 759
+  }
+ },
+ "scored_counterfactuals": {
+  "oracle_g10": {
+   "rows": 4658,
+   "audit": {
+    "no_homography": 1672,
+    "attached_correct": 3029,
+    "attached_right_id_wrong_attrs": 1629,
+    "rows": 4658
+   },
+   "flags_off": {
+    "GS-DetA": 0.5387371723327661,
+    "GS-HOTA": 0.7323994105300287,
+    "paired_hota": {
+     "mean": 0.8209342068379797,
+     "helped": 20,
+     "hurt": 0,
+     "wilcoxon_p": 1.9073486328125e-06
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.5944701891763913,
+    "GS-HOTA": 0.7797844757625825,
+    "paired_hota": {
+     "mean": 0.8730630400575567,
+     "helped": 20,
+     "hurt": 0,
+     "wilcoxon_p": 1.9073486328125e-06
+    }
+   }
+  },
+  "oracle_g30": {
+   "rows": 6249,
+   "audit": {
+    "no_homography": 2466,
+    "attached_correct": 4225,
+    "attached_right_id_wrong_attrs": 2024,
+    "rows": 6249
+   },
+   "flags_off": {
+    "GS-DetA": 0.7799687378867901,
+    "GS-HOTA": 1.0309187550888623,
+    "paired_hota": {
+     "mean": 1.1586539561247526,
+     "helped": 20,
+     "hurt": 0,
+     "wilcoxon_p": 1.9073486328125e-06
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.8537695558865366,
+    "GS-HOTA": 1.0899140523436088,
+    "paired_hota": {
+     "mean": 1.2207955454512749,
+     "helped": 20,
+     "hurt": 0,
+     "wilcoxon_p": 1.9073486328125e-06
+    }
+   }
+  },
+  "rule_g3_t0.25": {
+   "rows": 1603,
+   "audit": {
+    "no_homography": 246,
+    "attached_onto_gt_null": 434,
+    "attached_correct": 459,
+    "dropped_host_conflict": 158,
+    "attached_right_id_wrong_attrs": 249,
+    "attached_wrong_identity": 197,
+    "rows": 1603,
+    "attached_onto_covered_gt": 264
+   },
+   "flags_off": {
+    "GS-DetA": 0.028789400252364317,
+    "GS-HOTA": 0.06904529879324173,
+    "paired_hota": {
+     "mean": 0.09105711308640992,
+     "helped": 16,
+     "hurt": 3,
+     "wilcoxon_p": 0.004848166082515941
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.038794515361971094,
+    "GS-HOTA": 0.08176550204035493,
+    "paired_hota": {
+     "mean": 0.10518613667545829,
+     "helped": 16,
+     "hurt": 3,
+     "wilcoxon_p": 0.0037622518256999957
+    }
+   }
+  },
+  "rule_g10_t0.5": {
+   "rows": 3298,
+   "audit": {
+    "no_homography": 468,
+    "attached_onto_gt_null": 1014,
+    "attached_correct": 871,
+    "dropped_host_conflict": 521,
+    "attached_right_id_wrong_attrs": 463,
+    "attached_wrong_identity": 399,
+    "attached_onto_covered_gt": 551,
+    "rows": 3298
+   },
+   "flags_off": {
+    "GS-DetA": 0.04098861015331323,
+    "GS-HOTA": 0.11587471016567008,
+    "paired_hota": {
+     "mean": 0.16101134363745012,
+     "helped": 14,
+     "hurt": 6,
+     "wilcoxon_p": 0.026641845703125
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.04719858020450829,
+    "GS-HOTA": 0.13154945090645498,
+    "paired_hota": {
+     "mean": 0.18050483040270854,
+     "helped": 14,
+     "hurt": 6,
+     "wilcoxon_p": 0.029575347900390625
+    }
+   }
+  },
+  "rule_g10_t0.5_s0.6": {
+   "rows": 1883,
+   "audit": {
+    "no_homography": 462,
+    "attached_onto_gt_null": 353,
+    "attached_correct": 823,
+    "dropped_host_conflict": 309,
+    "attached_right_id_wrong_attrs": 371,
+    "attached_wrong_identity": 238,
+    "rows": 1883,
+    "attached_onto_covered_gt": 98
+   },
+   "flags_off": {
+    "GS-DetA": 0.10295152685151265,
+    "GS-HOTA": 0.15044752507036918,
+    "paired_hota": {
+     "mean": 0.16828341314540332,
+     "helped": 16,
+     "hurt": 4,
+     "wilcoxon_p": 0.002712249755859375
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.12144032572458485,
+    "GS-HOTA": 0.16839896342081317,
+    "paired_hota": {
+     "mean": 0.18836583812839686,
+     "helped": 16,
+     "hurt": 4,
+     "wilcoxon_p": 0.0014324188232421875
+    }
+   }
+  },
+  "rule_g30_t1.0_s0.3": {
+   "rows": 3146,
+   "audit": {
+    "no_homography": 793,
+    "attached_onto_gt_null": 769,
+    "attached_correct": 1181,
+    "dropped_host_conflict": 708,
+    "attached_right_id_wrong_attrs": 516,
+    "attached_wrong_identity": 434,
+    "rows": 3146,
+    "attached_onto_covered_gt": 246
+   },
+   "flags_off": {
+    "GS-DetA": 0.12488816060644581,
+    "GS-HOTA": 0.19277914823081943,
+    "paired_hota": {
+     "mean": 0.2313450143693263,
+     "helped": 13,
+     "hurt": 7,
+     "wilcoxon_p": 0.012079238891601562
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.14939539557779824,
+    "GS-HOTA": 0.21998394156521073,
+    "paired_hota": {
+     "mean": 0.2613835007450138,
+     "helped": 13,
+     "hurt": 7,
+     "wilcoxon_p": 0.009435653686523438
+    }
+   }
+  },
+  "rule_g3_t0.1_s1.0": {
+   "rows": 542,
+   "audit": {
+    "no_homography": 212,
+    "attached_onto_gt_null": 57,
+    "attached_correct": 265,
+    "dropped_host_conflict": 37,
+    "attached_right_id_wrong_attrs": 132,
+    "attached_wrong_identity": 69,
+    "rows": 542,
+    "attached_onto_covered_gt": 19
+   },
+   "flags_off": {
+    "GS-DetA": 0.03258129800300935,
+    "GS-HOTA": 0.04718255133364124,
+    "paired_hota": {
+     "mean": 0.05586747007616175,
+     "helped": 15,
+     "hurt": 2,
+     "wilcoxon_p": 0.0022633358728580753
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.041748694508271456,
+    "GS-HOTA": 0.05524859259988801,
+    "paired_hota": {
+     "mean": 0.06425431519077911,
+     "helped": 16,
+     "hurt": 1,
+     "wilcoxon_p": 0.0013967480890075116
+    }
+   }
+  },
+  "rule_g30_t1.0_s0.3_pan8": {
+   "rows": 1780,
+   "audit": {
+    "attached_correct": 872,
+    "dropped_host_conflict": 557,
+    "attached_onto_gt_null": 241,
+    "attached_right_id_wrong_attrs": 286,
+    "attached_wrong_identity": 291,
+    "rows": 1780,
+    "attached_onto_covered_gt": 90,
+    "no_homography": 431
+   },
+   "flags_off": {
+    "GS-DetA": 0.15530730715200747,
+    "GS-HOTA": 0.20103133886298252,
+    "paired_hota": {
+     "mean": 0.22403254436232203,
+     "helped": 16,
+     "hurt": 2,
+     "wilcoxon_p": 0.0010088325774685678
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.17597994774857995,
+    "GS-HOTA": 0.2151576275016538,
+    "paired_hota": {
+     "mean": 0.23911670731002416,
+     "helped": 16,
+     "hurt": 2,
+     "wilcoxon_p": 0.0010088325774685678
+    }
+   }
+  },
+  "rule_g30_t1.0_pan8": {
+   "rows": 1968,
+   "audit": {
+    "attached_correct": 880,
+    "dropped_host_conflict": 590,
+    "attached_onto_gt_null": 317,
+    "attached_right_id_wrong_attrs": 300,
+    "attached_wrong_identity": 309,
+    "rows": 1968,
+    "attached_onto_covered_gt": 162,
+    "no_homography": 433
+   },
+   "flags_off": {
+    "GS-DetA": 0.14728108936523654,
+    "GS-HOTA": 0.1994636089363624,
+    "paired_hota": {
+     "mean": 0.22374699603278145,
+     "helped": 16,
+     "hurt": 2,
+     "wilcoxon_p": 0.001369747573348664
+    }
+   },
+   "flags_on": {
+    "GS-DetA": 0.16680307276993034,
+    "GS-HOTA": 0.21322298048023214,
+    "paired_hota": {
+     "mean": 0.2385139978998474,
+     "helped": 15,
+     "hurt": 3,
+     "wilcoxon_p": 0.002138438026250584
+    }
+   }
+  }
+ },
+ "unprojectable": {
+  "oracle_g30_rows_dropped_no_homography": 2466,
+  "control_timesteps_with_lt4_rows": 313,
+  "control_timesteps": 14520,
+  "reading": "2.2% of timesteps carry 28% of the attachable mass: those frames have too few surviving rows to fit an image->pitch homography, i.e. their calibration was voided. Reaching them is the calibration/gate lever (v9-W7's 2,229 lost_at_gate rows), not the attach lever."
+ },
+ "legitimacy_audit": {
+  "tool": "tools.gsr_calibfill.verify_gtfree, flags OFF (VOTE_TRACK_ATTRS=(), GK_SIDE_REPAIR=())",
+  "arm": "outputs/gsr_srvtest/deleak_v6test_v6det_clip_e0.3r1w0.5a0.3",
+  "n_sequences": 49,
+  "n_rows": 467425,
+  "violations": 0,
+  "flipped": [
+   "SNGS-126",
+   "SNGS-130",
+   "SNGS-131",
+   "SNGS-197"
+  ],
+  "matches_on_record": "results/gsr_benchmark/gsr_v6_legitimacy_audit.json exactly (row count, violation count, flip set)"
+ },
+ "gpu_hours": {
+  "total": 0.0,
+  "basis": "the whole session ran on the laptop CPU against cached W7 artifacts; no extraction, no training, no cluster slot"
+ }
+}
