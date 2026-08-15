@@ -7954,6 +7954,132 @@
     "anatomy",
     "camera"
    ]
+  },
+  {
+   "id": "v9-w9-001",
+   "statement": "THE V9 FREEZE IS DRIFT-PROOF BY CONSTRUCTION, AND THE DRIFT WAS RE-MEASURED TO PROVE IT. The v9 bundle differs from the frozen v6 bundle by nothing but two post-processing flags (VOTE_TRACK_ATTRS = role,team,jersey and GK_SIDE_REPAIR = team), both pure functions of an already-written submission, so a flags-ON arm and its flags-OFF control are the same extraction bit for bit and the re-extraction drift of kb v9-w7-002 cannot enter the comparison. Measured on two DEV-20 lineages nine days apart (v6 laptop 2026-08-06, W7 server 2026-08-15): the BASELINES differ by 1.0817 GS-HOTA / 1.0182 GS-DetA (the drift) while the off->full flag delta differs by only 0.1323 GS-HOTA (4.4518 vs 4.3195) and 0.2307 GS-DetA (4.0674 vs 4.2981). The session therefore ran ZERO GPU against a ~12 GPU-h budget: re-extracting test-49 would have replaced a MEASURED 53.0846 lineage with a +/-1 point coin flip, and choosing between them afterwards would be selection on test.",
+   "value": 0.1323,
+   "unit": "GS-HOTA spread of the off->full flag delta across two DEV-20 lineages whose baselines are 1.0817 apart",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v9_frozen.json",
+    "results/gsr_benchmark/gsr_v9_w9_dev_v6lineage.json",
+    "results/gsr_benchmark/gsr_v9_w9_dev_w7lineage.json"
+   ],
+   "method": "tools.gsr_v9_w9.score_states over states off/vote/full on each lineage's own submission directory, official scorer EVAL_CONFIGS['gs_hota_full'], laptop sn-trackeval 0.4.0 @ 9c25232. Harness fidelity first: flags-off reproduces both lineages' on-record GS-HOTA/GS-DetA to 4 dp (51.8083/39.3083 and 52.8900/40.3265), vote reproduces W3's 54.7970/41.1082 and full reproduces W5's 56.2601/43.3757 to 4 dp.",
+   "n": 2,
+   "caveats": [
+    "Two lineages, one split. The delta's lineage stability is not measured on TEST-38 or test-49, where only one lineage exists.",
+    "This is an argument about post-processing flags only. Any future arm that changes the extraction still needs a same-window control."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w7-002",
+    "v9-w3-004",
+    "v9-w4-002"
+   ],
+   "tags": [
+    "gsr",
+    "v9",
+    "provenance",
+    "registered",
+    "control",
+    "benchmark"
+   ]
+  },
+  {
+   "id": "v9-w9-002",
+   "statement": "REGISTERED TEST-38 GATE: PASS ON ALL FOUR THRESHOLDS. Declared in results/gsr_v9_frozen.json at 2026-08-15T16:12:49Z, before any TEST-38 score of either flag state: paired mean GS-HOTA >= +2.0, >= 24/38 helped, Wilcoxon p < 0.01, paired mean GS-DetA >= +1.5. Measured on the 38 held-out valid sequences, flags ON vs OFF on one lineage: GS-HOTA 49.4970 -> 53.1978 (pooled +3.7008), paired mean +3.8423, 38 helped / 0 hurt, worst sequence still +0.7344, Wilcoxon p = 7.276e-12; GS-DetA paired mean +3.4740 (pooled +3.2652). The flags-OFF arm reproduces the on-record v6 TEST-38 numbers (49.4970 / 35.6331) to 4 dp, which is the lineage-integrity proof. Load-bearing detail for the pre-declared fail response: the vote-only arm would have PASSED the GS-HOTA bar (+2.1019) and FAILED the GS-DetA bar (+1.0935) -- dropping the keeper repair, the declared fallback, would have sunk the gate rather than saved it.",
+   "value": 3.8423,
+   "unit": "paired mean GS-HOTA on TEST-38, flags ON minus flags OFF (bar: +2.0)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v9_frozen.json",
+    "results/gsr_benchmark/gsr_v9_w9_t38.json"
+   ],
+   "method": "tools.gsr_v9_w9 on outputs/gsr_srv/deleak_v6t38_v6det_clip_e0.3r1w0.5a0.3 (digest fdb79d769487..., extracted 2026-08-06T12:52Z, a100server1 GPU 1), states off/vote/full, per-sequence Wilcoxon over n = 38.",
+   "n": 38,
+   "caveats": [
+    "TEST-38 is a valid-split partition, not the official test split; it was held out of every v9 development read but it is not the competition set.",
+    "The DEV-20 lineage used to size the arm is a laptop stack (supervision 0.28.x) while TEST-38 is the 2026-08-06 server stack, so the DEV->TEST transfer estimate crosses stacks. The TEST-38 -> test-49 step does not."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w9-001"
+   ],
+   "tags": [
+    "gsr",
+    "v9",
+    "registered",
+    "benchmark",
+    "component"
+   ]
+  },
+  {
+   "id": "v9-w9-003",
+   "statement": "TEST-49 SPENT ONCE: 53.0846 -> 55.4062 GS-HOTA (+2.3216), AND THE FLAG GAIN DECAYS MONOTONICALLY AWAY FROM THE SPLIT IT WAS FITTED ON. Same 467,425-row extraction as the v6 package, flags ON: GS-HOTA 55.4062 / GS-DetA 41.2793 / GS-AssA 74.3774 / GS-LocA 94.1272 / IDF1 58.5357 (flags-OFF reproduces the on-record 53.0846 / 39.3231 exactly). The off->full gain is +4.4518 on DEV-20, +3.7008 on TEST-38 and +2.3216 on test-49 -- 83% then 52% of the DEV read. The cause is measurable in the rows the flags touch, not in the method: the repair rewrites 4.6% of role values / 12.6% of team / 5.2% of jersey on DEV-20 and 4.4 / 12.4 / 5.1% on TEST-38, but only 1.2 / 7.7 / 3.2% on test-49. The test split's base submission is the most attribute-consistent of the three (flags-OFF GS-HOTA 53.08 against TEST-38's 49.50), so a consistency repair has less to fix there.",
+   "value": 2.3216,
+   "unit": "GS-HOTA gained on the official test-49 split by the two v9 flags",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v9_w9_test49.json",
+    "results/gsr_benchmark/gsr_v9_testsplit_package.json",
+    "results/gsr_submission/zip_selfscore_gtfree_v9.json"
+   ],
+   "method": "tools.gsr_v9_w9 on outputs/gsr_srvtest/deleak_v6test_v6det_clip_e0.3r1w0.5a0.3 (digest 2b989ee76c2a..., the exact directory the v6 package was built from), states off/vote/full, run once after the TEST-38 gate passed. Row-change counts are the 'changed' counters returned by vote_track_attributes and gk_side_repair.",
+   "n": 49,
+   "caveats": [
+    "Local score, not a board score. The board has matched our local scorer once on record (39.0215 local vs 39.02 returned, 2026-08-02) and the v6 53.08 package was never uploaded, so the board prediction rests on a single confirmed agreement.",
+    "The decay is explained by one covariate (base attribute consistency) measured on three splits; no competing explanation was tested."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w9-002"
+   ],
+   "tags": [
+    "gsr",
+    "v9",
+    "benchmark",
+    "transfer",
+    "attributes"
+   ]
+  },
+  {
+   "id": "v9-w9-004",
+   "statement": "SUBMISSION #6 IS PACKAGED AND AUDITED: gsr_testphase_gtfree_v9_c5fcae6e.zip, sha256 a9ef0f002b078d2b5f2aa25dd1a731cc911a24382e535a1b7abdf844f46ce0c9, 35,466,405 bytes, 49 sequences, 467,425 predictions. Re-scoring the archive itself reproduces the arm at every digit (GS-HOTA 55.40621828388049, GS-DetA 41.27933776257004). The GT-free audit was re-derived with both flags ON on the exact directory the zip was packaged from: 0 violations / 467,425 rows / 49 sequences, flip set SNGS-126, 130, 131, 197. The flip set did NOT move under the keeper repair, contrary to the session brief's expectation: the flips are a property of resolve_team_map_free on the positions parquets, upstream of any attribute rewrite, and verify_gtfree applies the same vote and repair to its expectation side, so the repair is tracked rather than counted as a violation.",
+   "value": 0,
+   "unit": "legitimacy violations over 467,425 shipped rows, flags ON",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v9_testsplit_package.json",
+    "results/gsr_submission/manifest_gtfree_v9.json",
+    "results/gsr_submission/PACKAGE_NOTES.md"
+   ],
+   "method": "tools.gsr_calibfill.verify_gtfree(arm, eval_v4_gta_f080_v6_v6det_eiou_t0.450_jg_clip_v6det_eiou, data, positions_gate_v6det, 49 names) with VOTE_TRACK_ATTRS and GK_SIDE_REPAIR set to the shipping values; tools.gsr_deleak.package_free (recipe hash = sha256 of results/gsr_v9_frozen.json); tools.gsr_calibgate.zip_selfscore on the built archive.",
+   "n": 49,
+   "caveats": [
+    "Not uploaded. The codabench submission is Sid's action.",
+    "The audit proves no label reached the team attribute; it is not a proof about the jersey or role attributes, which come from our own reader and role head."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w9-003"
+   ],
+   "tags": [
+    "gsr",
+    "v9",
+    "audit",
+    "de-leak",
+    "benchmark"
+   ]
   }
  ]
 }

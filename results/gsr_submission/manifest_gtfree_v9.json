@@ -1,0 +1,417 @@
+{
+  "zip": "results\\gsr_submission\\gsr_testphase_gtfree_v9_c5fcae6e.zip",
+  "bytes": 35466405,
+  "n_sequences": 49,
+  "zip_layout": "tracklab/<SEQ>.json",
+  "recipe_hash": "c5fcae6eebb9b555b13cb2ce622dfe9dbe48c154490b23fd46af0278b4e9d9a4",
+  "competition": "codabench 4365 (2025 SoccerNet GSR -- Test Phase)",
+  "source_arm": "outputs\\gsr\\v9_w9\\deleak_v6test_v6det_clip_e0.3r1w0.5a0.3\\full\\predictions\\data",
+  "predictions_per_sequence": {
+    "SNGS-116": 9274,
+    "SNGS-117": 6533,
+    "SNGS-118": 9679,
+    "SNGS-119": 7125,
+    "SNGS-120": 9836,
+    "SNGS-121": 7559,
+    "SNGS-122": 9099,
+    "SNGS-123": 11212,
+    "SNGS-124": 7869,
+    "SNGS-125": 7422,
+    "SNGS-126": 8839,
+    "SNGS-127": 13075,
+    "SNGS-128": 11665,
+    "SNGS-129": 11145,
+    "SNGS-130": 10495,
+    "SNGS-131": 12550,
+    "SNGS-132": 9577,
+    "SNGS-133": 10494,
+    "SNGS-134": 7468,
+    "SNGS-135": 10128,
+    "SNGS-136": 7278,
+    "SNGS-137": 6925,
+    "SNGS-138": 7951,
+    "SNGS-139": 8696,
+    "SNGS-140": 11480,
+    "SNGS-141": 8711,
+    "SNGS-142": 8299,
+    "SNGS-143": 3356,
+    "SNGS-144": 7318,
+    "SNGS-145": 6098,
+    "SNGS-146": 6413,
+    "SNGS-147": 3668,
+    "SNGS-148": 5931,
+    "SNGS-149": 8500,
+    "SNGS-150": 8606,
+    "SNGS-187": 13234,
+    "SNGS-188": 16361,
+    "SNGS-189": 11684,
+    "SNGS-190": 9370,
+    "SNGS-191": 10855,
+    "SNGS-192": 9977,
+    "SNGS-193": 11018,
+    "SNGS-194": 14136,
+    "SNGS-195": 12473,
+    "SNGS-196": 8902,
+    "SNGS-197": 12818,
+    "SNGS-198": 13106,
+    "SNGS-199": 12061,
+    "SNGS-200": 11156
+  },
+  "n_predictions_total": 467425,
+  "built_at_utc": "2026-08-15T16:20:04+00:00",
+  "gt_free": {
+    "declared_at": "2026-08-15T16:12:49+00:00",
+    "version": "v9-1.0",
+    "session": "v9 W9 (freeze / gate / package)",
+    "parent": {
+      "file": "results/gsr_v6_frozen.json",
+      "declared_at": "2026-08-06T05:53:08+00:00",
+      "sha256": "40fb32fd950fc7e48b91371a41fa7bb245a1a18a805794c6c88a43877608879a"
+    },
+    "bundle": {
+      "chain": "the frozen v6 chain, unchanged: S4b detector -> ByteTrack -> PnLCalib -> calibration gate + fill -> EIoU re-association -> PARSeq arm-4t reader (0.80 floor) -> GTA connector tau 0.450 + jersey-compatible merge -> frozen MILP solver, free team map, self roster",
+      "detector": {
+        "weights": "models\\gsr_det\\gsr_v3_ft_b_last.pt",
+        "md5": "2074d8741f97a6892a1322d0f808244c",
+        "parked_md5": "2074d8741f97a6892a1322d0f808244c"
+      },
+      "jersey_reader": {
+        "ckpt": "C:\\Users\\siddh_ygv5bws\\jersey-number-pipeline\\models\\parseq_v6_arm4t.ckpt",
+        "md5": "39c0c15defafda072ca0cefd0a4b8e18",
+        "parked_md5": "39c0c15defafda072ca0cefd0a4b8e18"
+      },
+      "association": {
+        "module": "tools/gsr_eiou.py",
+        "sha256": "a8e12204a621944024727d7a449846f8d80b9e99f30c5422300ea22eb6ef599a",
+        "params": "e=0.3 rounds=1 w_app=0.5 app_max=0.30, embedder clip"
+      },
+      "new_in_v9": {
+        "VOTE_TRACK_ATTRS": [
+          "role",
+          "team",
+          "jersey"
+        ],
+        "GK_SIDE_REPAIR": [
+          "team"
+        ],
+        "call_site": "tools.gsr_deleak.write_arm (vote first, keeper repair second)",
+        "provenance": [
+          "results/GSR_V9_W3.md section 4 (+1.7999 GS-DetA DEV-20, 20/0)",
+          "results/gsr_v9_w4_registered.json (+2.2676 GS-DetA DEV-20, 18/0)"
+        ],
+        "gt_free": "both read only our own predictions; no Labels-GameState.json"
+      },
+      "everything_else_off": "every other v9 candidate failed its registered gate and stays OFF: gk_side role/role2/role2dom (W4/W5), second-keeper arms (W5), name-borrowing (W6), KEEP_UNTRACKED and MIN_HITS=1 (W7), attach-inherit (W8, STOP before build)"
+    },
+    "code_sha256": {
+      "eval\\gsr_score.py": "7ca0206fdf7d5f2b77857b81023d36ec5b0e60a0ad27223d143db77abdd93929",
+      "tools\\gsr_deleak.py": "2568da1ba53ea6deba0dc654e12c28dce2ca90fe67f6e103c355c5433208b344",
+      "tools\\gsr_eiou.py": "a8e12204a621944024727d7a449846f8d80b9e99f30c5422300ea22eb6ef599a",
+      "tools\\gsr_v6det.py": "42f2da4e3d49104528da73294f606f2fc93a4d1663977328fb1e9098878b6a25",
+      "tools\\gsr_v9_w9.py": "91017ef2ab532029bd0ee90002758156ecc90418dda88f4c1e8a64c98dc83d29"
+    },
+    "environment": {
+      "scoring_host": "Siddhanth",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.14.0",
+      "numpy": "2.4.0",
+      "scipy": "1.17.0",
+      "trackeval": "C:\\Users\\siddh_ygv5bws\\AppData\\Roaming\\Python\\Python314\\site-packages\\trackeval\\__init__.py (sn-trackeval 0.4.0 @ 9c25232, byte-audited)"
+    },
+    "lineages": {
+      "dev20_v6_lineage": {
+        "dir": "outputs/gsr/deleak_v6detdev_clip_e0.3r1w0.5a0.3",
+        "n_sequences": 20,
+        "digest_sha256": "df4621517286c782446a3deb28d9aeee2cbf4128fb0ecd0441760b4c9ebfd394",
+        "extracted_at_utc": "2026-08-06T04:59Z",
+        "gpu_stack": "laptop RTX 3050, py3.14, supervision 0.28.x",
+        "on_record_flags_off": {
+          "GS-HOTA": 51.8083,
+          "GS-DetA": 39.3083,
+          "source": "results/GSR_V6.md section 2 (FULL bundle row)"
+        }
+      },
+      "dev20_w7_lineage": {
+        "dir": "outputs/gsr/v9_w9_src/outputs/gsr/deleak_v6dev_w7ctl_clip_e0.3r1w0.5a0.3",
+        "n_sequences": 20,
+        "digest_sha256": "8c0c0c573e05054b678aa30d9e4182c38383c2e59ea0a866d615043d799b90aa",
+        "extracted_at_utc": "2026-08-15T11:01Z",
+        "gpu_stack": "a100server1 GPU 1, py3.11, torch 2.5.1+cu121",
+        "on_record_flags_off": {
+          "GS-HOTA": 52.89,
+          "GS-DetA": 40.3265,
+          "source": "results/gsr_v9_w8_registered.json control_lineage"
+        }
+      },
+      "test38": {
+        "dir": "outputs/gsr_srv/deleak_v6t38_v6det_clip_e0.3r1w0.5a0.3",
+        "n_sequences": 38,
+        "digest_sha256": "fdb79d7694878bf4ee780d1bfceacc6350b89247c5f7b009d1b8c1403d084744",
+        "extracted_at_utc": "2026-08-06T12:52Z",
+        "gpu_stack": "a100server1 GPU 1 (GPU stages) + laptop (CPU stages)",
+        "on_record_flags_off": {
+          "GS-HOTA": 49.497,
+          "GS-DetA": 35.6331,
+          "source": "results/GSR_V6.md section 3 / gsr_v6det_t38_v6det.json"
+        }
+      },
+      "test49": {
+        "dir": "outputs/gsr_srvtest/deleak_v6test_v6det_clip_e0.3r1w0.5a0.3",
+        "n_sequences": 49,
+        "digest_sha256": "2b989ee76c2a821ea2a3a4b4b1865b767ea1df16578d02bb48fef60db231554d",
+        "extracted_at_utc": "2026-08-06T14:57Z",
+        "gpu_stack": "a100server1 GPU 1 (GPU stages) + laptop (CPU stages)",
+        "on_record_flags_off": {
+          "GS-HOTA": 53.0846,
+          "GS-DetA": 39.3231,
+          "n_rows": 467425,
+          "source": "results/GSR_V6.md section 4 (the once-only v6 test-49 run)"
+        }
+      }
+    },
+    "dev20": {
+      "design": "leave-one-out over the two v9 flags on ONE submission lineage: off (v6 shipped) -> vote (VOTE_TRACK_ATTRS only) -> full (vote + GK_SIDE_REPAIR). Both flags are pure functions of the written submission, so every arm and its control share the extraction bit for bit.",
+      "v6_lineage": {
+        "combined": {
+          "off": {
+            "GS-HOTA": 51.808280888021784,
+            "GS-DetA": 39.308307987997765,
+            "GS-AssA": 68.28680940240496,
+            "GS-LocA": 93.65233939165817,
+            "IDF1": 56.452551003353804
+          },
+          "vote": {
+            "GS-HOTA": 54.797012448197826,
+            "GS-DetA": 41.10815874033536,
+            "GS-AssA": 73.04747929297741,
+            "GS-LocA": 93.7224525677357,
+            "IDF1": 58.68633633800934
+          },
+          "full": {
+            "GS-HOTA": 56.26006896175957,
+            "GS-DetA": 43.375734576913906,
+            "GS-AssA": 72.97550229629857,
+            "GS-LocA": 93.7995580104775,
+            "IDF1": 60.81360237997081
+          }
+        },
+        "paired": {
+          "off->vote": {
+            "GS-HOTA": {
+              "mean": 2.9839925154228206,
+              "median": 2.412373186451397,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 0.17733150704073353,
+              "best": 6.817490149434597,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "GS-DetA": {
+              "mean": 1.7310785320684015,
+              "median": 1.3485337093491783,
+              "helped": 18,
+              "hurt": 2,
+              "n": 20,
+              "worst": -1.6765057897858,
+              "best": 6.465408829250762,
+              "wilcoxon_p": 0.0003948211669921875
+            },
+            "GS-AssA": {
+              "mean": 5.149620334140679,
+              "median": 3.6207201678559997,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 0.6898383446759553,
+              "best": 14.231564771553224,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "pooled": {
+              "GS-HOTA": 2.988731560176042,
+              "GS-DetA": 1.7998507523375977,
+              "GS-AssA": 4.7606698905724585,
+              "GS-LocA": 0.07011317607752687,
+              "IDF1": 2.2337853346555363
+            }
+          },
+          "off->full": {
+            "GS-HOTA": {
+              "mean": 4.646261407153001,
+              "median": 4.094659787587652,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 1.9310144188599736,
+              "best": 7.605879190268773,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "GS-DetA": {
+              "mean": 4.378850501656155,
+              "median": 3.842068544690484,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 0.7966012259572643,
+              "best": 10.375291207287148,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "GS-AssA": {
+              "mean": 5.1320764454511245,
+              "median": 3.880053147376543,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 0.8577025089284405,
+              "best": 15.821932966837863,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "pooled": {
+              "GS-HOTA": 4.451788073737788,
+              "GS-DetA": 4.067426588916142,
+              "GS-AssA": 4.6886928938936165,
+              "GS-LocA": 0.1472186188193234,
+              "IDF1": 4.361051376617006
+            }
+          }
+        }
+      },
+      "w7_lineage": {
+        "combined": {
+          "off": {
+            "GS-HOTA": 52.890016358660304,
+            "GS-DetA": 40.326522801662264,
+            "GS-AssA": 69.37066716947076,
+            "GS-LocA": 93.69754687329824,
+            "IDF1": 56.954647870539766
+          },
+          "vote": {
+            "GS-HOTA": 55.45451202345014,
+            "GS-DetA": 42.107271889107764,
+            "GS-AssA": 73.0354140005212,
+            "GS-LocA": 93.75036300084268,
+            "IDF1": 59.127913263583466
+          },
+          "full": {
+            "GS-HOTA": 57.209519343589896,
+            "GS-DetA": 44.624608951281814,
+            "GS-AssA": 73.34740347246854,
+            "GS-LocA": 93.83393276077665,
+            "IDF1": 61.5633475525386
+          }
+        },
+        "paired": {
+          "off->vote": {
+            "GS-HOTA": {
+              "mean": 2.6093802411760327,
+              "median": 2.0188530112282415,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 0.3930101121382563,
+              "best": 6.735301307616858,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "GS-DetA": {
+              "mean": 1.6850935591718588,
+              "median": 1.3104351027465597,
+              "helped": 19,
+              "hurt": 1,
+              "n": 20,
+              "worst": -0.8779023121956513,
+              "best": 4.838880806875586,
+              "wilcoxon_p": 1.9073486328125e-05
+            },
+            "GS-AssA": {
+              "mean": 3.9866723858445203,
+              "median": 2.972509187294996,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 0.7715456729387427,
+              "best": 9.328209542499813,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "pooled": {
+              "GS-HOTA": 2.5644956647898383,
+              "GS-DetA": 1.7807490874454999,
+              "GS-AssA": 3.6647468310504365,
+              "GS-LocA": 0.05281612754444609,
+              "IDF1": 2.1732653930436996
+            }
+          },
+          "off->full": {
+            "GS-HOTA": {
+              "mean": 4.5697606259325685,
+              "median": 4.480874464165236,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 1.9750692343629197,
+              "best": 7.625799826255431,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "GS-DetA": {
+              "mean": 4.596446066799968,
+              "median": 4.079711887872779,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 1.703857788253206,
+              "best": 9.817954667417553,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "GS-AssA": {
+              "mean": 4.343779386194431,
+              "median": 3.674677144269218,
+              "helped": 20,
+              "hurt": 0,
+              "n": 20,
+              "worst": 0.15403879199773485,
+              "best": 10.34403676293011,
+              "wilcoxon_p": 1.9073486328125e-06
+            },
+            "pooled": {
+              "GS-HOTA": 4.319502984929592,
+              "GS-DetA": 4.29808614961955,
+              "GS-AssA": 3.9767363029977787,
+              "GS-LocA": 0.1363858874784114,
+              "IDF1": 4.608699681998836
+            }
+          }
+        }
+      },
+      "fidelity": "flags-off reproduces the on-record GS-HOTA/GS-DetA of BOTH lineages to 4 dp (51.8083/39.3083 and 52.8900/40.3265); vote reproduces W3's 54.7970/41.1082 and full reproduces W5's 56.2601/43.3757 to 4 dp.",
+      "lineage_stability_of_the_flag_delta": {
+        "v6_lineage_off_to_full": {
+          "GS-HOTA": 4.4518,
+          "GS-DetA": 4.0674
+        },
+        "w7_lineage_off_to_full": {
+          "GS-HOTA": 4.3195,
+          "GS-DetA": 4.2981
+        },
+        "baseline_drift_between_the_two_lineages": {
+          "GS-HOTA": 1.0817,
+          "GS-DetA": 1.0182
+        },
+        "reading": "the extraction drift of kb v9-w7-002 moves the BASELINE by ~1.0 point and the flag delta by 0.13 (HOTA) / 0.23 (DetA). The quantity this session gates is the delta, and it is lineage-stable."
+      }
+    },
+    "pre_declared_gate": {
+      "split": "valid TEST-38 (38 sequences, held out of every v9 development read)",
+      "comparison": "flags-ON (vote+gk_side) vs flags-OFF, paired per sequence on ONE extraction lineage -- outputs/gsr_srv/deleak_v6t38_v6det_clip_e0.3r1w0.5a0.3",
+      "thresholds": {
+        "paired_mean_GS-HOTA": ">= +2.0",
+        "helped": ">= 24 of 38",
+        "wilcoxon_p": "< 0.01",
+        "paired_mean_GS-DetA": ">= +1.5 (the pooled GS-DetA delta is reported alongside; if the two readings straddle the bar that is reported loudly, not resolved silently)"
+      },
+      "decision_rule": "ALL FOUR must hold. PASS -> one test-49 chain run at flags ON, then package. FAIL -> pre-declared response: consult the TEST-38 leave-one-out; drop gk_side ONLY if it is the component hurting there, re-gate ONCE with vote-only at the same thresholds; if that also fails, ship nothing.",
+      "declared_before": "any TEST-38 score of either flag state was computed in this session; the only TEST-38 number consulted at declaration time is the on-record v6 flags-OFF 49.4970, which is the control by construction.",
+      "test49": "not read, not scored, not packaged at declaration time."
+    },
+    "note": "DEVIATION FROM THE DISPATCHED PROTOCOL, DECLARED HERE RATHER THAN DISCOVERED LATER. The brief called for a one-window re-extraction of DEV-20 + TEST-38 + test-49 (~12 GPU-h) so that every comparison pairs inside one window (kb v9-w7-002/004: same code, same weights, +1.02 GS-DetA of drift across 8 days). No extraction was run. Reason: the v9 bundle differs from the frozen v6 bundle ONLY by two post-processing flags that rewrite attribute values inside an already-written submission. Every comparison this session makes is flags-ON vs flags-OFF on the SAME submission files, so the two sides share the extraction bit for bit and the drift hazard is absent by construction -- strictly stronger than pairing inside one window. Re-extracting would also have replaced a test-49 lineage whose score is MEASURED (53.0846, zip-self-score verified) with one whose score is a +-1 point coin flip, and picking between them afterwards would be selection on test. The flag delta's lineage stability is measured directly in dev20.lineage_stability_of_the_flag_delta (two lineages 9 days apart, baselines 1.08 apart, deltas 0.13 apart). GPU spend this session: 0 h. Carried limitation: the DEV-20 v6 lineage is a laptop stack (supervision 0.28.x) while TEST-38 and test-49 are the same server-side 2026-08-06 window (supervision 0.30.0) -- the DEV->TEST transfer estimate crosses stacks, exactly as it did in results/GSR_V6.md; the TEST-38 -> test-49 step does not."
+  },
+  "label_reads": "none. The cluster -> side map comes from resolve_team_map_free (geometry only) and the solver's roster from the sequence's own OCR reads. No Labels-GameState.json is opened anywhere in the prediction chain."
+}

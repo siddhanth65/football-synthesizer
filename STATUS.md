@@ -1,5 +1,37 @@
 # STATUS
 
+## 2026-08-15 — v9 W9 FREEZE: all 4 TEST-38 gates PASS (+3.84 HOTA, 38/38, p=7.3e-12) — test-49 local 55.4062; submission #6 PACKAGED, awaiting Sid's upload; expected board ~55.4
+
+results/gsr_v9_frozen.json (declared 16:12:49Z BEFORE any TEST-38 read), results/
+gsr_benchmark/gsr_v9_w9_*.json, results/gsr_submission/gsr_testphase_gtfree_v9_c5fcae6e.zip
+(sha256 a9ef0f00..., 35.5 MB, 467,425 predictions, zip self-score reproduces the arm at every
+digit), kb v9-w9-001..004, tools/gsr_v9_w9.py. **Registered deviation, declared in the freeze
+record: NO re-extraction (0 GPU-h of 12)** — the bundle differs from v6 by two post-processing
+flags only, so flags-ON vs flags-OFF pairs on THE SAME submission files (bit-shared
+extraction, strictly stronger than same-window); re-extracting would have swapped a MEASURED
+test-49 lineage for a +-1 drift coin flip = selection on test. Priced, not asserted: the
+flag DELTA differs across the two 9-days-apart DEV lineages by only 0.13 HOTA while the
+baselines differ by 1.08. Fidelity: all four lineages reproduce on-record numbers to 4 dp.
+
+**Gate: paired +3.8423 HOTA (bar 2.0), 38/38 helped (bar 24, worst +0.73), p=7.276e-12
+(bar 0.01), DetA +3.4740 (bar 1.5) — PASS 4/4.** TEST-38 pooled 49.4970 -> 53.1978. Notable:
+the pre-declared fail response (drop gk_side) would have been WRONG — vote-only fails the
+DetA bar on TEST-38 (+1.09); the keeper repair supplies +2.38 DetA there. **test-49, one run,
+flags ON: 53.0846 -> 55.4062 (DetA 39.32 -> 41.28, AssA 71.67 -> 74.38), 46/3 helped,
+p=4.9e-13.** Transfer decay measured, not hand-waved: the flags rewrite 12.6% of DEV team
+rows but only 7.7% of test-49's — the test base was already the most attribute-consistent
+split, so a consistency repair has less to fix; DEV +4.45 -> TEST-38 +3.70 (83%) -> test-49
++2.32 (52%). verify_gtfree on the PACKAGED directory: 0 violations; flip set unchanged
+{126,130,131,197} (the repair is upstream-invariant and tracked). Audit passes at every layer.
+
+**Correction to a worker aside: the v6 package WAS uploaded 2026-08-06 (board 53.09, the
+entire on-record arc) — the W9 report's "board still reads 39.02" is wrong; expected board
+move is 53.09 -> ~55.4.** Submission #6 of 10 is Sid's action:
+results/gsr_submission/gsr_testphase_gtfree_v9_c5fcae6e.zip. Honest final arithmetic: ~55.4
+is 6.1 short of 61.48; the v9 map (W2-W8) documents where every remaining point lives and
+why it is unreachable on this architecture — that documentation plus the two shipped rules
+IS the campaign result.
+
 ## 2026-08-15 — v9 W8: attach oracle says STOP — mechanism confirmed (65-68% attribute yield) but reachable +0.16 vs bar +0.75; detection bucket CLOSED by three independent measurements; exploration over, FREEZE dispatched
 
 results/gsr_v9_w8_registered.json + results/gsr_benchmark/gsr_v9_w8_*.json, kb v9-w8-001..004,
