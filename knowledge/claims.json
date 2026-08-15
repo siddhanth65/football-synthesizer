@@ -7493,6 +7493,165 @@
         "legitimacy",
         "audit"
       ]
+    },
+    {
+      "id": "v9-w6-001",
+      "statement": "HARNESS FIDELITY AND LINEAGE RE-CONFIRMED FOR THE SHIPPING STACK. On DEV-20 the shipped v6 arm outputs/gsr/deleak_v6detdev_clip_e0.3r1w0.5a0.3 re-scores to GS-DetA 39.3083 / GS-HOTA 51.8083; with vote_track_attributes(role,team,jersey) to 41.1082 / 54.7970; with gk_side_repair(('team',)) on top to 43.3757 / 56.2601 -- all three rows to four decimals, independently re-derived in the W6 session before any arm was scored. 218,291 prediction rows over 20 sequences, per-sequence counts SNGS-024 6,701 / SNGS-051 10,723 / SNGS-054 10,319 / SNGS-057 12,264, i.e. the shipped-submission lineage and not the drifted eval_v4 cache of kb v9-w1-006.",
+      "value": 43.3757,
+      "unit": "GS-DetA on DEV-20 of the reproduced W3+W4 control",
+      "status": "confirmed",
+      "evidence": [
+        "outputs/gsr/v9_w6/fidelity.json",
+        "results/gsr_v9_w6_registered.json"
+      ],
+      "method": "eval.gsr_score.gs_hota, gs_hota_full config, three submissions written into separate work dirs under outputs/gsr/v9_w6/fidelity from the same source arm.",
+      "n": 20,
+      "caveats": [
+        "DEV-20 is the tuning split; TEST-38 / test-49 / challenge were not read."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w5-001"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "fidelity",
+        "control"
+      ]
+    },
+    {
+      "id": "v9-w6-002",
+      "statement": "THE OVER-NAMING EXPOSURE OF ANY JERSEY-PROPAGATION SCHEME, MEASURED ON BOTH SPLITS. On GSR-TRAIN (57 sequences, the W1 EIoU partition) 2,609 player-majority tracklets carry no jersey read: 1,514 (159,963 rows) belong to GT identities that ARE numbered, 484 (79,144 rows) to identities GT leaves UNNUMBERED and 611 (3,315 rows) have no trusted GT identity -- so 24.2% of the GT-resolvable unnamed player tracklets, and 33.1% of their rows, are rows where writing ANY number destroys a null==null match. On DEV-20 the same census over the shipped control's own tracks is WORSE, not better: 228 unnamed player tracks, 143 GT-numbered (41,707 rows) vs 84 GT-unnumbered (27,809 rows) -- 37.0% of tracks and 40.0% of rows in the danger zone. The reason is structural: the shipped solver has already named most of the numbered players it can reach, so the residual unnamed pool is ENRICHED in identities that were never numbered. The shipped submission also already over-names 81 tracks / 12,888 rows (48 player-labelled, 21 referee-labelled, 12 keeper-labelled) whose GT identity is unnumbered, and those tracks are available as lenders.",
+      "value": 40.0,
+      "unit": "percent of DEV-20 unnamed-player-track rows whose GT identity is unnumbered",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_v9_w6_registered.json",
+        "results/gsr_benchmark/gsr_v9_w6_traincal.json",
+        "results/gsr_benchmark/gsr_v9_w6_arms.json",
+        "results/gsr_benchmark/gsr_v9_w6_devcensus.json"
+      ],
+      "method": "GSR-TRAIN: tools.gsr_v9_w6.calibrate census over the W1 tracklet summaries with per-identity GT jersey from Labels-GameState.json (verified constant per identity). DEV-20: tools.gsr_v9_w6.dev_census, tracks summarised from the control-state submission and owned via the W4/W5 attribute-blind Hungarian matcher (tools.gsr_v9_w5.owners).",
+      "n": 77,
+      "caveats": [
+        "The two censuses use different naming sources by necessity: GSR-TRAIN naming is the per-crop reader's dominant number at the 0.80 confidence floor, DEV-20 naming is the shipped identity solver's decision. That difference is itself the finding.",
+        "DEV-20 track ownership uses the 5 m position-only Hungarian match; 10 tracks (104 rows) get no GT owner and are reported separately as gt_unknown."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w3-002",
+        "v8-w3-007"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "jersey",
+        "census"
+      ]
+    },
+    {
+      "id": "v9-w6-003",
+      "statement": "NAME-BORROWING FAILS ON DEV-20: THE LEARNED ARM LOSES 0.32 GS-DetA AND THE PHYSICS ARM BUYS NOISE. Registered before contact (results/gsr_v9_w6_registered.json): candidates are (named, unnamed) tracklet pairs of the shipped control inside the W1 physics window with both sides player-majority and same known team; the scorer is the frozen W2 TwixMetric seed-ensemble mean logit with the appearance channel forced missing; the threshold -2.5 was the GSR-TRAIN point maximising net rows subject to <= 15% over-naming (943 tracks / 28,347 rows / 15,179 correct / 3,047 over-named / 10.7% over-naming). On DEV-20 that arm fires on 6 tracks / 1,538 rows and scores GS-DetA 43.0518 (-0.3239) / GS-HOTA 56.0468 (-0.2133), 0 sequences helped and 2 hurt (Wilcoxon p = 0.180); its row audit is 1,262 OVER-NAMED (82.1% of touched rows, against the registered 20% ceiling), 270 newly-wrong-named, 6 unmatched and ZERO newly-correct. The registered model-free fallback (rank by required speed) had NO admissible train threshold at all -- its net rows are negative across the whole grid -- and at its least-bad point it scores 43.4001 (+0.0244) / 56.2657 (+0.0057), 3 helped / 0 hurt, p = 0.109, i.e. 2% of the +1.00 gate. Nothing ships; the stack stays at GS-DetA 43.3757 / GS-HOTA 56.2601 and no shipping module was modified.",
+      "value": -0.3239,
+      "unit": "GS-DetA delta on DEV-20 of the registered twix borrow arm vs the 43.3757 control",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_v9_w6_registered.json",
+        "results/gsr_benchmark/gsr_v9_w6_traincal.json",
+        "results/gsr_benchmark/gsr_v9_w6_arms.json",
+        "results/gsr_benchmark/gsr_v9_w6_devcensus.json"
+      ],
+      "method": "tools.gsr_v9_w6 --traincal then --arms; eval.gsr_score.gs_hota gs_hota_full over the 20 DEV sequences; paired per-sequence Wilcoxon; row audit against the GT jersey of the position-matched GT row.",
+      "n": 20,
+      "caveats": [
+        "Deterministic given the frozen checkpoints, so the noise floor is 0; the failure is not sampling error.",
+        "The arm changes only the jersey attribute -- no track was merged and no track_id changed, which the GS-AssA reads confirm (72.9681 twix / 72.9493 phys vs 72.9755 control, moved only by the attribute-conditioned matching, not by association)."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w6-001",
+        "v9-w6-002",
+        "v9-w2-003"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "jersey",
+        "negative-result"
+      ]
+    },
+    {
+      "id": "v9-w6-004",
+      "statement": "WHY IT FAILS: THE CANDIDATE SET, NOT THE THRESHOLD, IS THE CEILING -- AND IT IS ABOUT +0.2 GS-DetA. Over all 20 DEV sequences the physics window yields only 165 (named, unnamed) candidate pairs touching 78 distinct borrowing tracks. Labelling every one of them against GT: 7 borrowers (618 rows) would get the RIGHT number, 47 (7,112 rows) would get a wrong number from a numbered identity (DetA-neutral), 23 (4,639 rows) would be over-named, 1 unknown. So of the 41,707 rows that are the actual prize -- unnamed player tracks whose GT identity IS numbered -- the candidate generator reaches 7,730 rows (18.5%) and only 618 of those (8.0% of the reached mass, 1.5% of the prize) have a lender carrying the correct number. At W3's coverage-oracle exchange rate (44,866 rows = +16.36 GS-DetA) a PERFECT oracle over this candidate set is worth about +0.23 GS-DetA, a quarter of the registered +1.00 gate and 3% of the +8.15 own-roster bound. Name-borrowing cannot reach the jersey-coverage prize because the GTA connector has already consumed the temporally-disjoint same-player links: what is still unnamed is unnamed because the reader never read it ANYWHERE in the clip, not because a fragment lost a number it once had.",
+      "value": 0.23,
+      "unit": "GS-DetA of a perfect oracle over the whole DEV-20 name-borrow candidate set",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_v9_w6_registered.json",
+        "results/gsr_benchmark/gsr_v9_w6_traincal.json",
+        "results/gsr_benchmark/gsr_v9_w6_arms.json",
+        "results/gsr_benchmark/gsr_v9_w6_devcensus.json"
+      ],
+      "method": "tools.gsr_v9_w6 --devcensus: every candidate pair labelled with the GT jersey of its borrower's owning GT identity, deduplicated per borrowing track; the DetA conversion uses the W3 jersey_coverage oracle rate.",
+      "n": 165,
+      "caveats": [
+        "The +0.23 conversion is a linear extrapolation of the W3 coverage oracle and is an UPPER bound: borrowed rows still have to be position-matched and role/team-correct to score at all.",
+        "32 of the 38 over-naming candidate pairs have a lender that is ITSELF over-named, so a borrow would be multiplying the solver's existing over-naming onto more rows.",
+        "16 of the 38 over-naming candidates have a borrower whose GT role is REFEREE while our chain labels it player -- the W4/W5 referee bucket leaking onto the jersey axis, which no jersey-side filter can see."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w6-003",
+        "v9-w3-003"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "jersey",
+        "ceiling"
+      ]
+    },
+    {
+      "id": "v9-w6-005",
+      "statement": "THE W2 TWIX RANKING DOES NOT TRANSFER TO THE (NAMED, UNNAMED) SUBPOPULATION, AND ITS LOGIT SCALE IS NOT SEED-STABLE. On the 165 DEV-20 borrow candidates the frozen seed-ensemble scorer ranks same-identity pairs at average precision 0.0916 against a base rate of 0.0545 (per seed: 0.0824 / 0.0884 / 0.1133) -- essentially chance, against the val pair-AP 0.6579 that passed W2's G1 gate on merge candidates. It is marginally worse than chance in the direction that matters: AP for OVER-NAMING candidates is 0.2482 against a 0.2303 base rate, i.e. the model mildly PREFERS the pairs that cost points. Separately, the absolute logit scale differs by roughly 0.7 between seeds, so the registered ensemble threshold -2.5 fires on 25 tracks under seed 0, 7 under seed 1, 2 under seed 2 and 6 for the ensemble: any single-seed deployment of a threshold fitted on the ensemble is a different arm.",
+      "value": 0.0916,
+      "unit": "average precision of the ensemble ranking for same-identity DEV-20 borrow pairs",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_v9_w6_registered.json",
+        "results/gsr_benchmark/gsr_v9_w6_traincal.json",
+        "results/gsr_benchmark/gsr_v9_w6_arms.json",
+        "results/gsr_benchmark/gsr_v9_w6_devcensus.json"
+      ],
+      "method": "all three twixm_side checkpoints scored on the DEV-20 candidate pool with the appearance channel forced missing; AP against the GT-derived candidate outcome labels of the --devcensus pass.",
+      "n": 165,
+      "caveats": [
+        "The checkpoints are applied out of their training distribution twice over: trained on the pre-connector EIoU partition of GSR-TRAIN, applied to post-connector post-solver DEV tracks, and with the appearance channel switched off because the DEV embedding cache is broken on 11 of 20 sequences (kb v9-w1-006).",
+        "This does not retract W2's G1 result, which was measured on the merge-candidate population it was trained for."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w6-003",
+        "v9-w1-006"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "assoc",
+        "transfer",
+        "negative-result"
+      ]
     }
   ]
 }

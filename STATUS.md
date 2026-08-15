@@ -1,5 +1,32 @@
 # STATUS
 
+## 2026-08-15 — v9 W6 FAIL: name-borrowing cannot reach the jersey prize — the +8.15 coverage bound is STRUCTURALLY PHANTOM (oracle over all borrowable candidates = +0.23); stack holds 56.26; W7 (detector) is the campaign's last big lever
+
+results/gsr_v9_w6_registered.json + results/gsr_benchmark/gsr_v9_w6_*.json, kb v9-w6-001..005,
+tools/gsr_v9_w6.py. Fidelity exact. Train calibration first (registered): 24.2% of unnamed
+player tracklets (33.1% of rows) are GT-unnumbered = the over-naming danger zone; TwiX @ -2.5
+chosen a priori (10.7% over-naming on train). **DEV verdict: every gate fails** — twix arm
+-0.32 DetA with **82.1% of touched rows over-named and 0 newly-correct**; physics fallback
++0.02 (registered negative control). Nothing ships; no shipping surface was touched (audit
+unchanged by construction). **The mechanism, fully decomposed: the GTA connector already
+consumed the temporally-disjoint fragment links, so the residual unnamed mass was NEVER READ
+anywhere in the clip — of the 41,707 prize rows, the candidate generator reaches 18.5% and
+only 1.5% have a right-numbered lender; a PERFECT oracle over the whole candidate set is
+~+0.23 DetA (3% of the +8.15 bound).** Pool-composition inversion on record: the solver has
+already named what it can reach, so DEV's residual pool is ENRICHED in never-numbered
+identities (40.0% vs train's 33.1%) — the threshold transferred, the POOL didn't. W2's TwiX
+ranking does not transfer to this subpopulation (AP 0.0916 vs base 0.0545; mildly PREFERS
+over-naming pairs — G1 not retracted, different candidate class). Logit scale is not
+seed-stable (25/7/2 firings at one threshold) — ensemble-fitted thresholds are ensemble-only.
+Combined with the W3-v8 human audit (94.8% of unnamed pool = genuine glyph absence), **the
+jersey-coverage oracle (+16.36) is now known to be mostly unreachable by ANY reading or
+propagation method — closed as a campaign axis absent a fundamentally new evidence source.**
+
+**Path to 61.48 now runs almost entirely through W7 (detector retrain, in flight on the
+cluster): realistic +2..4.4 DetA on DEV 56.26, then freeze -> TEST-38 -> test-49.** Scraps
+if W7 lands short: keeper dup-track dedup (~+0.3), dead-frame veto rows (+1.12 ceiling,
+would need re-gating W2b's stage).
+
 ## 2026-08-15 — v9 W5 FAIL x2: the referee axis is REFUSED (three signals measured, none usable) and the second-keeper arms miss the bar — attribute mine exhausted at DEV 56.26; campaign hands to jersey-coverage + detector retrain
 
 results/gsr_v9_w5_registered.json + results/gsr_benchmark/gsr_v9_w5_*.json, kb v9-w5-001..005,

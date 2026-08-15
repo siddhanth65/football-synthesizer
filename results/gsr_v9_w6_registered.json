@@ -1,0 +1,78 @@
+{
+  "declared_at": "2026-08-15T12:05:00+00:00",
+  "session": "v9 W6",
+  "written_before": "any DEV-20 score of the arms below was computed (the DEV control fidelity re-derivation preceded it)",
+  "mechanism": "JERSEY NAME-BORROWING: an unnamed track copies the jersey number of a named track that is plausibly the same person. Propagation only -- no track is merged, no track_id changes, so GS-AssA is untouched by construction.",
+  "harness_fidelity": {
+    "arm_dir": "outputs/gsr/deleak_v6detdev_clip_e0.3r1w0.5a0.3",
+    "base": {"GS-DetA": 39.3083, "GS-HOTA": 51.8083},
+    "vote_all": {"GS-DetA": 41.1082, "GS-HOTA": 54.797},
+    "vote_all+gk_side_team": {"GS-DetA": 43.3757, "GS-HOTA": 56.2601},
+    "rows": 218291,
+    "row_counts_checked": {"SNGS-024": 6701, "SNGS-051": 10723, "SNGS-054": 10319,
+                           "SNGS-057": 12264},
+    "verdict": "all three registered rows reproduced to 4 dp on 2026-08-15; per-sequence row counts are the shipped-submission lineage, NOT the drifted eval_v4 cache of kb v9-w1-006"
+  },
+  "candidate_set": {
+    "generator": "tools.gsr_v9_factory.build_pairs with FactoryParams() (ordered pairs, A ends before B starts, gap <= 750 frames, endpoint distance closable at 9 m/s + 2 m slack), run on tracklets summarised from the CONTROL-STATE submission JSON itself (tools.gsr_v9_w6.submission_rows)",
+    "hard_filters": [
+      "exactly one side carries a jersey number (nothing to borrow otherwise; the jersey-conflict guard is inapplicable when one side is silent)",
+      "BOTH sides are player-majority -- goalkeeper- and referee-majority tracks are excluded on both sides, because GT numbers neither (v8-W3: 0/156 GKs numbered), so any borrow touching one can only over-name",
+      "both sides carry a known team side and the same one"
+    ],
+    "why_hard_filters_are_correct_here": "this is a COPY, not a merge. W1's features-not-filters finding (kb v9-w1-004) is about merges, where a wrong gate destroys a trajectory; a refused copy costs only the copy.",
+    "one_borrow_rule": "each unnamed track takes the number of its single best-scoring named partner above threshold; a named track may lend to several borrowers, each on its own evidence. Ties break on the smaller lender id, so the plan is order-independent."
+  },
+  "scorers": {
+    "twix": {
+      "model": "generator.assoc_twix.TwixMetric, the frozen W2 checkpoints outputs/gsr/v9_assoc/ckpts/twixm_side_s{0,1,2}.pt",
+      "aggregation": "SEED-ENSEMBLE MEAN LOGIT over the three seeds -- chosen a priori; the s0-only spread is reported as robustness information, not as an arm",
+      "device": "CPU",
+      "clip_channel": "FORCED MISSING on both train and DEV. The DEV detection-embedding cache joins the shipped submission on only 790/896 tracks and is broken on 11 of 20 sequences (kb v9-w1-006 / v9-w5-002), so the appearance channel cannot be used reproducibly there; switching it off on the calibration side too makes application and calibration see identical features."
+    },
+    "phys": {
+      "model": "none -- the registered learned-model-free fallback",
+      "score": "-req_speed_mps (the speed the endpoint gap would demand)"
+    }
+  },
+  "train_calibration": {
+    "split": "GSR-TRAIN, 57 sequences, the W1 pair dataset outputs/gsr/v9_assoc/v1 (DEV-20, TEST-38, test-49 and challenge untouched)",
+    "census_unnamed_player_tracklets": {
+      "tracks": 2609, "rows": 242422,
+      "gt_numbered": {"tracks": 1514, "rows": 159963},
+      "gt_unnumbered": {"tracks": 484, "rows": 79144},
+      "gt_identity_unknown": {"tracks": 611, "rows": 3315},
+      "danger_zone": "24.2% of the GT-resolvable unnamed player tracklets (484/1998), and 33.1% of their rows (79,144/239,107), belong to identities GT leaves UNNUMBERED -- naming any of those rows destroys a null==null match. That is the over-naming cost a blind borrow would pay."
+    },
+    "outcome_labels": "correct = borrowed number equals the GT number of the borrower's dominant GT identity; neutral = that identity IS numbered but we copied a different number (DetA-neutral: a wrong number scores exactly what null scores); overnamed = the identity is UNNUMBERED (a real loss); unknown = the tracklet has no trusted GT identity.",
+    "threshold_rule": "the grid threshold that MAXIMISES net rows (rows_correct - rows_overnamed) on GSR-TRAIN subject to overname_share_of_touched <= 0.15 (a margin under the registered 20% gate). Fixed before the curves were read; applied mechanically to both arms.",
+    "twix_curve_selected": {
+      "threshold": -2.5,
+      "tracks_fired": 943, "rows_touched": 28347,
+      "rows_correct": 15179, "rows_neutral": 8529, "rows_overnamed": 3047,
+      "overname_share_of_touched": 0.1075,
+      "row_precision_correct_vs_overnamed": 0.833,
+      "net_rows": 12132,
+      "runner_up": "threshold -3.0 has a larger reach (1,540 tracks / 47,026 rows) but 16.1% over-naming, above the 0.15 admissibility cap; its net (10,981) is also lower."
+    },
+    "phys_curve": {
+      "verdict": "NO ADMISSIBLE OPERATING POINT. Over the whole registered grid (req_speed 0.5 ... 9.0 m/s) the over-naming share never falls below 17.7% and the net rows are NEGATIVE at every threshold (best -25 rows at req_speed <= 0.5 m/s). Physics alone cannot tell a fragment of the same player from a different player of the same team.",
+      "disposition": "scored on DEV-20 at its least-bad point (-0.5, i.e. req_speed <= 0.5 m/s) as a NEGATIVE CONTROL that measures what the learned ranking is actually buying -- it is not a shipping candidate."
+    }
+  },
+  "arms": [
+    {"name": "twix", "arm": "twix", "threshold": -2.5,
+     "role": "the shipping candidate"},
+    {"name": "phys", "arm": "phys", "threshold": -0.5,
+     "role": "negative control; failed its own train-side admissibility rule"}
+  ],
+  "gates": {
+    "deta": ">= +1.00 GS-DetA over the 43.3757 control (GS-HOTA control 56.2601)",
+    "hota": "pooled GS-HOTA not worse than the control",
+    "paired": "per-sequence GS-HOTA helped > hurt with Wilcoxon p < 0.05 (n = 20)",
+    "row_audit": "every changed row classified newly-correct / newly-wrong-named / over-named / unmatched; over-naming must be < 20% of touched rows"
+  },
+  "noise_floor": "exactly 0 -- the checkpoints are frozen and every step is a deterministic pure function of the submission JSON. Ensemble-vs-s0 spread is reported as robustness information.",
+  "composition": "a new post-processing step AFTER vote_track_attributes AND AFTER gk_side_repair. Order matters twice: (1) the borrow reads the FINAL role labels, so a track gk_side promoted to goalkeeper is excluded from both sides of a borrow; (2) a borrowed number is written to every row of the borrowing track at once, so the result is already vote-consistent and needs no re-vote. Ships default OFF.",
+  "splits": "DEV-20 only; TEST-38, test-49 and challenge are not read in this session"
+}
