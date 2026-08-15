@@ -56,7 +56,9 @@ from eval.gsr_score import (
     DEFAULT_DATA_DIR,
     DEFAULT_OUT_DIR,
     EVAL_CONFIGS,
+    GK_SIDE_REPAIR,
     VOTE_TRACK_ATTRS,
+    gk_side_repair,
     gs_hota,
     load_gt_people_by_frame,
     resolve_team_map,
@@ -273,6 +275,9 @@ def write_arm(bundles: dict, assigns: dict, maps: dict, out_dir: Path, arm_dir: 
         # Registered v9-W3 component, default OFF (VOTE_TRACK_ATTRS = ()): a GT identity carries one
         # role and one team for the whole clip, so within-track disagreement is guaranteed error.
         vote_track_attributes(payload["predictions"], VOTE_TRACK_ATTRS)
+        # Registered v9-W4 component, default OFF (GK_SIDE_REPAIR = ()): a keeper's side is the goal
+        # he stands in, not his kit colour. Runs after the vote, on the voted roles.
+        gk_side_repair(payload["predictions"], GK_SIDE_REPAIR)
         (dest / f"{name}.json").write_text(json.dumps(payload), encoding="utf-8")
 
 

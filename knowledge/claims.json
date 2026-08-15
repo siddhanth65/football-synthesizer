@@ -7199,6 +7199,141 @@
         "deta",
         "planning"
       ]
+    },
+    {
+      "id": "v9-w4-001",
+      "statement": "AFTER THE W3 VOTE, THE LARGEST REACHABLE ATTRIBUTE BUCKET IS THE GOALKEEPER'S TEAM. Per-track anatomy of the voted DEV-20 submission (885 prediction tracks, 213,571 rows, attribute-blind Hungarian match to GT, a track owned by the GT identity holding most of its matched rows): 586 tracks (83.41% of rows) carry the right role AND team; 111 tracks (9.32%) are CONTAMINATED (dominant GT identity owns < 70% of matched rows, so no relabelling can fix them); 92 tracks (3.97%) carry the wrong team and 70 (3.23%) the wrong role. Track-level relabel oracles, scored with the official evaluator on top of the voted control (GS-DetA 41.1082): the whole goalkeeper bucket is worth +3.0190 GS-DetA -- team-wrong keepers +2.2676 (29 tracks / 5,257 rows), keepers we call players +0.7597 (13 tracks) -- against referee<->player confusions +1.6341 combined, outfield team errors +0.4973 (63 tracks) and contaminated tracks +0.3365. TWO PLANNING CONSEQUENCES: track-level kit RE-CLUSTERING IS A DEAD LEVER (a perfect track-level team classifier for outfield players is worth +0.50, below the +0.75 bar), and CONTAMINATED TRACKS ARE AN ASSOCIATION PROBLEM WORTH ONLY +0.34, not an attribute one.",
+      "value": 3.019,
+      "unit": "GS-DetA points from a perfect track-level relabel of the goalkeeper bucket, DEV-20",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_benchmark/gsr_v9_w4_anatomy.json",
+        "results/gsr_benchmark/gsr_v9_w4_oracles.json",
+        "results/gsr_benchmark/gsr_v9_w4_summary.json",
+        "tools/gsr_v9_w4.py"
+      ],
+      "method": "tools.gsr_v9_w4 --anatomy / --oracles. Anatomy: the W3 census matcher (gaussian at the evaluator's own sigma, cut at 5 m, attribute-blind) aggregated per prediction track. Oracles: for the tracks of one bucket, every row's role/team is forced onto the dominant GT identity's value and the submission is scored with eval.gsr_score.gs_hota under gs_hota_full. Control = the shipped v6 DEV-20 arm with vote_track_attributes applied, which reproduces the on-record 41.1082 / 54.7970 exactly.",
+      "n": 885,
+      "caveats": [
+        "The 70% purity floor that defines CONTAMINATED is fixed a priori, not tuned.",
+        "Isolated bucket oracles are not additive (a row can be wrong on both role and team).",
+        "DEV-20 is the tuning split."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w3-002",
+        "v9-w3-004"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "deta",
+        "attributes",
+        "goalkeeper",
+        "anatomy"
+      ]
+    },
+    {
+      "id": "v9-w4-002",
+      "statement": "REGISTERED PASS, ZERO GPU: A KEEPER'S TEAM IS THE GOAL HE STANDS IN, AND THAT RULE IS ORACLE-EQUIVALENT. Setting team = 'left' if a goalkeeper track's median pitch x < 0 else 'right' -- reading only our own predictions -- is worth +2.2676 GS-DetA and +1.4631 GS-HOTA on DEV-20 on top of the W3 vote (41.1082 -> 43.3757, 54.7970 -> 56.2601) against a registered bar of +0.75 DetA, with 18 sequences helped / 0 hurt on BOTH DetA and HOTA (Wilcoxon p = 1.96e-04; the other 2 sequences unchanged). It recovers the bucket's oracle value +2.2676 TO FOUR DECIMALS: the geometric rule is as good as knowing the answer. Row-level audit: 5,171 rows wrong -> right, 31 wrong -> wrong, ZERO right -> wrong. Adding the positional role step gives gk_side_role +2.2923 DetA / +1.4782 HOTA, also 18/0. Stacked on the shipped v6 chain the W3+W4 components take DEV-20 from 39.3083 / 51.8083 to 43.4004 / 56.2752 (+4.09 DetA, +4.47 HOTA) for 0.000 GPU-h. Mechanism: GSR's left/right is the half a team DEFENDS, and kit clustering is ANTI-informative for keepers (a GK kit contrasts with both outfield kits by regulation) -- our chain had the keeper's team wrong on 42 of 52 keeper-owned tracks. Ships default OFF (eval.gsr_score.GK_SIDE_REPAIR = ()), composable with VOTE_TRACK_ATTRS.",
+      "value": 2.2676,
+      "unit": "GS-DetA points on DEV-20 from the GT-free keeper side rule (bar: +0.75)",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_v9_w4_registered.json",
+        "results/gsr_benchmark/gsr_v9_w4_arms.json",
+        "results/gsr_benchmark/gsr_v9_w4_summary.json",
+        "eval/gsr_score.py",
+        "tests/test_gsr_v9_w4.py"
+      ],
+      "method": "tools.gsr_v9_w4 --arms. Control = the same submission with the W3 vote only; both arms are deterministic pure functions of the submission JSON, so the GPU artifacts are byte-identical and the experimental noise floor is exactly 0. Arms and bars were written to results/gsr_v9_w4_registered.json before either was scored. The side rule was checked on GSR-TRAIN ground truth first: 79/79 keeper identities.",
+      "n": 20,
+      "caveats": [
+        "DEV-20 is the tuning split; this is not a board number and no submission was built.",
+        "The rule needs a keeper to be LABELLED a keeper: it does nothing for the 13 tracks that are keepers our role model calls players (+0.7597 DetA still on the table).",
+        "31 rows stay wrong: 3 tracks we call goalkeeper are GT players and the rule assigns them a side by geometry (2 of those rows go right -> wrong there). Net right -> wrong over the whole split is 0.",
+        "Ships default OFF pending a TEST-38 confirmation and a bundle decision."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w4-001",
+        "v9-w3-004"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "deta",
+        "goalkeeper",
+        "teamside",
+        "registered-pass"
+      ]
+    },
+    {
+      "id": "v9-w4-003",
+      "statement": "THE GT-FREE POSITIONAL KEEPER-ROLE RULE IS PRECISE AND NEARLY INERT, BECAUSE OF FRAGMENTATION. Fitted on GSR-TRAIN ground truth ONLY (57 sequences, 79 keeper and 1,145 player identities), 'the most extreme candidate on a half of the pitch with median |x| >= 36 m and penalty-area share >= 0.90 is that half's keeper' scores 67 TP / 1 FP / 12 FN, while the same thresholds WITHOUT the most-extreme-per-side selector run at precision 0.74. Applied to DEV-20 under the structural guard 'only on a half that carries no goalkeeper track at all', it fires ONCE in 20 sequences (SNGS-081 track 58, a true keeper, 54 rows): precision 1/1, but recall 54 of the 1,773 keeper-as-player rows = 3%, worth +0.0247 GS-DetA of that bucket's +0.7597. The reason is fragmentation: our tracker splits a keeper into several tracks and usually labels at least one of them goalkeeper, so the guard blocks the rest. The remaining +0.73 DetA needs a rule that can add a SECOND keeper track to a half, which cannot be fit on train GT (GT roles are perfect there) and was therefore NOT built in this session.",
+      "value": 0.0247,
+      "unit": "GS-DetA points on DEV-20 from the positional keeper-role step (bucket oracle 0.76)",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_v9_w4_registered.json",
+        "results/gsr_benchmark/gsr_v9_w4_arms.json",
+        "results/gsr_benchmark/gsr_v9_w4_summary.json"
+      ],
+      "method": "Thresholds fit on GSR-TRAIN Labels-GameState.json only (per GT identity: median |x| and share of frames inside a FIFA penalty area), then applied unchanged to DEV-20 through eval.gsr_score.gk_side_repair with steps ('role','team'). No DEV score was consulted before the arm was registered.",
+      "n": 20,
+      "caveats": [
+        "One firing on 20 sequences is a sample of 1; its 1/1 precision carries no error bar.",
+        "The train fit is on GT positions while the arm runs on our projected positions -- a domain shift the fit cannot see."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w4-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "deta",
+        "goalkeeper",
+        "role"
+      ]
+    },
+    {
+      "id": "v9-w4-004",
+      "statement": "THE GT-FREE AUDIT SURVIVES THE KEEPER REPAIR, AND THE DEV BASE-ARM DRIFT IS STILL THERE. tools.gsr_calibfill.verify_gtfree now applies the same vote AND the same keeper repair to its expectation before comparing (both no-ops while their flags are empty). Re-derived on the on-record test-49 package with the flags OFF: 0 violations / 467,425 rows / flip set {SNGS-126, -130, -131, -197}, identical to GSR_V6.md section 4. Re-derived with the flags ON (vote role+team+jersey and keeper role+team applied to a scratch copy -- 36,013 team rows changed -- no metric read): ALSO 0 violations / 467,425 rows / the same flip set, so the audit tracks the repair rather than merely tolerating it. The DEV-20 flag-ON audit is STILL underivable on the laptop: the cached base arm eval_v4_gta_f080_v6_v6det_eiou_t0.450_jg_clip_v6det_eiou is missing 10 of the 20 sequences and disagrees on row count in 4 more (SNGS-024 6,915 vs 6,701, SNGS-057 12,964 vs 12,264, SNGS-051 10,765 vs 10,723, SNGS-054 10,339 vs 10,319) -- kb v9-w1-006, unchanged since W3.",
+      "value": 0,
+      "unit": "GT-free violations over 467,425 test-49 rows, with the repair flags ON and OFF",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_benchmark/gsr_v9_w4_summary.json",
+        "tools/gsr_calibfill.py",
+        "results/gsr_benchmark/gsr_v6_testsplit_package.json"
+      ],
+      "method": "tools.gsr_calibfill.verify_gtfree over the 49 test sequences against the frozen server mirror outputs/gsr_srvtest/. The flag-ON run repaired a scratch copy of the shipped package, audited it and deleted it; no score, no package and no manifest was touched.",
+      "n": 49,
+      "caveats": [
+        "The audit is a legitimacy check, not a metric read: no GS-HOTA was computed on any test sequence in this session.",
+        "It compares team only, which is the only attribute a label could ever have reached."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w1-006",
+        "v9-w4-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "legitimacy",
+        "audit",
+        "hazard"
+      ]
     }
   ]
 }

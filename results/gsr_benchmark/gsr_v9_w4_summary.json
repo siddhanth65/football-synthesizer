@@ -1,0 +1,179 @@
+{
+  "control_voted": {
+    "GS-HOTA": 54.797012448197826,
+    "GS-DetA": 41.10815874033536,
+    "GS-AssA": 73.04747929297741,
+    "GS-LocA": 93.7224525677357,
+    "IDF1": 58.68633633800934
+  },
+  "anatomy": {
+    "tracks": {
+      "ok": 586,
+      "unmatched": 26,
+      "contaminated": 111,
+      "team:player": 63,
+      "role:player->referee": 28,
+      "team:goalkeeper": 29,
+      "role:goalkeeper->player": 13,
+      "role:referee->player": 26,
+      "role:player->goalkeeper": 3
+    },
+    "rows": {
+      "ok": 178142,
+      "unmatched": 121,
+      "contaminated": 19905,
+      "team:player": 3225,
+      "role:player->referee": 1889,
+      "team:goalkeeper": 5257,
+      "role:goalkeeper->player": 1773,
+      "role:referee->player": 3249,
+      "role:player->goalkeeper": 10
+    },
+    "matched_rows": {
+      "ok": 176746,
+      "unmatched": 0,
+      "contaminated": 19712,
+      "team:player": 3089,
+      "role:player->referee": 1836,
+      "team:goalkeeper": 5200,
+      "role:goalkeeper->player": 1722,
+      "role:referee->player": 3182,
+      "role:player->goalkeeper": 10
+    }
+  },
+  "oracles": {
+    "role_all": {
+      "GS-DetA": 43.52895847996881,
+      "dDetA": 2.420799739633445,
+      "dHOTA": 1.2951959416925618,
+      "changed": 12462
+    },
+    "team_all": {
+      "GS-DetA": 43.889326867690535,
+      "dDetA": 2.7811681273551727,
+      "dHOTA": 1.7568803127104076,
+      "changed": 8645
+    },
+    "gk_all": {
+      "GS-DetA": 44.127114700661885,
+      "dDetA": 3.0189559603265224,
+      "dHOTA": 1.908661910039939,
+      "changed": 8980
+    },
+    "contaminated": {
+      "GS-DetA": 41.44461319491628,
+      "dDetA": 0.3364544545809167,
+      "dHOTA": 0.1624786087596206,
+      "changed": 2888
+    },
+    "role_goalkeeper2player": {
+      "GS-DetA": 41.86788044293751,
+      "dDetA": 0.7597217026021497,
+      "dHOTA": 0.4592571948773454,
+      "changed": 3610
+    },
+    "role_player2goalkeeper": {
+      "GS-DetA": 41.11066134535427,
+      "dDetA": 0.002502605018911197,
+      "dHOTA": 0.0005231857164602616,
+      "changed": 12
+    },
+    "role_player2referee": {
+      "GS-DetA": 41.3959990403705,
+      "dDetA": 0.2878403000351355,
+      "dHOTA": 0.09889225233230547,
+      "changed": 2130
+    },
+    "role_referee2player": {
+      "GS-DetA": 42.45445287845211,
+      "dDetA": 1.3462941381167468,
+      "dHOTA": 0.732154764250005,
+      "changed": 6710
+    },
+    "team_goalkeeper": {
+      "GS-DetA": 43.375734576913906,
+      "dDetA": 2.267575836578544,
+      "dHOTA": 1.463056513561746,
+      "changed": 5358
+    },
+    "team_player": {
+      "GS-DetA": 41.6054843038558,
+      "dDetA": 0.497325563520441,
+      "dHOTA": 0.2916387318490763,
+      "changed": 3287
+    }
+  },
+  "arms": {
+    "gk_side": {
+      "GS-DetA": 43.375734576913906,
+      "GS-HOTA": 56.26006896175957,
+      "dDetA": 2.267575836578544,
+      "dHOTA": 1.463056513561746,
+      "changed": {
+        "team": 5360
+      },
+      "paired_hota": {
+        "mean": 1.662268891730181,
+        "helped": 18,
+        "hurt": 0,
+        "wilcoxon_p": 0.00019643672621231134
+      },
+      "paired_deta": {
+        "mean": 2.6477719695877524,
+        "helped": 18,
+        "hurt": 0
+      }
+    },
+    "gk_side_role": {
+      "GS-DetA": 43.40043802410561,
+      "GS-HOTA": 56.27518108708244,
+      "dDetA": 2.292279283770249,
+      "dHOTA": 1.4781686388846111,
+      "changed": {
+        "role": 54,
+        "team": 5414
+      },
+      "paired_hota": {
+        "mean": 1.678013136530969,
+        "helped": 18,
+        "hurt": 0,
+        "wilcoxon_p": 0.00019643672621231134
+      },
+      "paired_deta": {
+        "mean": 2.6791145043081865,
+        "helped": 18,
+        "hurt": 0
+      }
+    }
+  },
+  "unvoted_baseline": {
+    "GS-DetA": 39.3083,
+    "GS-HOTA": 51.8083
+  },
+  "subpopulation_rows": {
+    "gk_side": {
+      "wrong2right": 5171,
+      "wrong2wrong": 31,
+      "right2wrong": 0
+    },
+    "gk_side_role": {
+      "wrong2right": 5225,
+      "wrong2wrong": 31,
+      "right2wrong": 0
+    }
+  },
+  "train_fit": {
+    "gk_side_rule_train_gt": "79/79",
+    "role_rule_train_gt": "67 TP / 1 FP / 12 FN at (36 m, 0.90)"
+  },
+  "audit": {
+    "test49_flags_off": {
+      "violations": 0,
+      "n_rows": 467425
+    },
+    "test49_flags_on": {
+      "violations": 0,
+      "n_rows": 467425
+    }
+  }
+}

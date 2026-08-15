@@ -1,0 +1,41 @@
+{
+  "declared_at": "2026-08-15T10:35:00+00:00",
+  "session": "v9 W4",
+  "written_before": "any DEV-20 score of the two arms below was computed",
+  "control": {
+    "arm_dir": "outputs/gsr/deleak_v6detdev_clip_e0.3r1w0.5a0.3",
+    "state": "the shipped v6 DEV-20 submission with eval.gsr_score.vote_track_attributes applied on ('role','team','jersey') -- the W3 shipping candidate",
+    "reproduced": {"GS-DetA": 41.1082, "GS-HOTA": 54.797, "delta_vs_unvoted": {"GS-DetA": 1.7999, "GS-HOTA": 2.9887}}
+  },
+  "why_these_arms": {
+    "stage1": "results/gsr_benchmark/gsr_v9_w4_oracles.json -- the goalkeeper bucket (29 tracks whose role is right and team wrong + 13 tracks that are keepers we call players) is worth +3.0190 GS-DetA on track-level relabel, the largest reachable sub-bucket; contaminated tracks (111) are worth only +0.3365 and cannot be relabelled at all.",
+    "mechanism": "GSR left/right is the half a team DEFENDS and a keeper stands in the goal he defends, so his side is the sign of his own pitch x. Kit clustering is ANTI-informative for keepers (GSR_TEAMSIDE.md section 6: a keeper lands in his own team's cluster in 24.4% of rows)."
+  },
+  "arms": [
+    {
+      "name": "gk_side",
+      "function": "eval.gsr_score.gk_side_repair(predictions, ('team',))",
+      "rule": "every track whose majority role is 'goalkeeper' gets team = 'left' if median(bbox_pitch.x_bottom_middle) < 0 else 'right'",
+      "gt_free": "reads only our own predictions (role label + projected pitch x); no Labels-GameState.json",
+      "thresholds": "none",
+      "prior_support": "gk_self is 113/113 on dev GT (results/GSR_TEAMSIDE.md section 3) and 79/79 keeper identities on GSR-TRAIN GT (this session)"
+    },
+    {
+      "name": "gk_side_role",
+      "function": "eval.gsr_score.gk_side_repair(predictions, ('role','team'))",
+      "rule": "first, on each half of the pitch (sign of a track's median x) that carries NO goalkeeper track, relabel to 'goalkeeper' the player track with the largest median |x| among those with median |x| >= GK_MIN_ABSX_M and penalty-area frame share >= GK_MIN_PEN_FRAC; then apply gk_side to every goalkeeper track",
+      "thresholds": {"GK_MIN_ABSX_M": 36.0, "GK_MIN_PEN_FRAC": 0.9},
+      "fit_on": "GSR-TRAIN ground truth ONLY (57 sequences, 79 keeper and 1145 player identities): the most-extreme-per-side rule scores 67 TP / 1 FP / 12 FN at these thresholds. No DEV score was consulted.",
+      "structural_prior": "at most one keeper per half of the pitch (a rule of football, not a fitted parameter)"
+    }
+  ],
+  "gates": {
+    "deta": "the shipped combination must add >= +0.75 GS-DetA on top of the voted control",
+    "hota": "pooled GS-HOTA not worse than the control",
+    "paired": "per-sequence GS-HOTA helped > hurt with Wilcoxon p < 0.05 (n = 20)",
+    "subpopulation": "any arm that loses DetA on a sub-population it touches is reported as a qualifier, not hidden (the W3 treatment of role-only voting)"
+  },
+  "noise_floor": "exactly 0 -- both arms are deterministic pure functions of the submission JSON; the GPU artifacts are byte-identical to the control's",
+  "ships": "default OFF (eval.gsr_score.GK_SIDE_REPAIR = ()), composable with VOTE_TRACK_ATTRS",
+  "splits": "DEV-20 only; TEST-38, test-49 and challenge are not read in this session"
+}

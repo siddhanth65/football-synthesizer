@@ -53,6 +53,10 @@ CENTRE_SHIFT_Y = PITCH_WID / 2.0
 #: GSR distance tolerance (metres) used both by the metric (sigma) and our team-map resolution.
 GSR_DIST_TOL_M = 5.0
 
+#: Penalty-area geometry (FIFA): 16.5 m deep, 40.32 m wide -> half-width 20.16 m.
+PENALTY_DEPTH_M = 16.5
+PENALTY_HALF_WID_M = 20.16
+
 #: GSR category ids (mirror the dataset's ``categories`` so predictions look native).
 _ROLE_CATEGORY_ID = {"player": 1, "goalkeeper": 2, "referee": 3, "other": 7}
 
@@ -65,6 +69,20 @@ DEFAULT_RESULTS_DIR = Path("results/gsr_benchmark")
 #: submission is written. Empty = OFF, the shipped default (v9 W3 registered the component behind
 #: this flag; see ``results/GSR_V9_W3.md`` section 4).
 VOTE_TRACK_ATTRS: tuple[str, ...] = ()
+
+#: Steps :func:`gk_side_repair` performs when a submission is written. Empty = OFF, the shipped
+#: default (v9 W4 registered the component behind this flag; see
+#: ``results/gsr_v9_w4_registered.json`` and ``results/gsr_benchmark/gsr_v9_w4_arms.json``).
+#: ``"team"`` = a keeper's team is the side he stands in; ``"role"`` = also recover keepers the role
+#: model called players. Composable with :data:`VOTE_TRACK_ATTRS`, applied after it.
+GK_SIDE_REPAIR: tuple[str, ...] = ()
+
+#: Thresholds of the ``"role"`` step, fit on GSR-TRAIN ground truth ONLY (79 keeper identities /
+#: 1,145 player identities over the 57 train sequences): a keeper candidate's median |pitch x| and
+#: its share of frames inside a penalty area. At (36 m, 0.90) the "most extreme candidate per side"
+#: rule is 67 TP / 1 FP on train GT.
+GK_MIN_ABSX_M = 36.0
+GK_MIN_PEN_FRAC = 0.90
 
 #: Attribute configs reported by the benchmark (name -> trackeval USE_* flags).
 EVAL_CONFIGS: dict[str, dict[str, bool]] = {
@@ -203,6 +221,87 @@ def vote_track_attributes(
                     r["attributes"][key] = value
                     changed[key] += 1
     return changed
+
+
+def gk_side_repair(
+    predictions: list[dict], steps: tuple[str, ...] = ("team",),
+) -> dict[str, int]:
+    """Fix keeper attributes from geometry instead of kit colour, in place (GT-free).
+
+    GSR's ``left``/``right`` is the half a team **defends**, and a keeper stands in the goal he
+    defends -- so his side is the sign of his own pitch x. That definitional rule scores 113/113 on
+    development ground truth (``results/GSR_TEAMSIDE.md`` section 3) and 79/79 on GSR-TRAIN, while
+    kit clustering puts a keeper in his own team's cluster only ~24% of the time: a GK kit is
+    designed to contrast with both outfield kits, so appearance is *anti*-informative here.
+
+    Steps:
+
+    * ``"team"`` -- every track whose majority role is ``goalkeeper`` gets
+      ``team = "left" if median x < 0 else "right"``.
+    * ``"role"`` -- before that, on each half of the pitch that carries no goalkeeper track at all,
+      the ``player`` track with the largest median ``|x|`` among those with
+      ``|x| >= GK_MIN_ABSX_M`` and penalty-area share ``>= GK_MIN_PEN_FRAC`` is relabelled
+      ``goalkeeper`` (one keeper per half; thresholds fit on GSR-TRAIN only).
+
+    Args:
+        predictions: A submission's ``predictions`` list (mutated in place). Ball rows are skipped.
+        steps: Which steps to run; ``()`` is a no-op.
+
+    Returns:
+        ``{step: rows changed}``.
+    """
+    if not steps:
+        return {}
+    tracks: dict[int, list[dict]] = defaultdict(list)
+    for p in predictions:
+        attrs = p.get("attributes") or {}
+        if attrs.get("role") == "ball":
+            continue
+        tracks[int(p["track_id"])].append(p)
+    info: dict[int, dict] = {}
+    for tid, rows in tracks.items():
+        x = np.array([r["bbox_pitch"]["x_bottom_middle"] for r in rows], float)
+        y = np.array([r["bbox_pitch"]["y_bottom_middle"] for r in rows], float)
+        role = Counter(str((r["attributes"] or {}).get("role")) for r in rows).most_common(1)[0][0]
+        info[tid] = {"role": role, "med_x": float(np.median(x)),
+                     "pen": penalty_frac(x, y), "rows": rows}
+    changed = {s: 0 for s in steps}
+    if "role" in steps:
+        for half in (-1.0, 1.0):
+            here = [t for t, i in info.items() if np.sign(i["med_x"]) == half]
+            if any(info[t]["role"] == "goalkeeper" for t in here):
+                continue  # this half already has its one keeper
+            cand = [t for t in here if info[t]["role"] == "player"
+                    and abs(info[t]["med_x"]) >= GK_MIN_ABSX_M and info[t]["pen"] >= GK_MIN_PEN_FRAC]
+            if not cand:
+                continue
+            best = max(cand, key=lambda t: abs(info[t]["med_x"]))
+            info[best]["role"] = "goalkeeper"
+            for r in info[best]["rows"]:
+                r["attributes"]["role"] = "goalkeeper"
+                changed["role"] += 1
+    if "team" in steps:
+        for i in info.values():
+            if i["role"] != "goalkeeper":
+                continue
+            side = "left" if i["med_x"] < 0 else "right"
+            for r in i["rows"]:
+                if r["attributes"].get("team") != side:
+                    r["attributes"]["team"] = side
+                    changed["team"] += 1
+    return changed
+
+
+def penalty_frac(x: np.ndarray, y: np.ndarray) -> float:
+    """Share of centred-frame pitch points inside either penalty area (pure).
+
+    The GSR pitch frame is centred, so a penalty area is ``|x| >= PITCH_LEN/2 - 16.5`` and
+    ``|y| <= 20.16`` (the FIFA 16.5 m x 40.32 m box).
+    """
+    if len(x) == 0:
+        return 0.0
+    inside = (np.abs(x) >= CENTRE_SHIFT_X - PENALTY_DEPTH_M) & (np.abs(y) <= PENALTY_HALF_WID_M)
+    return float(np.mean(inside))
 
 
 # === GT helpers ==================================================================================

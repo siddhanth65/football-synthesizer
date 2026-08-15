@@ -330,7 +330,9 @@ def verify_gtfree(arm_dir: Path, base_arm: Path, data_dir: Path, pos_dir: Path,
     where the free map disagrees with the GT one. Any other row is a violation.
     """
     from eval.gsr_score import (  # noqa: PLC0415
+        GK_SIDE_REPAIR,
         VOTE_TRACK_ATTRS,
+        gk_side_repair,
         load_gt_people_by_frame,
         resolve_team_map,
         resolve_team_map_free,
@@ -356,9 +358,12 @@ def verify_gtfree(arm_dir: Path, base_arm: Path, data_dir: Path, pos_dir: Path,
             for b in base:
                 if b["attributes"].get("team") in swap:
                     b["attributes"]["team"] = swap[b["attributes"]["team"]]
-        # The per-track vote is a pure function of our own predictions (no label read), so the
-        # expectation is the voted base row. A no-op while VOTE_TRACK_ATTRS is empty (the default).
+        # The per-track vote and the keeper side repair are pure functions of our own predictions
+        # (no label read), so the expectation is the base row put through the same two steps, in the
+        # same order as ``tools.gsr_deleak.write_arm``. Both are no-ops while their flags are empty
+        # (the shipped default).
         vote_track_attributes(base, VOTE_TRACK_ATTRS)
+        gk_side_repair(base, GK_SIDE_REPAIR)
         for b, g in zip(base, got):
             n_rows += 1
             violations += int(g["attributes"].get("team") != b["attributes"].get("team"))

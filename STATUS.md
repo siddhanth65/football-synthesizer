@@ -1,5 +1,35 @@
 # STATUS
 
+## 2026-08-15 — v9 W4 PASS: the keeper-side repair is ORACLE-EQUIVALENT — DEV 54.80 -> 56.28 (+1.48 HOTA, 18/0, p=1.96e-04), still zero GPU; stack = +4.47 over shipped v6
+
+results/gsr_v9_w4_registered.json (declared 10:35Z, pre-scoring), results/gsr_benchmark/
+gsr_v9_w4_*.json, kb v9-w4-001..004, tools/gsr_v9_w4.py, eval/gsr_score.py (gk_side_repair,
+GK_SIDE_REPAIR default ()). Fidelity exact (shipped 39.3083/51.8083; voted 41.1082/54.7970 to
+4 dp; base arm verified = shipped submission rows, NOT the drifted cache). **Anatomy of the
+post-vote majority-wrong tracks: 62% of wrong-team row mass is GOALKEEPERS (42/52 keeper
+tracks kit-clustered wrong — GSR_TEAMSIDE §6's anti-informative-kit finding, now measured on
+the shipping chain); track-level outfield kit re-clustering = DEAD lever (+0.50 oracle < bar,
+not built); contaminated tracks +0.34 ceiling (association, closed axis).** The geometric
+fact that picked the mechanism: sign(mean pitch x) matches the GT keeper's team **52/52**
+while kit matches 10/52.
+
+**gk_side (registered, threshold-free, zero fitted parameters): every goalkeeper-majority
+track gets team = the side it stands on. DetA +2.2676, HOTA +1.4631 over the voted control,
+18 helped / 0 hurt / 2 unchanged, p=1.96e-04 — and the score is BIT-IDENTICAL to the
+team:goalkeeper oracle at 15 significant figures: a definitional rule reading only our own
+predictions equals being told the answer for that bucket.** Row audit: 5,171 wrong->right, 31
+wrong->wrong, 0 right->wrong. gk_side_role also passed (+0.0247 more) but carries the
+session's only train-fitted thresholds and fires once in 20 seqs (fragmentation blocks the
+no-keeper-on-half guard) — **orchestrator adopts the worker's recommendation: ship
+GK_SIDE_REPAIR=("team",) only.** Audit strengthened: verify_gtfree now TRACKS the repair
+(flag-ON test-49 re-derivation: 0 violations / 467,425 rows / flip set identical). Worker
+self-reported + cleaned a corrupted first oracle run (three processes, one work dir; clean
+rerun is the record). Residual attribute levers: referee<->player +1.63 (largest live),
+keeper-as-player +0.73 (needs a second-keeper-per-half rule), outfield team +0.50,
+contaminated +0.34. **Stack: 51.81 -> 54.80 (W3) -> 56.28 (W4). W5 dispatched: the referee
+axis.** DEV-20 flag-ON audit still underivable from laptop caches (kb v9-w1-006, 10/20 seqs
+missing) — freeze session must rebuild or pull the server lineage.
+
 ## 2026-08-15 — v9 W3 PASS: DetA census + track-attribute voting — DEV 51.81 -> 54.80 (+2.99 HOTA, 20/0, p=1.9e-06) at ZERO GPU; jersey is the monster lever; small-box premise refuted
 
 results/GSR_V9_W3.md, kb v9-w3-001..005, tools/gsr_v9_deta.py, eval/gsr_score.py
