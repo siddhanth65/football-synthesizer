@@ -8080,6 +8080,193 @@
     "de-leak",
     "benchmark"
    ]
+  },
+  {
+   "id": "v10-w1-001",
+   "statement": "REGISTERED BARS FAIL, and by one read: Qwen3-VL-8B-Instruct (Apache-2.0, greedy, 12 stratified closest views per tracklet as 12 separate images) scores 8 correct of 9 emitted = 0.889 precision on Sid's 13 confident tier-A human numbers (bar 0.90, Wilson 95% CI [0.565, 0.980] -- the pool cannot resolve the bar) and 10 false positives on 274 human-confirmed-none tracklets = 3.65% (bar <= 5%, PASS). The other two registered regimes are worse on precision: contact sheet 6/7 = 0.857 at 1.46% FP, single 4x-upscaled best crop 4/5 = 0.800 at 2.92% FP. It comfortably beats the v7 Qwen2-VL-2B trial's 0.265 (ident-020), so that failure was a model-size failure -- but the bar is still not cleared.",
+   "value": 0.8889,
+   "unit": "precision on the 13 human-numbered tier-A tracklets",
+   "status": "confirmed",
+   "evidence": [
+    "results/GSR_V10_W1.md",
+    "outputs/gsr/v10_w1/summary.json",
+    "outputs/gsr/w3_annotation/labelling_manifest.csv"
+   ],
+   "method": "Qwen3-VL-8B-Instruct bf16, transformers 5.14.1, A100-40GB GPU 1, greedy decode, one JSON line out; GT = Sid's 499-tracklet W3 annotation (GSR-train only, no training anywhere); registration written to results/GSR_V10_W1.md section 1 before any weight was downloaded.",
+   "n": 13,
+   "caveats": [
+    "n=9 emissions: the pool cannot distinguish 0.89 from 0.90.",
+    "7 of the 13 human numbers are '1' and 6 of those are goalkeepers; excluding all read==1 rows gives 4/5 for both the VLM and the incumbent chain.",
+    "A post-hoc mean-logprob threshold would clear both bars (>= -0.1: 8/8 = 1.000 precision, FP 3.65%), but it was chosen after seeing the labels and is not a PASS."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v8-w3-007",
+    "ident-020"
+   ],
+   "tags": [
+    "gsr",
+    "jersey",
+    "vlm",
+    "registered",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w1-002",
+   "statement": "The VLM does NOT beat the shipped PARSeq + legibility chain on identical evidence, at either level. Tier A, same 12 views: the chain scores the identical 8 of 9 (0.889) with 14 of 274 false positives (5.11%) against the VLM's 10 (3.65%). Tier B (210 tracklets whose number SoccerNet annotates): the chain names 194 of 210 correctly -- 0.9848 precision at 0.9238 recall -- against the best VLM regime's 182 (0.9579 / 0.8667); paired, chain-only correct 14 vs VLM-only 2, union 196. Per crop over the same 2,520 cells the gap is decisive: chain-only correct 324 vs VLM-only 54, exact McNemar p = 4.8e-48.",
+   "value": 0.9238,
+   "unit": "tracklet recall of the shipped chain on tier B",
+   "status": "confirmed",
+   "evidence": [
+    "results/GSR_V10_W1.md",
+    "outputs/gsr/v10_w1/summary.json",
+    "outputs/gsr/w3_annotation/labelling_manifest.csv"
+   ],
+   "method": "Incumbent parseq_v6_arm4t.ckpt (md5 39c0c15defafda072ca0cefd0a4b8e18, verified equal to the shipped reader), shipped legibility gate at 0.7 and pose torso RoI, run over the same 5,988 cells the VLM saw; tracklet read = confidence-weighted majority of the gated per-crop reads.",
+   "n": 210,
+   "caveats": [
+    "Tier-B tracklets are GT identities with GT boxes; a tracker's tracklets fragment and switch, so 0.9238 is an upper bound for the deployed pipeline.",
+    "Tier-B tracklets were selected by legibility-gate uncertainty (v8-w3-009), not at random."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w1-001",
+    "v8-w3-009"
+   ],
+   "tags": [
+    "gsr",
+    "jersey",
+    "vlm",
+    "parseq",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w1-003",
+   "statement": "CONFIRMED at machine scale by two independent readers that never saw the labels: the SoccerNet-GSR train unnamed-tracklet pool is genuinely unnumbered. On the 274 tracklets Sid marked 'none' the VLM emits a number on 10 (3.65%) and the shipped chain on 14 (5.11%); both emit on only 5 and AGREE on the number on 2 -- one a goalkeeper '1' (the prior both readers carry) and one, SNGS-100 track 18 read as 33 by three independent reads, strong evidence of a single human miss. Per crop the chain's gate passes and PARSeq emits on 68 of 3,468 tier-A cells (2.0%) against 990 of 2,520 (39.3%) tier-B cells from the same builder. v8-w3-007's 94.8% genuine-absence figure therefore needs a correction of at most ~0.4 pp, and v9-W3's judgement that the jersey over-naming bucket (+1.16 DetA oracle) is unreachable stands.",
+   "value": 0.0036,
+   "unit": "fraction of the 274 human-'none' tracklets with strong independent evidence of a missed number",
+   "status": "confirmed",
+   "evidence": [
+    "results/GSR_V10_W1.md",
+    "outputs/gsr/v10_w1/summary.json",
+    "outputs/gsr/w3_annotation/labelling_manifest.csv"
+   ],
+   "method": "Re-read of the identical 12 stratified closest views per tracklet by Qwen3-VL-8B and by the shipped chain; agreement = both readers emit and emit the same integer.",
+   "n": 274,
+   "caveats": [
+    "Absence is established only for the 12 views shown, exactly as in v8-w3-007.",
+    "The goalkeeper-'1' agreement (A0026) is weak evidence: both readers carry a GK-1 prior."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v8-w3-007",
+    "v8-w3-002"
+   ],
+   "tags": [
+    "gsr",
+    "jersey",
+    "annotation",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w1-004",
+   "statement": "The jersey-coverage loss is upstream of the reader, not in it. Given twelve stratified closest views (>= 89 px) of one clean GT identity, the shipped reader names 92.4% of numbered tracklets correctly at 0.985 precision -- while on the 10 cached DEV bundles 309 of 478 tracklets carry no confident read at all (GSR_V9_W3.md section 3.1). The binding constraint on the +16.36-DetA jersey-coverage oracle is therefore WHICH CROPS REACH THE READER (tracker fragmentation, box quality, view selection, and a per-crop gate whose admissions are 27% unreadable per v8-w3-010), not the reader's ability to read.",
+   "value": 0.9238,
+   "unit": "tracklet naming accuracy on GT identities given 12 stratified views",
+   "status": "confirmed",
+   "evidence": [
+    "results/GSR_V10_W1.md",
+    "outputs/gsr/v10_w1/summary.json",
+    "outputs/gsr/w3_annotation/labelling_manifest.csv",
+    "results/GSR_V9_W3.md"
+   ],
+   "method": "Tier-B positive control, 210 GSR-train tracklets, shipped chain unchanged.",
+   "n": 210,
+   "caveats": [
+    "The comparison crosses splits (train GT tracklets vs DEV predicted tracklets) and crosses box provenance (GT boxes vs our detector's); it motivates a DEV-20 measurement, it does not substitute for one."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w1-002"
+   ],
+   "tags": [
+    "gsr",
+    "jersey",
+    "deta",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w1-005",
+   "statement": "Reader agreement is a perfect-precision naming gate on this pool: requiring the shipped chain and Qwen3-VL-8B to emit the SAME number names 180 of 210 tier-B tracklets and gets 180 of 180 right (precision 1.0000 at 0.857 recall) against 0.9848 / 0.9238 for the chain alone; on tier A it is 6 of 6 correct with 2 false positives in 274 (0.73%). The two readers' errors are near-disjoint -- on the 13 human numbers each one's only error is the other's success.",
+   "value": 1.0,
+   "unit": "precision at 0.857 recall (agreement gate, tier B)",
+   "status": "confirmed",
+   "evidence": [
+    "results/GSR_V10_W1.md",
+    "outputs/gsr/v10_w1/summary.json",
+    "outputs/gsr/w3_annotation/labelling_manifest.csv"
+   ],
+   "method": "AND-ensemble of the two independent tracklet reads over the same 12 views.",
+   "n": 210,
+   "caveats": [
+    "Measured on GSR-train GT tracklets, never on DEV-20; no GS-DetA number exists for this rule.",
+    "The second reader costs 0.79 s per tracklet at the multi12 regime."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w1-002"
+   ],
+   "tags": [
+    "gsr",
+    "jersey",
+    "ensemble",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w1-006",
+   "statement": "Two mechanism results that close the obvious follow-ups. (a) Sid's per-cell visibility labels are a LOWER bound on machine readability, not a ceiling: on the 1,749 cells he judged illegible the shipped chain returns the correct number on 250 (14.3%, precision 0.912) and the VLM on 82 (4.7%) -- both beat single-view human reading, the chain by 3x. (b) The VLM's deficit is NOT a localization artifact: handed the identical pose torso RoIs PARSeq reads, it gets WORSE (tier-B tracklet recall 0.748 from 0.867; per-crop recall 0.201 from 0.271). Whole-body context is load-bearing for a general VLM, and a jersey-fine-tuned STR specialist reads digits better than an 8B VLM at any crop geometry.",
+   "value": 0.143,
+   "unit": "fraction of human-illegible cells the shipped chain reads correctly",
+   "status": "confirmed",
+   "evidence": [
+    "results/GSR_V10_W1.md",
+    "outputs/gsr/v10_w1/summary.json",
+    "outputs/gsr/w3_annotation/labelling_manifest.csv"
+   ],
+   "method": "Per-crop reads of both readers over the 2,520 tier-B cells carrying Sid's visibility labels; the torso arm re-runs the VLM on the 5,319 pose torso RoIs the chain uses.",
+   "n": 1749,
+   "caveats": [
+    "'Correct' means matching the tracklet's GT number, which is identity-carried (v8-w3-001), so a correct read on a hidden cell cannot be told from a lucky one without per-cell number GT -- but at 0.912 precision over 274 emissions luck is not the explanation."
+   ],
+   "date": "2026-08-15",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v8-w3-009",
+    "v8-w3-010"
+   ],
+   "tags": [
+    "gsr",
+    "jersey",
+    "annotation",
+    "vlm",
+    "v10"
+   ]
   }
  ]
 }

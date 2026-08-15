@@ -34,13 +34,15 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
 - Scope (2026-07-17 pivot, per Sid): **Manchester United, EPL 2024-25 season** — demo = opposition
   scouting pack for ManU. France/WC material is REFERENCE ONLY (PMSR PDFs stay as method-calibration
   ground truth). Footage source: PL website 24-25 replays, supplied by Sid.
-- **Scope amendment (2026-08-14, per Sid, OVERRIDING): SOLE goal = beat 61.48 GS-HOTA on the
-  live GSR test board. The vehicle is the v9 association campaign (learned association in
-  metric pitch coordinates — TWiX/MOTIP/SUSHI lineage on our cue basis, targeting the measured
-  +11.9 connector-achievable ceiling). Do NOT propose or mention challenge pivots
-  (PCBAS/SynLoc/2027 etc.) unless Sid explicitly raises them. Spend priority: the jugular,
-  not cheap probes.** (Prior 2026-07-31 amendment — GSR focus over ManU corpus — still holds
-  underneath.)
+- **Scope amendment (2026-08-15, per Sid, OVERRIDING): goal = 70 GS-HOTA on the GSR test
+  board ("use as much GPU as you need, do anything"). Context: a NEW leader "betterdays"
+  posted 68.3 (DetA 55.86 / AssA 83.53) on 2026-08-14 — an existence proof that the
+  benchmark ceiling far exceeds our v6/v9 substrate (our architecture-level closures stand;
+  the BENCHMARK-level ceiling was never ours to close). Campaign v10 = substrate rebuild:
+  identity evidence at scale (VLM reading), modern detection, learned association on the
+  new substrate. Do NOT propose challenge pivots unless Sid raises them.** (Prior
+  amendments — beat-61.48/v9, 2026-07-31 GSR focus — superseded but their discipline rules
+  all still apply: registration, gates, GT-free legitimacy, cluster-only GPU.)
 - **Scope amendment (2026-07-31, per Sid): primary near-term goal = score well on the SoccerNet
   GSR benchmark (GS-HOTA), using the SoccerNet GSR dataset.** ManU-corpus adaptation deferred.
   College GPU cluster is approved (Sid books slots on request); the 4 GB constraint applies to the

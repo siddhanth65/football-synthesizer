@@ -1,5 +1,99 @@
 # STATUS
 
+## 2026-08-15 — v10 W1 (VLM trial): FAIL by one read at n=9 — and three decisive answers: our PARSeq CRUSHES an 8B VLM per-crop (p=4.8e-48); 94.8% genuine absence CONFIRMED at VLM scale; coverage loss is UPSTREAM of the reader (92.4% named given good views)
+
+results/GSR_V10_W1.md (§1 registered pre-download), kb v10-w1-001..006, outputs/gsr/v10_w1/.
+Qwen3-VL-8B (Apache-2.0, 17.5 GB via curl — server IPv6 gotcha documented: hf/requests hang,
+curl works). On Sid's 499-label GT: best VLM regime 0.889 precision at 9/13 emitted (bar 0.90
+— unresolvable at n=9; FAIL as registered), FP on human-none 3.65% (bar PASS). The v7 2B
+trial (0.265) was a model-size failure (ident-020 context corrected) — but the incumbent
+STANDS: tier-B positive control chain 0.985/0.924 vs VLM 0.958/0.867; per-crop chain-only
+correct 324 vs VLM-only 54, McNemar p=4.8e-48; handing the VLM our torso RoIs makes it WORSE
+(general VLM < fine-tuned STR specialist). **Identity-via-VLM is closed — consistent with
+the Baishev recon (no VLM at 68.3).** 94.8%-genuine-absence confirmed (correction <= 0.4 pp).
+
+**The two findings that outlive the FAIL: (1) given 12 stratified views of one clean
+identity, the shipped reader names 92.4% of numbered tracklets — but on DEV 309/478
+tracklets carry no confident read: COVERAGE LOSS IS UPSTREAM (fragmented tracklets never
+assemble good views) — an association/geometry problem, converging with the calibration
+thread. (2) chain-AND-VLM agreement is a perfect-precision gate (180/180 tier-B, 1.0000 at
+0.857 recall) — banked, low priority.** Post-hoc logprob threshold would clear both bars —
+reported, NOT claimed (chosen after labels). 0.48 GPU-h. v10-W2 (calibration audit) in
+flight — briefly co-resident on GPU 1 at peak 36.4/40.9 GiB, no OOM, noted.
+
+## 2026-08-15 — betterdays UNMASKED (Sid's codabench login): Oleg Baishev, HSE Master's student, github.com/PogChamper — his PUBLIC pipeline is our twin (55.68/DetA 42.1); the private +12.6 is, on commit evidence, a CALIBRATION overhaul; his bug list = our free audit checklist
+
+Recon (public sources only): soccerGSR repo (MIT service code, vendored AGPL BoxMOT +
+GPL-2.0 PnLCalib subsets), stated 55.682 / 42.144 / 73.586 — the 68.3 method is PRIVATE.
+His stack: DEIMv2-DINOv3 detector @896, BoT-SORT, OSNet ReID + kmeans teams, ShuffleNet
+legibility + ConvNeXt-Tiny OCR — **NO VLM** (identity is not his edge; consistent with our
+closures). **The tell: his BroadTrack fork (EVS proprietary noncommercial license —
+INSTRUMENT-ONLY for us) got 14 commits on 2026-08-09/10, four days pre-submission, fixing:
+BGR frames fed to RGB-trained keypoint HRNet, broken heatmap decode, un-inverted forward
+radial distortion, non-subpixel line points, TVCalib-mismatched preprocessing, and
+"process every frame at native resolution" + SoccerNet-GSR run/evaluate scripts.
+GS-HOTA matches in PITCH coordinates — calibration quality gates DetA AND AssA; a tripod
+camera model halving reprojection error is a +10-14 DetA-shaped change off HIS baseline.**
+Our tempered expectation: our calibration measured GOOD (0.475 m, v8-W2), our localization
+oracle is +3.74 (W3-v9 bucket e) + the veto/dead-frame mass — the checklist may recover
+part of that, not his +13. Weights all unlicensed Drive blobs (instrument-only); training
+unverifiable (zero training scripts — no evidence for or against challenge self-training);
+his public fork of EVS-licensed code is HIS exposure, and cautions us off his fork. His
+dfine-cpp (Apache-2.0) marks the license-clean modern-detector path. **v10-W2 dispatched:
+audit OUR PnLCalib integration against the six-defect checklist (transfer limited to the
+standard-bug LIST, no code read), measure each present defect on the W2 probe, fix behind
+flags, registered DEV gates. v10-W1 (VLM trial) still in flight on GPU 1.**
+
+## 2026-08-15 — v10 recon: betterdays is ANONYMOUS (no paper/repo; likely pre-WACV-2027 one-shot) — but Broadcast2Pitch++ (KIST, June 2026, CC BY 4.0, full hyperparameters, 62.56) is a legally buildable-upon recipe; identity-gating costs the SOTA ~37 DetA points
+
+Recon (verified via codabench API + literature sweep): betterdays = rank 1, 68.3/55.86/83.53,
+ONE submission (2026-08-14T10:44Z), no profile metadata, no paper, no repo, absent from every
+other SoccerNet board; GitHub "betterdays" is a dormant 2012 account. Pattern reads as a lab
+benchmarking before a deadline — WACV 2027 R1 papers surface on arXiv in the next 4-6 weeks
+(standing watch). **Cheapest remaining probe needs SID: log into codabench — betterdays'
+profile and the competition forum (id 4283) are login-gated but visible to participants.**
+
+**The build-upon gift: Broadcast2Pitch++ (KIST, Research Square 2026-06-02, DOI 10.21203/
+rs.3.rs-9790440/v1, text CC BY 4.0, no code, EVERY hyperparameter in the text): test-split
+62.56/48.85/80.12.** Recipe: YOLOX + DeepEIoU/OSNet + EffNetV2-S+U-Net calibration (97 kpts
++ 18 lines, DLT+LM) + **fine-tuned LLaMA-3.2-Vision identity** + depth-aware tracking
+(Depth-Anything-V2-Small foot-depth, EMA 0.5, cost weight 0.3) + **IDASTR soft-merge**
+(split at >25-frame gaps; merge cost = ReID cosine + 0.5 spatial + 0.2 identity-DISAGREEMENT
+majority votes, thr 0.45 — soft identity costs, precisely our v9-W1 finding that hard
+gates forbid 19.8% of true merges). Depth variant: AssA 81.87 but DetA -6.5 (trade-off on
+record). **The decisive ablation: with identity attributes disabled their GS-DetA is ~86;
+gated it collapses to ~49 — identity attribution, not detection, is where ~37 DetA points
+die at SOTA. betterdays' 55.86 = ~7 more points of correctly-attributed identity; AssA 83.5
+is within published range (lianyou 85.33 challenge-split), so the DetA jump is the real
+mystery — and it is coupled to AssA through vote quality (cleaner tracklets -> better
+jersey votes).** v10 roadmap firms up: VLM identity (W1 trial in flight decides the reader)
++ IDASTR-style soft-merge on our substrate + temporal aggregation; published recipes compose
+to ~62-65; the last ~5 to 70 is unmapped by anyone public. KIST author contact for their
+UNLICENSED repo remains jinwook.kim21@gmail.com (the CC BY preprint TEXT needs no permission).
+
+## 2026-08-15 — BOARD SHOCK + v10 OPENS: new leader "betterdays" 68.3 (DetA 55.86 / AssA 83.53, posted 2026-08-14) — the BENCHMARK ceiling far exceeds our substrate; Sid's new goal: 70 ("use as much GPU as needed")
+
+Sid supplied a leaderboard screenshot: betterdays 68.3 tops myyyy/Broadcast2Pitch 61.48 by
++6.8; our 53.09 now sits 9th; board rows visible: Metrica-Sports 58.17, Playbox&MIXI 58.06,
+KIST 56.56, vladika 55.82, tyler_durden 55.59, SJTU 54.77. **Interpretation on record: our
+v9 closures priced OUR v6-substrate's ceiling (~57-58) — correct and standing — but 68.3 is
+an existence proof that identity evidence + association scale far beyond that substrate.
+DetA 55.86 vs our 41.28 is the telling number: identity-gated detection at a level our
+jersey-evidence stack cannot reach.** CLAUDE.md scope amended: v10 = substrate rebuild,
+goal 70. The v9 submission #6 package (55.4062 local) remains VALID and worth uploading
+meanwhile (lands ~8th, ahead of SJTU; establishes the arc while v10 builds).
+
+**v10 opening dispatches:** (1) RECON agent on betterdays — paper/repo/method hunt (arXiv
+Jul-Aug 2026, GitHub, codabench profile); if they published, "build upon the best" resumes
+with a 68.3 anchor. (2) v10-W1: **open-weights VLM jersey reading at scale on the A100**
+(Qwen2.5-VL-7B class) — the one direction never tried at scale (the v7 2B trial's 0.265
+precision is the floor to beat), validated against Sid's 499-tracklet human annotation as
+GT (registered bars: precision >= 0.90 on human-numbered, false-positive <= 5% on
+human-confirmed-none; a FAIL confirms the 94.8%-genuine-absence hypothesis at VLM scale —
+itself a thesis claim). Housekeeping: the v9 zip stays untracked for now (classifier blocks
+force-adding gitignored binaries; sha256 is in the committed freeze record; Sid can
+one-liner it).
+
 ## 2026-08-15 — v9 W9 FREEZE: all 4 TEST-38 gates PASS (+3.84 HOTA, 38/38, p=7.3e-12) — test-49 local 55.4062; submission #6 PACKAGED, awaiting Sid's upload; expected board ~55.4
 
 results/gsr_v9_frozen.json (declared 16:12:49Z BEFORE any TEST-38 read), results/
