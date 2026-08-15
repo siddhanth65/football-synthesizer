@@ -1,0 +1,116 @@
+{
+  "session": "v9 W5",
+  "gpu_hours": 0.0,
+  "splits_read": ["DEV-20 (tuning)", "GSR-TRAIN GT (threshold validation)",
+                  "test-49 predictions (GT-free audit only, no metric read)"],
+  "harness_fidelity": {
+    "arm_dir": "outputs/gsr/deleak_v6detdev_clip_e0.3r1w0.5a0.3",
+    "base": {"GS-DetA": 39.3083, "GS-HOTA": 51.8083, "GS-AssA": 68.2868, "GS-LocA": 93.6523},
+    "vote_all": {"GS-DetA": 41.1082, "GS-HOTA": 54.797, "GS-AssA": 73.0475, "GS-LocA": 93.7225},
+    "vote_all_plus_gk_side_team": {"GS-DetA": 43.3757, "GS-HOTA": 56.2601, "GS-AssA": 72.9755,
+                                   "GS-LocA": 93.7996},
+    "reproduced_to_4dp": true,
+    "lineage": "218,291 prediction rows over 20 sequences; per-sequence counts match the shipped submission (SNGS-024 6701, SNGS-051 10723, SNGS-054 10319, SNGS-057 12264), i.e. NOT the drifted eval_v4 cache of kb v9-w1-006 / v9-w4-004"
+  },
+  "residual_map_on_the_w4_control": {
+    "note": "per-track anatomy of the vote + gk_side(team) submission; team:goalkeeper has been fully absorbed by gk_side and no longer appears",
+    "ok": {"tracks": 615, "rows": 187542},
+    "contaminated": {"tracks": 111, "rows": 20193, "oracle_dDetA_on_the_vote_only_control": 0.3365},
+    "role:referee->player": {"tracks": 26, "rows": 3355, "oracle_dDetA": 1.3463},
+    "team:player": {"tracks": 63, "rows": 3287, "oracle_dDetA": 0.4973},
+    "role:player->referee": {"tracks": 28, "rows": 1904, "oracle_dDetA": 0.2878},
+    "role:goalkeeper->player": {"tracks": 13, "rows": 1805, "oracle_dDetA": 0.7597},
+    "role:player->goalkeeper": {"tracks": 3, "rows": 10, "oracle_dDetA": 0.0025},
+    "unmatched": {"tracks": 37, "rows": 195}
+  },
+  "stage1_referee": {
+    "geometry": {
+      "referee_owned_player_voted_tracks": {"tracks": 26, "rows": 3355, "median_abs_y_m": 7.94},
+      "our_referee_tracks_central_abs_y_lt_25": {"tracks": 51, "rows": 9946,
+                                                 "of_which_true_referees_rows": 7831},
+      "our_referee_tracks_touchline_abs_y_ge_25": {"tracks": 43, "rows": 6223},
+      "reading": "the bucket is the MAIN referee (central corridor), not the assistants; the detector already gets both the touchline assistants and 27 central referee tracks right, so no |y| threshold separates the bucket from the tracks it would break"
+    },
+    "role_flicker_per_row_referee_share_unvoted": {
+      "gt_player": {"n": 614, "median": 0.0, "frac_gt_0": 0.244, "frac_ge_0.1": 0.145},
+      "gt_goalkeeper": {"n": 49, "median": 0.0, "frac_gt_0": 0.02, "frac_ge_0.1": 0.0},
+      "gt_referee": {"n": 85, "median": 0.88, "frac_gt_0": 0.894, "frac_ge_0.1": 0.871},
+      "best_sweep_cell": {"threshold": 0.3, "tp_tracks": 10, "tp_rows": 2456, "fp_tracks": 15,
+                          "fp_rows": 3497},
+      "reading": "every threshold loses more rows than it wins"
+    },
+    "kit_distinctness": {
+      "pool": "9 DEV-20 sequences whose CLIP detection-embedding cache still joins the submission's track ids; 267 tracks with purity >= 0.7 and >= 20 rows",
+      "median_distance_to_nearer_team_centroid": {"player": 0.6776, "referee": 0.9004,
+                                                  "goalkeeper": 0.949},
+      "auc_referee_over_player": 0.8821,
+      "operating_points": {"p90_player_0.9026": {"referees_caught": "12/26", "players_hit": "23/225"},
+                           "p95_player_0.9571": {"referees_caught": "8/26", "players_hit": "12/225"}},
+      "reading": "the premise is directionally TRUE and quantitatively too weak; and the GK trap is worse than stated -- keepers sit FARTHER from both team centroids than referees do"
+    },
+    "artifact_hazard": {
+      "cache": "outputs/gsr/detembed_cache_clip_v6det_eiou",
+      "joinable_tracks": "790 of 896 DEV-20 tracks; 11 of 20 sequences have a broken join (SNGS-021 24/35, -030 30/38, -036 31/41, -081 34/55, -084 30/40, -087 25/34, -090 32/44, -093 31/40, -096 36/44)",
+      "kb": "a fresh instance of v9-w1-006"
+    },
+    "decision": "NOT BUILT"
+  },
+  "stage1_keeper": {
+    "bucket_oracle_dDetA": 0.7597,
+    "tracks": 13,
+    "rows": 1773,
+    "positionally_unreachable": {
+      "tracks": 2, "rows": 571,
+      "detail": "SNGS-096 t70 (405 rows, median x -22.1 m, penalty share 0.00) and SNGS-093 t56 (166 rows, median x 26.0 m, penalty share 0.00) -- keepers who left their line entirely",
+      "implied_ceiling_dDetA": 0.51
+    },
+    "w4_blocker_confirmed": "10 of the 13 sit on a half that already carries a goalkeeper-labelled track; 5 of those overlap it in time by 2 to 50 frames (SNGS-042 t26 50/529, SNGS-054 t110 9/101, SNGS-030 t71 7/14, SNGS-027 t114 3/68, SNGS-087 t47 2/115)"
+  },
+  "train_fit": {
+    "source": "GSR-TRAIN Labels-GameState.json, 57 sequences, 79 keeper and 1,145 player identities",
+    "candidates_passing_36m_and_0.90": 35,
+    "role2_strict_firings": 0,
+    "role2dom_firings": 2,
+    "note": "every firing on train GT is a false positive by construction (GT carries exactly one keeper per side and never fragments him)"
+  },
+  "arms": {
+    "control": {"GS-DetA": 43.3757, "GS-HOTA": 56.2601},
+    "gk_second": {
+      "GS-DetA": 43.5476, "GS-HOTA": 56.3296, "dDetA": 0.1718, "dHOTA": 0.0695,
+      "changed": {"role2": 485, "team": 437},
+      "audit_rows": {"wrong2right": 350, "wrong2wrong": 76, "right2wrong": 4,
+                     "changed_unmatched": 55},
+      "paired_hota": {"mean": 0.0683, "helped": 4, "hurt": 0, "wilcoxon_p": 0.0679},
+      "paired_deta": {"mean": 0.1723, "helped": 4, "hurt": 0},
+      "verdict": "FAIL -- +0.1718 against the registered +0.35 bar, and the paired gate misses too (p = 0.068, only 4 of 20 sequences change at all)"
+    },
+    "gk_second_dom": {
+      "GS-DetA": 43.5899, "GS-HOTA": 56.3515, "dDetA": 0.2142, "dHOTA": 0.0915,
+      "changed": {"role2dom": 608, "team": 552},
+      "audit_rows": {"wrong2right": 447, "wrong2wrong": 78, "right2wrong": 4,
+                     "changed_unmatched": 79},
+      "paired_hota": {"mean": 0.0908, "helped": 5, "hurt": 0, "wilcoxon_p": 0.0431},
+      "paired_deta": {"mean": 0.2076, "helped": 5, "hurt": 0},
+      "verdict": "FAIL -- +0.2142 against the registered +0.35 bar (the paired gate passes)"
+    },
+    "per_sequence_deltas_gk_second_dom": {"SNGS-027": 1.9658, "SNGS-054": 0.7065,
+                                          "SNGS-081": 0.7429, "SNGS-084": 0.7277,
+                                          "SNGS-093": 0.0093},
+    "right_to_wrong_share": "4 of 485 (0.8%) and 4 of 608 (0.7%) touched rows -- far below the 10% report-loudly threshold"
+  },
+  "audit": {
+    "test49_flags_off": {"violations": 0, "n_rows": 467425,
+                         "flipped": ["SNGS-126", "SNGS-130", "SNGS-131", "SNGS-197"]},
+    "test49_flags_on": {"violations": 0, "n_rows": 467425,
+                        "flipped": ["SNGS-126", "SNGS-130", "SNGS-131", "SNGS-197"],
+                        "rows_changed": {"vote": {"role": 5657, "team": 30289, "jersey": 14754},
+                                         "repair": {"role2": 4497, "team": 7579}}},
+    "note": "identical to GSR_V6.md section 4 and to the W4 re-derivation; no metric was read on test-49"
+  },
+  "residual_after_w5": {
+    "shipping_stack_unchanged": "vote_all + gk_side(team) = 43.3757 / 56.2601; nothing new ships",
+    "keeper_bucket_left": "about +0.55 of the +0.7597, of which ~0.25 is positionally unreachable and ~0.30 is blocked by DUPLICATE CONCURRENT TRACKS on one keeper (the tracker emits two tracks on the same person in the same frames, which defeats the physical non-coexistence guard) -- that is an association/dedup problem, not an attribute one",
+    "referee_bucket_left": "+1.6341, no GT-free mechanism found",
+    "next_largest_untouched": "contaminated tracks +0.3365 (association) and outfield team +0.4973 (declared a dead lever in W4)"
+  }
+}

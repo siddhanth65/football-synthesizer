@@ -74,7 +74,9 @@ VOTE_TRACK_ATTRS: tuple[str, ...] = ()
 #: default (v9 W4 registered the component behind this flag; see
 #: ``results/gsr_v9_w4_registered.json`` and ``results/gsr_benchmark/gsr_v9_w4_arms.json``).
 #: ``"team"`` = a keeper's team is the side he stands in; ``"role"`` = also recover keepers the role
-#: model called players. Composable with :data:`VOTE_TRACK_ATTRS`, applied after it.
+#: model called players; ``"role2"`` / ``"role2dom"`` = the v9 W5 concurrency-guarded replacements
+#: for ``"role"`` that can recover a FRAGMENTED keeper (``results/gsr_v9_w5_registered.json``).
+#: Composable with :data:`VOTE_TRACK_ATTRS`, applied after it.
 GK_SIDE_REPAIR: tuple[str, ...] = ()
 
 #: Thresholds of the ``"role"`` step, fit on GSR-TRAIN ground truth ONLY (79 keeper identities /
@@ -242,6 +244,15 @@ def gk_side_repair(
       the ``player`` track with the largest median ``|x|`` among those with
       ``|x| >= GK_MIN_ABSX_M`` and penalty-area share ``>= GK_MIN_PEN_FRAC`` is relabelled
       ``goalkeeper`` (one keeper per half; thresholds fit on GSR-TRAIN only).
+    * ``"role2"`` -- the v9 W5 replacement for ``"role"``: the same two thresholds, but the guard is
+      **temporal** instead of global. Every keeper-shaped ``player`` track on a half is relabelled
+      when it shares no frame with a goalkeeper-majority track on that half, because two tracks that
+      never coexist can be fragments of one person and two that do coexist cannot. This is what lets
+      a fragmented keeper be recovered when one of his own fragments is already labelled correctly.
+    * ``"role2dom"`` -- ``"role2"`` plus: a candidate that *does* coexist with keeper tracks is still
+      promoted when it is deeper than every one of them (at most one keeper per half at a time, and
+      he is the deepest person on it). Riskier: 2 false positives on GSR-TRAIN GT against 0 for
+      ``"role2"``.
 
     Args:
         predictions: A submission's ``predictions`` list (mutated in place). Ball rows are skipped.
@@ -264,7 +275,8 @@ def gk_side_repair(
         y = np.array([r["bbox_pitch"]["y_bottom_middle"] for r in rows], float)
         role = Counter(str((r["attributes"] or {}).get("role")) for r in rows).most_common(1)[0][0]
         info[tid] = {"role": role, "med_x": float(np.median(x)),
-                     "pen": penalty_frac(x, y), "rows": rows}
+                     "pen": penalty_frac(x, y), "rows": rows,
+                     "frames": {r.get("image_id") for r in rows}}
     changed = {s: 0 for s in steps}
     if "role" in steps:
         for half in (-1.0, 1.0):
@@ -280,6 +292,14 @@ def gk_side_repair(
             for r in info[best]["rows"]:
                 r["attributes"]["role"] = "goalkeeper"
                 changed["role"] += 1
+    for step in ("role2", "role2dom"):
+        if step not in steps:
+            continue
+        for tid in _second_keepers(info, dominance=step == "role2dom"):
+            info[tid]["role"] = "goalkeeper"
+            for r in info[tid]["rows"]:
+                r["attributes"]["role"] = "goalkeeper"
+                changed[step] += 1
     if "team" in steps:
         for i in info.values():
             if i["role"] != "goalkeeper":
@@ -290,6 +310,32 @@ def gk_side_repair(
                     r["attributes"]["team"] = side
                     changed["team"] += 1
     return changed
+
+
+def _second_keepers(info: dict[int, dict], *, dominance: bool) -> list[int]:
+    """Track ids the second-keeper rule promotes to ``goalkeeper`` (pure; see :func:`gk_side_repair`).
+
+    Args:
+        info: ``{track_id: {"role", "med_x", "pen", "frames"}}`` for every non-ball track.
+        dominance: Also promote a candidate that coexists with keeper tracks but is deeper than all
+            of them.
+
+    Returns:
+        The promoted track ids, deterministic (sorted by decreasing ``|med_x|``, then by id).
+    """
+    out: list[int] = []
+    for half in (-1.0, 1.0):
+        here = {t: i for t, i in info.items() if np.sign(i["med_x"]) == half}
+        keepers = [t for t, i in here.items() if i["role"] == "goalkeeper"]
+        cand = [t for t, i in here.items() if i["role"] == "player"
+                and abs(i["med_x"]) >= GK_MIN_ABSX_M and i["pen"] >= GK_MIN_PEN_FRAC]
+        for t in sorted(cand, key=lambda t: (-abs(here[t]["med_x"]), t)):
+            conc = [k for k in keepers if here[k]["frames"] & here[t]["frames"]]
+            if not conc:
+                out.append(t)
+            elif dominance and all(abs(here[t]["med_x"]) > abs(here[k]["med_x"]) for k in conc):
+                out.append(t)
+    return out
 
 
 def penalty_frac(x: np.ndarray, y: np.ndarray) -> float:

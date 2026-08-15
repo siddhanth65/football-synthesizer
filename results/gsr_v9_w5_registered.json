@@ -1,0 +1,58 @@
+{
+  "declared_at": "2026-08-15T12:20:00+00:00",
+  "session": "v9 W5",
+  "written_before": "any DEV-20 score of the arms below was computed",
+  "harness_fidelity": {
+    "arm_dir": "outputs/gsr/deleak_v6detdev_clip_e0.3r1w0.5a0.3",
+    "base": {"GS-DetA": 39.3083, "GS-HOTA": 51.8083},
+    "vote_all": {"GS-DetA": 41.1082, "GS-HOTA": 54.797},
+    "vote_all+gk_side_team": {"GS-DetA": 43.3757, "GS-HOTA": 56.2601},
+    "verdict": "all three registered rows reproduced to 4 dp; per-sequence prediction row counts match the shipped-submission lineage (SNGS-024 6701, SNGS-051 10723, SNGS-054 10319, SNGS-057 12264), i.e. NOT the drifted eval_v4 cache of kb v9-w1-006 / v9-w4-004",
+    "control": "vote_track_attributes(role,team,jersey) + gk_side_repair(('team',)) on the shipped DEV-20 arm"
+  },
+  "stage1_verdict_referee_axis": {
+    "decision": "NOT BUILT",
+    "oracle_left_on_the_table": {"role:referee->player": 1.3463, "role:player->referee": 0.2878},
+    "why": [
+      "GEOMETRY IS NOT SEPARABLE. The bucket is the MAIN referee, not the assistants: the 26 referee-owned player-voted tracks have median |y| 7.9 m and the 8 largest (2,890 of 3,249 rows) all sit in the central corridor, exactly where 520 correctly-labelled player tracks live. Our detector already gets the touchline assistants (59 correctly-labelled referee tracks, median |y| 31.6 m, 95% of rows beyond |y| 30) and it also gets 27 central referee tracks right (7,831 rows), so 'referee-labelled AND central -> player' would break 7,831 rows to fix 1,496.",
+      "ROLE FLICKER IS NOT SEPARABLE. Per-row referee share, measured on the unvoted submission: GT-referee-owned tracks median 0.880, GT-player-owned tracks median 0.000 -- but 24.4% of GT-player tracks carry SOME referee row and 14.5% carry >= 0.10. Every threshold on that share loses: at 0.30 it fires on 25 tracks, 10 true (2,413 rows) and 15 false (3,441 rows).",
+      "THE KIT-DISTINCTNESS PREMISE IS TRUE BUT TOO WEAK, AND THE GK TRAP IS WORSE THAN STATED. On the 9 DEV sequences whose CLIP detection-embedding cache still joins the shipped submission's track ids, distance from a track's mean embedding to the nearer of the two team centroids separates referees from players at AUC 0.882 -- but GOALKEEPERS ARE FARTHER OUT THAN REFEREES (median dmin 0.949 vs 0.900 vs 0.678 for players), and at the 90th player percentile the rule catches 12 of 26 referees while hitting 23 of 225 players. Precision 0.34 at the operating point the premise proposes.",
+      "ARTIFACT HAZARD. outputs/gsr/detembed_cache_clip_v6det_eiou joins the shipped submission on only 790 of 896 DEV-20 tracks, and on 11 of 20 sequences the join is broken (SNGS-021 24/35, -081 34/55, -087 25/34, -090 32/44 ...) -- a fresh instance of kb v9-w1-006. An arm built on it could not be reproduced for a test package without re-extraction."
+    ],
+    "conclusion": "no GT-free mechanism on this axis clears any honest bar; per the brief, it is not built"
+  },
+  "why_the_bar_moves": {
+    "brief_bar": 0.6,
+    "a_priori_ceiling_of_the_only_live_bucket": "The keeper-as-player bucket's track-level relabel oracle is +0.7597 GS-DetA over 13 tracks / 1,773 rows. TWO of those tracks (SNGS-096 t70, 405 rows, median x -22.1 m, penalty share 0.00; SNGS-093 t56, 166 rows, median x 26.0 m, penalty share 0.00) are keepers who left their line entirely and carry NO keeper positional signature at all. 571 of 1,773 rows (32%) are therefore unreachable by any positional rule, leaving a hard ceiling of about +0.51 DetA.",
+    "registered_bar": 0.35,
+    "bar_justification": "+0.35 is ~70% of the reachable ceiling (+0.51) of the only bucket with a live mechanism. Registering the brief's +0.60 for this arm alone would be registering an arithmetically impossible target. The other gates are unchanged from W3/W4."
+  },
+  "arms": [
+    {
+      "name": "gk_second",
+      "function": "eval.gsr_score.gk_side_repair(predictions, ('role2', 'team'))",
+      "rule": "On each half of the pitch (sign of a track's median pitch x), a PLAYER-majority track with median |x| >= GK_MIN_ABSX_M and penalty-area frame share >= GK_MIN_PEN_FRAC is relabelled 'goalkeeper' when it shares NO frame with any goalkeeper-majority track on that same half. Then gk_side's 'team' step gives every goalkeeper track the side it stands in.",
+      "new_content_vs_w4": "W4's 'role' step required the half to carry NO goalkeeper track anywhere in the clip and then promoted only the single most extreme candidate; because our tracker fragments a keeper and usually labels one fragment correctly, that guard blocked the other fragments (it fired once in 20 sequences, +0.0247 DetA). The new test is temporal instead of global: two tracks that never share a frame can be the same person, two that do cannot.",
+      "thresholds": "NONE NEW -- GK_MIN_ABSX_M = 36.0 and GK_MIN_PEN_FRAC = 0.90 are W4's, fit on GSR-TRAIN GT only. The concurrency test has no parameter.",
+      "train_fit": "GSR-TRAIN GT, 57 sequences, 79 keeper and 1,145 player identities: 35 player identities pass the (36 m, 0.90) gate; the concurrency test rejects ALL 35 -- 0 firings, i.e. 0 false positives, since a GT keeper is never fragmented and so always coexists with any deep candidate on his side.",
+      "gt_free": "reads only our own predictions (role labels, projected pitch x/y, image_id)"
+    },
+    {
+      "name": "gk_second_dom",
+      "function": "eval.gsr_score.gk_side_repair(predictions, ('role2dom', 'team'))",
+      "rule": "As gk_second, but a candidate that DOES share frames with goalkeeper-majority tracks on its half is still promoted when it is deeper (larger median |x|) than every one of those concurrent keeper tracks -- the structural rule being 'at most one keeper per half at a time, and he is the deepest person on it'.",
+      "thresholds": "NONE NEW (same two W4 thresholds).",
+      "train_fit": "GSR-TRAIN GT: 2 firings over 1,145 player identities (both in SNGS-106, 874 rows) -- both false positives by construction, because GT carries exactly one keeper per side. Precision 0/2 on train for the extra firings the dominance test adds; it is registered as the RISKY arm.",
+      "gt_free": "same"
+    }
+  ],
+  "gates": {
+    "deta": "the shipped arm must add >= +0.35 GS-DetA on top of the W4 control (vote_all + gk_side team)",
+    "hota": "pooled GS-HOTA not worse than the control",
+    "paired": "per-sequence GS-HOTA helped > hurt with Wilcoxon p < 0.05 (n = 20)",
+    "subpopulation": "row-level audit of every touched row (wrong->right / wrong->wrong / right->wrong); any right->wrong population above 10% of the rows touched is reported loudly, not hidden"
+  },
+  "noise_floor": "exactly 0 -- both arms are deterministic pure functions of the submission JSON; the GPU artifacts are byte-identical to the control's",
+  "ships": "default OFF (eval.gsr_score.GK_SIDE_REPAIR = ()), composable with VOTE_TRACK_ATTRS, applied after it",
+  "splits": "DEV-20 only; TEST-38, test-49 and challenge are not read in this session"
+}

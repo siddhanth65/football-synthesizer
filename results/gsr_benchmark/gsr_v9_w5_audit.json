@@ -1,0 +1,46 @@
+{
+ "flags_off": {
+  "n_sequences": 49,
+  "n_rows": 467425,
+  "violations": 0,
+  "flipped_sequences": [
+   "SNGS-126",
+   "SNGS-130",
+   "SNGS-131",
+   "SNGS-197"
+  ],
+  "n_flipped": 4
+ },
+ "flags_on": {
+  "n_sequences": 49,
+  "n_rows": 467425,
+  "violations": 0,
+  "flipped_sequences": [
+   "SNGS-126",
+   "SNGS-130",
+   "SNGS-131",
+   "SNGS-197"
+  ],
+  "n_flipped": 4
+ },
+ "rows_changed": {
+  "vote": {
+   "role": 5657,
+   "team": 30289,
+   "jersey": 14754
+  },
+  "repair": {
+   "role2": 4497,
+   "team": 7579
+  }
+ },
+ "vote_keys": [
+  "role",
+  "team",
+  "jersey"
+ ],
+ "repair_steps": [
+  "role2",
+  "team"
+ ]
+}

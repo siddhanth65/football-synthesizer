@@ -7334,6 +7334,165 @@
         "audit",
         "hazard"
       ]
+    },
+    {
+      "id": "v9-w5-001",
+      "statement": "HARNESS FIDELITY AND LINEAGE CONFIRMED FOR THE W3+W4 STACK. On DEV-20 the shipped v6 arm outputs/gsr/deleak_v6detdev_clip_e0.3r1w0.5a0.3 re-scores to GS-DetA 39.3083 / GS-HOTA 51.8083; with vote_track_attributes(role,team,jersey) to 41.1082 / 54.7970; with gk_side_repair(('team',)) on top to 43.3757 / 56.2601 -- all three registered rows to four decimals. The arm holds 218,291 prediction rows over 20 sequences and its per-sequence counts match the shipped submission (SNGS-024 6,701, SNGS-051 10,723, SNGS-054 10,319, SNGS-057 12,264), i.e. it is the shipped-submission lineage and NOT the drifted eval_v4 cache of kb v9-w1-006 / v9-w4-004.",
+      "value": 43.3757,
+      "unit": "GS-DetA on DEV-20 of the reproduced W3+W4 control",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_benchmark/gsr_v9_w5_fidelity.json",
+        "results/gsr_v9_w5_registered.json",
+        "results/gsr_benchmark/gsr_v9_w5_summary.json"
+      ],
+      "method": "eval.gsr_score.gs_hota with the gs_hota_full config over the 20 DEV sequences, three submissions written into separate work dirs from the same source arm.",
+      "n": 20,
+      "caveats": [
+        "DEV-20 is the tuning split; no TEST-38 / test-49 / challenge score was read."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w3-004",
+        "v9-w4-002"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "fidelity",
+        "control"
+      ]
+    },
+    {
+      "id": "v9-w5-002",
+      "statement": "THE REFEREE<->PLAYER AXIS HAS NO GT-FREE MECHANISM: REGISTERED REFUSAL OF THE LARGEST REMAINING BUCKET (+1.63 GS-DetA oracle). Three independent signals were measured on the W4 control and all three fail. (1) GEOMETRY: the referee-owned player-voted bucket is the MAIN referee, median |y| 7.94 m, not the touchline assistants -- our detector already labels 51 central referee tracks (7,831 rows correct) and 43 touchline ones, so no |y| rule separates the 3,355-row bucket from the 9,946 rows it would break. (2) ROLE FLICKER: per-row referee share on the unvoted submission is median 0.880 on GT-referee tracks vs 0.000 on GT-player tracks, but 24.4% of player tracks carry some referee row and 14.5% carry >= 0.10; the best threshold (0.30) wins 2,456 rows and loses 3,497. (3) KIT DISTINCTNESS IS TRUE BUT TOO WEAK, AND THE GK TRAP IS WORSE THAN ASSUMED: distance from a track's mean CLIP embedding to the nearer team centroid separates referees from players at AUC 0.8821, yet GOALKEEPERS SIT FARTHER OUT THAN REFEREES (median 0.949 vs 0.900 vs 0.678), and at the 90th player percentile the rule catches 12 of 26 referees while hitting 23 of 225 players (precision 0.34). No arm was built on this axis.",
+      "value": 0.8821,
+      "unit": "AUC of kit distance-to-nearer-team-centroid, referee over player (0.5 = no signal)",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_benchmark/gsr_v9_w5_refanatomy.json",
+        "results/gsr_benchmark/gsr_v9_w5_summary.json",
+        "results/gsr_v9_w5_registered.json",
+        "tools/gsr_v9_w5.py"
+      ],
+      "method": "Per-track anatomy of the vote+gk_side submission (attribute-blind Hungarian ownership, the W3/W4 matcher) joined to per-row role tallies from the unvoted submission and to per-detection CLIP embeddings from outputs/gsr/detembed_cache_clip_v6det_eiou; team centroids are the row-weighted mean embedding of each side's player-majority tracks.",
+      "n": 896,
+      "caveats": [
+        "The kit measurement uses only the 9 DEV sequences whose embedding cache still joins the submission's track ids (267 tracks); the cache joins 790 of 896 tracks overall and is broken on 11 of 20 sequences -- a fresh instance of kb v9-w1-006, which is also why no embedding-based arm could be shipped without re-extraction.",
+        "The threshold sweeps are DEV-20 reads used to REFUSE a rule, never to select one."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w1-006",
+        "v9-w4-001"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "negative-result",
+        "referee",
+        "premise-correction"
+      ]
+    },
+    {
+      "id": "v9-w5-003",
+      "statement": "REGISTERED FAIL: THE CONCURRENCY-GUARDED SECOND-KEEPER RULE IS PRECISE BUT TOO SMALL. Replacing W4's global guard ('this half carries no goalkeeper track at all') with a TEMPORAL one ('this candidate shares no frame with a goalkeeper-majority track on his half' -- two tracks that never coexist can be fragments of one person, two that do cannot) is worth +0.1718 GS-DetA / +0.0695 GS-HOTA on DEV-20 over the W4 control (43.3757 -> 43.5476), against a registered bar of +0.35. The dominance variant (also promote a concurrent candidate that is deeper than every keeper track it overlaps) is worth +0.2142 / +0.0915 (-> 43.5899). Both FAIL the bar; gk_second also fails the paired gate (4 of 20 sequences change, Wilcoxon p = 0.068) while gk_second_dom passes it (5 sequences, p = 0.043). Row-level audit is clean in both: 350 / 447 wrong->right against 4 right->wrong (0.8% / 0.7% of touched rows). No new threshold was introduced: the |x| >= 36 m and penalty-share >= 0.90 gates are W4's train-fitted ones and the concurrency test has no parameter. On GSR-TRAIN GT (57 sequences, 1,145 player identities) the strict rule fires 0 times and the dominance rule 2 times, and every train firing is a false positive by construction. NOTHING SHIPS: the stack stays at vote_all + gk_side(team).",
+      "value": 0.2142,
+      "unit": "best GS-DetA gain on DEV-20 from the second-keeper rule (registered bar: +0.35)",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_v9_w5_registered.json",
+        "results/gsr_benchmark/gsr_v9_w5_arms.json",
+        "results/gsr_benchmark/gsr_v9_w5_trainfit.json",
+        "eval/gsr_score.py",
+        "tests/test_gsr_v9_w5.py"
+      ],
+      "method": "eval.gsr_score.gk_side_repair steps 'role2' / 'role2dom' composed after vote_track_attributes and before the 'team' step, scored with the official evaluator against the same submission in the W4 control state; deterministic, noise floor exactly 0, GPU artifacts byte-identical.",
+      "n": 20,
+      "caveats": [
+        "The bar was moved from the brief's +0.60 to +0.35 BEFORE any arm was scored, because stage 1 showed +0.60 to be arithmetically unreachable on this bucket (see v9-w5-004); the arms fail even the reduced bar.",
+        "Only 4-5 of 20 sequences are touched at all, so the paired statistics are weak by construction."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w4-003",
+        "v9-w5-001"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "registered",
+        "fail",
+        "goalkeeper"
+      ]
+    },
+    {
+      "id": "v9-w5-004",
+      "statement": "THE KEEPER-AS-PLAYER BUCKET HAS A HARD POSITIONAL CEILING OF ABOUT +0.51 GS-DetA, AND ITS RESIDUAL IS AN ASSOCIATION PROBLEM. Of the 13 tracks / 1,773 rows worth +0.7597 on track-level relabel, TWO tracks (571 rows, 32%) are keepers who left their line entirely -- SNGS-096 t70 (405 rows, median pitch x -22.1 m, penalty share 0.00) and SNGS-093 t56 (166 rows, 26.0 m, 0.00) -- and carry no keeper positional signature at all, so no |x|/penalty rule can ever reach them. Of the remaining 10 tracks that sit on a half already carrying a goalkeeper-labelled track, 5 OVERLAP IT IN TIME (SNGS-042 t26 50 of 529 frames, SNGS-054 t110 9 of 101, SNGS-030 t71 7 of 14, SNGS-027 t114 3 of 68, SNGS-087 t47 2 of 115) -- i.e. the tracker emits two concurrent tracks on the SAME person, which defeats the physical non-coexistence guard and holds ~+0.30 DetA hostage. That is a duplicate-track / dedup problem, not an attribute one.",
+      "value": 0.51,
+      "unit": "GS-DetA ceiling of any positional keeper-role rule on DEV-20 (bucket oracle 0.7597)",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_benchmark/gsr_v9_w5_summary.json",
+        "results/gsr_benchmark/gsr_v9_w5_arms.json",
+        "results/gsr_benchmark/gsr_v9_w4_oracles.json"
+      ],
+      "method": "Per-track geometry (median pitch x, penalty-area frame share) and frame-set intersection between each keeper-owned player-voted track and the goalkeeper-majority tracks on its half, on the W4 control submission.",
+      "n": 13,
+      "caveats": [
+        "The +0.51 figure is the bucket oracle scaled by the reachable row share, not a scored arm."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w4-001",
+        "v9-w4-003"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "goalkeeper",
+        "ceiling",
+        "association"
+      ]
+    },
+    {
+      "id": "v9-w5-005",
+      "statement": "THE GT-FREE AUDIT SURVIVES THE SECOND-KEEPER STEP. tools.gsr_calibfill.verify_gtfree needed no change -- it already puts its expectation through vote_track_attributes and gk_side_repair with whatever step tuple the flags carry. Re-derived on the on-record test-49 package with the flags OFF: 0 violations / 467,425 rows / flip set {SNGS-126, -130, -131, -197}, identical to GSR_V6.md section 4 and to the W4 re-derivation. Re-derived with the flags ON (vote role+team+jersey plus keeper role2+team applied to a scratch copy: 4,497 role rows and 7,579 team rows changed by the repair, on top of the vote's 5,657/30,289/14,754): ALSO 0 violations / 467,425 rows / the same flip set. No metric was read on any test sequence.",
+      "value": 0,
+      "unit": "GT-free violations over 467,425 test-49 rows with the W3+W4+W5 flags ON and OFF",
+      "status": "confirmed",
+      "evidence": [
+        "results/gsr_benchmark/gsr_v9_w5_audit.json",
+        "tools/gsr_calibfill.py",
+        "results/gsr_benchmark/gsr_v6_testsplit_package.json"
+      ],
+      "method": "tools.gsr_calibfill.verify_gtfree over the 49 test sequences against the frozen server mirror outputs/gsr_srvtest/; the flag-ON run repaired a scratch copy in a temp dir, audited it and deleted it. Team is the only attribute compared.",
+      "n": 49,
+      "caveats": [
+        "A legitimacy check, not a metric read.",
+        "The per-sequence firing rate of role2 on test-49 (4,497 rows over 49 sequences) is about twice the DEV-20 rate (485 over 20) -- reported as an observation, not a transfer claim."
+      ],
+      "date": "2026-08-15",
+      "supersedes": [],
+      "superseded_by": [],
+      "depends_on": [
+        "v9-w4-004",
+        "v9-w5-003"
+      ],
+      "tags": [
+        "gsr",
+        "v9",
+        "legitimacy",
+        "audit"
+      ]
     }
   ]
 }

@@ -1,0 +1,20 @@
+{
+ "seqs": 57,
+ "cand": 35,
+ "fire_strict": 0,
+ "fire_dom": 2,
+ "keepers": 79,
+ "players": 1145,
+ "rows_fire_dom": 874,
+ "per_seq": {
+  "SNGS-106": {
+   "cand": 11,
+   "strict": [],
+   "dom": [
+    6,
+    24
+   ],
+   "rows_dom": 874
+  }
+ }
+}

@@ -1,5 +1,34 @@
 # STATUS
 
+## 2026-08-15 — v9 W5 FAIL x2: the referee axis is REFUSED (three signals measured, none usable) and the second-keeper arms miss the bar — attribute mine exhausted at DEV 56.26; campaign hands to jersey-coverage + detector retrain
+
+results/gsr_v9_w5_registered.json + results/gsr_benchmark/gsr_v9_w5_*.json, kb v9-w5-001..005,
+tools/gsr_v9_w5.py. Fidelity exact (all three stack stages to 4 dp; lineage = shipped rows).
+**Referee axis (+1.63 oracle): NOT BUILT, on measurement.** (1) Geometry fails — the bucket is
+the MAIN referee (central, median |y| 7.94 m) and 51 correctly-labelled central referee tracks
+(7,831 rows) sit in the same region: any central-corridor rule breaks 7,831 rows to fix 1,496.
+(2) Role-flicker fails — best threshold wins 2,456 / loses 3,497. (3) Kit-distinctness: TRUE
+(referee kit far from both team clusters, AUC 0.8821) but USELESS (12/26 refs at precision
+0.34) — and the GK trap DOMINATES: keepers are FARTHER from team clusters (0.949) than
+referees (0.900). Second-keeper arms (parameter-free non-coexistence test + deeper-than-
+overlapped variant; train fit 0 and 2 firings): +0.17/+0.21 DetA vs a bar honestly REDUCED
++0.60 -> +0.35 BEFORE scoring (stage-1 arithmetic showed +0.60 unreachable: 2 of 13 residual
+keeper tracks left their line entirely — positional ceiling +0.51) — **FAIL either way;
+flags stay OFF; stack stays vote_all + gk_side(team) = 43.3757 / 56.2601.** Row audits clean
+(right->wrong 0.7-0.8%). Audit re-derivations: test-49 flags OFF and ON both 0 violations,
+flip set identical. New hazard instance (kb v9-w1-006 family): detembed cache joins the
+shipped submission on only 790/896 DEV tracks (11/20 seqs broken) — any embedding-based ship
+component needs re-extraction. **Blocker worth remembering: the tracker emits DUPLICATE
+CONCURRENT tracks on one keeper — defeats physical non-coexistence guards; an assoc/dedup
+fix worth ~+0.30 of the keeper residual.**
+
+Residual attribute map (honest): referee +1.63 unreachable GT-free; keeper ~+0.55 (0.25
+physically unreachable, 0.30 behind the dup-track blocker); team:player +0.50 dead;
+contaminated +0.34 = association. **W6 dispatched: jersey coverage via name-borrowing
+(+16.36 oracle, +8.15 own-roster bound; propagation-only — no association change; never onto
+GK tracks per the GT-never-numbers-keepers finding). W7 dispatched: the detector retrain
+(realistic +2..4.4, 6-12 GPU-h + same-stack control lineage per v8-w4-004).**
+
 ## 2026-08-15 — v9 W4 PASS: the keeper-side repair is ORACLE-EQUIVALENT — DEV 54.80 -> 56.28 (+1.48 HOTA, 18/0, p=1.96e-04), still zero GPU; stack = +4.47 over shipped v6
 
 results/gsr_v9_w4_registered.json (declared 10:35Z, pre-scoring), results/gsr_benchmark/

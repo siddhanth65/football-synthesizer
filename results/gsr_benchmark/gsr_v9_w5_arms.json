@@ -1,0 +1,825 @@
+{
+  "control": {
+    "combined": {
+      "GS-HOTA": 56.26006896175957,
+      "GS-DetA": 43.375734576913906,
+      "GS-AssA": 72.97550229629857,
+      "GS-LocA": 93.7995580104775,
+      "IDF1": 60.81360237997081
+    },
+    "per_seq": {
+      "SNGS-021": {
+        "GS-HOTA": 71.99181622732071,
+        "GS-DetA": 66.95018335713874,
+        "GS-AssA": 77.44411380594502,
+        "GS-LocA": 93.36399916571126,
+        "IDF1": 81.08578388724553
+      },
+      "SNGS-024": {
+        "GS-HOTA": 50.287193307820544,
+        "GS-DetA": 46.28807602596003,
+        "GS-AssA": 54.633804845929326,
+        "GS-LocA": 90.4996811731379,
+        "IDF1": 62.50295718003313
+      },
+      "SNGS-027": {
+        "GS-HOTA": 53.95303086903858,
+        "GS-DetA": 39.36703648419041,
+        "GS-AssA": 73.9552554385728,
+        "GS-LocA": 94.79998678253597,
+        "IDF1": 55.627173267746585
+      },
+      "SNGS-030": {
+        "GS-HOTA": 69.28707301247468,
+        "GS-DetA": 60.2214301637757,
+        "GS-AssA": 79.72562628091904,
+        "GS-LocA": 93.63933252899074,
+        "IDF1": 74.25840942423238
+      },
+      "SNGS-033": {
+        "GS-HOTA": 57.19971672848371,
+        "GS-DetA": 47.77033750140007,
+        "GS-AssA": 68.4950845259044,
+        "GS-LocA": 93.42277715528171,
+        "IDF1": 66.90015009649059
+      },
+      "SNGS-036": {
+        "GS-HOTA": 69.90494879442865,
+        "GS-DetA": 59.058878315523344,
+        "GS-AssA": 82.77485499796707,
+        "GS-LocA": 92.04369962519185,
+        "IDF1": 78.34287638935669
+      },
+      "SNGS-039": {
+        "GS-HOTA": 42.621556809835624,
+        "GS-DetA": 29.88249008658902,
+        "GS-AssA": 60.792634998498016,
+        "GS-LocA": 96.05214357790899,
+        "IDF1": 46.03654251581167
+      },
+      "SNGS-042": {
+        "GS-HOTA": 39.8569251542564,
+        "GS-DetA": 22.997246783341847,
+        "GS-AssA": 69.09473843073144,
+        "GS-LocA": 95.4195939740391,
+        "IDF1": 37.04743395954797
+      },
+      "SNGS-045": {
+        "GS-HOTA": 56.780107981487625,
+        "GS-DetA": 45.258233455079484,
+        "GS-AssA": 71.23768342560489,
+        "GS-LocA": 96.01758237217523,
+        "IDF1": 57.434315286624205
+      },
+      "SNGS-048": {
+        "GS-HOTA": 56.09747208016776,
+        "GS-DetA": 49.5613844767682,
+        "GS-AssA": 63.50328842792784,
+        "GS-LocA": 92.65090213065363,
+        "IDF1": 60.428172086998025
+      },
+      "SNGS-051": {
+        "GS-HOTA": 51.253391014981844,
+        "GS-DetA": 39.57197896679852,
+        "GS-AssA": 66.41286468692705,
+        "GS-LocA": 92.82500540493545,
+        "IDF1": 55.3955872520615
+      },
+      "SNGS-054": {
+        "GS-HOTA": 42.90372571427435,
+        "GS-DetA": 28.23068658025362,
+        "GS-AssA": 65.20539588030431,
+        "GS-LocA": 94.08167667822003,
+        "IDF1": 45.53260617312602
+      },
+      "SNGS-057": {
+        "GS-HOTA": 41.68473911946299,
+        "GS-DetA": 24.536757193958987,
+        "GS-AssA": 70.93168513103055,
+        "GS-LocA": 90.0903738365061,
+        "IDF1": 40.11860051393556
+      },
+      "SNGS-078": {
+        "GS-HOTA": 49.38787603047668,
+        "GS-DetA": 36.46054571337363,
+        "GS-AssA": 66.89971897208231,
+        "GS-LocA": 95.48668639100892,
+        "IDF1": 52.81905716034952
+      },
+      "SNGS-081": {
+        "GS-HOTA": 71.66852067062011,
+        "GS-DetA": 63.30451273023775,
+        "GS-AssA": 81.14015329149359,
+        "GS-LocA": 96.05645737743245,
+        "IDF1": 78.29487680876026
+      },
+      "SNGS-084": {
+        "GS-HOTA": 54.904439731154234,
+        "GS-DetA": 41.82649712385384,
+        "GS-AssA": 72.0717712097434,
+        "GS-LocA": 94.02605429383689,
+        "IDF1": 61.38594615608902
+      },
+      "SNGS-087": {
+        "GS-HOTA": 65.84849942037167,
+        "GS-DetA": 55.77478158317653,
+        "GS-AssA": 77.7440888550647,
+        "GS-LocA": 92.97711069780019,
+        "IDF1": 74.27118995746447
+      },
+      "SNGS-090": {
+        "GS-HOTA": 66.52269266865038,
+        "GS-DetA": 58.131064292984355,
+        "GS-AssA": 76.12724747641948,
+        "GS-LocA": 94.77034575450881,
+        "IDF1": 75.63597451237901
+      },
+      "SNGS-093": {
+        "GS-HOTA": 65.75960853345788,
+        "GS-DetA": 53.668782521709055,
+        "GS-AssA": 80.57864974412642,
+        "GS-LocA": 94.8654629653349,
+        "IDF1": 71.76497381006605
+      },
+      "SNGS-096": {
+        "GS-HOTA": 52.60945451346851,
+        "GS-DetA": 36.497191299694066,
+        "GS-AssA": 75.8413550330686,
+        "GS-LocA": 92.75773409383893,
+        "IDF1": 55.92284623773174
+      }
+    }
+  },
+  "gk_second": {
+    "combined": {
+      "GS-HOTA": 56.3296033848256,
+      "GS-DetA": 43.54756237511082,
+      "GS-AssA": 72.86733009636141,
+      "GS-LocA": 93.80606788877162,
+      "IDF1": 60.83766950049583
+    },
+    "per_seq": {
+      "SNGS-021": {
+        "GS-HOTA": 71.99181622732071,
+        "GS-DetA": 66.95018335713874,
+        "GS-AssA": 77.44411380594502,
+        "GS-LocA": 93.36399916571126,
+        "IDF1": 81.08578388724553
+      },
+      "SNGS-024": {
+        "GS-HOTA": 50.287193307820544,
+        "GS-DetA": 46.28807602596003,
+        "GS-AssA": 54.633804845929326,
+        "GS-LocA": 90.4996811731379,
+        "IDF1": 62.50295718003313
+      },
+      "SNGS-027": {
+        "GS-HOTA": 54.7354164899518,
+        "GS-DetA": 41.3328735547043,
+        "GS-AssA": 72.4955329010319,
+        "GS-LocA": 94.82226865510542,
+        "IDF1": 55.627173267746585
+      },
+      "SNGS-030": {
+        "GS-HOTA": 69.28707301247468,
+        "GS-DetA": 60.2214301637757,
+        "GS-AssA": 79.72562628091904,
+        "GS-LocA": 93.63933252899074,
+        "IDF1": 74.25840942423238
+      },
+      "SNGS-033": {
+        "GS-HOTA": 57.19971672848371,
+        "GS-DetA": 47.77033750140007,
+        "GS-AssA": 68.4950845259044,
+        "GS-LocA": 93.42277715528171,
+        "IDF1": 66.90015009649059
+      },
+      "SNGS-036": {
+        "GS-HOTA": 69.90494879442865,
+        "GS-DetA": 59.058878315523344,
+        "GS-AssA": 82.77485499796707,
+        "GS-LocA": 92.04369962519185,
+        "IDF1": 78.34287638935669
+      },
+      "SNGS-039": {
+        "GS-HOTA": 42.621556809835624,
+        "GS-DetA": 29.88249008658902,
+        "GS-AssA": 60.792634998498016,
+        "GS-LocA": 96.05214357790899,
+        "IDF1": 46.03654251581167
+      },
+      "SNGS-042": {
+        "GS-HOTA": 39.8569251542564,
+        "GS-DetA": 22.997246783341847,
+        "GS-AssA": 69.09473843073144,
+        "GS-LocA": 95.4195939740391,
+        "IDF1": 37.04743395954797
+      },
+      "SNGS-045": {
+        "GS-HOTA": 56.780107981487625,
+        "GS-DetA": 45.258233455079484,
+        "GS-AssA": 71.23768342560489,
+        "GS-LocA": 96.01758237217523,
+        "IDF1": 57.434315286624205
+      },
+      "SNGS-048": {
+        "GS-HOTA": 56.09747208016776,
+        "GS-DetA": 49.5613844767682,
+        "GS-AssA": 63.50328842792784,
+        "GS-LocA": 92.65090213065363,
+        "IDF1": 60.428172086998025
+      },
+      "SNGS-051": {
+        "GS-HOTA": 51.253391014981844,
+        "GS-DetA": 39.57197896679852,
+        "GS-AssA": 66.41286468692705,
+        "GS-LocA": 92.82500540493545,
+        "IDF1": 55.3955872520615
+      },
+      "SNGS-054": {
+        "GS-HOTA": 42.90372571427435,
+        "GS-DetA": 28.23068658025362,
+        "GS-AssA": 65.20539588030431,
+        "GS-LocA": 94.08167667822003,
+        "IDF1": 45.53260617312602
+      },
+      "SNGS-057": {
+        "GS-HOTA": 41.68473911946299,
+        "GS-DetA": 24.536757193958987,
+        "GS-AssA": 70.93168513103055,
+        "GS-LocA": 90.0903738365061,
+        "IDF1": 40.11860051393556
+      },
+      "SNGS-078": {
+        "GS-HOTA": 49.38787603047668,
+        "GS-DetA": 36.46054571337363,
+        "GS-AssA": 66.89971897208231,
+        "GS-LocA": 95.48668639100892,
+        "IDF1": 52.81905716034952
+      },
+      "SNGS-081": {
+        "GS-HOTA": 72.01297386291427,
+        "GS-DetA": 64.04739711156606,
+        "GS-AssA": 80.97184538187868,
+        "GS-LocA": 96.0655238996608,
+        "IDF1": 78.76417676965194
+      },
+      "SNGS-084": {
+        "GS-HOTA": 55.14198702263627,
+        "GS-DetA": 42.55424566860107,
+        "GS-AssA": 71.45350620068723,
+        "GS-LocA": 94.07041104283849,
+        "IDF1": 61.38594615608902
+      },
+      "SNGS-087": {
+        "GS-HOTA": 65.84849942037167,
+        "GS-DetA": 55.77478158317653,
+        "GS-AssA": 77.7440888550647,
+        "GS-LocA": 92.97711069780019,
+        "IDF1": 74.27118995746447
+      },
+      "SNGS-090": {
+        "GS-HOTA": 66.52269266865038,
+        "GS-DetA": 58.131064292984355,
+        "GS-AssA": 76.12724747641948,
+        "GS-LocA": 94.77034575450881,
+        "IDF1": 75.63597451237901
+      },
+      "SNGS-093": {
+        "GS-HOTA": 65.76167788644757,
+        "GS-DetA": 53.67812158726256,
+        "GS-AssA": 80.56972138563984,
+        "GS-LocA": 94.8642254268501,
+        "IDF1": 71.76497381006605
+      },
+      "SNGS-096": {
+        "GS-HOTA": 52.60945451346851,
+        "GS-DetA": 36.497191299694066,
+        "GS-AssA": 75.8413550330686,
+        "GS-LocA": 92.75773409383893,
+        "IDF1": 55.92284623773174
+      }
+    },
+    "changed": {
+      "role2": 485,
+      "team": 437
+    },
+    "audit_rows": {
+      "wrong2wrong": 76,
+      "wrong2right": 350,
+      "right2wrong": 4,
+      "changed_unmatched": 55
+    },
+    "promoted_tracks": [
+      {
+        "seq": "SNGS-027",
+        "track_id": 98,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-027",
+        "track_id": 102,
+        "n_rows": 246,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 246
+      },
+      {
+        "seq": "SNGS-027",
+        "track_id": 127,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-027",
+        "track_id": 140,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": null,
+        "gt_matched_rows": 0
+      },
+      {
+        "seq": "SNGS-054",
+        "track_id": 114,
+        "n_rows": 28,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 21
+      },
+      {
+        "seq": "SNGS-078",
+        "track_id": 20,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-078",
+        "track_id": 40,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-081",
+        "track_id": 58,
+        "n_rows": 54,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 54
+      },
+      {
+        "seq": "SNGS-081",
+        "track_id": 60,
+        "n_rows": 10,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 9
+      },
+      {
+        "seq": "SNGS-081",
+        "track_id": 62,
+        "n_rows": 2,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 2
+      },
+      {
+        "seq": "SNGS-084",
+        "track_id": 86,
+        "n_rows": 3,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 3
+      },
+      {
+        "seq": "SNGS-084",
+        "track_id": 88,
+        "n_rows": 94,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 72
+      },
+      {
+        "seq": "SNGS-084",
+        "track_id": 89,
+        "n_rows": 39,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 16
+      },
+      {
+        "seq": "SNGS-084",
+        "track_id": 96,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": null,
+        "gt_matched_rows": 0
+      },
+      {
+        "seq": "SNGS-087",
+        "track_id": 54,
+        "n_rows": 2,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 2
+      },
+      {
+        "seq": "SNGS-093",
+        "track_id": 44,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 1
+      }
+    ],
+    "paired_hota": {
+      "mean": 0.06832277288395545,
+      "helped": 4,
+      "hurt": 0,
+      "wilcoxon_p": 0.06788915486182899
+    },
+    "paired_deta": {
+      "mean": 0.17229045310714675,
+      "helped": 4,
+      "hurt": 0
+    }
+  },
+  "gk_second_dom": {
+    "combined": {
+      "GS-HOTA": 56.35153913464722,
+      "GS-DetA": 43.58989001244963,
+      "GS-AssA": 72.85328183780486,
+      "GS-LocA": 93.80957485877511,
+      "IDF1": 60.860399558769466
+    },
+    "per_seq": {
+      "SNGS-021": {
+        "GS-HOTA": 71.99181622732071,
+        "GS-DetA": 66.95018335713874,
+        "GS-AssA": 77.44411380594502,
+        "GS-LocA": 93.36399916571126,
+        "IDF1": 81.08578388724553
+      },
+      "SNGS-024": {
+        "GS-HOTA": 50.287193307820544,
+        "GS-DetA": 46.28807602596003,
+        "GS-AssA": 54.633804845929326,
+        "GS-LocA": 90.4996811731379,
+        "IDF1": 62.50295718003313
+      },
+      "SNGS-027": {
+        "GS-HOTA": 54.7354164899518,
+        "GS-DetA": 41.3328735547043,
+        "GS-AssA": 72.4955329010319,
+        "GS-LocA": 94.82226865510542,
+        "IDF1": 55.627173267746585
+      },
+      "SNGS-030": {
+        "GS-HOTA": 69.28707301247468,
+        "GS-DetA": 60.2214301637757,
+        "GS-AssA": 79.72562628091904,
+        "GS-LocA": 93.63933252899074,
+        "IDF1": 74.25840942423238
+      },
+      "SNGS-033": {
+        "GS-HOTA": 57.19971672848371,
+        "GS-DetA": 47.77033750140007,
+        "GS-AssA": 68.4950845259044,
+        "GS-LocA": 93.42277715528171,
+        "IDF1": 66.90015009649059
+      },
+      "SNGS-036": {
+        "GS-HOTA": 69.90494879442865,
+        "GS-DetA": 59.058878315523344,
+        "GS-AssA": 82.77485499796707,
+        "GS-LocA": 92.04369962519185,
+        "IDF1": 78.34287638935669
+      },
+      "SNGS-039": {
+        "GS-HOTA": 42.621556809835624,
+        "GS-DetA": 29.88249008658902,
+        "GS-AssA": 60.792634998498016,
+        "GS-LocA": 96.05214357790899,
+        "IDF1": 46.03654251581167
+      },
+      "SNGS-042": {
+        "GS-HOTA": 39.8569251542564,
+        "GS-DetA": 22.997246783341847,
+        "GS-AssA": 69.09473843073144,
+        "GS-LocA": 95.4195939740391,
+        "IDF1": 37.04743395954797
+      },
+      "SNGS-045": {
+        "GS-HOTA": 56.780107981487625,
+        "GS-DetA": 45.258233455079484,
+        "GS-AssA": 71.23768342560489,
+        "GS-LocA": 96.01758237217523,
+        "IDF1": 57.434315286624205
+      },
+      "SNGS-048": {
+        "GS-HOTA": 56.09747208016776,
+        "GS-DetA": 49.5613844767682,
+        "GS-AssA": 63.50328842792784,
+        "GS-LocA": 92.65090213065363,
+        "IDF1": 60.428172086998025
+      },
+      "SNGS-051": {
+        "GS-HOTA": 51.253391014981844,
+        "GS-DetA": 39.57197896679852,
+        "GS-AssA": 66.41286468692705,
+        "GS-LocA": 92.82500540493545,
+        "IDF1": 55.3955872520615
+      },
+      "SNGS-054": {
+        "GS-HOTA": 43.35369764787879,
+        "GS-DetA": 28.937196247787906,
+        "GS-AssA": 64.95481908199294,
+        "GS-LocA": 94.17565368961472,
+        "IDF1": 46.00603388257136
+      },
+      "SNGS-057": {
+        "GS-HOTA": 41.68473911946299,
+        "GS-DetA": 24.536757193958987,
+        "GS-AssA": 70.93168513103055,
+        "GS-LocA": 90.0903738365061,
+        "IDF1": 40.11860051393556
+      },
+      "SNGS-078": {
+        "GS-HOTA": 49.38787603047668,
+        "GS-DetA": 36.46054571337363,
+        "GS-AssA": 66.89971897208231,
+        "GS-LocA": 95.48668639100892,
+        "IDF1": 52.81905716034952
+      },
+      "SNGS-081": {
+        "GS-HOTA": 72.01297386291427,
+        "GS-DetA": 64.04739711156606,
+        "GS-AssA": 80.97184538187868,
+        "GS-LocA": 96.0655238996608,
+        "IDF1": 78.76417676965194
+      },
+      "SNGS-084": {
+        "GS-HOTA": 55.14198702263627,
+        "GS-DetA": 42.55424566860107,
+        "GS-AssA": 71.45350620068723,
+        "GS-LocA": 94.07041104283849,
+        "IDF1": 61.38594615608902
+      },
+      "SNGS-087": {
+        "GS-HOTA": 65.84849942037167,
+        "GS-DetA": 55.77478158317653,
+        "GS-AssA": 77.7440888550647,
+        "GS-LocA": 92.97711069780019,
+        "IDF1": 74.27118995746447
+      },
+      "SNGS-090": {
+        "GS-HOTA": 66.52269266865038,
+        "GS-DetA": 58.131064292984355,
+        "GS-AssA": 76.12724747641948,
+        "GS-LocA": 94.77034575450881,
+        "IDF1": 75.63597451237901
+      },
+      "SNGS-093": {
+        "GS-HOTA": 65.76167788644757,
+        "GS-DetA": 53.67812158726256,
+        "GS-AssA": 80.56972138563984,
+        "GS-LocA": 94.8642254268501,
+        "IDF1": 71.76497381006605
+      },
+      "SNGS-096": {
+        "GS-HOTA": 52.60945451346851,
+        "GS-DetA": 36.497191299694066,
+        "GS-AssA": 75.8413550330686,
+        "GS-LocA": 92.75773409383893,
+        "IDF1": 55.92284623773174
+      }
+    },
+    "changed": {
+      "role2dom": 608,
+      "team": 552
+    },
+    "audit_rows": {
+      "wrong2wrong": 78,
+      "wrong2right": 447,
+      "right2wrong": 4,
+      "changed_unmatched": 79
+    },
+    "promoted_tracks": [
+      {
+        "seq": "SNGS-027",
+        "track_id": 98,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-027",
+        "track_id": 102,
+        "n_rows": 246,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 246
+      },
+      {
+        "seq": "SNGS-027",
+        "track_id": 127,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-027",
+        "track_id": 140,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": null,
+        "gt_matched_rows": 0
+      },
+      {
+        "seq": "SNGS-030",
+        "track_id": 71,
+        "n_rows": 14,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-030",
+        "track_id": 83,
+        "n_rows": 2,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 2
+      },
+      {
+        "seq": "SNGS-045",
+        "track_id": 141,
+        "n_rows": 6,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": null,
+        "gt_matched_rows": 0
+      },
+      {
+        "seq": "SNGS-054",
+        "track_id": 110,
+        "n_rows": 101,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 96
+      },
+      {
+        "seq": "SNGS-054",
+        "track_id": 114,
+        "n_rows": 28,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 21
+      },
+      {
+        "seq": "SNGS-078",
+        "track_id": 20,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-078",
+        "track_id": 40,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 1
+      },
+      {
+        "seq": "SNGS-081",
+        "track_id": 58,
+        "n_rows": 54,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 54
+      },
+      {
+        "seq": "SNGS-081",
+        "track_id": 60,
+        "n_rows": 10,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 9
+      },
+      {
+        "seq": "SNGS-081",
+        "track_id": 62,
+        "n_rows": 2,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 2
+      },
+      {
+        "seq": "SNGS-084",
+        "track_id": 86,
+        "n_rows": 3,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 3
+      },
+      {
+        "seq": "SNGS-084",
+        "track_id": 88,
+        "n_rows": 94,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 72
+      },
+      {
+        "seq": "SNGS-084",
+        "track_id": 89,
+        "n_rows": 39,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 16
+      },
+      {
+        "seq": "SNGS-084",
+        "track_id": 96,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": null,
+        "gt_matched_rows": 0
+      },
+      {
+        "seq": "SNGS-087",
+        "track_id": 54,
+        "n_rows": 2,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "player",
+        "gt_matched_rows": 2
+      },
+      {
+        "seq": "SNGS-093",
+        "track_id": 44,
+        "n_rows": 1,
+        "from": "player",
+        "to": "goalkeeper",
+        "gt_role": "goalkeeper",
+        "gt_matched_rows": 1
+      }
+    ],
+    "paired_hota": {
+      "mean": 0.09082136956417734,
+      "helped": 5,
+      "hurt": 0,
+      "wilcoxon_p": 0.043114446783075355
+    },
+    "paired_deta": {
+      "mean": 0.20761593648386095,
+      "helped": 5,
+      "hurt": 0
+    }
+  }
+}
