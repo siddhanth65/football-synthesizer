@@ -80,6 +80,18 @@ def set_arm(detector: str) -> None:
         raise SystemExit(f"unknown detector arm {detector!r}")
 
 
+def set_variant(variant: str) -> None:
+    """Override the artifact suffix, so one weights set can produce several arm lineages.
+
+    v9 W7 pairs *extraction* arms (tracker settings) against a same-stack control extracted with the
+    same weights, so the suffix has to be free of the detector identity (kb v9-w1-006: never write a
+    second arm into a directory another arm already owns).
+    """
+    global VARIANT  # noqa: PLW0603 - one switch for every stage in the module
+
+    VARIANT = variant
+
+
 def check_weights() -> str:
     """Verify the detector checkpoint against its parked md5, returning it."""
     import hashlib  # noqa: PLC0415
@@ -395,8 +407,24 @@ def main() -> None:
                     help="external legibility floor for the percrop stage; 0.0 disables the gate")
     ap.add_argument("--detector", choices=("s4b", "control"), default="s4b",
                     help="'control' re-extracts with the shipped detector (same-stack control)")
+    ap.add_argument("--variant", default=None,
+                    help="override the artifact suffix (v9 W7 extraction arms: _w7ctl/_w7a1/...)")
+    ap.add_argument("--keep-untracked", action="store_true",
+                    help="v9 W7 arm A1: write through the detections ByteTrack discards")
+    ap.add_argument("--min-hits", type=int, default=None,
+                    help="v9 W7 arm A2: ByteTrack minimum_consecutive_frames (shipped 3)")
     args = ap.parse_args()
     set_arm(args.detector)
+    if args.variant:
+        set_variant(args.variant)
+
+    import generator.tracking as tracking  # noqa: PLC0415
+
+    tracking.KEEP_UNTRACKED = bool(args.keep_untracked)
+    if args.min_hits is not None:
+        tracking.MIN_HITS = args.min_hits
+    logger.info("tracker: keep_untracked=%s min_hits=%d variant=%s", tracking.KEEP_UNTRACKED,
+                tracking.MIN_HITS, VARIANT)
 
     from eval.gsr_identity import split_sequences  # noqa: PLC0415
 

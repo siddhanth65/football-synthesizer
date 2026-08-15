@@ -1,0 +1,1099 @@
+{
+ "grid": {
+  "shipped c0.20 m3": {
+   "detect_conf": 0.2,
+   "min_hits": 3
+  },
+  "c0.20 m1": {
+   "detect_conf": 0.2,
+   "min_hits": 1
+  },
+  "c0.10 m3": {
+   "detect_conf": 0.1,
+   "min_hits": 3
+  },
+  "c0.10 m1": {
+   "detect_conf": 0.1,
+   "min_hits": 1
+  },
+  "c0.05 m1": {
+   "detect_conf": 0.05,
+   "min_hits": 1
+  },
+  "c0.10 m1 a0.10": {
+   "detect_conf": 0.1,
+   "min_hits": 1,
+   "activation": 0.1
+  },
+  "c0.05 m1 a0.10": {
+   "detect_conf": 0.05,
+   "min_hits": 1,
+   "activation": 0.1
+  },
+  "c0.20 m1 a0.10": {
+   "detect_conf": 0.2,
+   "min_hits": 1,
+   "activation": 0.1
+  }
+ },
+ "summary": {
+  "shipped c0.20 m3": {
+   "gt": 235174,
+   "recovered": 217357,
+   "rows": 225357,
+   "tracks": 1236,
+   "recall": 0.9242390740473011
+  },
+  "c0.20 m1": {
+   "gt": 235174,
+   "recovered": 220450,
+   "rows": 229900,
+   "tracks": 1653,
+   "recall": 0.9373910381249628
+  },
+  "c0.10 m3": {
+   "gt": 235174,
+   "recovered": 217720,
+   "rows": 226058,
+   "tracks": 1238,
+   "recall": 0.9257826120234379
+  },
+  "c0.10 m1": {
+   "gt": 235174,
+   "recovered": 220805,
+   "rows": 230745,
+   "tracks": 1653,
+   "recall": 0.9389005587352344
+  },
+  "c0.05 m1": {
+   "gt": 235174,
+   "recovered": 220851,
+   "rows": 230791,
+   "tracks": 1653,
+   "recall": 0.9390961585889597
+  },
+  "c0.10 m1 a0.10": {
+   "gt": 235174,
+   "recovered": 220472,
+   "rows": 230618,
+   "tracks": 1902,
+   "recall": 0.9374845858810923
+  },
+  "c0.05 m1 a0.10": {
+   "gt": 235174,
+   "recovered": 220516,
+   "rows": 230661,
+   "tracks": 1902,
+   "recall": 0.9376716813933513
+  },
+  "c0.20 m1 a0.10": {
+   "gt": 235174,
+   "recovered": 220445,
+   "rows": 230591,
+   "tracks": 1902,
+   "recall": 0.937369777271297
+  }
+ },
+ "per_seq": {
+  "SNGS-021": {
+   "shipped c0.20 m3": {
+    "gt": 11894,
+    "recovered": 11237,
+    "rows": 11306,
+    "tracks": 57
+   },
+   "c0.20 m1": {
+    "gt": 11894,
+    "recovered": 11392,
+    "rows": 11486,
+    "tracks": 60
+   },
+   "c0.10 m3": {
+    "gt": 11894,
+    "recovered": 11254,
+    "rows": 11331,
+    "tracks": 57
+   },
+   "c0.10 m1": {
+    "gt": 11894,
+    "recovered": 11401,
+    "rows": 11507,
+    "tracks": 60
+   },
+   "c0.05 m1": {
+    "gt": 11894,
+    "recovered": 11401,
+    "rows": 11507,
+    "tracks": 60
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 11894,
+    "recovered": 11385,
+    "rows": 11499,
+    "tracks": 66
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 11894,
+    "recovered": 11385,
+    "rows": 11499,
+    "tracks": 66
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 11894,
+    "recovered": 11385,
+    "rows": 11498,
+    "tracks": 66
+   }
+  },
+  "SNGS-024": {
+   "shipped c0.20 m3": {
+    "gt": 7065,
+    "recovered": 5964,
+    "rows": 7202,
+    "tracks": 46
+   },
+   "c0.20 m1": {
+    "gt": 7065,
+    "recovered": 6199,
+    "rows": 7468,
+    "tracks": 55
+   },
+   "c0.10 m3": {
+    "gt": 7065,
+    "recovered": 5966,
+    "rows": 7201,
+    "tracks": 47
+   },
+   "c0.10 m1": {
+    "gt": 7065,
+    "recovered": 6211,
+    "rows": 7477,
+    "tracks": 55
+   },
+   "c0.05 m1": {
+    "gt": 7065,
+    "recovered": 6215,
+    "rows": 7481,
+    "tracks": 55
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 7065,
+    "recovered": 6235,
+    "rows": 7513,
+    "tracks": 59
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 7065,
+    "recovered": 6237,
+    "rows": 7515,
+    "tracks": 59
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 7065,
+    "recovered": 6233,
+    "rows": 7510,
+    "tracks": 59
+   }
+  },
+  "SNGS-027": {
+   "shipped c0.20 m3": {
+    "gt": 12281,
+    "recovered": 11268,
+    "rows": 11606,
+    "tracks": 71
+   },
+   "c0.20 m1": {
+    "gt": 12281,
+    "recovered": 11408,
+    "rows": 11836,
+    "tracks": 97
+   },
+   "c0.10 m3": {
+    "gt": 12281,
+    "recovered": 11307,
+    "rows": 11717,
+    "tracks": 69
+   },
+   "c0.10 m1": {
+    "gt": 12281,
+    "recovered": 11437,
+    "rows": 11942,
+    "tracks": 96
+   },
+   "c0.05 m1": {
+    "gt": 12281,
+    "recovered": 11438,
+    "rows": 11943,
+    "tracks": 96
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 12281,
+    "recovered": 11418,
+    "rows": 11902,
+    "tracks": 124
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 12281,
+    "recovered": 11419,
+    "rows": 11903,
+    "tracks": 124
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 12281,
+    "recovered": 11416,
+    "rows": 11901,
+    "tracks": 124
+   }
+  },
+  "SNGS-030": {
+   "shipped c0.20 m3": {
+    "gt": 10674,
+    "recovered": 10332,
+    "rows": 10471,
+    "tracks": 46
+   },
+   "c0.20 m1": {
+    "gt": 10674,
+    "recovered": 10392,
+    "rows": 10578,
+    "tracks": 60
+   },
+   "c0.10 m3": {
+    "gt": 10674,
+    "recovered": 10346,
+    "rows": 10500,
+    "tracks": 46
+   },
+   "c0.10 m1": {
+    "gt": 10674,
+    "recovered": 10403,
+    "rows": 10616,
+    "tracks": 61
+   },
+   "c0.05 m1": {
+    "gt": 10674,
+    "recovered": 10406,
+    "rows": 10620,
+    "tracks": 61
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 10674,
+    "recovered": 10409,
+    "rows": 10629,
+    "tracks": 68
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 10674,
+    "recovered": 10412,
+    "rows": 10632,
+    "tracks": 68
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 10674,
+    "recovered": 10409,
+    "rows": 10629,
+    "tracks": 68
+   }
+  },
+  "SNGS-033": {
+   "shipped c0.20 m3": {
+    "gt": 7707,
+    "recovered": 6500,
+    "rows": 6592,
+    "tracks": 72
+   },
+   "c0.20 m1": {
+    "gt": 7707,
+    "recovered": 6710,
+    "rows": 6819,
+    "tracks": 77
+   },
+   "c0.10 m3": {
+    "gt": 7707,
+    "recovered": 6510,
+    "rows": 6603,
+    "tracks": 72
+   },
+   "c0.10 m1": {
+    "gt": 7707,
+    "recovered": 6720,
+    "rows": 6830,
+    "tracks": 77
+   },
+   "c0.05 m1": {
+    "gt": 7707,
+    "recovered": 6724,
+    "rows": 6834,
+    "tracks": 77
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 7707,
+    "recovered": 6728,
+    "rows": 6842,
+    "tracks": 81
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 7707,
+    "recovered": 6732,
+    "rows": 6846,
+    "tracks": 81
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 7707,
+    "recovered": 6725,
+    "rows": 6839,
+    "tracks": 81
+   }
+  },
+  "SNGS-036": {
+   "shipped c0.20 m3": {
+    "gt": 13978,
+    "recovered": 12380,
+    "rows": 13110,
+    "tracks": 64
+   },
+   "c0.20 m1": {
+    "gt": 13978,
+    "recovered": 12496,
+    "rows": 13307,
+    "tracks": 68
+   },
+   "c0.10 m3": {
+    "gt": 13978,
+    "recovered": 12376,
+    "rows": 13184,
+    "tracks": 62
+   },
+   "c0.10 m1": {
+    "gt": 13978,
+    "recovered": 12491,
+    "rows": 13392,
+    "tracks": 67
+   },
+   "c0.05 m1": {
+    "gt": 13978,
+    "recovered": 12494,
+    "rows": 13395,
+    "tracks": 67
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 13978,
+    "recovered": 12471,
+    "rows": 13333,
+    "tracks": 83
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 13978,
+    "recovered": 12474,
+    "rows": 13336,
+    "tracks": 83
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 13978,
+    "recovered": 12471,
+    "rows": 13333,
+    "tracks": 83
+   }
+  },
+  "SNGS-039": {
+   "shipped c0.20 m3": {
+    "gt": 14875,
+    "recovered": 13896,
+    "rows": 13969,
+    "tracks": 70
+   },
+   "c0.20 m1": {
+    "gt": 14875,
+    "recovered": 14043,
+    "rows": 14225,
+    "tracks": 110
+   },
+   "c0.10 m3": {
+    "gt": 14875,
+    "recovered": 13940,
+    "rows": 14017,
+    "tracks": 70
+   },
+   "c0.10 m1": {
+    "gt": 14875,
+    "recovered": 14091,
+    "rows": 14279,
+    "tracks": 110
+   },
+   "c0.05 m1": {
+    "gt": 14875,
+    "recovered": 14094,
+    "rows": 14282,
+    "tracks": 110
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 14875,
+    "recovered": 14013,
+    "rows": 14256,
+    "tracks": 130
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 14875,
+    "recovered": 14016,
+    "rows": 14259,
+    "tracks": 130
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 14875,
+    "recovered": 14012,
+    "rows": 14255,
+    "tracks": 130
+   }
+  },
+  "SNGS-042": {
+   "shipped c0.20 m3": {
+    "gt": 14317,
+    "recovered": 13338,
+    "rows": 13630,
+    "tracks": 68
+   },
+   "c0.20 m1": {
+    "gt": 14317,
+    "recovered": 13473,
+    "rows": 13890,
+    "tracks": 104
+   },
+   "c0.10 m3": {
+    "gt": 14317,
+    "recovered": 13358,
+    "rows": 13691,
+    "tracks": 72
+   },
+   "c0.10 m1": {
+    "gt": 14317,
+    "recovered": 13497,
+    "rows": 13970,
+    "tracks": 104
+   },
+   "c0.05 m1": {
+    "gt": 14317,
+    "recovered": 13498,
+    "rows": 13971,
+    "tracks": 104
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 14317,
+    "recovered": 13475,
+    "rows": 13934,
+    "tracks": 131
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 14317,
+    "recovered": 13476,
+    "rows": 13935,
+    "tracks": 131
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 14317,
+    "recovered": 13474,
+    "rows": 13933,
+    "tracks": 131
+   }
+  },
+  "SNGS-045": {
+   "shipped c0.20 m3": {
+    "gt": 10607,
+    "recovered": 9728,
+    "rows": 11166,
+    "tracks": 79
+   },
+   "c0.20 m1": {
+    "gt": 10607,
+    "recovered": 9982,
+    "rows": 11549,
+    "tracks": 104
+   },
+   "c0.10 m3": {
+    "gt": 10607,
+    "recovered": 9769,
+    "rows": 11225,
+    "tracks": 79
+   },
+   "c0.10 m1": {
+    "gt": 10607,
+    "recovered": 10010,
+    "rows": 11632,
+    "tracks": 106
+   },
+   "c0.05 m1": {
+    "gt": 10607,
+    "recovered": 10012,
+    "rows": 11634,
+    "tracks": 106
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 10607,
+    "recovered": 9959,
+    "rows": 11631,
+    "tracks": 127
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 10607,
+    "recovered": 9961,
+    "rows": 11633,
+    "tracks": 127
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 10607,
+    "recovered": 9958,
+    "rows": 11629,
+    "tracks": 127
+   }
+  },
+  "SNGS-048": {
+   "shipped c0.20 m3": {
+    "gt": 14994,
+    "recovered": 14428,
+    "rows": 14515,
+    "tracks": 54
+   },
+   "c0.20 m1": {
+    "gt": 14994,
+    "recovered": 14524,
+    "rows": 14742,
+    "tracks": 96
+   },
+   "c0.10 m3": {
+    "gt": 14994,
+    "recovered": 14450,
+    "rows": 14548,
+    "tracks": 55
+   },
+   "c0.10 m1": {
+    "gt": 14994,
+    "recovered": 14551,
+    "rows": 14810,
+    "tracks": 96
+   },
+   "c0.05 m1": {
+    "gt": 14994,
+    "recovered": 14551,
+    "rows": 14810,
+    "tracks": 96
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 14994,
+    "recovered": 14510,
+    "rows": 14802,
+    "tracks": 106
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 14994,
+    "recovered": 14510,
+    "rows": 14802,
+    "tracks": 106
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 14994,
+    "recovered": 14510,
+    "rows": 14802,
+    "tracks": 106
+   }
+  },
+  "SNGS-051": {
+   "shipped c0.20 m3": {
+    "gt": 11727,
+    "recovered": 10872,
+    "rows": 10972,
+    "tracks": 42
+   },
+   "c0.20 m1": {
+    "gt": 11727,
+    "recovered": 11029,
+    "rows": 11233,
+    "tracks": 72
+   },
+   "c0.10 m3": {
+    "gt": 11727,
+    "recovered": 10886,
+    "rows": 11004,
+    "tracks": 43
+   },
+   "c0.10 m1": {
+    "gt": 11727,
+    "recovered": 11055,
+    "rows": 11287,
+    "tracks": 72
+   },
+   "c0.05 m1": {
+    "gt": 11727,
+    "recovered": 11057,
+    "rows": 11288,
+    "tracks": 72
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 11727,
+    "recovered": 11011,
+    "rows": 11264,
+    "tracks": 87
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 11727,
+    "recovered": 11013,
+    "rows": 11265,
+    "tracks": 87
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 11727,
+    "recovered": 11011,
+    "rows": 11264,
+    "tracks": 87
+   }
+  },
+  "SNGS-054": {
+   "shipped c0.20 m3": {
+    "gt": 11226,
+    "recovered": 10518,
+    "rows": 10565,
+    "tracks": 51
+   },
+   "c0.20 m1": {
+    "gt": 11226,
+    "recovered": 10616,
+    "rows": 10806,
+    "tracks": 80
+   },
+   "c0.10 m3": {
+    "gt": 11226,
+    "recovered": 10549,
+    "rows": 10592,
+    "tracks": 51
+   },
+   "c0.10 m1": {
+    "gt": 11226,
+    "recovered": 10650,
+    "rows": 10839,
+    "tracks": 81
+   },
+   "c0.05 m1": {
+    "gt": 11226,
+    "recovered": 10652,
+    "rows": 10841,
+    "tracks": 81
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 11226,
+    "recovered": 10601,
+    "rows": 10849,
+    "tracks": 99
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 11226,
+    "recovered": 10602,
+    "rows": 10850,
+    "tracks": 99
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 11226,
+    "recovered": 10598,
+    "rows": 10847,
+    "tracks": 99
+   }
+  },
+  "SNGS-057": {
+   "shipped c0.20 m3": {
+    "gt": 13405,
+    "recovered": 12490,
+    "rows": 13326,
+    "tracks": 88
+   },
+   "c0.20 m1": {
+    "gt": 13405,
+    "recovered": 12605,
+    "rows": 13623,
+    "tracks": 133
+   },
+   "c0.10 m3": {
+    "gt": 13405,
+    "recovered": 12506,
+    "rows": 13358,
+    "tracks": 90
+   },
+   "c0.10 m1": {
+    "gt": 13405,
+    "recovered": 12619,
+    "rows": 13643,
+    "tracks": 136
+   },
+   "c0.05 m1": {
+    "gt": 13405,
+    "recovered": 12623,
+    "rows": 13646,
+    "tracks": 136
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 13405,
+    "recovered": 12600,
+    "rows": 13655,
+    "tracks": 144
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 13405,
+    "recovered": 12604,
+    "rows": 13658,
+    "tracks": 144
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 13405,
+    "recovered": 12600,
+    "rows": 13655,
+    "tracks": 144
+   }
+  },
+  "SNGS-078": {
+   "shipped c0.20 m3": {
+    "gt": 9488,
+    "recovered": 8736,
+    "rows": 8974,
+    "tracks": 55
+   },
+   "c0.20 m1": {
+    "gt": 9488,
+    "recovered": 8802,
+    "rows": 9064,
+    "tracks": 72
+   },
+   "c0.10 m3": {
+    "gt": 9488,
+    "recovered": 8738,
+    "rows": 8987,
+    "tracks": 55
+   },
+   "c0.10 m1": {
+    "gt": 9488,
+    "recovered": 8805,
+    "rows": 9080,
+    "tracks": 72
+   },
+   "c0.05 m1": {
+    "gt": 9488,
+    "recovered": 8807,
+    "rows": 9082,
+    "tracks": 72
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 9488,
+    "recovered": 8804,
+    "rows": 9071,
+    "tracks": 73
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 9488,
+    "recovered": 8806,
+    "rows": 9073,
+    "tracks": 73
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 9488,
+    "recovered": 8799,
+    "rows": 9066,
+    "tracks": 73
+   }
+  },
+  "SNGS-081": {
+   "shipped c0.20 m3": {
+    "gt": 12061,
+    "recovered": 11278,
+    "rows": 11341,
+    "tracks": 65
+   },
+   "c0.20 m1": {
+    "gt": 12061,
+    "recovered": 11500,
+    "rows": 11595,
+    "tracks": 78
+   },
+   "c0.10 m3": {
+    "gt": 12061,
+    "recovered": 11282,
+    "rows": 11346,
+    "tracks": 64
+   },
+   "c0.10 m1": {
+    "gt": 12061,
+    "recovered": 11503,
+    "rows": 11600,
+    "tracks": 77
+   },
+   "c0.05 m1": {
+    "gt": 12061,
+    "recovered": 11505,
+    "rows": 11602,
+    "tracks": 77
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 12061,
+    "recovered": 11527,
+    "rows": 11633,
+    "tracks": 91
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 12061,
+    "recovered": 11530,
+    "rows": 11636,
+    "tracks": 91
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 12061,
+    "recovered": 11526,
+    "rows": 11632,
+    "tracks": 91
+   }
+  },
+  "SNGS-084": {
+   "shipped c0.20 m3": {
+    "gt": 11171,
+    "recovered": 9902,
+    "rows": 10502,
+    "tracks": 64
+   },
+   "c0.20 m1": {
+    "gt": 11171,
+    "recovered": 10218,
+    "rows": 10871,
+    "tracks": 98
+   },
+   "c0.10 m3": {
+    "gt": 11171,
+    "recovered": 9938,
+    "rows": 10539,
+    "tracks": 64
+   },
+   "c0.10 m1": {
+    "gt": 11171,
+    "recovered": 10247,
+    "rows": 10910,
+    "tracks": 96
+   },
+   "c0.05 m1": {
+    "gt": 11171,
+    "recovered": 10253,
+    "rows": 10916,
+    "tracks": 96
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 11171,
+    "recovered": 10236,
+    "rows": 10913,
+    "tracks": 115
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 11171,
+    "recovered": 10242,
+    "rows": 10919,
+    "tracks": 115
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 11171,
+    "recovered": 10235,
+    "rows": 10912,
+    "tracks": 115
+   }
+  },
+  "SNGS-087": {
+   "shipped c0.20 m3": {
+    "gt": 10005,
+    "recovered": 9760,
+    "rows": 10344,
+    "tracks": 34
+   },
+   "c0.20 m1": {
+    "gt": 10005,
+    "recovered": 9843,
+    "rows": 10435,
+    "tracks": 39
+   },
+   "c0.10 m3": {
+    "gt": 10005,
+    "recovered": 9763,
+    "rows": 10347,
+    "tracks": 34
+   },
+   "c0.10 m1": {
+    "gt": 10005,
+    "recovered": 9846,
+    "rows": 10439,
+    "tracks": 39
+   },
+   "c0.05 m1": {
+    "gt": 10005,
+    "recovered": 9849,
+    "rows": 10443,
+    "tracks": 39
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 10005,
+    "recovered": 9842,
+    "rows": 10441,
+    "tracks": 44
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 10005,
+    "recovered": 9845,
+    "rows": 10445,
+    "tracks": 44
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 10005,
+    "recovered": 9842,
+    "rows": 10441,
+    "tracks": 44
+   }
+  },
+  "SNGS-090": {
+   "shipped c0.20 m3": {
+    "gt": 10813,
+    "recovered": 9949,
+    "rows": 10349,
+    "tracks": 81
+   },
+   "c0.20 m1": {
+    "gt": 10813,
+    "recovered": 10123,
+    "rows": 10564,
+    "tracks": 92
+   },
+   "c0.10 m3": {
+    "gt": 10813,
+    "recovered": 9978,
+    "rows": 10420,
+    "tracks": 81
+   },
+   "c0.10 m1": {
+    "gt": 10813,
+    "recovered": 10149,
+    "rows": 10647,
+    "tracks": 92
+   },
+   "c0.05 m1": {
+    "gt": 10813,
+    "recovered": 10152,
+    "rows": 10650,
+    "tracks": 92
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 10813,
+    "recovered": 10135,
+    "rows": 10599,
+    "tracks": 97
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 10813,
+    "recovered": 10138,
+    "rows": 10602,
+    "tracks": 97
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 10813,
+    "recovered": 10131,
+    "rows": 10594,
+    "tracks": 97
+   }
+  },
+  "SNGS-093": {
+   "shipped c0.20 m3": {
+    "gt": 11327,
+    "recovered": 10773,
+    "rows": 11056,
+    "tracks": 53
+   },
+   "c0.20 m1": {
+    "gt": 11327,
+    "recovered": 10914,
+    "rows": 11243,
+    "tracks": 67
+   },
+   "c0.10 m3": {
+    "gt": 11327,
+    "recovered": 10771,
+    "rows": 11055,
+    "tracks": 53
+   },
+   "c0.10 m1": {
+    "gt": 11327,
+    "recovered": 10922,
+    "rows": 11256,
+    "tracks": 64
+   },
+   "c0.05 m1": {
+    "gt": 11327,
+    "recovered": 10923,
+    "rows": 11257,
+    "tracks": 64
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 11327,
+    "recovered": 10897,
+    "rows": 11238,
+    "tracks": 73
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 11327,
+    "recovered": 10898,
+    "rows": 11239,
+    "tracks": 73
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 11327,
+    "recovered": 10897,
+    "rows": 11238,
+    "tracks": 73
+   }
+  },
+  "SNGS-096": {
+   "shipped c0.20 m3": {
+    "gt": 15559,
+    "recovered": 14008,
+    "rows": 14361,
+    "tracks": 76
+   },
+   "c0.20 m1": {
+    "gt": 15559,
+    "recovered": 14181,
+    "rows": 14566,
+    "tracks": 91
+   },
+   "c0.10 m3": {
+    "gt": 15559,
+    "recovered": 14033,
+    "rows": 14393,
+    "tracks": 74
+   },
+   "c0.10 m1": {
+    "gt": 15559,
+    "recovered": 14197,
+    "rows": 14589,
+    "tracks": 92
+   },
+   "c0.05 m1": {
+    "gt": 15559,
+    "recovered": 14197,
+    "rows": 14589,
+    "tracks": 92
+   },
+   "c0.10 m1 a0.10": {
+    "gt": 15559,
+    "recovered": 14216,
+    "rows": 14614,
+    "tracks": 104
+   },
+   "c0.05 m1 a0.10": {
+    "gt": 15559,
+    "recovered": 14216,
+    "rows": 14614,
+    "tracks": 104
+   },
+   "c0.20 m1 a0.10": {
+    "gt": 15559,
+    "recovered": 14213,
+    "rows": 14613,
+    "tracks": 104
+   }
+  }
+ }
+}

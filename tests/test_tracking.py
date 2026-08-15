@@ -43,3 +43,52 @@ def test_botsort_backend_requires_a_track_method():
 
     with pytest.raises(ValueError, match="botsort"):
         BotSortBackend().update(_DetectOnly(), frame_rgb=None)
+
+
+# --- v9 W7: the keep-untracked pass-through -------------------------------------------------------
+class _FixedDetector:
+    """Detector stub returning one fixed per-frame detection set (no ball)."""
+
+    def __init__(self, boxes, confs, roles):
+        self._ret = (boxes, confs, roles, None)
+
+    def detect(self, frame_rgb):
+        return self._ret
+
+
+def test_untracked_mask_is_exact_box_identity():
+    from generator.tracking import untracked_mask
+
+    boxes = np.array([[0.0, 0, 10, 20], [50.0, 0, 60, 20], [100.0, 0, 110, 20]])
+    kept = boxes[[0, 2]]
+    assert untracked_mask(boxes, kept).tolist() == [False, True, False]
+    assert untracked_mask(boxes, np.zeros((0, 4))).tolist() == [True] * 3
+    assert untracked_mask(np.zeros((0, 4)), kept).tolist() == []
+
+
+def test_keep_untracked_emits_every_detection_with_unique_ids():
+    """With the flag ON no detection is lost, and the extra ids never collide with ByteTrack's."""
+    import generator.tracking as tk
+
+    boxes = np.array([[0.0, 0, 10, 20], [50.0, 0, 60, 20]])
+    confs = np.array([0.9, 0.9])
+    roles = np.array([0, 0])
+    det = _FixedDetector(boxes, confs, roles)
+
+    off = tk.ByteTrackBackend(min_hits=3)
+    first_off = off.update(det, frame_rgb=None)[0]
+    assert len(first_off) == 0  # 3-frame confirmation: nothing on frame 1
+
+    tk.KEEP_UNTRACKED = True
+    try:
+        on = tk.ByteTrackBackend(min_hits=3)
+        seen_ids = set()
+        for _ in range(4):
+            xyxy, conf, cls, tids, _ball = on.update(det, frame_rgb=None)
+            assert len(xyxy) == len(boxes), "a detection was dropped with the flag ON"
+            assert len(conf) == len(cls) == len(tids) == len(boxes)
+            assert len(set(tids.tolist())) == len(boxes), "duplicate ids inside one frame"
+            seen_ids.update(tids.tolist())
+    finally:
+        tk.KEEP_UNTRACKED = False
+    assert any(i >= tk.UNTRACKED_ID_BASE for i in seen_ids)

@@ -1,0 +1,71 @@
+{
+  "session": "v9-W7",
+  "declared_at": "2026-08-15T13:05:00+00:00",
+  "declared_before": "any arm code was written, any arm was extracted, and any arm was scored; stage-0 anatomy and the zero-GPU tracker replay were complete and are the evidence this registration is built on",
+  "split": "DEV-20 only; TEST-38 / test-49 / challenge not read, extracted or scored",
+  "brief_premise": {
+    "as_given": "the detection-miss bucket needs a detector retrain; oracle +6.99 GS-DetA, realistic +2..4.4",
+    "verdict": "REFUTED by stage 0 -- see stage0_findings; no detector training is registered"
+  },
+  "stage0_findings": {
+    "gt_rows": 235174,
+    "misses": 23677,
+    "submission_position_recall": 0.8993,
+    "shipped_positions_recall_image_space": 0.9094,
+    "detector_only_recall_conf_0.20": 0.9711,
+    "detector_only_recall_conf_0.10": 0.9754,
+    "detector_only_recall_conf_0.01": 0.9854,
+    "miss_split": {
+      "lost_downstream_of_positions": 4478,
+      "lost_between_detector_and_positions": 11900,
+      "no_box_at_0.20_but_box_in_[0.10,0.20)": 1481,
+      "no_box_at_0.10_but_box_in_[0.01,0.10)": 3840,
+      "no_box_at_any_confidence": 1978
+    },
+    "reading": "71.4% of the miss bucket (16,378 of 23,677) is chain loss on rows the detector already produced at >= 0.20. A perfect detector adds at most 2.89 recall points; the chain after the detector loses 7.2."
+  },
+  "control": {
+    "name": "A0",
+    "what": "the shipped chain re-extracted TODAY on a100server1 GPU 1, same env, same weights (gsr_v3_ft_b/weights/last.pt, md5 2074d8741f97a6892a1322d0f808244c), variant _w7ctl",
+    "why": "kb v8-w4-004 -- an arm produced on this stack may only be paired against a control produced on this stack",
+    "secondary_read": "its positions parquets are also diffed against the on-record 2026-08-07 server artifacts, which measures within-machine stack drift directly"
+  },
+  "arms": [
+    {
+      "name": "A1 keepall",
+      "variant": "_w7a1",
+      "change": "generator.tracking.KEEP_UNTRACKED = True -- ByteTrackBackend additionally writes through every input detection the tracker did not return, with a fresh track id",
+      "mechanism": "supervision.ByteTrack.update_with_detections returns only input rows whose box matches a returned Kalman track box at IoU >= 0.5, so it silently discards 8.0% of the detector's confident boxes (250,705 -> 230,753 on DEV-20). tools.gsr_eiou.associate re-derives every tracklet from raw boxes and never drops a row, so the tracker's filtering buys the chain nothing.",
+      "detect_conf": 0.20,
+      "replay_recall_ceiling": 0.9711,
+      "cost_estimate_gpu_h": 2.0
+    },
+    {
+      "name": "A2 m1",
+      "variant": "_w7a2",
+      "change": "generator.extract build_tracker(min_hits=1) -- minimum_consecutive_frames 3 -> 1, nothing else",
+      "why": "the cheap ablation of A1: how much of the recovered mass is only track-confirmation latency",
+      "detect_conf": 0.20,
+      "replay_recall": 0.9374,
+      "cost_estimate_gpu_h": 2.0,
+      "order": "run only after A1 completes, budget permitting"
+    }
+  ],
+  "arms_considered_and_refused": {
+    "detector_retrain_more_epochs": "ceiling +2.89 recall points; the whole detector-level bucket is 1,978 rows (0.84% of GT). 4-6 GPU-h for less mass than A1's 11,900 rows at zero training.",
+    "imgsz_1280": "S4/S4b measured -30.8 big-box recall at 1280; not repeated.",
+    "occlusion_augmentation": "crowding (GT-GT IoU >= 0.3) carries 12.3% of detector-level misses = 2,414 rows.",
+    "lower_DETECT_CONF": "the replay prices conf 0.20 -> 0.10 at +0.15 recall points once min_hits is fixed, and kb v8-w4 warns downstream thresholds are calibrated to the shipped confidence distribution. Not worth an arm."
+  },
+  "gates": {
+    "primary": "paired DEV-20 vs the A0 control: GS-DetA >= +1.00 AND GS-HOTA not worse, measured on the FULL post-processing stack (vote_track_attributes(role,team,jersey) + gk_side_repair(('team',)) ON for both sides)",
+    "secondary": "per-sequence paired GS-HOTA helped > hurt with Wilcoxon p < 0.05, n = 20",
+    "reported_regardless": "the same numbers with both flags OFF; image-space GT recall of the arm's positions; prediction row count; track count; GS-AssA and GS-LocA",
+    "noise": "no training is involved, so there is no seed variance to measure; extraction is bit-deterministic run to run on one stack (kb v8-w4-004). The known cross-stack hazard is -1.14 paired GS-HOTA and is avoided by construction: control and arms are extracted on the same machine, same env, within the same session."
+  },
+  "environment": {
+    "gpu_host": "a100server1 (192.168.3.19), GPU 1 only, tmux, versioned output dirs",
+    "env": "conda gsr: python 3.11.15, torch 2.5.1+cu121, ultralytics 8.4.115, supervision 0.30.0, numpy 1.26.4",
+    "cpu_side": "laptop -- scoring, vote/gk_side post-processing, pairing"
+  }
+}

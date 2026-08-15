@@ -1,0 +1,333 @@
+{
+ "session": "v9-W7",
+ "registration": "results/gsr_v9_w7_registered.json",
+ "verdict": "BOTH REGISTERED ARMS FAIL. The detector-retrain premise is refused on measurement.",
+ "detector_only_recall_dev20": {
+  "conf>=0.20": 0.9711,
+  "conf>=0.10": 0.9754,
+  "conf>=0.01": 0.9854
+ },
+ "lineages": {
+  "onrecord": {
+   "gt": 235174,
+   "misses": 23677,
+   "submission_recall": 0.8993,
+   "positions_recall": 0.9094,
+   "pred_rows": 213571,
+   "positions_rows": 230753,
+   "split": {
+    "lost_downstream": 4478,
+    "lost_at_gate": 2261,
+    "lost_after_gate": 2217,
+    "miss_tracker_level": 11900,
+    "miss_conf_free": 1481,
+    "miss_conf_deep": 3840,
+    "miss_detector_level": 1978
+   }
+  },
+  "A0": {
+   "gt": 235174,
+   "misses": 19933,
+   "submission_recall": 0.9152,
+   "positions_recall": 0.924,
+   "pred_rows": 217969,
+   "positions_rows": 235294,
+   "split": {
+    "lost_downstream": 4352,
+    "lost_at_gate": 2229,
+    "lost_after_gate": 2123,
+    "miss_tracker_level": 8815,
+    "miss_conf_free": 1401,
+    "miss_conf_deep": 3427,
+    "miss_detector_level": 1938
+   }
+  },
+  "A1": {
+   "gt": 235174,
+   "misses": 7830,
+   "submission_recall": 0.9667,
+   "positions_recall": 0.9707,
+   "pred_rows": 245251,
+   "positions_rows": 263959,
+   "split": {
+    "lost_downstream": 4147,
+    "lost_at_gate": 2255,
+    "lost_after_gate": 1892,
+    "miss_tracker_level": 641,
+    "miss_conf_free": 355,
+    "miss_conf_deep": 1031,
+    "miss_detector_level": 1656
+   }
+  },
+  "A2": {
+   "gt": 235174,
+   "misses": 16820,
+   "submission_recall": 0.9285,
+   "positions_recall": 0.9353,
+   "pred_rows": 222645,
+   "positions_rows": 240119,
+   "split": {
+    "lost_downstream": 4323,
+    "lost_at_gate": 2189,
+    "lost_after_gate": 2134,
+    "miss_tracker_level": 6331,
+    "miss_conf_free": 1263,
+    "miss_conf_deep": 3030,
+    "miss_detector_level": 1873
+   }
+  }
+ },
+ "stack_drift_same_machine_8_days": {
+  "note": "identical code, identical weights (md5 2074d874...), a100server1 GPU 1, 2026-08-07 artifacts vs a 2026-08-15 re-extraction",
+  "flags_off": {
+   "GS-DetA": 1.0182,
+   "GS-HOTA": 1.0817,
+   "GS-AssA": 1.0839
+  },
+  "flags_on": {
+   "GS-DetA": 1.2489,
+   "GS-HOTA": 0.9495,
+   "GS-AssA": 0.3719
+  },
+  "paired_hota_off": {
+   "mean": 1.0364127226105695,
+   "helped": 13,
+   "hurt": 7,
+   "wilcoxon_p": 0.16495704650878906
+  }
+ },
+ "miss_oracle_on_control": {
+  "arm": "nomiss (a GT-attributed prediction on every missed GT row)",
+  "gs_deta_delta": 5.8204,
+  "rows": 19933,
+  "linear_apportionment": {
+   "chain_after_detector": {
+    "rows": 13167,
+    "share": 0.6606,
+    "gs_deta_ceiling": 3.845
+   },
+   "confidence_floor": {
+    "rows": 4828,
+    "share": 0.2422,
+    "gs_deta_ceiling": 1.41
+   },
+   "detector_blind": {
+    "rows": 1938,
+    "share": 0.0972,
+    "gs_deta_ceiling": 0.566
+   }
+  }
+ },
+ "arms": {
+  "A1_keepall": {
+   "pair": {
+    "off": {
+     "delta": {
+      "GS-DetA": -7.1054,
+      "GS-HOTA": -8.4451,
+      "GS-AssA": -9.9054
+     },
+     "paired_hota": {
+      "mean": -8.492817406331527,
+      "helped": 0,
+      "hurt": 20,
+      "wilcoxon_p": 1.9073486328125e-06
+     },
+     "paired_deta": {
+      "mean": -6.985164468832001,
+      "helped": 1,
+      "hurt": 19,
+      "wilcoxon_p": 3.814697265625e-06
+     },
+     "control": {
+      "GS-DetA": 40.3265,
+      "GS-HOTA": 52.89
+     },
+     "arm": {
+      "GS-DetA": 33.2211,
+      "GS-HOTA": 44.4449
+     }
+    },
+    "on": {
+     "delta": {
+      "GS-DetA": -8.4305,
+      "GS-HOTA": -9.667,
+      "GS-AssA": -10.8926
+     },
+     "paired_hota": {
+      "mean": -9.742596067185723,
+      "helped": 0,
+      "hurt": 20,
+      "wilcoxon_p": 1.9073486328125e-06
+     },
+     "paired_deta": {
+      "mean": -8.294089980554679,
+      "helped": 0,
+      "hurt": 20,
+      "wilcoxon_p": 1.9073486328125e-06
+     },
+     "control": {
+      "GS-DetA": 44.6246,
+      "GS-HOTA": 57.2095
+     },
+     "arm": {
+      "GS-DetA": 36.1941,
+      "GS-HOTA": 47.5425
+     }
+    }
+   },
+   "verdict": "FAIL"
+  },
+  "A2_minhits1": {
+   "pair": {
+    "off": {
+     "delta": {
+      "GS-DetA": -0.5221,
+      "GS-HOTA": -0.5833,
+      "GS-AssA": -0.6316
+     },
+     "paired_hota": {
+      "mean": -0.44621612939069555,
+      "helped": 10,
+      "hurt": 10,
+      "wilcoxon_p": 0.6476554870605469
+     },
+     "paired_deta": {
+      "mean": -0.3034628432799461,
+      "helped": 10,
+      "hurt": 10,
+      "wilcoxon_p": 0.7841262817382812
+     },
+     "control": {
+      "GS-DetA": 40.3265,
+      "GS-HOTA": 52.89
+     },
+     "arm": {
+      "GS-DetA": 39.8044,
+      "GS-HOTA": 52.3067
+     }
+    },
+    "on": {
+     "delta": {
+      "GS-DetA": -0.5299,
+      "GS-HOTA": -0.7069,
+      "GS-AssA": -0.942
+     },
+     "paired_hota": {
+      "mean": -0.6248328073823132,
+      "helped": 10,
+      "hurt": 10,
+      "wilcoxon_p": 0.5958194732666016
+     },
+     "paired_deta": {
+      "mean": -0.2699644952317534,
+      "helped": 10,
+      "hurt": 10,
+      "wilcoxon_p": 1.0
+     },
+     "control": {
+      "GS-DetA": 44.6246,
+      "GS-HOTA": 57.2095
+     },
+     "arm": {
+      "GS-DetA": 44.0948,
+      "GS-HOTA": 56.5026
+     }
+    }
+   },
+   "verdict": "FAIL"
+  }
+ },
+ "census": {
+  "control": {
+   "miss_deadframe": 2795,
+   "jersey_wrong": 52199,
+   "jersey_coverage_loss": 36437,
+   "correct": 136206,
+   "jersey_named_wrong": 13948,
+   "fp_phantom": 952,
+   "fp_duplicate": 1776,
+   "role_wrong": 12823,
+   "team_wrong": 14013,
+   "miss_live": 17138,
+   "jersey_overnamed": 1814,
+   "n_gt": 235174,
+   "n_pred": 217969,
+   "n_frames": 14520,
+   "n_dead_frames": 210,
+   "tracks": 938
+  },
+  "A1": {
+   "jersey_wrong": 74081,
+   "jersey_coverage_loss": 56912,
+   "correct": 123502,
+   "jersey_overnamed": 2878,
+   "miss_live": 6784,
+   "fp_phantom": 2043,
+   "fp_duplicate": 15864,
+   "role_wrong": 13566,
+   "team_wrong": 16195,
+   "jersey_named_wrong": 14291,
+   "n_gt": 235174,
+   "n_pred": 245251,
+   "n_frames": 14520,
+   "n_dead_frames": 91,
+   "miss_deadframe": 1046,
+   "tracks": 2163
+  },
+  "A2": {
+   "jersey_wrong": 54632,
+   "jersey_coverage_loss": 39243,
+   "correct": 136196,
+   "jersey_named_wrong": 13253,
+   "fp_phantom": 1097,
+   "fp_duplicate": 3194,
+   "role_wrong": 13060,
+   "team_wrong": 14466,
+   "miss_live": 15229,
+   "jersey_overnamed": 2136,
+   "n_gt": 235174,
+   "n_pred": 222645,
+   "n_frames": 14520,
+   "n_dead_frames": 131,
+   "miss_deadframe": 1591,
+   "tracks": 1117
+  }
+ },
+ "recovered_row_yield": {
+  "A2": {
+   "misses_recovered": 3113,
+   "delta_correct_rows": -10,
+   "delta_pred_rows": 4676,
+   "delta_tracks": 179
+  },
+  "A1": {
+   "misses_recovered": 12103,
+   "delta_correct_rows": -12704,
+   "delta_pred_rows": 27282,
+   "delta_tracks": 1225
+  },
+  "control_attribute_yield": 0.6328
+ },
+ "tracker_replay_validation": {
+  "predicted_positions_recall_shipped_config": 0.9242390740473011,
+  "measured_A0": 0.924,
+  "predicted_c0.20_m1": 0.9373910381249628,
+  "measured_A2": 0.9353
+ },
+ "gpu_hours": {
+  "basis": "GPU-1 wall occupancy on a100server1; no training was run",
+  "lowconf_probe_conf0.01_dev20": 0.19,
+  "rgb_vs_bgr_control_probe": 0.01,
+  "A0_control_chain": 1.42,
+  "A1_chain": 1.42,
+  "A2_chain": 1.38,
+  "total": 4.42
+ },
+ "checkpoint_provenance": {
+  "detector": "~/runs/det/gsr_v3_ft_b/weights/last.pt (S4b)",
+  "md5_control": "2074d8741f97a6892a1322d0f808244c",
+  "md5_arms": "2074d8741f97a6892a1322d0f808244c",
+  "note": "no detector was trained; control and both arms use the SAME checkpoint, verified by tools.gsr_v6det.check_weights at every stage launch and by md5sum on the server. The arms differ only in generator.tracking flags."
+ }
+}

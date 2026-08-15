@@ -1,5 +1,35 @@
 # STATUS
 
+## 2026-08-15 — v9 W7: the "detector bucket" was never the detector — 66% of misses are CONFIDENT BOXES the chain discards; retrain REFUSED on evidence; both recovery arms FAIL; and same-code re-extraction drifts +1.02 DetA in 8 days
+
+results/gsr_v9_w7_registered.json + results/gsr_benchmark/gsr_v9_w7_*.json, kb v9-w7-001..005,
+tools/gsr_v9_w7.py + _infer.py, generator/tracking.py (KEEP_UNTRACKED/MIN_HITS, default OFF).
+**Stage-0 anatomy (conf=0.01 re-inference, 0.19 GPU-h): of 19,933 DEV misses, 66.1% have a
+CONFIDENT (>=0.20) detector box that never reaches the submission — killed by
+supervision.ByteTrack.update_with_detections (re-matches its KALMAN boxes at IoU>=0.5 and
+returns only matches, discarding 8.0% of confident boxes; dominant covariate = camera pan,
+recall 0.545 at >=20 px/frame GT foot speed). Only 9.7% are true detector misses: a PERFECT
+detector is worth +0.57 GS-DetA. The retrain (W3's "+2..4.4 realistic") is REFUSED with
+numbers — the pricing had attributed chain losses to the detector.** Both registered recovery
+arms FAIL: A1 keep-untracked recovered 12,103 GT rows and LOST 7.1 DetA (tracklets 938->2,163,
+jersey coverage-loss +20,475 — recall and GS-DetA move in OPPOSITE directions here); A2
+min_hits=1: recovered 3,113 misses, fully-correct rows moved by **-10** — the attribute yield
+of newly-recovered detections is **0.0%**: the rows the chain loses are exactly the rows the
+identity machinery cannot name. The nomiss oracle (+5.82) is unreachable by finding
+detections. Instrument banked: CPU ByteTrack replay prices any (conf, min_hits) point in
+seconds (validated 0.9242 vs 0.9240 measured).
+
+**SECOND FINDING, FREEZE-CRITICAL (kb v9-w7-004): same machine, same code, same md5-verified
+weights, 8 days apart -> +1.0182 GS-DetA / +1.0817 GS-HOTA drift (flags-ON stack 56.2601 ->
+57.2095 on the fresh lineage).** v8-w4-004 confirmed on-cluster with the sign FLIPPED; the
+drift exceeds the session's own +1.0 bar — pairing new arms against on-record numbers would
+MANUFACTURE passes. The freeze session must re-extract EVERYTHING (DEV/TEST-38/test-49) on
+one stack in one window and pair only within it. **W8 dispatched — the surgical version A1/A2
+weren't: attach chain-discarded confident boxes to EXISTING tracks (inheriting the host's
+identity — A1/A2 spawned unnamed tracks; attach-inherit is the only untested mechanism for
+the +3.85 written-through bucket). After W8: freeze -> TEST-38 -> test-49 -> submission #6.**
+4.42 GPU-h of 15.
+
 ## 2026-08-15 — v9 W6 FAIL: name-borrowing cannot reach the jersey prize — the +8.15 coverage bound is STRUCTURALLY PHANTOM (oracle over all borrowable candidates = +0.23); stack holds 56.26; W7 (detector) is the campaign's last big lever
 
 results/gsr_v9_w6_registered.json + results/gsr_benchmark/gsr_v9_w6_*.json, kb v9-w6-001..005,
