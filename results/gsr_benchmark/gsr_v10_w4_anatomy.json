@@ -1,0 +1,278 @@
+{
+ "anatomy": {
+  "per_seq": {
+   "SNGS-021": {
+    "frames": 747,
+    "dead_after_gate": 0,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 92,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-024": {
+    "frames": 747,
+    "dead_after_gate": 110,
+    "dead_after_fill": 68,
+    "rows_lost_on_dead_frames": 358,
+    "rows_lost_on_live_frames": 23,
+    "dead_with_hypotheses": 46,
+    "dead_hyp_ge2_pts": 46,
+    "dead_hyp_ge4_pts": 46,
+    "dead_no_gt_camera": 0,
+    "views": {
+     "box_in_view": 53,
+     "central_view": 15
+    }
+   },
+   "SNGS-027": {
+    "frames": 747,
+    "dead_after_gate": 1,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 141,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-030": {
+    "frames": 747,
+    "dead_after_gate": 0,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 5,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-033": {
+    "frames": 733,
+    "dead_after_gate": 30,
+    "dead_after_fill": 8,
+    "rows_lost_on_dead_frames": 31,
+    "rows_lost_on_live_frames": 68,
+    "dead_with_hypotheses": 8,
+    "dead_hyp_ge2_pts": 8,
+    "dead_hyp_ge4_pts": 8,
+    "dead_no_gt_camera": 0,
+    "views": {
+     "box_in_view": 8
+    }
+   },
+   "SNGS-036": {
+    "frames": 747,
+    "dead_after_gate": 0,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 157,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-039": {
+    "frames": 747,
+    "dead_after_gate": 1,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 9,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-042": {
+    "frames": 747,
+    "dead_after_gate": 0,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 0,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-045": {
+    "frames": 747,
+    "dead_after_gate": 13,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 8,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-048": {
+    "frames": 747,
+    "dead_after_gate": 2,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 24,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-051": {
+    "frames": 747,
+    "dead_after_gate": 22,
+    "dead_after_fill": 21,
+    "rows_lost_on_dead_frames": 42,
+    "rows_lost_on_live_frames": 9,
+    "dead_with_hypotheses": 21,
+    "dead_hyp_ge2_pts": 21,
+    "dead_hyp_ge4_pts": 21,
+    "dead_no_gt_camera": 0,
+    "views": {
+     "box_in_view": 12,
+     "central_view": 9
+    }
+   },
+   "SNGS-054": {
+    "frames": 747,
+    "dead_after_gate": 25,
+    "dead_after_fill": 6,
+    "rows_lost_on_dead_frames": 20,
+    "rows_lost_on_live_frames": 0,
+    "dead_with_hypotheses": 6,
+    "dead_hyp_ge2_pts": 6,
+    "dead_hyp_ge4_pts": 6,
+    "dead_no_gt_camera": 6,
+    "views": {}
+   },
+   "SNGS-057": {
+    "frames": 747,
+    "dead_after_gate": 67,
+    "dead_after_fill": 43,
+    "rows_lost_on_dead_frames": 691,
+    "rows_lost_on_live_frames": 18,
+    "dead_with_hypotheses": 2,
+    "dead_hyp_ge2_pts": 2,
+    "dead_hyp_ge4_pts": 2,
+    "dead_no_gt_camera": 0,
+    "views": {
+     "box_in_view": 43
+    }
+   },
+   "SNGS-078": {
+    "frames": 740,
+    "dead_after_gate": 30,
+    "dead_after_fill": 6,
+    "rows_lost_on_dead_frames": 13,
+    "rows_lost_on_live_frames": 44,
+    "dead_with_hypotheses": 6,
+    "dead_hyp_ge2_pts": 6,
+    "dead_hyp_ge4_pts": 6,
+    "dead_no_gt_camera": 0,
+    "views": {
+     "box_in_view": 6
+    }
+   },
+   "SNGS-081": {
+    "frames": 747,
+    "dead_after_gate": 22,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 26,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-084": {
+    "frames": 747,
+    "dead_after_gate": 55,
+    "dead_after_fill": 51,
+    "rows_lost_on_dead_frames": 228,
+    "rows_lost_on_live_frames": 16,
+    "dead_with_hypotheses": 1,
+    "dead_hyp_ge2_pts": 1,
+    "dead_hyp_ge4_pts": 1,
+    "dead_no_gt_camera": 3,
+    "views": {
+     "box_in_view": 48
+    }
+   },
+   "SNGS-087": {
+    "frames": 747,
+    "dead_after_gate": 35,
+    "dead_after_fill": 8,
+    "rows_lost_on_dead_frames": 122,
+    "rows_lost_on_live_frames": 227,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {
+     "box_in_view": 8
+    }
+   },
+   "SNGS-090": {
+    "frames": 747,
+    "dead_after_gate": 30,
+    "dead_after_fill": 3,
+    "rows_lost_on_dead_frames": 3,
+    "rows_lost_on_live_frames": 424,
+    "dead_with_hypotheses": 3,
+    "dead_hyp_ge2_pts": 3,
+    "dead_hyp_ge4_pts": 3,
+    "dead_no_gt_camera": 0,
+    "views": {
+     "box_in_view": 3
+    }
+   },
+   "SNGS-093": {
+    "frames": 747,
+    "dead_after_gate": 20,
+    "dead_after_fill": 0,
+    "rows_lost_on_dead_frames": 0,
+    "rows_lost_on_live_frames": 102,
+    "dead_with_hypotheses": 0,
+    "dead_hyp_ge2_pts": 0,
+    "dead_hyp_ge4_pts": 0,
+    "dead_no_gt_camera": 0,
+    "views": {}
+   },
+   "SNGS-096": {
+    "frames": 747,
+    "dead_after_gate": 11,
+    "dead_after_fill": 2,
+    "rows_lost_on_dead_frames": 4,
+    "rows_lost_on_live_frames": 293,
+    "dead_with_hypotheses": 2,
+    "dead_hyp_ge2_pts": 2,
+    "dead_hyp_ge4_pts": 2,
+    "dead_no_gt_camera": 0,
+    "views": {
+     "box_in_view": 2
+    }
+   }
+  },
+  "total": {
+   "frames": 14919,
+   "dead_after_gate": 474,
+   "dead_after_fill": 216,
+   "rows_lost_dead": 1512,
+   "rows_lost_live": 1686,
+   "dead_with_hypotheses": 95,
+   "dead_central_view": 24,
+   "dead_no_gt_camera": 9,
+   "dead_two_plus_pts": 95,
+   "dead_four_plus_pts": 95
+  }
+ }
+}

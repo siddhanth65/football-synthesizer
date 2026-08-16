@@ -1,5 +1,36 @@
 # STATUS
 
+## 2026-08-16 — v10 W4: THE SENSITIVITY CURVE — geometry axis holds +6.82 GS-HOTA and 92% of it is PER-FRAME ACCURACY (not completeness, not temporal); the 5 m "tolerance" is a Gaussian charging every centimetre; RTS registered arms FAIL, mapping-space candidate +0.54
+
+results/gsr_v10_w4_registered.json (pre-scoring) + results/gsr_benchmark/gsr_v10_w4*.json,
+kb v10-w4-001..006, generator/camera_track.py, tools/gsr_v10_w4.py. Lineage: v10-W2 ctrl,
+zero-drift reproduction verified to every digit. **Premise correction that drives all of it:
+GS-HOTA's position similarity = exp(-0.5 (d/2.0427)^2) — 5 m is where similarity hits 0.05,
+NOT a gate; the innovation map's "median is past the bottleneck" inference is REFUTED (its
+own decision rule fired correctly and its conclusion was wrong for the right reasons).**
+The curve (perturbation + oracle counterfactuals, association frozen, null verified 1e-14):
+**O_acc (GT camera, solved frames) = +6.2537 -> 61.32; O_comp +0.49; O_fill +0.48; O_all
++6.8207 -> 61.89. Calibration stops mattering at ~0.20 m mean; we sit at 0.762 m — an order
+of magnitude of chargeable error remains. AssA gains MORE than DetA from geometry (+8.24 vs
++4.75) even with association frozen.** Frame-correlated and iid position error cost
+identically — camera error and detection error are the same currency per metre. Dead tail
+now tiny: 216 post-fill dead frames (1.45%), 24 central-view; completeness prize capped
++0.49 — Rung 2 demoted, **Rung 3 (batch accuracy refinement) promoted: the only
+formulation attacking the +6.25 term.**
+
+RTS probe: **registered camera-space arms FAIL (A -5.77 catastrophic, B -0.41)** — root
+cause measured: the per-frame camera decomposition is DEGENERATE (position trades off
+against focal, 1.2-2.6 m frame noise; PnLCalib also emits NON-SQUARE pixels fy/fx
+0.94-0.97 — anything assuming square intrinsics is silently wrong). The identical smoother
+on the MAPPING (homography) space: arm E +0.5375 DEV-20 (15/5, p=0.0296, accuracy -4.9%)
+— passes all numeric bars but is POST-registration (added after diagnosing the degeneracy;
+selected on the accuracy instrument before end-to-end reads): **CANDIDATE requiring fresh
+registration + same-window TEST-38; confirms W3's +0.4251 ember at DEV scale.** "Smooth
+the MAP, not the camera" is the transferable design law. **v10-W5 dispatched: the accuracy
+attack — denser correspondences (conic tangents/line-conic intersections), full-clip batch
+refinement in mapping space (+ per-clip distortion term), and the E-arm properly
+registered; honest target 30-50% of the +6.25 oracle.**
+
 ## 2026-08-16 — v10 W3: the tripod camera CLASS is REFUTED on GSR — BroadTrack loses 7.39 GS-HOTA in our chain (2.5x worse accuracy; its own tripod estimator fails on 9/10 clips); the surviving ember: our camera jitters 26x more, smoothing our OWN solves ~ +0.43
 
 results/gsr_v10_w3_registered.json (§1 pre-compile) + results/gsr_benchmark/gsr_v10_w3.json,

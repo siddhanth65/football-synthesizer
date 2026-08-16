@@ -8604,6 +8604,170 @@
     "v10",
     "lead"
    ]
+  },
+  {
+   "id": "v10-w4-001",
+   "statement": "THE GEOMETRY AXIS HOLDS +6.82 GS-HOTA, AND THE '5 m TOLERANCE' PREMISE IS WRONG. GS-HOTA's position match is not a 5 m gate: TrackEval's SoccerNetGS class scores every pair with a GAUSSIAN, sim = exp(-d^2 / (2 * 2.0427^2)), where 5 m is merely the distance at which the similarity has decayed to 0.05 (0.43 m -> 0.978, 1 m -> 0.886, 2 m -> 0.62). Every centimetre of pitch error is charged. On DEV-20, flags ON, holding detections / track ids / association / attributes byte-identical and rewriting only bbox_pitch: re-projecting every submission row through a GT-fitted per-frame homography (perfect camera, our own detections) moves 55.0660 -> 61.3198 (+6.2537 GS-HOTA, DetA +4.745, AssA +8.239, LocA 93.18 -> 98.35); adding the 2,893 rows the calibration chain loses takes it to 61.8867 (+6.8207). The registered a-priori kill threshold for the whole axis was '< +1.00 -> Rungs 2-3 are not worth 3-5 weeks': exceeded 6.8x.",
+   "value": 6.8207,
+   "unit": "GS-HOTA headroom vs same-lineage control, DEV-20 flags ON (perfect camera + perfect completeness oracle)",
+   "status": "pending",
+   "evidence": [
+    "results/gsr_v10_w4_registered.json",
+    "results/gsr_benchmark/gsr_v10_w4.json"
+   ],
+   "method": "tools.gsr_v10_w4 --curve, arms O_acc / O_comp / O_all on the v10-W2 ctrl lineage (deleak_v10w2_ctrl predictions, positions_v10w2ctrl_v6det, v10_w2_full/ctrl candidate cache); flags applied after the rewrite via tools.gsr_v9_w7 FLAGS_ON; scored with eval.gsr_score.gs_hota EVAL_CONFIGS['gs_hota_full'].",
+   "n": 20,
+   "caveats": [
+    "UPPER BOUND, twice over: the oracle homography is FITTED per frame to that frame's own GT annotations, so it absorbs lens distortion and any GT foot-point convention locally -- no physical camera model is guaranteed to reach it; and the GT fit's own residual (0.09 m median) is the instrument's floor.",
+    "LOWER BOUND in one respect: the rewrite is downstream of association, so the oracle gets no credit for better geometry feeding EIoU / the GTA connector / the solver. The end-to-end value of perfect geometry is therefore >= this number.",
+    "Null arm verified: re-projecting every row through its OWN frame's solved homography reproduces the control to 4 dp (55.0660) and to 1e-14 m per row.",
+    "305 of the 3,198 lost rows are skipped by the completeness oracle (no GT camera on that frame, or a duplicate (track, timestep) the evaluator rejects), so O_comp is itself conservative."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "geometry",
+    "oracle",
+    "pre-registered"
+   ]
+  },
+  {
+   "id": "v10-w4-002",
+   "statement": "THE CALIBRATION-ERROR -> GS-HOTA SENSITIVITY CURVE (unpublished elsewhere). DEV-20, flags ON, association frozen; mean induced pitch displacement -> GS-HOTA loss. Camera pan/tilt jitter: 0.049 m -> 0.034, 0.098 -> 0.121, 0.244 -> 0.647, 0.487 -> 2.225, 0.973 -> 6.739, 2.616 -> 19.642. Focal jitter: 0.012 -> 0.003, 0.029 -> 0.015, 0.058 -> 0.055, 0.117 -> 0.195, 0.233 -> 0.718. iid per-row Gaussian: 0.125 -> 0.133, 0.313 -> 0.849, 0.627 -> 3.485, 1.253 -> 12.309, 2.507 -> 30.690, 3.760 -> 41.405, 6.267 -> 49.481. The loss is QUADRATIC in mean error near zero (loss / err^2 runs 11-16 over 0-0.25 m and falls as saturation sets in). DIRECT ANSWER TO 'when does calibration stop mattering under the 5 m kernel': only below ~0.20 m MEAN pitch displacement (~0.13 m median), where the cost falls under 0.5 GS-HOTA. Our shipped camera sits at 0.76 m mean / 0.48 m median -- an order of magnitude inside the regime where geometry pays.",
+   "value": 0.2,
+   "unit": "metres of mean pitch-position error below which the GS-HOTA cost is < 0.5 (DEV-20, flags ON)",
+   "status": "pending",
+   "evidence": [
+    "results/gsr_v10_w4_registered.json",
+    "results/gsr_benchmark/gsr_v10_w4.json"
+   ],
+   "method": "tools.gsr_v10_w4 --curve families F1 (iid row Gaussian), F2 (per-frame Gaussian), F3 (per-frame pan/tilt jitter through generator.camera_track), F4 (per-frame log-focal jitter), F5 (dead-run simulation), seed 20260816; the threshold is a log-log interpolation between the bracketing measured levels of F3 (0.214 m) and F4 (0.188 m).",
+   "n": 20,
+   "caveats": [
+    "Association is held fixed, so this is the METRIC's response: a lower bound on the end-to-end cost of the same error injected upstream.",
+    "Perturbed rows are not re-gated; the shipped chain would NaN a coordinate that lands off the pitch, so the large-sigma end is slightly pessimistic.",
+    "F1 vs F2 agree to < 0.05 GS-HOTA at every level: GS-HOTA charges ABSOLUTE position and has no notion of the relative geometry a frame-correlated (camera) error preserves. Camera error and detection error cost the same per metre.",
+    "Bit-reproducible: the F1 ladder is identical to 4 dp across two independent runs."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "calibration",
+    "geometry"
+   ]
+  },
+  {
+   "id": "v10-w4-003",
+   "statement": "OUR DEAD-FRAME TAIL IS SMALL AND NOW PRICED: 474 of 14,919 DEV-20 frames (3.18%) get no camera from the per-frame solver + gate, 216 (1.45%) survive fill_calibration_gaps(10) with no position at all, and 3,198 person-rows carry an image point but no pitch coordinate (1,512 on dead frames, 1,686 on live frames). Projecting all of them through a GT camera is worth +0.4913 GS-HOTA; repairing the geometry of the 7,672 rows the fill wrote is worth +0.4816. The whole tail is ~1.0 of the +6.82 the axis holds -- 85% of the headroom is the median accuracy of ordinary SOLVED frames. Of the 216 post-fill dead frames, 95 already carry a PnLCalib hypothesis with >= 4 ground correspondences (killed by the metre gate / on-pitch plausibility, not by missing evidence), and only 24 are central-view frames (centre circle in view, no penalty box) -- the population arXiv:2504.20052's circle->line conversion targets, i.e. 0.16% of frames.",
+   "value": 0.4913,
+   "unit": "GS-HOTA from perfect completeness alone, DEV-20 flags ON (2,893 rows added)",
+   "status": "pending",
+   "evidence": [
+    "results/gsr_v10_w4_registered.json",
+    "results/gsr_benchmark/gsr_v10_w4.json"
+   ],
+   "method": "tools.gsr_v10_w4 --anatomy (census + per-dead-frame landmark visibility from that frame's GT-fitted camera) and --curve arms O_comp / O_fill.",
+   "n": 20,
+   "caveats": [
+    "The 121 dead frames with NO cached hypothesis have < 4 correspondences by construction (PnLCalib emits nothing below that) and the cache does not record how many keypoints they had; the exact '2 or 3 correspondences, solvable under a tripod prior' count needs a GPU re-detect that was NOT run, because O_comp already caps the entire prize at +0.49.",
+    "The completeness oracle inherits each lost row's identity from its own ByteTrack track's surviving submission rows; rows whose track never survives anywhere are skipped, not invented."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "oracle",
+    "geometry"
+   ]
+  },
+  {
+   "id": "v10-w4-004",
+   "statement": "REGISTERED RUNG-1 RESULT: RTS SMOOTHING IN CAMERA-PARAMETER SPACE FAILS, AND FAILS HARD. Both registered arms lose on DEV-20 flags ON against the same-lineage control (55.0660): arm A (smooth all frames) 49.2941, paired -5.6834, helped 2 / hurt 18, p = 3.6e-05; arm B (smoother prediction on dead frames only) 54.6543, paired -0.4322, 6/9, p = 0.078. The mechanism is measured, not guessed: our per-frame solves ARE exactly decomposable into [pan, tilt, roll, log f, log aspect, C] (round trip < 5 cm on 93% of solved frames, once the non-square pixel aspect fy/fx ~ 0.94-0.97 that PnLCalib's calibrateCamera leaves free is modelled), but the decomposition is DEGENERATE: the estimated camera position carries 1.2-2.6 m of frame-to-frame measurement noise that trades off against focal length, so smoothing the parameters independently destroys the image->pitch map -- GT-anchored median error 0.4779 -> 0.6801 m (+42%), 115,503 rows worse vs 63,077 better. Extrapolating those parameters into dead runs is worse still: median 3.83 m, mean 78.8 m, 55% within 5 m, against the shipped linear fill's 2.06 m / 73%.",
+   "value": -5.6834,
+   "unit": "paired GS-HOTA vs same-lineage control, DEV-20 flags ON (registered arm A)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w4_registered.json",
+    "results/gsr_benchmark/gsr_v10_w4.json"
+   ],
+   "method": "generator.camera_track (decompose / RTS / compose; measurement and process noise estimated from each series' second differences, per-frame measurement weight from the solver's metre residual, 2 m grid clamp) via tools.gsr_v10_w4 --smooth --accuracy --score; the frozen v6 chain per arm, tools.gsr_v9_w7.score_pair flags ON and OFF.",
+   "n": 20,
+   "caveats": [
+    "The 2 m clamp fired on 2,330 of 13,538 parameterised frames -- the smoothed camera disagreed with its own frame's solve by more than the 2024-winner guard on 17% of frames; without the clamp the arms would be worse still.",
+    "This is a negative about the PARAMETERISATION, not about temporal modelling as such: see v10-w4-005."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "pre-registered",
+    "negative-result",
+    "geometry"
+   ]
+  },
+  {
+   "id": "v10-w4-005",
+   "statement": "TEMPORAL SMOOTHING WORKS ONLY IN MAPPING SPACE, AND IS WORTH ABOUT +0.53 -- 8% OF THE GEOMETRY HEADROOM. Running the identical RTS smoother over the pitch coordinates of a fixed 3x3 image grid (homography re-fitted by DLT) instead of over camera parameters improves GT-anchored accuracy (median 0.4779 -> 0.4543 m, -4.9%; p90 1.463 -> 1.395; 105,353 rows better vs 91,895 worse) and scores, on DEV-20 flags ON: arm E (solved frames smoothed, fill untouched) 55.6036 = +0.5375 combined, paired +0.5273, helped 15 / hurt 5, Wilcoxon p = 0.0296, GS-DetA +0.3312, GS-LocA 93.1805 -> 93.5044; arm D (also replacing the fill) +0.4935, 14/6, p = 0.083. This is the DEV-20 confirmation that v10-w3-006's exploratory probe-10 +0.4251 (p = 0.131) asked for, at the same sign and magnitude.",
+   "value": 0.5273,
+   "unit": "paired GS-HOTA vs same-lineage control, DEV-20 flags ON (arm E, mapping-space RTS)",
+   "status": "pending",
+   "evidence": [
+    "results/gsr_v10_w4_registered.json",
+    "results/gsr_benchmark/gsr_v10_w4.json"
+   ],
+   "method": "generator.camera_track.smooth_homographies(mode='mapping') via tools.gsr_v10_w4 --smooth --score, arms D and E; same chain, same control, same window as arms A/B.",
+   "n": 20,
+   "caveats": [
+    "POST-REGISTRATION ARM. The registered probe was camera-parameter space (arms A/B). The mapping parameterisation was added after the camera series was found degenerate and was selected on the GT-ANCHORED ACCURACY instrument -- which it passes at v10-W2's own escalation bar (-4.9% median vs a 3% bar, p ~ 0, more rows better than worse) -- BEFORE any end-to-end score was read. It is still not pre-registered, and it clears the +0.50 bar by 0.03. CANDIDATE, not a ship: it needs its own registration and a same-window TEST-38 confirmation.",
+    "Two arms (D, E) were scored, so +0.5375 is the better of two.",
+    "8% of the +6.82 the geometry axis holds: temporal consistency is real but small, and it does not change where the money is."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": ["v10-w3-006"],
+   "tags": [
+    "gsr",
+    "geometry",
+    "calibration"
+   ]
+  },
+  {
+   "id": "v10-w4-006",
+   "statement": "LADDER DECISION: THE CAMERA-INNOVATION MAP'S PREMISE IS INVERTED. The map argued that the 5 m kernel puts our 0.43-0.48 m median past the bottleneck and that the remaining edge is completeness + tail behaviour. Measured on one lineage, one window, one control: the kernel is Gaussian; the median IS the bottleneck (+6.25 of the +6.82 total headroom is per-frame accuracy on frames we already solve); completeness is worth +0.49; the fill is worth +0.48; and the registered temporal probe returns -5.68 in its registered form and +0.53 in its best post-hoc form. The Rung-1 decision rule ('< +0.5 -> temporal camera modelling is non-bottleneck') therefore FIRES: temporal modelling is not the lever. Rung 2 (tripod clip solver) is justified only insofar as a tripod prior makes the per-frame solve MORE ACCURATE -- its advertised prize, 100% completeness, is capped at +0.49 -- and Rung 3 (offline bundle adjustment) is justified because a batch solve attacks the +6.25 accuracy term, the only large number on this axis.",
+   "value": 6.25,
+   "unit": "GS-HOTA in the per-frame-accuracy term vs 0.49 completeness + 0.53 temporal (DEV-20, flags ON)",
+   "status": "pending",
+   "evidence": [
+    "results/gsr_v10_w4_registered.json",
+    "results/gsr_benchmark/gsr_v10_w4.json"
+   ],
+   "method": "Synthesis of v10-w4-001..005 on one lineage, one window, one control.",
+   "n": 20,
+   "caveats": [
+    "The +6.25 is an oracle ceiling, not a reachable target: it is what a camera fitted to the frame's own ground truth achieves. What a tripod-constrained or bundle-adjusted solve can actually recover of it is UNMEASURED -- that is the next probe, and it is now the only geometry question worth GPU time.",
+    "v10-W3's independent result constrains the space and is consistent: a full camera-model replacement (BroadTrack) reads 1.00 m against our 0.40 m and loses 7.39 GS-HOTA inside our chain, so the accuracy term has to be attacked from OUR per-frame solver, not by swapping the model class."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "pre-registered",
+    "negative-result",
+    "geometry"
+   ]
   }
  ]
 }

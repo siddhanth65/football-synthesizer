@@ -1,0 +1,69 @@
+{
+ "session": "v10-W4",
+ "written_utc": "2026-08-16T12:05Z",
+ "written_before": "any perturbed, oracle or smoothed homography was scored; the only GS-HOTA read at write time is the on-record v10-W2 ctrl baseline, reproduced locally to 4 dp (55.0660 flags ON / 50.7022 flags OFF) purely to anchor the lineage",
+ "question": "How much GS-HOTA does the geometry axis actually hold? (a) the unpublished calibration-error -> GS-HOTA sensitivity curve under the evaluator's 5 m kernel; (b) what our own tail (dead frames + linear fill) costs against a perfect-completeness oracle; (c) does a BHITK-style RTS smoother over our per-frame camera solves beat the shipped chain.",
+ "lineage": {
+  "artifact_set": "v10-W2 ctrl (the SHIPPED decode; the half-cell rider s4 stays OFF)",
+  "candidate_cache": "outputs/gsr/v10_w2_full/ctrl/<SEQ>.npz (18 PnLCalib hypotheses per frame, fetched from a100server1, byte-identical)",
+  "positions": "outputs/gsr/positions_v10w2ctrl_v6det (gate -> reproject -> fill_calibration_gaps(10))",
+  "predictions": "outputs/gsr/deleak_v10w2_ctrl/predictions/data",
+  "baseline_dev20_flags_on": {"GS-HOTA": 55.0660, "GS-DetA": 42.4914, "GS-AssA": 71.3646, "GS-LocA": 93.1805},
+  "drift_rule": "kb v9-w7-004: every pairing is inside this one lineage. The chain was re-run from the same positions in this window and reproduced GS-HOTA 50.702163718440275 to every digit, so control drift is exactly zero and the on-record control may be paired against."
+ },
+ "rung_0a_sensitivity": {
+  "instrument": "PREDICTION-LEVEL. Each submission row's own bbox_image bottom-middle point is re-projected through a perturbed / oracle homography and its bbox_pitch overwritten; detections, track ids, association and attributes are byte-identical to the baseline; the v9 flags (vote role/team/jersey + gk_side team) are applied AFTER the perturbation, so the shipped stack sees the damaged geometry. Verified null: re-projecting every row through its own frame's solved homography reproduces its recorded coordinate to 1e-14 m on 99% of rows (the remaining 1% are rows whose coordinate came from fill, which is a measured population, not an error).",
+  "why_prediction_level": "it isolates the evaluator's response to position error with association held fixed. It is therefore a LOWER bound on the end-to-end cost of calibration error (geometry also feeds EIoU/GTA/the solver upstream) and, symmetrically, a lower bound on the oracles' value. Stated, not hidden.",
+  "families": {
+   "F1_gauss_row": "isotropic Gaussian added to each row's pitch coordinate independently. sigma_m in [0.1, 0.25, 0.5, 1, 2, 3, 5]",
+   "F2_gauss_frame": "one Gaussian draw per FRAME applied to every row in it (calibration error is frame-correlated; detection error is not). Same sigma ladder",
+   "F3_cam_pantilt": "per-frame iid Gaussian on pan and tilt of the frame's own decomposed camera, sd_deg in [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]",
+   "F4_cam_focal": "per-frame iid Gaussian on log f, sd in [0.001, 0.0025, 0.005, 0.01, 0.02] (relative focal error)",
+   "F5_deadsim": "x% of frames have their homography replaced by the linear interpolation fill_calibration_gaps would use, in runs whose lengths are drawn from that sequence's OWN observed dead-run distribution. x in [2, 5, 10, 20, 40]"
+  },
+  "oracles": {
+   "N_self": "null arm: every row re-projected through its own frame's solved homography (must reproduce the baseline)",
+   "O_acc": "every row re-projected through a GT-fitted per-frame homography (perfect camera, our detections, our completeness)",
+   "O_fill": "only the rows whose shipped coordinate came from fill get the GT-fitted homography (prices the fill alone)",
+   "O_comp": "baseline + one added submission row for every person our detector found in image space but the calibration chain could not project (perfect completeness, our camera quality via GT fit)",
+   "O_all": "O_acc + O_comp -- perfect camera AND perfect completeness = the TOTAL headroom of the geometry axis"
+  },
+  "gt_use": "ground truth is read only (i) to score and (ii) to fit the oracle homographies. No arm that is a candidate to ship consumes it. The GT-fitted homography's own residual against GT is reported as the instrument's noise floor.",
+  "headline_definitions": {
+   "geometry_axis_total_headroom": "O_all - baseline, DEV-20 GS-HOTA flags ON",
+   "calibration_stops_mattering_at": "the largest perturbation whose GS-HOTA loss is < 0.5 (the same threshold Rung 1 must clear), reported in metres of induced median position error so every family lands on one axis"
+  },
+  "decision_declared_a_priori": "If O_all - baseline < +1.00 GS-HOTA then the entire geometry axis -- perfect cameras on every frame, every currently-lost detection projected -- is worth less than one point, and Rungs 2 (tripod clip solver) and 3 (bundle adjustment) are NOT worth their 3-5 weeks whatever Rung 1 does. This is written before the number is known."
+ },
+ "rung_0b_dead_frame_anatomy": {
+  "measure_only_build_nothing": true,
+  "items": [
+   "DEV-20 dead-frame census on this lineage: frames dead after the gate, dead after fill, rows lost on them, rows lost on live frames",
+   "post-fill dead frames that carry at least one PnLCalib camera hypothesis in the cache, and the correspondence count (n_pts) of those hypotheses -- the 'solvable under a tripod prior with >= 2 correspondences' population",
+   "view classification of each dead frame from its GT-fitted camera: which pitch landmarks are inside the image (centre circle, halfway line, either penalty box, either goal). 'Central view' = centre circle visible and no penalty box visible -- the population arXiv:2504.20052's circle->line conversion targets"
+  ],
+  "bar": "none: this is a census. Its value is priced by O_comp above, which is the ceiling any dead-frame rescue can reach."
+ },
+ "rung_1_rts_smoother": {
+  "component": "generator/camera_track.py -- decompose ground H to [pan, tilt, roll, log f, Cx, Cy, Cz] (pinhole, square pixels, principal point at the image centre; a frame whose recomposition does not reproduce its H to 5 cm is treated as unparameterisable and dropped to a missing measurement), constant-velocity Kalman + RTS backward pass per parameter, then recompose.",
+  "noise_model": "measurement sd and process (acceleration) sd are ESTIMATED FROM THE SERIES, not tuned: the robust variance of the second difference splits into 6*var(measurement noise) + var(acceleration). Per frame, the measurement sd is scaled by clip(solver_error_m / sequence median, 0.5, 5) -- this is where the per-frame solver residual enters, as registered.",
+  "clamp": "a smoothed homography that moves a 3x3 image grid more than 2.0 m from that frame's own solve is refused and the solve kept (the 2024 GSR winner's +-2 deg / +-2 m guard, expressed in metres). Clamp firings are reported.",
+  "arms": {
+   "A": "smooth-all-frames: every frame gets the smoothed camera; dead frames get the smoother's prediction instead of fill's linear interpolation",
+   "B": "dead-frames-only: solved frames keep their own homography byte-identically; only frames the solver never answered get the smoother's prediction"
+  },
+  "pipeline": "identical to v10-W2: swap_positions(mode t1) -> fill_calibration_gaps(10) -> the frozen v6 chain (EIoU e0.3/r1/w0.5/a0.30, clip_v6det embeddings, percrop _v6_v6det, GTA tau, MILP solver) -> tools.gsr_v9_w7.score_pair flags ON and OFF. Only the homography moves.",
+  "bars_a_priori": {
+   "ship_or_escalate": "DEV-20 flags ON, paired per sequence vs the same-lineage control: mean GS-HOTA >= +0.50 AND GS-DetA not worse (>= 0.00) AND helped > hurt AND Wilcoxon p < 0.05",
+   "decision_rule_from_the_map": "if the best arm moves DEV GS-HOTA by < +0.50, temporal camera modelling is CONFIRMED non-bottleneck for our stack, the negative is the deliverable, and the campaign budget returns to identity/tracking. This is reported loudly, not softened.",
+   "supporting_reported_not_gating": "GS-LocA, and the v10-W2 GT-anchored homography-accuracy instrument (median/p90 metres of GT foot points pushed through each arm's homography) on the frames both arms answer, plus the accuracy of the rows each arm adds beyond fill's reach (the v8-W2 lesson: coverage only counts if it is accurate coverage)."
+  }
+ },
+ "guards": [
+  "DEV-20 only. TEST-38, test-49, the challenge split and every submission are untouched.",
+  "CPU only on this laptop; the chain re-runs execute on a100server1 CPU. GPU 1 is not taken (a W3 BroadTrack worker may want it); GPU 0 is another user's.",
+  "One process per work directory; every arm's chain is tagged separately (v10w4_*).",
+  "rng seed 20260816 for every stochastic perturbation; the same draw ladder for every family.",
+  "No STATUS edit, no commit, no push, no METRICS_VERSION change. Nothing in this session is enabled by default anywhere."
+ ]
+}
