@@ -1,5 +1,15 @@
 # Prof-meeting brief — where the BTP stands and where it should go
 
+> **SUPERSEDED 2026-08-17 — read `GSR_PROJECT_MASTER.md` (or the PDF) instead.** This brief
+> predates the v9/v10 campaigns and two of its central claims were later MEASURED AWAY by our
+> own experiments: (1) "metric-coordinate association is a novel winning angle" — refuted
+> (v9-W2: kinematics-only pair-AP 0.2707 vs 0.5586; the learned merger failed its gates);
+> (2) the "+11.9 association ceiling" — superseded (merge-only oracle tops out at +4.2;
+> oracle split+merge at ~60.4). The current state: DEV 57.17 via attribute voting, the
+> keeper-side rule, and geometry re-selection/batch refinement; the sensitivity curve and
+> the benchmark audit are the headline research artifacts. The master doc carries the
+> corrected story end to end.
+
 *Prepared 2026-08-14 for Monday's meeting. Companion docs: `GSR_JOURNEY_14_TO_53.md` (how we
 got to 53.09), `GSR_NEXT_PLAN.md` (the just-closed v8 campaign), `STATUS.md` (day-by-day log),
 `knowledge/claims.json` (228 versioned claims, every number in this brief traceable).*
