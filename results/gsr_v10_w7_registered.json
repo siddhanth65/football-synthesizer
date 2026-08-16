@@ -1,0 +1,66 @@
+{
+ "session": "v10-W7",
+ "written_utc": "2026-08-17T09:20Z",
+ "written_before": "any W7 code existed, any ownership table was rebuilt on the arm-D artifacts, any oracle submission was written and any W7 GS-HOTA or splitter score was read. Numbers on record at write time: the v10-W5 arm-D result (DEV-20 flags ON 57.168 vs ctrl 55.066, flags OFF 52.6359 vs 50.7022) and the v9 association ledger (kb v9-w1-004/005, v9-w2-005/006).",
+ "scope": "CPU only, laptop, cached artifacts. No ssh, no GPU, no cluster contact. DEV-20 is tuning; TEST-38 / test-49 / challenge untouched.",
+ "task_a": {
+  "question": "On the CURRENT (v10 arm-D) substrate, how much GS-HOTA is left in MERGING ALONE? The 57.32-era merge-only oracle was computed on the v9 substrate at DetA 39.32 / AssA 71.67; v10's geometry lifted AssA, so the merge headroom must be re-read before any connector work is licensed.",
+  "substrate": {
+   "predictions": "outputs/gsr/deleak_v10w5_D/predictions/data (arm D, the current-best DEV stack)",
+   "positions": "outputs/gsr/positions_v10w5D_v6det",
+   "baseline_on_record": {"flags_on": 57.168, "flags_off": 52.6359},
+   "note": "the oracle is applied to the FINAL submission (post EIoU + GTA connector + solver + writer), so it prices what is left after everything the shipped chain already merges."
+  },
+  "procedure": [
+   "1. Rebuild per-row GT ownership with the v9 factory machinery (tools.gsr_v9_factory.label_rows: nearest GT within eval.gsr_score.GSR_DIST_TOL_M = 5 m, players/GK via generator.track_relink.load_gt_ids_by_frame, referees via the factory's referee-only map) on a positions-shaped view of arm D's own submission rows.",
+   "2. Per predicted track: dominant GT identity by row vote, trusted only at >= 5 audited rows (FactoryParams.min_audited), else the track is left untouched.",
+   "3. MERGE-ONLY ORACLE: every set of predicted tracks sharing a trusted dominant GT identity is relabelled to one track id. No track is ever SPLIT, no row is added, moved or deleted, no attribute is set from GT.",
+   "4. Score the oracle submission and the untouched arm-D submission through tools.gsr_v9_w7.score_pair (flags ON = vote(role, team, jersey) + gk_side_repair(team); flags OFF = raw), official evaluator, DEV-20, paired per sequence."
+  ],
+  "amendment_1": {
+   "written_utc": "2026-08-17T09:58Z",
+   "written_before": "any W7 GS-HOTA was read (the first scoring attempt CRASHED inside the official evaluator before producing any number, and the crash message is the whole content of this amendment).",
+   "finding": "trackeval's SoccerNetGS loader raises 'Tracker predicts the same ID more than once in a single timestep' (first hit: SNGS-021 frame 67, id 25). Arm D's submission carries temporally OVERLAPPING same-identity fragments (64 stacked rows in SNGS-021 alone), so a naive all-merges oracle is not a scorable submission.",
+   "resolution": "Merges are granted only between tracks that share NO frame. Within one GT identity the longest track anchors the chain and each further track joins only if it is frame-disjoint from the chain so far; blocked tracks keep their own ids and are counted (merges_blocked_overlap). This keeps the original registration's 'no row is added, moved or deleted' promise and matches the v9 factory's own candidate rule (A must end before B starts) -- a connector cannot link overlapping tracklets either. The alternative (dropping duplicate rows) was rejected because it would delete detections and confound DetA.",
+   "consequence": "the measured headroom is the CONNECTOR ceiling, i.e. slightly conservative against an unconstrained link oracle; the blocked count is reported so the gap is visible."
+  },
+  "amendment_2": {
+   "written_utc": "2026-08-17T10:25Z",
+   "written_after": "the REGISTERED oracle was scored (+1.2976 flags ON, verdict CLOSED). This amendment adds a MEASURE-ONLY upper variant and explicitly does NOT change the registered decision rule, which has already fired on the registered number.",
+   "variant": "merge + dedup: the overlap rule of amendment 1 is dropped, every same-identity track is merged, and the duplicate rows a timestep then carries are resolved by keeping the highest-confidence one (the rest are deleted).",
+   "why": "185 merges were BLOCKED by the overlap rule against 80 granted, so the reader deserves to know whether the CLOSED verdict is an artefact of that constraint. This variant is not a connector ceiling -- it prices connection PLUS duplicate-track removal, i.e. a different axis (kb v9-w5-004).",
+   "status": "reported alongside; the CLOSED/OPEN call stays on the registered oracle."
+  },
+  "headroom_definition": "GS-HOTA(oracle, flags ON) - GS-HOTA(arm D, flags ON), both re-derived inside this run. The arm-D side must reproduce 57.168 (flags ON) / 52.6359 (flags OFF); if it does not, no W7 pairing is valid and the session reports that instead.",
+  "decision_rule": {
+   "closed_if": "headroom < +1.5 GS-HOTA -> THE SOFT-COST CONNECTOR AXIS IS CLOSED. No soft-cost connector is built in this session and none is proposed for the next one.",
+   "open_if": "headroom >= +1.5 GS-HOTA -> price the pair-factory regeneration on this substrate honestly, and run the soft-cost-vs-hard-gate comparison at MATCHED merge count on regenerated pairs only if it fits this session's CPU budget.",
+   "open_bars": "merge precision >= 0.80 while recovering >= 10% of the merges the incumbent's team/role/jersey gates currently forbid (kb v9-w1-004: 19.83% of all true merges)."
+  }
+ },
+ "task_b_splitter": {
+  "question": "Can a learned per-row change-point model cut contaminated tracklets where the identity actually changes, at a precision the shipped DBSCAN splitter never reached (kb v9-w2-005: inert at eps 0.30, 280 cuts on >= 0.99-pure tracklets at eps 0.20)?",
+  "substrate": "outputs/gsr/v9_assoc/v1 (the v9 factory dataset: 57 GSR TRAIN sequences, per-row gt_id, tracklet purity) + its per-detection CLIP cache outputs/gsr/v9_assoc/v1/detembed. Registered split: the 45 development sequences train the model, the 12 registered validation sequences (manifest.json split.val_slice, every 5th sorted train sequence) are held out and read once.",
+  "substrate_caveat_registered_before_measuring": "The train split CANNOT be re-geometried on the v10 substrate on this laptop: outputs/gsr/v10_w2_full/ctrl holds PnLCalib candidate caches for DEV-20 only (20 files), and re-decoding 57 train clips is a GPU/cluster job that this session is forbidden to run. Task B therefore rides the v9-substrate labels; the ONLY shared cost with Task A is the machinery, not the artifacts (Task A is DEV-20, Task B is the train split). Per-row jersey-read events are also unavailable locally (no koshkina_percrop_* parquet exists for train sequences), so the jersey-disagreement feature family is DROPPED and declared, not silently omitted.",
+  "labels": "true change point = a boundary between two temporally consecutive AUDITED rows of one tracklet whose gt_id differs. Row label = 1 iff the row lies within +/- 2 rows of such a boundary.",
+  "model": "sklearn.ensemble.HistGradientBoostingClassifier (installed; no new dependency). Features per row, all from cached artifacts: CLIP cosine distance to the running centroid of the preceding K rows and of the following K rows (K = 10) and between those two centroids; metric position jump and implied speed to the previous/next row; velocity direction change; frame gap; image-space jump normalised by nothing (raw px) ; detector confidence; calibration error; role/team change against the tracklet mode; row index fraction and tracklet length.",
+  "cut_extraction": "per-row probability -> keep rows above threshold t -> non-maximum suppression inside a 25-frame (1 s) window -> the surviving rows are the predicted cuts.",
+  "matching_tolerance": "a predicted cut is CORRECT iff it lies within +/- 12 frames (0.5 s at 25 fps) of a true change point; each true change point may be claimed once.",
+  "populations": {
+   "impure": "tracklets with purity < 0.80 (the W1/W2 convention)",
+   "pure": "tracklets with purity >= 0.99"
+  },
+  "bars": {
+   "b1": "cut-point precision >= 0.80 at recall >= 0.30 on impure tracklets (held-out 12 sequences)",
+   "b2": "false-cut rate <= 1% on pure tracklets, defined as (pure tracklets receiving >= 1 predicted cut) / (pure tracklets), same held-out slice",
+   "operating_point": "the threshold is chosen on the 45 TRAIN sequences ONLY -- the smallest threshold whose train false-cut rate on pure tracklets is <= 1% -- and then applied unchanged to the held-out 12. The full held-out PR curve is reported alongside, for information."
+  },
+  "projected_value": "the W2-era split-leg arithmetic (kb v9-w2-006) recomputed on today's substrate: the AssA split leg apportioned by the fraction of impurity MASS the model's cuts remove, converted through GS-HOTA = sqrt(DetA x AssA) at arm D's own DetA/AssA. Component gate only -- NO end-to-end run this session, and the arithmetic is declared optimistic (it charges nothing for the fragments a cut creates)."
+ },
+ "task_c_forensic": {
+  "question": "Why is SNGS-021 the only DEV clip arm D hurts (-1.50), when mapping smoothing alone also hurts it (W4: 0.504 -> 0.598 m accuracy)?",
+  "method": "diagnosis from cached artifacts only -- per-frame GT-anchored accuracy timeline ctrl vs D, which cached hypothesis each stage selects, where the batch refinement moves the mapping, and clip-level anomaly statistics (focal/zoom proxy, correspondence count, candidate-pool agreement, shot cuts). No arm is built and nothing is scored.",
+  "deliverable": "the mechanism in plain words + whether a cheap guard (fall back to the ctrl selection when the batch residual worsens) is registerable for the NEXT session, with its predicted value. Also: the reviewer said SNGS-082; our ledger says SNGS-021. 082's current per-clip delta is reported so the orchestrator can see which the reviewer meant.",
+  "no_registration_needed": "measure-only; no decision rule fires on it in this session."
+ }
+}

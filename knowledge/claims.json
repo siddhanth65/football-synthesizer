@@ -8936,6 +8936,250 @@
     "geometry",
     "calibration"
    ]
+  },
+  {
+   "id": "v10-w7-001",
+   "statement": "REGISTERED KILL-STEP: THE MERGE-ONLY ASSOCIATION HEADROOM ON THE CURRENT (v10 arm-D) SUBSTRATE IS ONLY +1.30 GS-HOTA, SO THE SOFT-COST CONNECTOR AXIS IS CLOSED. Per-row GT ownership was rebuilt with the v9 factory machinery on arm D's OWN DEV-20 submission (898 predicted tracks, 731 with a trusted dominant GT identity at >= 5 audited rows, row-weighted purity 0.909), and every frame-disjoint same-identity merge was granted: 80 merges over 76 identities. End to end with the official evaluator the oracle scores 58.4660 against arm D's re-derived 57.1684 flags ON (+1.2976; DetA +0.63, AssA +2.32, 18 helped / 1 hurt, Wilcoxon p = 9.7e-04) and 53.0497 against 52.6359 flags OFF (+0.4138). The registered rule (headroom < +1.5 -> CLOSED) fires: no soft-cost connector is built, and the 57.32-era 'perfect merger' arithmetic (kb v9-w1-005) is retired as v9-substrate stale -- v10's geometry already spent most of that band.",
+   "value": 1.2976,
+   "unit": "GS-HOTA headroom of a perfect merger over arm D, DEV-20 flags ON",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w7_registered.json",
+    "results/gsr_benchmark/gsr_v10_w7.json"
+   ],
+   "method": "tools.gsr_v10_w7 --oracle: tools.gsr_v9_factory.label_rows ownership of outputs/gsr/deleak_v10w5_D/predictions/data, frame-disjoint merge map, scored by tools.gsr_v9_w7.score_pair (official sn-trackeval, flags ON = attribute vote + GK side repair).",
+   "n": 20,
+   "caveats": [
+    "Ownership uses the on-record nearest-GT-within-5 m instrument, whose own flicker is measured in v10-w7-005.",
+    "Temporally overlapping same-identity tracks are not merged (registration amendment 1): the evaluator refuses two rows of one id in a timestep and a connector cannot link overlapping tracklets. 185 further same-identity pairs were blocked that way and are priced separately in v10-w7-002.",
+    "Arm D reproduced its on-record 57.1684 / 52.6359 to every digit inside this run, so the pairing is drift-free.",
+    "DEV-20 only; TEST-38 and test-49 untouched."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w1-004",
+    "v9-w1-005",
+    "v10-w5-001"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "connector",
+    "headroom",
+    "oracle",
+    "pre-registered",
+    "negative-result"
+   ]
+  },
+  {
+   "id": "v10-w7-002",
+   "statement": "WHAT IS ACTUALLY LEFT IN ASSOCIATION IS DUPLICATE CONCURRENT TRACKS, NOT LINKABLE FRAGMENTS. Of the 265 same-identity track pairs in arm D's DEV-20 submission, 185 (70%) OVERLAP IN TIME -- two predicted tracks on the same person in the same frames -- and only 80 are the frame-disjoint fragments a connector could ever join. Priced end to end against arm D (57.1684 flags ON): merge alone +1.2976 (DetA +0.63), duplicate-row removal alone +0.5261 (DetA +0.77, AssA +0.07), and the two TOGETHER +4.4999 -> 61.6683 (DetA +3.5048, AssA +5.78, 17/3, p = 1.7e-04). The combination is 2.5x the sum of its parts because a duplicate track can only be absorbed if its overlapping rows are dropped AND its disjoint rows are relinked. This extends kb v9-w5-004 (concurrent tracks on one person defeating the non-coexistence guard) from a DetA-attribute finding to the dominant remaining association lever, and it qualifies kb v9-w3-002's 'FP suppression and dedup are dead levers': that measurement counted only rows matching NO ground truth, while these rows match a real person and merely lose the competition for it.",
+   "value": 4.4999,
+   "unit": "GS-HOTA over arm D for the merge+dedup oracle, DEV-20 flags ON",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w7_registered.json",
+    "results/gsr_benchmark/gsr_v10_w7.json"
+   ],
+   "method": "tools.gsr_v10_w7 --oracle --oracle-dedup --dedup-only (registration amendment 2): same ownership table, three id/row edits, each scored end to end by tools.gsr_v9_w7.score_pair.",
+   "n": 20,
+   "caveats": [
+    "Oracle, not a method: which tracks are duplicates is known from ground truth here. 9,202 of 219,215 rows (4.2%) are dropped by the dedup leg.",
+    "The dedup leg deletes rows, so it is not comparable to the registered merge-only oracle's 'nothing deleted' construction; it is reported as an amendment-2 upper variant and the CLOSED verdict of v10-w7-001 stands on the registered number.",
+    "Flags ON gains far more than flags OFF (+4.50 vs +0.58) because attribute voting over a repaired track fixes whole-track jersey/team labels."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w7-001",
+    "v9-w5-004"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "deta",
+    "oracle",
+    "decomposition",
+    "tracking"
+   ]
+  },
+  {
+   "id": "v10-w7-003",
+   "statement": "THE ROW-LEVEL 'PERFECT ASSOCIATION' ORACLE IS NOT AN UPPER BOUND -- THE LABELLER IS PART OF IT. Relabelling every audited submission row by ITS OWN nearest GT identity (the split+merge oracle of kb v9-w1-005, built end to end for the first time) scores 59.2107 flags ON (+2.0423 over arm D, 13 helped / 7 hurt, p = 0.23) and 52.2392 flags OFF (-0.3967, 10/10, p = 0.60) -- i.e. row-level 'perfect' association is WORSE than the shipped chain when the attribute post-processing is off, and its GS-DetA FALLS 0.79. The cause is measured in v10-w7-005: the nearest-GT-within-5 m instrument swaps owner between two players standing under a metre apart, so a row-level oracle shreds correct tracks at the labeller's noise rate. Any arithmetic that treats a row-level oracle as a ceiling (the 61.59 / 60.40 band of kb v9-w1-005 and v9-w2-006) is quoting the instrument, not the task.",
+   "value": 2.0423,
+   "unit": "GS-HOTA over arm D for the row-level split+merge oracle, DEV-20 flags ON",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w7_registered.json",
+    "results/gsr_benchmark/gsr_v10_w7.json"
+   ],
+   "method": "tools.gsr_v10_w7 --oracle-perfect (registration amendment 3): every audited row's track id replaced by its own GT identity, duplicate rows in a timestep resolved by confidence, scored end to end.",
+   "n": 20,
+   "caveats": [
+    "Measure-only; it fires no registered decision rule.",
+    "Rows with no GT within 5 m keep their original id, so the construction is not a pure GT partition.",
+    "The comparison is against arm D, a stronger substrate than the 53.08 board entry those older ceilings were computed on."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w7-001",
+    "v10-w7-005",
+    "v9-w2-006"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "oracle",
+    "ceiling",
+    "instrument",
+    "premise-correction"
+   ]
+  },
+  {
+   "id": "v10-w7-004",
+   "statement": "REGISTERED VERDICT: THE LEARNED TRACKLET SPLITTER FAILS BOTH ITS BARS. A per-row change-point model (sklearn HistGradientBoosting, 18 features: CLIP distance to the running tracklet centroid before/after each row, metric jump/speed/turn, frame gap, image jump, confidence, calibration error, role/team change) trained on the 45 development clips of the v9 factory dataset (517,669 rows) and read once on the 12 registered held-out clips (135,121 rows, 129 impure tracklets, 813 true change points). Bar 1 (cut precision >= 0.80 at recall >= 0.30): at recall 0.301 precision is 0.681 -- FAIL; precision only reaches 0.805 at recall 0.239. Bar 2 (false-cut rate <= 1% on >= 0.99-pure tracklets): 0.895 at that same operating point, and at the registered train-chosen threshold (0.95) the model cuts 1.21% of pure tracklets while recovering 2.6% of true cuts -- FAIL. Row-level average precision is 0.371 against a 0.060 base rate, so the model DOES rank boundary rows 6x better than chance; the failure is that the same signature fires on tracklets that are already clean.",
+   "value": 0.681,
+   "unit": "held-out cut precision at the registered recall bar of 0.30 (bar: >= 0.80)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w7_registered.json",
+    "results/gsr_benchmark/gsr_v10_w7.json"
+   ],
+   "method": "tools.gsr_v10_w7 --splitter over outputs/gsr/v9_assoc/v1; cuts = threshold + 1 s NMS, correct within +/- 12 frames of a true ownership change; threshold chosen on the train slice only.",
+   "n": 12,
+   "caveats": [
+    "Substrate is the v9 factory dataset, NOT the v10 arm-D geometry: the train split has no v10 candidate cache on this laptop (DEV-20 only), and re-decoding 57 train clips is a GPU/cluster job this session was forbidden to run. Registered before measuring.",
+    "Per-row jersey-read events were dropped: no koshkina_percrop_* artifact exists locally for train sequences. Jersey reads are sparse (~0.26 density) so this is unlikely to move a bar by 0.12.",
+    "A first version of this evaluation keyed tracklets on track_id alone, which pools different clips' tracklets; the bug was found and fixed before any verdict was recorded, and tests/test_gsr_v10_w7.py pins the fix.",
+    "Component gate only -- no end-to-end run was spent on it."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w2-005",
+    "v9-w2-006"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "splitter",
+    "negative-result",
+    "pre-registered",
+    "component"
+   ]
+  },
+  {
+   "id": "v10-w7-005",
+   "statement": "WHY NO SPLITTER CAN WIN: 'CONTAMINATION' IS THE LABELLER FLICKERING, NOT THE TRACKER HANDING OVER. On the 12 held-out factory clips, 5.13% of audited rows (6,766 of 131,817) disagree with their tracklet's dominant GT identity, but those disagreements come in 1,277 runs whose MEDIAN LENGTH IS 2 ROWS (0.08 s), 77.1% are <= 5 rows and 97.1% are <= 25 rows; where both identities are annotated in the frame, the claimed owner is nearer than the dominant one by a median of just 0.74 m, and 60.8% of the time by less than 1 m. Of the 2,403 identity change points in those clips only 12 (0.5%) have a full second of continuous ownership on both sides -- 8 of them inside impure tracklets. A model trained on those 12 substantial handovers learns nothing (row AP 0.0007, zero cuts above threshold 0.2). The splitter axis is therefore CLOSED for a different reason than kb v9-w2-005 gave: not that the shipped DBSCAN is mistuned, but that there is almost nothing cuttable to find, and the impurity statistic that motivated splitters is dominated by nearest-GT assignment noise in crowds.",
+   "value": 0.005,
+   "unit": "share of held-out identity change points that are real (>= 1 s of ownership on both sides)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w7_registered.json",
+    "results/gsr_benchmark/gsr_v10_w7.json"
+   ],
+   "method": "tools.gsr_v10_w7 --flicker: foreign-ownership run lengths and the distance margin between the claimed and the dominant GT identity, over the 12 registered held-out factory clips.",
+   "n": 12,
+   "caveats": [
+    "v9-substrate positions; v10 geometry (0.40 m median accuracy against ~0.50) would shrink the ambiguous band, not widen it, so the direction is safe.",
+    "2.2% of impure rows have no dominant-identity annotation in their frame and contribute no margin.",
+    "This does not say the tracker never swaps identities -- it says the audited signal is dominated by sub-second flicker at sub-metre margins."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w7-004",
+    "v9-w2-005"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "splitter",
+    "instrument",
+    "anatomy",
+    "negative-result"
+   ]
+  },
+  {
+   "id": "v10-w7-006",
+   "statement": "THE SNGS-021 WOUND IS THE BATCH PRIOR'S STIFFNESS, NOT A BAD HYPOTHESIS POOL. Arm D's only hurt DEV clip loses 1.50 GS-HOTA, and the geometry autopsy localises it: 148.4 m of the clip's 179.1 m of accuracy damage (83%) sits in ONE 50-frame window (frames 300-349), where the control is fine (0.52 m median) and arm D explodes to 2.83 m median, peaking at 7.1 m. In that window every one of the 12 admissible cached hypotheses is accurate (0.27-0.90 m) and unanimous (100% within 1 m of the gate's pick, which is rank 0 at 0.16-0.28 m keypoint error), so the pool is not the problem -- the batch solve moves the mapping 3.2-3.7 m away from evidence it agrees with. That window is also the clip's fastest camera motion (0.40 m/frame between consecutive GT-fitted homographies against 0.01-0.29 elsewhere) and the clip is the DEV-20 zoom outlier (34.7 m per check-grid step against 62-67 on the clips D helps), while the batch's smoothness weight is ~350x its data weight there (lambda 4283 against ~12 candidate weights). Mechanism: an over-stiff second-difference prior cannot follow a camera acceleration, and the error is transported across ~30 frames on each side. Everything else on the clip improves (median 0.404 -> 0.341 m).",
+   "value": 0.83,
+   "unit": "share of arm D's SNGS-021 accuracy damage inside frames 300-349",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w7_registered.json",
+    "results/gsr_benchmark/gsr_v10_w7.json",
+    "outputs/gsr/v10_w7/forensic_SNGS-021.csv"
+   ],
+   "method": "tools.gsr_v10_w7 --forensic SNGS-021: per-frame GT-anchored displacement for the gate pick, the re-selection and the batch output, plus pool size/rank/keypoint error, camera motion between consecutive GT-fitted homographies and the batch solver's own weights.",
+   "n": 750,
+   "caveats": [
+    "Accuracy autopsy, not a score decomposition: the -1.50 GS-HOTA is the W5 end-to-end number, this session measures the geometry that produces it.",
+    "The external review named SNGS-082; that clip is in TEST-38, not DEV-20, and on the last TEST-38 run it is one of the strongest clips (GS-HOTA 63.34). Arm D has never been run on TEST-38, so no arm-D delta exists for it. The live wound is SNGS-021.",
+    "The zoom proxy is the median metric spacing of the CHECK_GRID image, not a calibrated focal length."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w5-001",
+    "v10-w4-004"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "diagnostics",
+    "mechanism",
+    "camera"
+   ]
+  },
+  {
+   "id": "v10-w7-007",
+   "statement": "THE CHEAP 'REVERT WHERE THE BATCH LEAVES ITS EVIDENCE' GUARD IS DEV-NEUTRAL, SO IT IS NOT A POINTS LEVER. The GT-free statistic (distance from arm D's mapping to the nearest admissible cached hypothesis of that frame) separates the SNGS-021 damage cleanly and reverting those frames to the re-selection pick repairs the clip (kernel loss 0.1363 -> 0.1136, better than the control's 0.1189), but pooled over DEV-20 the guard is worth +0.010 predicted GS-HOTA at tau 1.0 m (547 of 13,551 frames reverted), -0.031 at 2.0 m and -0.106 at 3.0 m: what it wins on SNGS-021, SNGS-084 and SNGS-078 it gives back on SNGS-081, SNGS-093 and SNGS-087. Register it, if at all, as variance control for TEST-38 (it caps the worst clip at zero DEV cost), never as a gain. Also measured on the same instrument: arm D captures 1.544 of the 2.324 predicted GS-HOTA available inside the cached hypothesis pool, so ~0.78 predicted points remain for a better selector/refiner -- an adaptive smoothness weight is the mechanism-matched candidate (v10-w7-006), not a revert rule.",
+   "value": 0.01,
+   "unit": "predicted GS-HOTA of the guard over arm D at tau 1.0 m, DEV-20 (kernel-loss bridge)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w7_registered.json",
+    "results/gsr_benchmark/gsr_v10_w7.json"
+   ],
+   "method": "tools.gsr_v10_w7 --guard over DEV-20: per-frame min grid distance from the batch output to its admissible hypotheses, fallback to the re-selection pick above tau, priced with the W5 kernel-loss -> GS-HOTA bridge (tools.gsr_v10_w5.predicted_gain).",
+   "n": 20,
+   "caveats": [
+    "Predicted, not scored: the kernel-loss bridge under-predicted arm D by 36% end to end (kb v10-w5-006), so the guard's true end-to-end value could differ in either direction -- it is quoted only to decide whether an end-to-end run is worth spending.",
+    "Accuracy instrument only; association effects of the guard are not modelled.",
+    "tau was not tuned beyond the four declared values."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w7-006",
+    "v10-w5-006"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "negative-result",
+    "robustness",
+    "planning"
+   ]
   }
  ]
 }

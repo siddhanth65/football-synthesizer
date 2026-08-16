@@ -1,5 +1,32 @@
 # STATUS
 
+## 2026-08-17 — v10 W7: connector axis CLOSED (+1.30 < 1.5) and splitter axis CLOSED (the target barely exists) — but the amendment finds THE lever: DUPLICATE CONCURRENT TRACKS, merge+dedup oracle +4.50 flags-ON with DetA +3.50
+
+results/gsr_v10_w7_registered.json (§1 + 3 timestamped amendments), results/gsr_benchmark/
+gsr_v10_w7.json (8 stages), kb v10-w7-001..007, tools/gsr_v10_w7.py. All CPU on cached
+artifacts; arm D re-derived to every digit. **Task A: merge-only oracle on the current
+substrate = +1.2976 (bar 1.5) — soft-cost connector CLOSED.** The finding that reframes
+association: 185 of 265 same-identity track pairs (70%) OVERLAP IN TIME — duplicate
+concurrent tracks, not linkable fragments; **merge+dedup = +4.4999 flags-ON (DetA +3.5048,
+AssA +5.78, 17/3, p=1.7e-04) — 2.5x the sum of merge (+1.30) and dedup (+0.53) alone**,
+because a duplicate is absorbed only when its overlapping rows GO and its disjoint rows
+RELINK. Extends v9-w5-004 (the keeper dup blocker); qualifies v9-w3-002 ("dedup dead" counted
+only no-GT rows). **Task B: splitter FAIL both bars — and the axis closes on a diagnosis:
+contamination is the LABELLER'S FLICKER** (5.13% of rows swap owner in median-2-row runs
+between players <1 m apart; only 0.5% of change points are real handovers; a perfect
+ROW-LEVEL association oracle scores BELOW shipped flags-OFF, DetA -0.79 — **the 61.59/60.40
+association ceilings were partly instrument artefacts; on record**). Worker caught + pinned
+its own tracklet-keying bug pre-verdict. **Task C (SNGS-021): 83% of arm D's damage is one
+50-frame window at the clip's fastest pan — the batch's second-difference prior (lambda
+~350x data weight) cannot follow camera acceleration; the pool was innocent and unanimous.
+Guard measured: fixes 021 but pooled +0.010 — variance control only, NOT a points lever.
+The mechanism-matched candidate: ADAPTIVE smoothness weight; ~0.78 predicted points remain
+in the cached pool for a better selector/refiner (handed to W8).** Reviewer's "SNGS-082"
+was misnamed — it is TEST-38 and one of the STRONGEST clips (63.34). Bonus caution banked:
+attribute voting is not a free rider on association changes (an oracle merge cost SNGS-096
+-2.41 by flipping its voted jersey). **Dedup/non-coexistence session dispatched — the new
+association lever (+4.50 oracle) is now the largest measured prize on any axis.**
+
 ## 2026-08-16 — v10 W5 PASS: arm D (+2.1024 DEV flags-ON, 19/1, p=5.0e-05) — DEV 55.07 -> 57.17; the prize was the 17 of 18 camera hypotheses per frame we were THROWING AWAY; 33.6% of the geometry oracle captured on CPU alone
 
 results/gsr_v10_w5_registered.json (§1 + a pre-scoring amendment, both timestamped),
