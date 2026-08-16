@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated": "2026-08-15",
+ "generated": "2026-08-16",
  "claims": [
   {
    "id": "proj-001",
@@ -8265,6 +8265,161 @@
     "jersey",
     "annotation",
     "vlm",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w2-001",
+   "statement": "CALIBRATION AUDIT AGAINST THE LEADER'S SIX-DEFECT CHECKLIST: four of six are ABSENT from our PnLCalib integration and one more is present only by design. BGR/RGB is correct (generator/calibrate.py::_detect does cv2.cvtColor(BGR2RGB) and every caller supplies BGR); preprocessing is line-for-line PnLCalib's own inference.py (to_tensor [0,1], no ImageNet normalisation, T.Resize((540,960)), thresholds 0.3434/0.7867, denormalize+normalize paired); radial distortion is N-A because PnLCalib fixes CALIB_FIX_K1..K6 and emits radial_distortion=[0]*6, so there is no coefficient to invert or mis-apply; frame skipping is absent (calib_period=1 on every GSR path). Only the heatmap DECODE is defective -- and the measured residual field says the defect is not the one the checklist names.",
+   "value": 4,
+   "unit": "of six checklist defects absent (1 by design, 1 genuinely present)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w2_registered.json",
+    "results/gsr_benchmark/gsr_v10_w2_full.json"
+   ],
+   "method": "Source audit of generator/calibrate.py, generator/extract.py, generator/postprocess.py and the ~/PnLCalib dependency (utils_heatmap.py, utils_calib.py, inference.py) with file:line evidence per item; the distortion item additionally measured as the radial component of the image-space GT residual field over 211,496 DEV-20 GT rows (median radial -0.58 px, non-monotonic across six radius bins, unchanged by the decode fix).",
+   "n": 6,
+   "caveats": [
+    "Nothing from Baishev's repositories was fetched, read or run; the six-item checklist was the only permitted transfer.",
+    "Item 6a (960x540 rather than native 1080p) is present but deliberate -- that is PnLCalib's training resolution and feeding native frames is out of distribution. Not attempted; its recoverable half is the decode quantisation, measured separately."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v8-w2-002"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "pnlcalib",
+    "audit",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w2-002",
+   "statement": "THE SUBPIXEL FIX IS THE WRONG FIX AND MAKES CALIBRATION WORSE. Replacing PnLCalib's integer arg-max heatmap decode with an exact sub-cell estimate (log-parabola through the peak and its two neighbours per axis; exact for a Gaussian to 1e-6) moves the GT-anchored homography error the WRONG WAY on DEV-20: pooled median 0.4773 -> 0.5085 m (+6.5%), mean 1.374 -> 1.915, GT-free keypoint reprojection 3.816 -> 3.855 px, 23,392 rows worse against 18,773 better over 42,165 paired rows. Un-rounding PnLCalib's line-intersection keypoints (complete_keypoints' round(x, 0), fixed by handing it an 8x canvas) is worth exactly nothing: median 0.4773 -> 0.4771 m, 624 of 42,165 rows changed at all.",
+   "value": 0.5085,
+   "unit": "m, pooled median GT-anchored homography error under sub-cell decoding (ctrl 0.4773)",
+   "status": "refuted",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w2_s5_acc.json",
+    "results/gsr_v10_w2_registered.json"
+   ],
+   "method": "DEV-20, every 5th frame, six decode arms built from ONE forward pass per frame (same weights, same heatmaps, cv2.setRNGSeed(20260815) per frame) so the decode is the only variable. Error instrument: each annotation's own bbox_image bottom-middle pushed through that frame's gate-selected homography against its own bbox_pitch -- no detection, no matcher, no box-convention term.",
+   "n": 42165,
+   "caveats": [
+    "The estimator is not the weak link: it recovers a synthetic off-cell Gaussian to under 0.005 cells (tests/test_calibrate.py), where a +-2 centroid leaves 0.29 cells of bias.",
+    "The mechanism is in PnLCalib's TRAINING code: utils_heatmap.resize_keypoints builds every target as int(x * 0.5), so the Gaussian's true centre IS an integer cell and sub-cell interpolation can only add noise."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w2-001"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "pnlcalib",
+    "negative",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w2-003",
+   "statement": "THE REAL DECODE DEFECT IS A HALF-CELL BIAS, AND ONE LINE REMOVES IT. PnLCalib's label generator floors keypoints into heatmap cells (utils_heatmap.resize_keypoints: x_resized = int(x * 0.5)), so the decoder's cell*2 returns the cell's LOW EDGE and every keypoint and line endpoint is biased by U[0, 2) px of the 960-wide input toward the image origin -- 2 px of a 1080p frame, in both axes, on every frame. Measured in image space over 211,496 DEV-20 GT rows the stock chain's median residual is dx +1.497, dy +2.336 px, as predicted; adding half a cell (generator.calibrate.shift_half_cell) collapses it to dx -0.533, dy +0.335 px. GT-anchored homography error falls 0.4778 -> 0.4272 m median (-10.6%), p90 1.4611 -> 1.3965, mean 1.594 -> 1.316 (-17.4%), improving on 17 of 20 sequences.",
+   "value": 0.4272,
+   "unit": "m, pooled median GT-anchored homography error, DEV-20 every frame (ctrl 0.4778)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w2_full.json",
+    "results/gsr_benchmark/gsr_v10_w2_s5_acc.json",
+    "results/gsr_v10_w2_registered.json"
+   ],
+   "method": "Full-stride DEV-20 (15,000 frames), two decode arms from one forward pass per frame with a fixed RANSAC seed. Accuracy: the annotation's own image foot point through the gate-selected homography vs its own bbox_pitch. Mechanism: the same GT pitch point pushed BACK through H^-1 into the image, residual medians and their radial component binned by image radius. The offset is scale/2 = 1.0 px by derivation from the label code -- no sweep, no alternative value tried.",
+   "n": 211496,
+   "caveats": [
+    "Derived AFTER the sub-pixel arm failed, from PnLCalib's training code rather than from a score, and registered in results/gsr_v10_w2_registered.json before any s4 coordinate was decoded, under the same 3% bar as every other arm.",
+    "s4's x residual slightly overshoots (-0.533 px), so the true x bias is nearer 1.5 px than 2.0 -- line-intersection keypoints partly cancel it.",
+    "DEV-20 only. TEST-38, test-49 and the challenge split are untouched."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w2-002"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "pnlcalib",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w2-004",
+   "statement": "THE HALF-CELL FIX FAILS ITS PRE-REGISTERED SHIP BAR WHILE MOVING EVERY COLUMN THE RIGHT WAY. End to end on DEV-20 with detections, ByteTrack ids, CLIP embeddings, per-crop OCR, EIoU association, the GTA connector and the MILP solver held identical and only the pitch coordinate varying, the flags-ON stack scores GS-DetA 42.4914 -> 42.8846 (+0.3932) against a pre-declared >= +1.00 bar: FAIL. Every supporting condition passes -- GS-HOTA 55.0660 -> 55.5557 (+0.4896), GS-AssA +0.6079, IDF1 +0.1537, paired per-sequence GS-HOTA +0.4240 with 17 helped / 3 hurt, Wilcoxon p = 0.00486 -- and GS-LocA RISES by +0.5831 (93.1805 -> 93.7636), the registered signature of a real geometry fix. Flags OFF the same picture: DetA +0.3434, HOTA +0.4358, LocA +0.5766, 16/4, p = 0.0073.",
+   "value": 0.3932,
+   "unit": "GS-DetA gain on DEV-20, flags ON (bar: +1.00)",
+   "status": "refuted",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w2_full.json",
+    "results/gsr_v10_w2_registered.json"
+   ],
+   "method": "tools.gsr_eiou.run_point at the frozen v6 point (e=0.3, rounds=1, w_app=0.5, app_max=0.30, embedder clip_v6det, tau 0.450, reader _v6_v6det) per arm, then tools.gsr_v9_w7.score_pair flags ON (vote role/team/jersey + gk_side team) and OFF. The control is re-derived in the SAME window from the same forward pass, the same weights and the same RANSAC seed as the arm (kb v9-w7-004's drift rule).",
+   "n": 20,
+   "caveats": [
+    "The bar was set for a fix expected to reach into the +3.74 DetA localization oracle of the v9-W3 census; it delivered 10.5% of that oracle. The bar stands as registered -- nothing was re-run and no threshold was moved.",
+    "Worst sequence SNGS-024 -1.684 GS-HOTA, best SNGS-036 +1.772.",
+    "The re-derived control (flags-ON DetA 42.4914) is not the on-record shipped DEV-20 number: it is a fresh calibration of every frame, which GSR_CALIBGATE.md prices at a median 0.26 m coordinate difference. Only the paired within-window delta is claimed."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w2-003",
+    "v9-w7-004"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "deta",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w2-005",
+   "statement": "THE LEADER'S +12.6 CALIBRATION PATTERN DOES NOT APPLY TO US, AND THE v8-W2 0.475 m WAS ALL CALIBRATION. The whole overhaul -- six defects audited, both live ones fixed and measured -- is worth +0.49 GS-HOTA on DEV-20, 3.9% of the 12.6 the leader's private jump represents. Two supporting facts. (a) The v8-W2 detection-anchored 0.475 m was assumed to be an upper bound containing detection-box and matcher error; the homography-only instrument built here reads 0.4778 m on the same chain, so essentially ALL of it is calibration and there is no detection-side slack hiding in that number. (b) A latent crash was found and fixed on the way: PnLCalib's cv2.calibrateCamera raises on a degenerate correspondence set that the integer decode can produce (6 occurrences on SNGS-096 alone) and generator.calibrate.candidates had no guard, so one bad keypoint subset killed an entire extraction instead of 1 of its 18 hypotheses.",
+   "value": 0.4896,
+   "unit": "GS-HOTA the entire calibration overhaul is worth on DEV-20 (leader's jump: +12.6)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w2_full.json",
+    "results/gsr_v10_w2_registered.json",
+    "results/GSR_V8_W2.md"
+   ],
+   "method": "Six-defect audit (v10-w2-001) plus two decode arms measured GT-anchored and end to end (v10-w2-002 to -004). The crash was surfaced by fixing the RANSAC seed, which makes the degenerate inlier set reproducible; the guard counts (PnLCalibCalibrator.n_solver_errors) instead of raising.",
+   "n": 20,
+   "caveats": [
+    "This does not say the leader's +12.6 is not calibration for HIM -- his public baseline is a different pipeline. It says OUR calibration had one recoverable defect worth half a HOTA point, consistent with v8-w2-002 (we were already more accurate than the previous leader's SFR module).",
+    "The crash guard changes shipped behaviour: a raising subset is skipped and counted instead of propagating. Frames that never raised are byte-identical.",
+    "The 0.475 vs 0.4778 comparison is indicative, not exact: v8-W2 measured 10 probe sequences on the on-record positions_gate_v6det coordinates, this session measured DEV-20 on a fresh re-calibration of every frame. The two instruments agree to 0.003 m across those differences, which is why the detection-side slack is called negligible."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w2-004",
+    "v8-w2-002"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "leader",
+    "negative",
     "v10"
    ]
   }

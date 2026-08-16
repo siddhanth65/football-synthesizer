@@ -180,3 +180,47 @@ def test_select_calibration_rejects_when_nothing_is_plausible():
     # Plausible but over the error gate is still a reject.
     assert not select_calibration([CalibCandidate(_GOOD_H, 9.9, 12, "full", 0.0, 1.0)],
                                   foot_points=_FOOT).ok
+
+
+# --- v10-W2: sub-cell heatmap decoding -----------------------------------------------------------
+def test_refine_peaks_recovers_a_known_subcell_gaussian():
+    """A Gaussian centred off-cell must be decoded to its true centre, not the arg-max cell."""
+    torch = pytest.importorskip("torch")
+    from generator.calibrate import HEATMAP_SIGMA, HEATMAP_SCALE, refine_peaks
+
+    h = w = 40
+    cy, cx = 20.3, 15.7  # true sub-cell centre
+    yy, xx = np.meshgrid(np.arange(h), np.arange(w), indexing="ij")
+    hm = np.exp(-((yy - cy) ** 2 + (xx - cx) ** 2) / (2 * HEATMAP_SIGMA**2))
+    hm_t = torch.tensor(hm, dtype=torch.float32).view(1, 1, h, w)
+    peak = np.unravel_index(int(hm.argmax()), hm.shape)
+    stock = torch.tensor([[[[float(peak[1] * HEATMAP_SCALE), float(peak[0] * HEATMAP_SCALE), 1.0]]]])
+    out = refine_peaks(stock, hm_t).numpy()[0, 0, 0]
+    assert abs(stock.numpy()[0, 0, 0][0] / HEATMAP_SCALE - cx) >= 0.25, "argmax must be quantised"
+    assert abs(out[0] / HEATMAP_SCALE - cx) < 0.005, out
+    assert abs(out[1] / HEATMAP_SCALE - cy) < 0.005, out
+    assert out[2] == 1.0, "the score column is untouched"
+
+
+def test_refine_peaks_keeps_the_argmax_on_a_degenerate_neighbourhood():
+    torch = pytest.importorskip("torch")
+    from generator.calibrate import refine_peaks
+
+    coords = torch.tensor([[[[4.0, 6.0, 0.0]]]])
+    assert torch.equal(refine_peaks(coords, torch.zeros(1, 1, 8, 8)), coords), "flat -> no shift"
+    assert torch.equal(refine_peaks(coords, -torch.ones(1, 1, 8, 8)), coords), "negative -> no shift"
+
+
+def test_calibrator_decode_flags_default_to_stock():
+    c = PnLCalibCalibrator(device="cpu")
+    assert c.subpix_decode is False and c.derived_kp_scale == 1
+
+
+def test_shift_half_cell_moves_to_the_cell_centre():
+    """PnLCalib floors labels into cells, so the decoded corner needs half a cell back."""
+    torch = pytest.importorskip("torch")
+    from generator.calibrate import HEATMAP_SCALE, shift_half_cell
+
+    coords = torch.tensor([[[[40.0, 24.0, 0.75]]]])
+    got = shift_half_cell(coords).numpy()[0, 0, 0]
+    assert got.tolist() == [40.0 + HEATMAP_SCALE / 2, 24.0 + HEATMAP_SCALE / 2, 0.75], got

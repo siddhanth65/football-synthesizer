@@ -1,0 +1,68 @@
+{
+ "session": "v10-W2",
+ "written_utc": "2026-08-15T22:45Z",
+ "written_before": "any arm homography was decoded on GSR data and any GS-HOTA was computed",
+ "question": "Baishev/PogChamper's private +12.6 over a public twin of our pipeline is, on file-level commit evidence, a calibration overhaul. Which of the six named defects are present in OUR PnLCalib integration, what does each cost, and what is the fix worth end to end?",
+ "audit_checklist": {
+  "1_bgr_to_rgb_trained_net": {
+   "verdict": "ABSENT",
+   "evidence": "generator/calibrate.py::PnLCalibCalibrator._detect does cv2.cvtColor(frame_bgr, COLOR_BGR2RGB) before to_tensor; every caller supplies BGR (cv2.imread in tools/gsr_calibgate.py and tools/gsr_v10_w2_calib.py, cv2.VideoCapture.read in generator/extract.py:440). Byte-identical to ~/PnLCalib/inference.py::inference line 66."
+  },
+  "2_heatmap_decode_argmax_vs_subpixel": {
+   "verdict": "PRESENT",
+   "evidence": "~/PnLCalib/utils/utils_heatmap.py:290 (and :359 for the line net): loc = candidates[idx][::-1] * scale with scale=2 and integer indices. The heatmap is half the 540x960 network input, so every keypoint sits on a 2 px grid of that input = 4 px of a native 1920x1080 frame. No subpixel refinement anywhere in the chain.",
+   "fix": "generator.calibrate.refine_peaks, flag PnLCalibCalibrator(subpix_decode=True)"
+  },
+  "3_uninverted_forward_radial_distortion": {
+   "verdict": "N-A (no distortion is modelled at all)",
+   "evidence": "~/PnLCalib/utils/utils_calib.py:368-370 fixes CALIB_FIX_K1..K6, FIX_TANGENT_DIST, FIX_S1_S2_S3_S4, FIX_TAUX_TAUY in cv2.calibrateCamera, and :466 emits radial_distortion = [0]*6. generator.calibrate.ground_homography_from_cam_params consumes only focal/principal point/R/t, so there is no coefficient to invert and none applied in the wrong direction. Measured, not fixed: the radial trend of the GT-anchored residual (reported, not gating)."
+  },
+  "4_non_subpixel_line_points": {
+   "verdict": "PRESENT, twice",
+   "evidence": "(a) the line endpoints come from the same integer decoder as (2); (b) ~/PnLCalib/utils/utils_heatmap.py:457 and :469 store every line-intersection keypoint as round(new_kp, 0) -- whole pixels of the 960x540 canvas, 2 px at native resolution -- and those derived keypoints are the majority of the correspondences on a zoomed frame.",
+   "fix": "(a) subpix_decode as above; (b) PnLCalibCalibrator(derived_kp_scale=8): complete_keypoints is handed the same geometry on an 8x canvas, so its round() quantises at 0.125 px and the normalised output is otherwise identical."
+  },
+  "5_preprocessing_mismatched_to_the_calibrator_convention": {
+   "verdict": "ABSENT",
+   "evidence": "_detect is line-for-line ~/PnLCalib/inference.py::inference: BGR->RGB, PIL, torchvision to_tensor ([0,1], no ImageNet normalisation in either), conditional T.Resize((540,960)), thresholds 0.3434/0.7867 = their inference defaults, complete_keypoints(normalize=True) + FramebyFrameCalib(denormalize=True) = their pairing. Our candidates() loop is heuristic_voting(refine=False, refine_lines=True) with the winner-only return removed."
+  },
+  "6a_reduced_resolution": {
+   "verdict": "PRESENT BY DESIGN, not fixed",
+   "evidence": "1920x1080 is resized to 960x540 because that is PnLCalib's training resolution; feeding native frames is out of distribution and is NOT attempted. The recoverable half of this defect is the decode quantisation it causes, which is (2)/(4)."
+  },
+  "6b_frame_skipping": {
+   "verdict": "ABSENT",
+   "evidence": "every GSR path calibrates each frame: calib_period=1 in tools/gsr_v6det.py:130, tools/gsr_deleak.py:141, tools/gsr_w4_bnstats.py:163 and the eval/gsr_score.py default. calib_period 25/62 is the ManU/FOOTPASS full-match speed lever only."
+  }
+ },
+ "arms": {
+  "ctrl": "PnLCalib's stock decode, re-derived in the same pass",
+  "s1": "subpix_decode=True (sub-cell peaks on both heatmaps)",
+  "s2": "derived_kp_scale=8 (un-rounded line-intersection keypoints)",
+  "s3": "s1 + s2, composed",
+  "s4": "half_cell_offset=True -- ADDED 2026-08-15T23:35Z, after stage 1 refuted s1 and s2 and BEFORE any s4 coordinate was decoded. Not a tuned variant of s1: it is the opposite fix, and it comes from PnLCalib's TRAINING code, not from a score. utils_heatmap.resize_keypoints builds every target as x_resized = int(x * 0.5), i.e. the Gaussian is drawn on the FLOORED cell, so the network's arg-max is the cell CONTAINING the keypoint and the decoder's cell*2 is that cell's low edge. The stock coordinate is therefore biased by U[0, 2) px of the 960-wide input toward the image origin (2 px of a 1080p frame) in both axes on every keypoint and every line endpoint -- a systematic offset, not noise. s1 failed because it estimates the sub-cell centre of a Gaussian whose true centre IS the integer cell, so it can only add noise; the recoverable error is the half-cell bias. The offset is scale/2 = 1.0 px by derivation, not by search: no sweep, no alternative value tried.",
+  "s5": "s4 + s2, composed"
+ },
+ "chosen_a_priori_no_sweep": {
+  "subpixel_estimator": "log-parabola through the peak and its two neighbours per axis -- exact for a Gaussian of any sigma. Chosen over a windowed centroid on a numerical fact established before any GSR data was touched: at PnLCalib's training sigma of 2 heatmap cells, a +-2 centroid still leaves 0.29 cells of shrinkage bias (most of the quantisation it is meant to undo) while the log-parabola is exact to 1e-6. No radius, no sweep.",
+  "derived_kp_scale": "8 (0.125 px); any scale >= 4 is numerically equivalent, so it is not a tuned dial.",
+  "rng": "cv2.setRNGSeed(20260815) before every frame of every arm, so the arms share PnLCalib's RANSAC draws."
+ },
+ "instruments": {
+  "stage1_accuracy": "Homography-only, GT-anchored: each annotation's OWN bbox_image bottom-middle pushed through that frame's gate-selected homography, against that annotation's own bbox_pitch. No detection, no 60 px matcher, no box-convention term -- unlike the v8-W2 0.475 m, which is detection-anchored and therefore an upper bound on calibration error. Paired across arms on the frames every arm calibrates.",
+  "stage2_end_to_end": "Positions rebuilt per arm from the arm's own gated homographies + fill_calibration_gaps(10); detections, ByteTrack ids, CLIP embeddings, per-crop OCR, EIoU association, GTA connector (tau 0.450) and the MILP solver are byte-identical across arms. Scored with tools.gsr_v9_w7.score_pair, flags ON (vote role/team/jersey + gk_side team) and OFF."
+ },
+ "bars_a_priori": {
+  "stage1_escalation": "Escalate an arm to the end-to-end stage only if its pooled GT-anchored homography-error median is at least 3% below ctrl's AND the paired per-row Wilcoxon has p < 0.01 with more rows better than worse. If no arm clears, the null is the deliverable and no DEV-20 end-to-end run is spent.",
+  "stage2_ship": "Combined (best composed) arm on DEV-20, flags ON: GS-DetA >= +1.00 vs the same-window ctrl, GS-HOTA not worse, and helped > hurt with Wilcoxon p < 0.05 on the per-sequence paired GS-HOTA.",
+  "stage2_supporting": "GS-LocA must RISE if the fixes are real (reported for every arm; not a gate on its own).",
+  "stage1_for_s4": "Same bar as every other arm, unchanged and applied to the arm added on 2026-08-15T23:35Z: pooled GT-anchored homography-error median at least 3% below ctrl's, paired Wilcoxon p < 0.01, more rows better than worse. Measured on the same DEV-20 stride-5 cache and the same re-derived ctrl."
+ },
+ "guards": [
+  "DEV-20 only. TEST-38, test-49, the challenge split and every submission are untouched.",
+  "The control is re-derived from the SAME forward pass, the same weights and the same RANSAC seed as the arms, in the same window (kb v9-w7-004's drift rule): the decode is the only variable.",
+  "GPU work on cluster GPU 1 only; GPU 0 is another user's.",
+  "Nothing from Baishev's repositories was fetched, read or run. The six-item checklist is the complete permitted transfer.",
+  "No STATUS edit, no commit, no push, no METRICS_VERSION change unless an arm ships."
+ ]
+}

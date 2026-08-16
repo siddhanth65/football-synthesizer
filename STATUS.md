@@ -1,5 +1,33 @@
 # STATUS
 
+## 2026-08-16 — v10 W2 (calibration audit): our stack was ALREADY CLEAN — 4 of 6 checklist bugs absent, distortion N-A; the one real defect (half-cell decode bias, 2 px) fixed for +0.49 HOTA but FAILS its bar; only ~4% of the leader's +12.6 transfers as bug fixes
+
+results/gsr_v10_w2_registered.json (audit + bars pre-declared), results/gsr_benchmark/
+gsr_v10_w2_*.json, kb v10-w2-001..005, generator/calibrate.py (refine_peaks/shift_half_cell/
+crash guard, flags default OFF), tools/gsr_v10_w2_calib.py. Audit: BGR feed ABSENT (our code
+is line-for-line the reference), preprocessing mismatch ABSENT, frame skipping ABSENT
+(calib_period=1), radial distortion N-A (PnLCalib models none; measured residual -0.58 px,
+no r^3 signature), reduced-resolution BY DESIGN (960x540 = training res; native is OOD).
+**The one real find is genuinely subtle: the textbook subpixel fix is HARMFUL (0.477 ->
+0.509 m) because PnLCalib trains on integer-cell targets — the true defect is the decoder
+returning the cell's LOW EDGE, a U[0,2)px origin-ward bias; the derived (not tuned)
+half-cell shift removes it (pixel-space residual dx +1.50/dy +2.34 -> -0.53/+0.34) and
+delivers median 0.478 -> 0.427 m (-10.6%), end-to-end flags-ON +0.4896 HOTA / +0.3932 DetA /
++0.5831 LocA, 17/3, p=0.0049 — but the registered DetA bar was +1.0: FAIL; flag stays OFF,
+held as a CANDIDATE RIDER for the next freeze (same-window TEST-38 confirmation required;
+orchestrator decision on record).** Bonus: latent calibrateCamera crash guarded
+(n_solver_errors; frames that never raised are byte-identical). Corollary: v8-W2's 0.475 m
+"detection-anchored" number was pure calibration (homography-only reads 0.478 — agreement to
+3 mm). 1.7 GPU-h.
+
+**Strategic verdict: Baishev's +12.6 is NOT transferable as bug fixes — his baseline was
+broken, ours never was. The surviving hypothesis is MODEL CLASS: a temporally-consistent
+tripod camera (BroadTrack, WACV'25) vs our per-frame solving — accuracy + jitter +
+dead-frame coverage simultaneously. v10-W3 dispatched: BroadTrack as INSTRUMENT-ONLY (EVS
+noncommercial license; upstream repo, never the fork, never vendored) on the W2 probe:
+GT-anchored accuracy / coverage / jitter head-to-head, registered escalation bars; ship
+path if headroom is real = clean-room from the paper (arXiv:2412.01721) as v10-W4.**
+
 ## 2026-08-15 — v10 W1 (VLM trial): FAIL by one read at n=9 — and three decisive answers: our PARSeq CRUSHES an 8B VLM per-crop (p=4.8e-48); 94.8% genuine absence CONFIRMED at VLM scale; coverage loss is UPSTREAM of the reader (92.4% named given good views)
 
 results/GSR_V10_W1.md (§1 registered pre-download), kb v10-w1-001..006, outputs/gsr/v10_w1/.

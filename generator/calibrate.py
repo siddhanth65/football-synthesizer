@@ -40,6 +40,102 @@ _DEFAULT_PNLCALIB_ROOT = Path.home() / "PnLCalib"
 # PnLCalib's detector defaults (from its inference.py).
 _KP_THRESHOLD = 0.3434
 _LINE_THRESHOLD = 0.7867
+#: PnLCalib's heatmaps are half the network input (540x960 in, 270x480 out), and its decoder
+#: (``utils_heatmap.get_keypoints_from_heatmap_batch_maxpool``) returns the integer argmax cell times
+#: this factor -- so every keypoint is quantised to 2 px of the 960-wide frame, i.e. **4 px of a
+#: native 1920x1080 broadcast frame**. :func:`refine_peaks` undoes that.
+HEATMAP_SCALE = 2
+#: Target Gaussian sigma PnLCalib trains its heatmaps with (``generate_gaussian_array_vectorized``).
+#: A log-parabola through three cells is *exact* for a Gaussian of any sigma, which is why the
+#: sub-cell decode below uses that and not a windowed centroid (a centroid over +-2 cells still
+#: leaves 0.29 cells of shrinkage bias at sigma = 2 -- most of the quantisation it is meant to undo).
+HEATMAP_SIGMA = 2.0
+
+
+def _log_parabola_offset(vm, v0, vp):
+    """Sub-cell offset of a peak from three consecutive samples, via a parabola through their logs.
+
+    Args:
+        vm: Value one cell before the peak.
+        v0: Value at the peak.
+        vp: Value one cell after the peak.
+
+    Returns:
+        Offset in cells, clamped to ``[-1, 1]``; zero where the triple is not a positive concave
+        peak (so a flat, clipped or negative neighbourhood is left at the arg-max cell).
+    """
+    import torch  # noqa: PLC0415 - torch is only needed on the detector seam
+
+    ok = (vm > 0) & (v0 > 0) & (vp > 0)
+    lm, l0, lp = (torch.log(v.clamp(min=1e-12)) for v in (vm, v0, vp))
+    den = lm - 2.0 * l0 + lp
+    ok = ok & (den < -1e-9)
+    d = 0.5 * (lm - lp) / torch.where(ok, den, -torch.ones_like(den))
+    return torch.where(ok, d.clamp(-1.0, 1.0), torch.zeros_like(d))
+
+
+def shift_half_cell(coords, scale: int = HEATMAP_SCALE):
+    """Move decoded peaks from the low corner of their heatmap cell to its centre.
+
+    PnLCalib's label generator floors keypoints into cells (``utils_heatmap.resize_keypoints``:
+    ``x_resized = int(x * 0.5)``), so the network's peak marks the cell containing the keypoint and
+    the decoder's ``cell * scale`` is that cell's **low edge**. The stock coordinate is therefore
+    biased by ``U[0, scale)`` px of the 960-wide network input toward the image origin -- 2 px of a
+    1080p frame in both axes, on every keypoint and every line endpoint. Adding half a cell removes
+    the bias and halves the residual quantisation range.
+
+    Args:
+        coords: ``(B, C, K, 3)`` decoder output ``[x, y, score]``.
+        scale: The decoder's heatmap -> network-input factor.
+
+    Returns:
+        A copy with ``x``/``y`` shifted by ``scale / 2``; the score column is untouched.
+    """
+    out = coords.clone().float()
+    out[..., :2] = out[..., :2] + scale / 2.0
+    return out
+
+
+def refine_peaks(coords, heatmap, scale: int = HEATMAP_SCALE):
+    """Replace integer heatmap arg-max peaks with a sub-cell log-parabola estimate.
+
+    PnLCalib decodes both HRNets by taking the arg-max heatmap cell and multiplying by ``scale``
+    (``utils_heatmap.get_keypoints_from_heatmap_batch_maxpool``), which quantises every pitch
+    keypoint and every line endpoint onto a 2 px grid of the network's 960x540 input -- **4 px of a
+    native 1920x1080 broadcast frame**. The heatmaps are MSE-regressed Gaussians, so fitting a
+    parabola to the logs of the peak and its two neighbours on each axis recovers the true centre
+    exactly for a clean peak, at no extra forward pass.
+
+    Args:
+        coords: ``(B, C, K, 3)`` decoder output ``[x, y, score]``, ``x``/``y`` already scaled.
+        heatmap: ``(B, C, H, W)`` heatmap those peaks were read from (same channel order).
+        scale: The decoder's heatmap -> network-input factor.
+
+    Returns:
+        A tensor shaped like ``coords`` with sub-cell ``x``/``y``; the score column is untouched.
+    """
+    import torch  # noqa: PLC0415 - torch is only needed on the detector seam
+
+    if coords.numel() == 0:
+        return coords
+    dev = heatmap.device
+    b, c = heatmap.shape[0], heatmap.shape[1]
+    xy = coords[..., :2].to(dev).float()
+    ix = torch.round(xy[..., 0] / scale).long().clamp(0, heatmap.shape[3] - 1)
+    iy = torch.round(xy[..., 1] / scale).long().clamp(0, heatmap.shape[2] - 1)
+    pad = torch.nn.functional.pad(heatmap.float(), (1, 1, 1, 1))
+    bi = torch.arange(b, device=dev).view(b, 1, 1)
+    ci = torch.arange(c, device=dev).view(1, c, 1)
+
+    def at(dy: int, dx: int):
+        return pad[bi, ci, iy + 1 + dy, ix + 1 + dx]
+
+    ox = _log_parabola_offset(at(0, -1), at(0, 0), at(0, 1))
+    oy = _log_parabola_offset(at(-1, 0), at(0, 0), at(1, 0))
+    out = coords.clone().float()
+    out[..., 0] = ((ix + ox) * scale).to(out.device)
+    out[..., 1] = ((iy + oy) * scale).to(out.device)
+    return out
 
 
 @dataclass(frozen=True)
@@ -289,12 +385,30 @@ class PnLCalibCalibrator:
         max_error_m: float = MAX_REPROJ_ERROR_M,
         kp_threshold: float = _KP_THRESHOLD,
         line_threshold: float = _LINE_THRESHOLD,
+        subpix_decode: bool = False,
+        derived_kp_scale: int = 1,
+        half_cell_offset: bool = False,
     ):
         #: ``None`` -> auto-detect CUDA at load time (falls back to CPU).
         self.device = device
         self.max_error_m = max_error_m
         self.kp_threshold = kp_threshold
         self.line_threshold = line_threshold
+        #: True -> sub-cell heatmap decoding (:func:`refine_peaks`). ``False`` (default) keeps
+        #: PnLCalib's integer arg-max decode byte-for-byte.
+        self.subpix_decode = bool(subpix_decode)
+        #: > 1 -> ask PnLCalib's ``complete_keypoints`` for line-intersection keypoints on a canvas
+        #: this many times larger, so its ``round(x, 0)`` quantises at ``1 / scale`` px instead of
+        #: 1 px. ``1`` (default) is stock.
+        self.derived_kp_scale = int(derived_kp_scale)
+        #: True -> add half a heatmap cell to every decoded coordinate, undoing the **floor** that
+        #: PnLCalib's own label generator applies (``utils_heatmap.resize_keypoints``:
+        #: ``x_resized = int(x * 0.5)``). The decoder returns ``cell * 2``, i.e. the cell's low edge,
+        #: so a stock decode is biased by ``U[0, 2)`` px of the 960-wide input toward the origin --
+        #: 2 px of a 1080p frame, in both axes, on every keypoint. ``False`` (default) is stock.
+        self.half_cell_offset = bool(half_cell_offset)
+        #: Count of ``get_cam_params`` calls that raised (a degenerate subset, skipped not fatal).
+        self.n_solver_errors = 0
         self._weights_kp = weights_kp
         self._weights_line = weights_line
         self._loaded = False
@@ -354,11 +468,28 @@ class PnLCalibCalibrator:
         with torch.no_grad():
             heatmaps = self._model(t)
             heatmaps_l = self._model_l(t)
-        kp_coords = get_keypoints_from_heatmap_batch_maxpool(heatmaps[:, :-1, :, :])
-        line_coords = get_keypoints_from_heatmap_batch_maxpool_l(heatmaps_l[:, :-1, :, :])
+        kp_hm, line_hm = heatmaps[:, :-1, :, :], heatmaps_l[:, :-1, :, :]
+        kp_coords = get_keypoints_from_heatmap_batch_maxpool(kp_hm)
+        line_coords = get_keypoints_from_heatmap_batch_maxpool_l(line_hm)
+        if self.subpix_decode:
+            kp_coords = refine_peaks(kp_coords, kp_hm)
+            line_coords = refine_peaks(line_coords, line_hm)
+        if self.half_cell_offset:
+            kp_coords, line_coords = (shift_half_cell(c) for c in (kp_coords, line_coords))
         kp_dict = coords_to_dict(kp_coords, threshold=self.kp_threshold)
         lines_dict = coords_to_dict(line_coords, threshold=self.line_threshold)
-        kp_dict, lines_dict = complete_keypoints(kp_dict[0], lines_dict[0], w=w, h=h, normalize=True)
+        kp_d, ln_d, cw, ch = kp_dict[0], lines_dict[0], float(w), float(h)
+        if self.derived_kp_scale > 1:
+            # complete_keypoints rounds every line-intersection keypoint to a whole pixel of the
+            # (w, h) canvas it is handed and then normalises by it. Scaling coordinates and canvas
+            # together is a similarity transform -- the normalised output is unchanged except that
+            # the rounding now happens at 1/scale px.
+            s = float(self.derived_kp_scale)
+            kp_d = {k: {**v, "x": v["x"] * s, "y": v["y"] * s} for k, v in kp_d.items()}
+            ln_d = {k: {**v, "x_1": v["x_1"] * s, "y_1": v["y_1"] * s,
+                        "x_2": v["x_2"] * s, "y_2": v["y_2"] * s} for k, v in ln_d.items()}
+            cw, ch = cw * s, ch * s
+        kp_dict, lines_dict = complete_keypoints(kp_d, ln_d, w=cw, h=ch, normalize=True)
         return kp_dict, lines_dict, w0, h0
 
     def candidates(self, frame_bgr: np.ndarray) -> list[CalibCandidate]:
@@ -387,9 +518,15 @@ class PnLCalibCalibrator:
         raw: list[tuple[str, float, float, dict]] = []
         for mode in _VOTE_MODES:
             for use_ransac in _VOTE_RANSAC:
-                cam_params, rep = cam.get_cam_params(
-                    mode=mode, use_ransac=use_ransac, refine=False, refine_w_lines=True
-                )
+                try:
+                    cam_params, rep = cam.get_cam_params(
+                        mode=mode, use_ransac=use_ransac, refine=False, refine_w_lines=True
+                    )
+                except Exception:  # noqa: BLE001 - one bad subset must not kill the other 17
+                    # PnLCalib hands cv2.calibrateCamera whatever survived RANSAC and can raise on a
+                    # degenerate correspondence set; its own contract for "no camera" is (None, None).
+                    self.n_solver_errors += 1
+                    continue
                 if rep:
                     raw.append((mode, float(use_ransac), float(rep), cam_params))
         if not raw:
