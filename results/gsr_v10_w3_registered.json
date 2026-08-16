@@ -1,0 +1,57 @@
+{
+ "session": "v10-W3",
+ "written_utc": "2026-08-16T05:40Z",
+ "written_before": "any BroadTrack binary produced a calibration on GSR data; the binary had not yet compiled when this file was written (build was still failing on a Ceres API mismatch)",
+ "question": "Does a temporally-consistent tripod camera model (BroadTrack, WACV 2025, arXiv:2412.01721) beat our per-frame PnLCalib + gate + fill chain on GSR broadcast clips -- on position accuracy, on dead-frame coverage, and on frame-to-frame jitter?",
+ "why_now": "v10-W2 showed our per-frame calibration is essentially bug-free (one half-cell bias, +0.49 HOTA); only ~4% of the leader's +12.6 was transferable as bug fixes. The remaining candidate edge in the camera-model class is temporal consistency, not per-frame solving. BroadTrack is the registered instance of that class: it uses the SAME open-source field detectors we do (NBJW keypoints, TVCalib lines) and changes only the camera model and the temporal solver, so this is a clean controlled comparison of the model class.",
+ "license_posture": {
+  "upstream": "github.com/evs-broadcast/BroadTrack (NOT fmagera/BroadTrack, which does not exist; Floriane Magera is the first author, the code lives under the EVS org). Baishev/PogChamper's fork is not touched.",
+  "license": "EVS Broadcast Equipment SA proprietary. Noncommercial internal research use only; derivatives are owned by EVS; no distribution of the software or of derivatives.",
+  "posture": "INSTRUMENT ONLY. Installed and run privately on a100server1 under ~/work/v10w3, outside the repo tree. No BroadTrack code, weights or derived file is vendored into the repo. Nothing shipped is built from its code. The two local build patches (a hardcoded /usr/local/cuda in CMakeLists.txt; any Ceres-API compile fix) are private, never distributed.",
+  "cleanroom_hygiene": "The worker deliberately did NOT read Camera.cpp, CameraTracker.cpp, core.cpp, Residuals.h, SoccerPitch3D.cpp or PointExtractor.cpp. Only build files (CMakeLists.txt, Dockerfile, .gitattributes, README, LICENSE), the CLI --help output, and compiler diagnostics were read. If a ship decision follows, the clean-room implementation must be specified from the PAPER only.",
+  "ship_path_if_headroom_is_large": "clean-room re-implementation from arXiv:2412.01721, decided by the orchestrator, not by this session."
+ },
+ "probe": {
+  "sequences": ["SNGS-024", "SNGS-027", "SNGS-039", "SNGS-042", "SNGS-045", "SNGS-048",
+                "SNGS-051", "SNGS-054", "SNGS-057", "SNGS-078"],
+  "note": "the v8-W2 10-sequence DEV-20 subset, unchanged. TEST-38, test-49 and the challenge split are untouched.",
+  "gt_use": "GT is read ONLY to score (bbox_pitch of each annotation against that annotation's own bbox_image bottom-middle). No GT enters any calibration."
+ },
+ "our_side_of_the_comparison": {
+  "arms": ["ctrl", "s4"],
+  "ctrl": "the shipped PnLCalib decode + select_calibration gate + fill_calibration_gaps(10)",
+  "s4": "ctrl + the half-cell de-bias that v10-W2 shipped (+0.49 HOTA)",
+  "source": "the v10-W2 candidate cache on the server (~/football-synthesizer/outputs/gsr/v10_w2_s5/<arm>/<SEQ>.npz), replayed through the same gate. Zero new GPU on our side.",
+  "on_record_dev20_numbers": {"ctrl_median_m": 0.4778, "s4_median_m": 0.4272}
+ },
+ "instruments": {
+  "a_accuracy": "GT-anchored homography error: each GT annotation's own image foot point pushed through that frame's homography, against that annotation's own bbox_pitch. Reported as median / p90 / mean metres, pooled and per sequence, on the frames BOTH systems answer (paired) and on each system's own coverage (unpaired).",
+  "b_coverage": "frames with a usable camera, per system: ours before fill, ours after fill_calibration_gaps(10), BroadTrack's. Plus the accuracy of BroadTrack on the rows our chain leaves dead -- coverage only counts if it is accurate coverage (the v8-W2 lesson).",
+  "c_jitter": "frame-to-frame movement, in metres, of the pitch point that a FIXED image point maps to. Evaluated on a fixed 5x5 grid of image points inside the frame, per consecutive frame pair where both frames have a camera. A perfect camera track on a moving camera still moves this quantity, so the number is reported both raw and after removing the per-frame median motion (the residual = non-smooth component). Also reported: the same statistic on our chain.",
+  "d_failure_modes": "per-frame status from BroadTrack's own output (frames it declines / reinitialises), cross-tabbed against our gate's verdict and against shot cuts detected by a frame-difference measure."
+ },
+ "bars_a_priori": {
+  "escalate_to_stage2_if_ANY": [
+   "ACCURACY: BroadTrack's pooled paired GT-anchored median error is >= 15% below our better arm's (s4), i.e. <= 0.363 m against s4's 0.4272 m on DEV-20 (the probe-10 value of the same statistic is computed from the same cache and is the actual bar; the 15% is relative, not absolute)",
+   "COVERAGE: BroadTrack emits a usable camera on >= 50% of the rows our post-fill chain leaves dead, AND those rows' GT-anchored median error is within 1.25x our chain's median on its own live rows (accuracy-conditioned coverage)",
+   "JITTER: BroadTrack's residual jitter (per instrument c) is <= 0.5x ours"
+  ],
+  "otherwise": "bank the negative. A negative closes the camera-model-class hypothesis for this campaign and leaves the leader's remaining edge unexplained -- which is itself the finding, and gets reported as such rather than softened.",
+  "stage2_if_licensed": "swap BroadTrack homographies into the positions layer for the 10 probe sequences (t1/t2/t3 arms of tools.gsr_w2_calibswap), re-run the frozen v6 chain on CPU, score paired vs the same-lineage control, flags ON. This is a CEILING MEASUREMENT, not a shippable component."
+ },
+ "resolutions_recorded_during_the_run": {
+  "upstream_correction": "The brief named github.com/fmagera/BroadTrack; that repo does not exist (404). The real upstream is github.com/evs-broadcast/BroadTrack (Floriane Magera is the first author; the code lives under the EVS org). Baishev/PogChamper was not touched.",
+  "install": "No docker/podman GPU path on a100server1 (direct docker is disabled; gpurun --docker needs an image in the root daemon's store). Built natively instead: conda env btbuild2 (ceres-solver 2.1 + suitesparse 5 + libopencv + boost + rapidjson + eigen + cmake<4 + a conda CUDA 12.4 toolkit) plus the official libtorch 2.5.1+cu124 cxx11-abi zip. Two build-config facts: CMake >= 4.0 removes FindCUDA, which libtorch 2.5.1's Caffe2Config still calls (hence cmake 3.31), and ceres 2.2 removed SubsetParameterization/SetParameterization, which the source still uses (hence ceres 2.1). One local patch: CMakeLists.txt line 4 hardcodes CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda, wrapped in if(NOT CUDA_TOOLKIT_ROOT_DIR). Private, never distributed.",
+  "camera_convention": "Resolved on SNGS-024 as registered. Winner: R = Rz(-roll) Rx(-tilt) Rz(-pan), no mirror, principal point at the image centre, f = (W/2)/tan(hFOV/2), distortion mode immaterial (the pass-2 coefficients are ~5e-4). Margin over the next rotation family: 1.288 m vs 29.74 m. Independent cross-check (not registered, added because 1.0 m looked too large): cv2.solvePnP on GT correspondences with their K recovers a rotation within ~2 degrees of the chosen reading on frames 100/300/500, with the discrepancy CHANGING SIGN between frames -- a per-frame error, not a fixed convention offset.",
+  "tripod_estimation": "BroadTrack's own scripts/compute_tripod.py raises AssertionError (len(intersect_optical_axes_match)) on 9 of the 10 clips: a 30 s GSR clip does not carry enough optical-axis diversity to triangulate the tripod. Substitute used for those 9: the median pass-1 camera position over the above-median-score frames, with their own radius 0.210928. Validated on SNGS-057, the one clip where their estimator works: their centre (0.04, 57.87, -15.22) vs our substitute (0.12, 54.75, -14.71).",
+  "runs": "pass1 = prior tripod (0, 90, -18); pass2 = median tripod with a loose radius; pass3 = median tripod with radius 0.211 (the reported configuration, best of the three); pass4 = pass3 plus our own detections through their --b human-bbox masking, 3 sequences.",
+  "gpu": "0.9 GPU-h total on the gpurun broker (48.0 -> 47.1 weekly quota). The broker assigns the GPU; it placed the jobs on GPU 0 and GPU 1. Per-clip tracker cost: ~50 ms/frame, ~60 s per 750-frame sequence.",
+  "post_hoc_arm": "An unregistered, exploratory arm was added after the registered measurements: temporal smoothing of OUR OWN homographies. It is labelled exploratory in kb v10-w3-006 and is NOT part of the registered verdict."
+ },
+ "guards": [
+  "DEV-20 probe subset only. No submission, no TEST-38, no test-49, no challenge split.",
+  "GPU 1 only, occupancy checked before each run; budget ~8 GPU-h.",
+  "Our control is the v10-W2 cache -- same detector, same tracker, same embeddings, same OCR. Only the camera moves.",
+  "If BroadTrack's output frame indexing or pitch convention is ambiguous, it is resolved by a sanity check against GT on ONE sequence and the resolution is recorded before any headline number is computed."
+ ]
+}

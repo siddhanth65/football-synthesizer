@@ -8422,6 +8422,188 @@
     "negative",
     "v10"
    ]
+  },
+  {
+   "id": "v10-w3-001",
+   "statement": "A TEMPORALLY-CONSISTENT TRIPOD CAMERA TRACKER IS 2.5x LESS ACCURATE THAN OUR PER-FRAME SOLVER ON GSR. BroadTrack (WACV 2025, EVS proprietary, run privately as an instrument) was built from upstream and run on the 10-sequence v8-W2 probe in its intended two-pass configuration (prior-position pass, then a per-sequence tripod file at the tight radius 0.211 m). GT-anchored homography error on 106,748 paired annotation rows: BroadTrack median 1.0001 m / p90 3.2533 / 94.5% within 5 m, against our shipped chain's s4 arm at 0.4024 m / 1.2867 / 99.6% and ctrl at 0.4682 m on the identical rows. Excluding the one clip where the tracker diverges (SNGS-078), the mean of per-sequence medians is still 0.954 m vs our 0.431 m -- the gap is systematic, not a failure-mode artifact. Registered escalation bar was <= 0.85x our s4 median (0.342 m): FAIL by 2.9x.",
+   "value": 1.0001,
+   "unit": "GT-anchored median position error, metres (our s4 = 0.4024 m on the same rows)",
+   "status": "refuted",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w3.json",
+    "results/gsr_v10_w3_registered.json"
+   ],
+   "method": "tools.gsr_v10_w3_camtrack --accuracy. Each GT annotation's own bbox_image bottom-middle pushed through that frame's camera against that annotation's own bbox_pitch; no detection, no matcher and no box convention enters. Our side is the v10-W2 candidate cache (outputs/gsr/v10_w2_full) replayed through the shipped select_calibration gate -- the ctrl/s4 per-sequence medians reproduce results/gsr_benchmark/gsr_v10_w2_full.json. The external camera-parameter reading convention was resolved once on SNGS-024 by a 16 x 3 discrete search (rotation composition x distortion mode) and cross-checked with cv2.solvePnP on GT: the chosen reading agrees with the PnP-fitted rotation to ~2 degrees per frame with per-frame sign changes, so the residual is the tracker's error, not a misreading.",
+   "n": 10,
+   "caveats": [
+    "BroadTrack's own tripod estimator (scripts/compute_tripod.py) succeeds on only 1 of the 10 clips; the other 9 tripods are the median of the pass-1 per-frame positions over the above-median-score frames. On SNGS-057, where their estimator succeeds, its centre and ours agree to 2.5 m and the run behaves the same, so the substitute is not the cause of the gap.",
+    "One arm gave the tracker our own detections as human bboxes to mask (its --b option, which our calibrator has no equivalent of): on 3 sequences it helped one (SNGS-024 1.310 -> 0.810 m) and hurt one (SNGS-042 1.250 -> 1.469 m). It does not close the gap.",
+    "INSTRUMENT ONLY: EVS proprietary licence, noncommercial internal research, no distribution of derivatives. Nothing was vendored into the repo; the binary and its weights live in ~/work/v10w3 on a100server1."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w2-003"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "broadtrack",
+    "v10",
+    "negative"
+   ]
+  },
+  {
+   "id": "v10-w3-002",
+   "statement": "THE TRIPOD TRACKER IS 26x TEMPORALLY SMOOTHER THAN OUR CHAIN -- THE ONE REGISTERED BAR IT PASSES. On the frames both systems answer, the pitch position of a fixed 5x5 image grid moves with a frame-to-frame second difference (acceleration: the pure jitter signal, zero for any smooth pan) of 0.0146 m median / 0.2207 p90 for BroadTrack against 0.3795 m / 2.1871 for our s4 arm and 0.3811 m for ctrl. First differences: 0.129 m vs 0.283 m. Registered bar was <= 0.5x ours: PASS by 26x, which is what licensed stage 2.",
+   "value": 26.0,
+   "unit": "ratio of our jitter to theirs (0.3795 m vs 0.0146 m median grid acceleration)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w3.json",
+    "results/gsr_v10_w3_registered.json"
+   ],
+   "method": "tools.gsr_v10_w3_camtrack --jitter, evaluated only inside maximal runs of >= 3 consecutive frames that BOTH systems calibrate, so the number is smoothness and not coverage.",
+   "n": 10,
+   "caveats": [
+    "Smoothness is measured, not its value: stage 2 shows it buys nothing downstream when it costs accuracy (v10-w3-004).",
+    "Our jitter is the shipped gate's chosen hypothesis per frame; the gate re-selects among 18 PnLCalib hypotheses independently each frame, which is the mechanism."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w3-001"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "jitter",
+    "broadtrack",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w3-003",
+   "statement": "OUR DEAD-FRAME PROBLEM IS NOW 2.3% OF FRAMES, AND AN EXTERNAL CAMERA ANSWERS ALL OF IT BUT AT TWICE OUR ERROR. Across the 10-sequence probe our gate plus fill_calibration_gaps(10) leaves 176 of 7,500 frames without a camera (2.35%); BroadTrack emits a usable camera on 176 of 176 (100%). Its error on exactly those frames is 0.858 m median / 1.880 p90 against our chain's 0.402 m on its own live frames, so the registered accuracy-conditioned coverage bar (<= 1.25x ours, i.e. 0.503 m) FAILS. The v8-W2 framing of coverage as the leader's real edge is largely obsolete on our side: the dead pool has shrunk to 176 frames and the whole prize for filling it is +0.35 GS-HOTA.",
+   "value": 176,
+   "unit": "dead frames after fill across 7,500 probe frames (2.35%); external recovers 100%",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w3.json",
+    "results/gsr_v10_w3_registered.json"
+   ],
+   "method": "tools.gsr_v10_w3_camtrack --coverage. Dead = frames with no finite pitch coordinate for any player/GK row in the shipped positions_gate_v6det table after fill_calibration_gaps(max_gap=10).",
+   "n": 10,
+   "caveats": [
+    "Frame-level, not row-level: 2,288 GT-matched annotation rows sit on those 176 frames.",
+    "Measured on the v6det lineage over the DEV-20 probe subset, not the test split."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "calibration",
+    "coverage",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w3-004",
+   "statement": "SWAPPING THE TRIPOD TRACKER INTO THE CHAIN COSTS 7.39 GS-HOTA -- SMOOTHNESS BUYS NOTHING WHEN IT COSTS ACCURACY. End to end on the probe with detections, ByteTrack ids, CLIP embeddings, per-crop OCR, EIoU association and the solver held identical and only the pitch coordinate varying: control 42.9370, t1 (external camera everywhere) 35.5461 (-7.39, hurt 10 of 10, Wilcoxon p = 0.00195, worst -23.26), t2 (external + fill) 35.3593. GS-LocA falls 93.6348 -> 87.7888 and GS-AssA falls 58.8777 -> 49.5836: a 26x smoother camera made association WORSE, because position accuracy dominates. Only t3 (ours where finite, external on our NaN rows) gains: 43.2901, +0.35, helped 6 hurt 3, p = 0.086 -- indistinguishable from the +0.33 the leader's per-frame calibrator bought in the same t3 slot in v8-W2. The camera-model-class hypothesis is closed: the leader's remaining edge is not a better camera model.",
+   "value": -7.3909,
+   "unit": "GS-HOTA delta vs same-lineage control, 10-sequence probe (t1 arm)",
+   "status": "refuted",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w3.json",
+    "results/gsr_v10_w3_registered.json"
+   ],
+   "method": "tools.gsr_w2_calibswap --positions/--arms at suffix v10w3t, tag v10_w3, origin 0,0 on the exported per-frame homographies (homography-fit residual to the exact camera map 0.0000 m median: the pass-2 distortion coefficients are ~5e-4). The control re-derives v8-W2's control to 42.9370 vs 42.9371.",
+   "n": 10,
+   "caveats": [
+    "This is the frozen v6/v8-W2 lineage chain (the same one v8-W2's t-arms rode), not the v9 flags-ON stack; only the paired within-window delta is claimed.",
+    "A ceiling measurement, not a shippable component: the instrument's licence forbids shipping anything built from its code."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w3-001",
+    "v10-w3-002"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "broadtrack",
+    "gs-hota",
+    "v10",
+    "negative"
+   ]
+  },
+  {
+   "id": "v10-w3-005",
+   "statement": "THE TRACKER LOSES LOCK ON 2 OF 10 CLIPS WITH NO SHOT CUT TO BLAME -- THE STRUCTURAL COST OF TEMPORAL STATE. SNGS-078 flags 328 of 749 frames as reinit (44%) with its horizontal FOV estimate running from 5.6 to 226.3 degrees; SNGS-027 collapses from frame 483 onward (222 reinits, FOV to 333.2 degrees). A frame-difference cut detector finds ZERO shot cuts in either clip (or in the well-behaved SNGS-051 control), so these are divergences on continuous single-shot footage, not cut-induced. The other 8 clips take 1-3 reinits. Our per-frame solver cannot fail this way by construction: on SNGS-078 it calibrates 719 of 750 frames at 0.398 m while the tracker sits at 2.393 m.",
+   "value": 2,
+   "unit": "clips of 10 where the temporal tracker diverges (44% and 30% of frames reinit)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w3.json",
+    "results/gsr_v10_w3_registered.json"
+   ],
+   "method": "tools.gsr_v10_w3_camtrack --failures on the tracker's own per-frame score/reinit trace, cross-tabbed against a downscaled-grayscale frame-difference cut detector (threshold = median + 8 IQR).",
+   "n": 10,
+   "caveats": [
+    "Reinit count does not predict accuracy monotonically: SNGS-027 takes 222 reinits yet scores 0.438 m, while SNGS-024 takes 1 and scores 1.310 m.",
+    "The tripod files for 9 of 10 clips are our median substitute (v10-w3-001); SNGS-057, the clip carrying the tracker's OWN tripod estimate, behaves like the substitute clips."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w3-001"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "broadtrack",
+    "robustness",
+    "v10"
+   ]
+  },
+  {
+   "id": "v10-w3-006",
+   "statement": "WE CAN BUY THE SMOOTHNESS OURSELVES FOR FREE -- AND IT IMPROVES ACCURACY TOO (EXPLORATORY, NOT REGISTERED). Temporally averaging OUR OWN per-frame homographies (four fixed image points pushed to the pitch, centred moving average inside runs of consecutive calibrated frames, homography re-fitted) cuts jitter 9.5x and cuts error at the same time: window 9 gives GT-anchored median 0.3635 m vs 0.4028 m raw (-9.8%, better on 10 of 10 sequences) with grid acceleration 0.0402 m vs 0.3800 m; window 5 gives 0.3718 m and 0.0704 m. End to end through the same chain the smoothed arm scores GS-HOTA 43.3621 vs control 42.9370 (+0.4251), GS-LocA 93.6348 -> 94.4502 (+0.82), GS-AssA +0.75, GS-DetA +0.22, helped 7 hurt 3, Wilcoxon p = 0.131 on n = 10. This lever needs no external code and no licence.",
+   "value": 0.4251,
+   "unit": "GS-HOTA gain vs same-lineage control, 10-sequence probe, window 9 (exploratory)",
+   "status": "pending",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w3.json",
+    "results/gsr_v10_w3_registered.json"
+   ],
+   "method": "tools.gsr_v10_w3_camtrack --smooth 1,5,9 for the geometry, then tools.gsr_w2_calibswap --positions/--arms at suffix v10w3s, tag v10_w3s, arms control,t2 (smoothed + fill_calibration_gaps(10)).",
+   "n": 10,
+   "caveats": [
+    "EXPLORATORY AND POST-HOC: conceived after the registered BroadTrack measurements, two windows were tried, and p = 0.131 on 10 sequences is not significant. It needs its own pre-registration and a DEV-20 read before any of it counts.",
+    "The moving average is unbiased only for a linear pan; a fast zoom or an accelerating pan is lagged, a candidate explanation for the 3 sequences it hurt.",
+    "Nothing here derives from BroadTrack's code -- only from the measurement that our own camera jitters 26x more than a temporally-consistent one."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w3-002",
+    "v10-w3-004"
+   ],
+   "tags": [
+    "gsr",
+    "calibration",
+    "jitter",
+    "v10",
+    "lead"
+   ]
   }
  ]
 }

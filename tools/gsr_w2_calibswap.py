@@ -302,8 +302,19 @@ def delta_report(data_dir: Path, out_dir: Path, homog_root: Path, seqs: list[str
 
 
 # === the decisive arms ===========================================================================
+def retarget(suffix: str) -> None:
+    """Point the arm subdirectories at a new experiment prefix (default ``w2t``).
+
+    Args:
+        suffix: Prefix inserted into ``positions_<suffix><arm><VARIANT>``. Re-running a later
+            campaign session must not overwrite v8-W2's on-record arm parquets.
+    """
+    for arm in ARM_SUBDIR:
+        ARM_SUBDIR[arm] = f"positions_{suffix}{arm}" + VARIANT
+
+
 def run_arms(data_dir: Path, out_dir: Path, results_dir: Path, seqs: list[str],
-             arms: tuple[str, ...]) -> dict:
+             arms: tuple[str, ...], tag: str = "w2") -> dict:
     """Score the control and each swap arm through the frozen v6 chain, paired per sequence."""
     import tools.gsr_eiou as eiou  # noqa: PLC0415
     from tools.gsr_v6det import TAU  # noqa: PLC0415
@@ -316,7 +327,7 @@ def run_arms(data_dir: Path, out_dir: Path, results_dir: Path, seqs: list[str],
         sub = CONTROL_SUBDIR if arm == "control" else ARM_SUBDIR[arm]
         res = eiou.run_point(data_dir, out_dir, seqs,
                              eiou.EiouParams(e=0.3, rounds=1, w_app=0.5, app_max=0.30),
-                             embedder="clip" + VARIANT, tau=TAU, tag=f"w2_{arm}",
+                             embedder="clip" + VARIANT, tau=TAU, tag=f"{tag}_{arm}",
                              percrop_variant="_v6" + VARIANT, positions_subdir=sub)
         out[arm] = {"positions_subdir": sub, "gs_hota": res["gs_hota"],
                     "gs_hota_per_seq": res["gs_hota_per_seq"], "pooled": res.get("pooled"),
@@ -330,7 +341,7 @@ def run_arms(data_dir: Path, out_dir: Path, results_dir: Path, seqs: list[str],
             continue
         out[arm]["paired_vs_control"] = paired_stats(base, out[arm]["gs_hota_per_seq"], seqs)
     results_dir.mkdir(parents=True, exist_ok=True)
-    dest = results_dir / "gsr_v8_w2_arms.json"
+    dest = results_dir / f"gsr_{tag}_arms.json"
     dest.write_text(json.dumps({"probe": seqs, "arms": out}, indent=1, default=str),
                     encoding="utf-8")
     print(f"wrote {dest}")
@@ -369,6 +380,10 @@ def _demo() -> None:
     acc = gt_matched_error(df, gt, {"a": (df["pitch_x"].to_numpy(), df["pitch_y"].to_numpy())})
     assert acc["_matched"] == 1 and acc["a"]["n"] == 1, acc
     assert np.isclose(acc["a"]["median"], np.hypot(1.0 - 9.0, 2.0 - 21.0)), acc
+    before = dict(ARM_SUBDIR)
+    retarget("v10w3t")
+    assert ARM_SUBDIR["t1"] == "positions_v10w3tt1" + VARIANT, ARM_SUBDIR
+    ARM_SUBDIR.update(before)  # a later session must not inherit this process's retarget
     print("gsr_w2_calibswap demo OK")
 
 
@@ -391,6 +406,8 @@ def main() -> None:
     ap.add_argument("--origin", default="10,5", help="template coord of the pitch (0,0) corner")
     ap.add_argument("--seqs", default=None)
     ap.add_argument("--arms-list", default="control,t1,t2,t3")
+    ap.add_argument("--suffix", default="w2t", help="positions/results prefix; keeps sessions apart")
+    ap.add_argument("--tag", default="v8_w2", help="run tag for deleak dirs and the results file")
     ap.add_argument("--positions", action="store_true")
     ap.add_argument("--deltas", action="store_true")
     ap.add_argument("--arms", action="store_true")
@@ -402,24 +419,25 @@ def main() -> None:
     if args.demo:
         _demo()
         return
+    retarget(args.suffix)
     if args.positions or args.deltas:
         if args.homog is None:
             raise SystemExit("--homog is required for --positions/--deltas")
     if args.positions:
         st = build_arms(args.out_dir, args.homog, seqs, origin=origin)
-        dest = args.results_dir / "gsr_v8_w2_positions.json"
+        dest = args.results_dir / f"gsr_{args.tag}_positions.json"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(json.dumps(st, indent=1), encoding="utf-8")
         print(f"wrote {dest}")
     if args.deltas:
         rep = delta_report(args.data_dir, args.out_dir, args.homog, seqs, origin=origin)
-        dest = args.results_dir / "gsr_v8_w2_deltas.json"
+        dest = args.results_dir / f"gsr_{args.tag}_deltas.json"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(json.dumps(rep, indent=1), encoding="utf-8")
         print(f"wrote {dest}")
     if args.arms:
         out = run_arms(args.data_dir, args.out_dir, args.results_dir, seqs,
-                       tuple(args.arms_list.split(",")))
+                       tuple(args.arms_list.split(",")), tag=args.tag)
         if "control" in out:
             print("control vs on-record:", control_check(out, seqs))
 

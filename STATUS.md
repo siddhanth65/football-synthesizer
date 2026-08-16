@@ -1,5 +1,30 @@
 # STATUS
 
+## 2026-08-16 — v10 W3: the tripod camera CLASS is REFUTED on GSR — BroadTrack loses 7.39 GS-HOTA in our chain (2.5x worse accuracy; its own tripod estimator fails on 9/10 clips); the surviving ember: our camera jitters 26x more, smoothing our OWN solves ~ +0.43
+
+results/gsr_v10_w3_registered.json (§1 pre-compile) + results/gsr_benchmark/gsr_v10_w3.json,
+kb v10-w3-001..006, tools/gsr_v10_w3_camtrack.py; BroadTrack built and run STRICTLY
+server-side as instrument (EVS licence; clean-room hygiene log in the report: algorithm
+files unread). Correction: upstream is github.com/evs-broadcast/BroadTrack (not fmagera).
+Controlled comparison (it ships the same NBJW/TVCalib detector family we use): **accuracy
+FAIL — 1.0001 m median vs our 0.4024 m (s4)**; coverage raw-PASS but accuracy-conditioned
+FAIL (recovers 100% of dead frames at 0.858 m); **jitter PASS by 26x** (0.0146 vs 0.381 m).
+End-to-end swap: **-7.39 GS-HOTA, 10/10 hurt — and AssA FELL 9.3: smoothness buys nothing
+once it costs accuracy.** Their tripod estimator raises AssertionError on 9/10 GSR clips —
+30 s is outside the method's design envelope. Dead-frame arm t3 (+0.35) ties v8-W2's
+per-frame calibrator (+0.33): **our dead pool has shrunk to 2.35% of frames — the old
+"coverage is the leader's edge" story is obsolete on our substrate.** Do NOT clean-room
+BroadTrack (recommendation adopted). 0.9 GPU-h. Cluster runbook note: gpurun jobs get
+read-only $HOME (cost three runs).
+
+**The Baishev 68.3 mystery: THREE candidate classes now measured away on our substrate —
+calibration bugs (~4%, W2), jersey aggregation (v8-W1 lineage), camera model class (W3).
+Exploratory ember handed to W4 (running): smoothing OUR OWN homographies (window-9 moving
+average, unregistered) scored probe +0.4251 with accuracy -9.8% and LocA +0.82 — W4's
+registered RTS arms now carry that as a floor. Highest PUBLISHED GS-HOTA anywhere remains
+64.1 (SoccerMaster, arXiv:2512.11016); 68.3 has no paper.** Hazard-guard added:
+gsr_w2_calibswap.py --suffix prevents overwriting on-record arm parquets.
+
 ## 2026-08-16 — v10 W2 (calibration audit): our stack was ALREADY CLEAN — 4 of 6 checklist bugs absent, distortion N-A; the one real defect (half-cell decode bias, 2 px) fixed for +0.49 HOTA but FAILS its bar; only ~4% of the leader's +12.6 transfers as bug fixes
 
 results/gsr_v10_w2_registered.json (audit + bars pre-declared), results/gsr_benchmark/
