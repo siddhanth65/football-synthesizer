@@ -79,6 +79,18 @@ VOTE_TRACK_ATTRS: tuple[str, ...] = ()
 #: Composable with :data:`VOTE_TRACK_ATTRS`, applied after it.
 GK_SIDE_REPAIR: tuple[str, ...] = ()
 
+#: Configuration of :func:`dedup_absorb`, the v10 W9 duplicate-concurrent-track stage. ``None`` = OFF
+#: (the shipped default). Registered in ``results/gsr_v10_w9_registered.json``; thresholds are fit on
+#: the v9 factory GSR-TRAIN split only. Keys: ``n_ov`` (minimum shared timesteps), ``d_med`` (maximum
+#: median pitch distance over the overlap, metres), ``cos`` (minimum CLIP tracklet-mean cosine, or
+#: ``None`` for the geometry-only arm), ``same_team`` (require agreeing majority team), ``embed_dir``
+#: (per-detection embedding cache, or ``None``) and ``min_track_rows``.
+DEDUP_ABSORB: dict | None = None
+
+#: Rows a track needs before it can take part in a duplicate pair (1 s at 25 fps). Below that the
+#: pair label is at the nearest-GT labeller's noise floor and the pair carries no row mass anyway.
+DEDUP_MIN_TRACK_ROWS = 25
+
 #: Thresholds of the ``"role"`` step, fit on GSR-TRAIN ground truth ONLY (79 keeper identities /
 #: 1,145 player identities over the 57 train sequences): a keeper candidate's median |pitch x| and
 #: its share of frames inside a penalty area. At (36 m, 0.90) the "most extreme candidate per side"
@@ -336,6 +348,172 @@ def _second_keepers(info: dict[int, dict], *, dominance: bool) -> list[int]:
             elif dominance and all(abs(here[t]["med_x"]) > abs(here[k]["med_x"]) for k in conc):
                 out.append(t)
     return out
+
+
+def track_mean_embeddings(embed_dir: Path | str | None, seq: str) -> dict[int, np.ndarray]:
+    """``{track_id: L2-normalised mean CLIP embedding}`` from a per-detection cache (GT-free).
+
+    The cache is keyed by the pre-connector tracklet id, and the connector keeps one member's id as
+    the id of the whole component, so a submission track's cached rows are that member's own
+    detections -- the same person. Tracklets the connector absorbed simply never join. A missing
+    cache is not an error: the caller falls back to geometry (registration ``B_geom_app``).
+
+    Args:
+        embed_dir: Directory of ``<seq>.npz`` files with ``track_ids`` and ``embeddings``.
+        seq: Sequence name.
+
+    Returns:
+        Mean embedding per cached track id; empty when no cache is available.
+    """
+    if embed_dir is None:
+        return {}
+    path = Path(embed_dir) / f"{seq}.npz"
+    if not path.exists():
+        return {}
+    with np.load(path) as z:
+        tid, emb = np.asarray(z["track_ids"]), np.asarray(z["embeddings"], dtype=float)
+    out: dict[int, np.ndarray] = {}
+    for t in np.unique(tid):
+        m = emb[tid == t].mean(axis=0)
+        out[int(t)] = m / max(float(np.linalg.norm(m)), 1e-9)
+    return out
+
+
+def pair_features(info: dict[int, dict], embs: dict[int, np.ndarray],
+                  min_track_rows: int = DEDUP_MIN_TRACK_ROWS) -> list[dict]:
+    """One record per temporally overlapping track pair, GT-free (pure).
+
+    Shared by the threshold fit (on the v9 factory GSR-TRAIN tracklets) and by the shipped stage, so
+    a fitted threshold means exactly the same thing in both places.
+
+    Args:
+        info: ``{track_id: {"pos": {timestep: (x, y)}, "team": majority team, ...}}``.
+        embs: ``{track_id: mean embedding}``; absent ids yield ``cos = nan``.
+        min_track_rows: Both tracks of a pair need at least this many rows.
+
+    Returns:
+        ``[{"a", "b", "n_ov", "d_med", "cos", "same_team"}]``, sorted by ``(a, b)``.
+    """
+    ids = sorted(t for t, i in info.items() if len(i["pos"]) >= min_track_rows)
+    out: list[dict] = []
+    for k, a in enumerate(ids):
+        for b in ids[k + 1:]:
+            shared = info[a]["pos"].keys() & info[b]["pos"].keys()
+            if not shared:
+                continue
+            pa = np.array([info[a]["pos"][f] for f in sorted(shared)], dtype=float)
+            pb = np.array([info[b]["pos"][f] for f in sorted(shared)], dtype=float)
+            d = np.hypot(pa[:, 0] - pb[:, 0], pa[:, 1] - pb[:, 1])
+            d = d[np.isfinite(d)]
+            if not len(d):
+                continue
+            ea, eb = embs.get(a), embs.get(b)
+            out.append({"a": a, "b": b, "n_ov": int(len(d)), "d_med": float(np.median(d)),
+                        "cos": float(ea @ eb) if ea is not None and eb is not None else float("nan"),
+                        "same_team": int(info[a]["team"] == info[b]["team"])})
+    return out
+
+
+def accepts_pair(f: dict, params: dict) -> bool:
+    """Whether the registered duplicate rule accepts one pair record (pure).
+
+    Geometry is required of every arm; the appearance term binds only when BOTH tracks carry an
+    embedding, so a sequence whose embedding cache is missing degrades to the geometry rule instead
+    of being waved through (registration ``B_geom_app``).
+    """
+    if f["n_ov"] < int(params["n_ov"]) or f["d_med"] > float(params["d_med"]):
+        return False
+    if params.get("same_team") and not f["same_team"]:
+        return False
+    cos_min = params.get("cos")
+    return not (cos_min is not None and np.isfinite(f["cos"]) and f["cos"] < float(cos_min))
+
+
+def dedup_absorb(predictions: list[dict], params: dict | None = None,
+                 seq: str | None = None) -> dict[str, int]:
+    """Absorb duplicate concurrent tracks: one identity, loser's overlap dropped (in place).
+
+    kb v10-w7-002 measured that 185 of 265 same-identity track pairs in the current DEV submission
+    OVERLAP IN TIME -- two predicted tracks on one person -- and that an oracle which merges them AND
+    deletes the duplicated rows is worth +4.50 GS-HOTA, 2.5x the sum of merging alone and deduping
+    alone. This is the GT-free version: pairs are detected from geometry (and optionally appearance),
+    unioned into components, relabelled to the strongest member's id, and the rows a timestep then
+    carries twice are resolved in favour of the strongest member (the official evaluator refuses two
+    rows of one id in a timestep).
+
+    "Strongest" is fixed a priori: most rows, then highest mean detection confidence, then lowest
+    track id. Ground truth is never read.
+
+    Args:
+        predictions: A submission's ``predictions`` list (mutated in place; ball rows are ignored).
+        params: :data:`DEDUP_ABSORB`-shaped config; ``None`` or empty is a no-op.
+        seq: Sequence name, used only to find this sequence's embedding cache.
+
+    Returns:
+        ``{"pairs": accepted pairs, "components": merged groups, "tracks_absorbed": losing tracks,
+        "rows_relabelled": rows given a new track id, "rows_dropped": rows deleted}``.
+    """
+    if not params:
+        return {}
+    info: dict[int, dict] = defaultdict(lambda: {"pos": {}, "conf": [], "team": [], "idx": []})
+    for i, p in enumerate(predictions):
+        attrs = p.get("attributes") or {}
+        if attrs.get("role") == "ball":
+            continue
+        bp = p.get("bbox_pitch") or {}
+        rec = info[int(p["track_id"])]
+        rec["pos"][p["image_id"]] = (float(bp.get("x_bottom_middle", np.nan)),
+                                     float(bp.get("y_bottom_middle", np.nan)))
+        rec["conf"].append(float(p.get("confidence") or 0.0))
+        rec["team"].append(str(attrs.get("team")))
+        rec["idx"].append(i)
+    for rec in info.values():
+        rec["team"] = Counter(rec["team"]).most_common(1)[0][0]
+        rec["rank"] = (-len(rec["idx"]), -float(np.mean(rec["conf"])))
+    embs = track_mean_embeddings(params.get("embed_dir"), seq) if seq else {}
+    feats = pair_features(info, embs, int(params.get("min_track_rows", DEDUP_MIN_TRACK_ROWS)))
+    pairs = [(f["a"], f["b"]) for f in feats if accepts_pair(f, params)]
+
+    parent = {t: t for t in info}
+
+    def find(t: int) -> int:
+        while parent[t] != t:
+            parent[t] = parent[parent[t]]
+            t = parent[t]
+        return t
+
+    for a, b in pairs:
+        ra, rb = find(a), find(b)
+        if ra != rb:  # the winner of the two roots anchors the component
+            lo, hi = sorted((ra, rb), key=lambda t: (*info[t]["rank"], t))
+            parent[hi] = lo
+    members: dict[int, list[int]] = defaultdict(list)
+    for t in info:
+        members[find(t)].append(t)
+    changed = {"pairs": len(pairs), "components": 0, "tracks_absorbed": 0,
+               "rows_relabelled": 0, "rows_dropped": 0}
+    drop: set[int] = set()
+    for group in members.values():
+        if len(group) < 2:
+            continue
+        changed["components"] += 1
+        changed["tracks_absorbed"] += len(group) - 1
+        order = sorted(group, key=lambda t: (*info[t]["rank"], t))
+        winner, seen = order[0], set()
+        for t in order:
+            for i in info[t]["idx"]:
+                stamp = predictions[i]["image_id"]
+                if stamp in seen:
+                    drop.add(i)
+                    continue
+                seen.add(stamp)
+                if t != winner:
+                    predictions[i]["track_id"] = int(winner)
+                    changed["rows_relabelled"] += 1
+    changed["rows_dropped"] = len(drop)
+    if drop:
+        predictions[:] = [p for i, p in enumerate(predictions) if i not in drop]
+    return changed
 
 
 def penalty_frac(x: np.ndarray, y: np.ndarray) -> float:

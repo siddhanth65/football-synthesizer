@@ -1,0 +1,56 @@
+{
+ "session": "v10-W9",
+ "written_utc": "2026-08-17T11:40Z",
+ "written_before": "any held-out (factory val_slice) component number was read, any line of the stage was written into eval/gsr_score.py or tools/gsr_deleak.py, and any DEV-20 GS-HOTA of any W9 arm existed. Numbers on record at write time: arm D DEV-20 flags ON 57.1684 / flags OFF 52.6359 (kb v10-w5-*, re-derived in W7), and the W7 oracle ladder on that substrate -- dedup-only +0.5261, merge-only +1.2976, merge+dedup +4.4999, row-level perfect +2.0423 (kb v10-w7-001/002/003).",
+ "written_after": "an EXPLORATORY pass over the v9 factory FIT split only (the 45 train_slice sequences of outputs/gsr/v9_assoc/v1). That pass is declared here in full because it chose the rule family and the fixed minimum-track-length constant; it read no held-out sequence and no DEV artifact. What it measured: 62,281 temporally overlapping tracklet pairs, 41,878 auditable (both tracks trusted), 651 positive; same-identity pairs sit at median overlap distance 1.23 m against 15.24 m for different-identity pairs; geometry-only precision at recall 0.30 tops out at 0.66-0.70; restricting to pairs whose SHORTER track has >= 25 rows lifts that to 0.88 once CLIP tracklet-mean cosine is added; 88% of the tight-geometry 'false positives' on a 12-sequence sub-probe have their two claimed GT identities under 1.5 m apart, i.e. the pair label itself is at the labeller's noise floor there (kb v10-w7-005 at track level).",
+ "scope": "CPU only, laptop, cached artifacts. No GPU, no cluster contact. DEV-20 is tuning; TEST-38 / test-49 / challenge untouched. No freeze or W8 directory is written.",
+
+ "problem": "kb v10-w7-002: 185 of 265 same-identity predicted-track pairs in arm D's DEV-20 submission OVERLAP IN TIME (two concurrent tracks on one person). The oracle that absorbs them -- drop the duplicate's overlapping rows AND relink its disjoint remainder -- is worth +4.4999 GS-HOTA flags ON. This session asks whether a GT-FREE, one-pass, deterministic detector of those pairs captures a usable share of it.",
+
+ "mechanism": {
+  "where": "A pure submission-level transform, eval.gsr_score.dedup_absorb, called from tools.gsr_deleak.write_arm AFTER the base-arm rewrite (team-map flip + jersey) and BEFORE vote_track_attributes / gk_side_repair. The placement is load-bearing and is taken from the W7 oracle: the +4.4999 was measured with the attribute vote applied to the ALREADY-merged submission, so a stage that ran after the vote would forfeit most of the flags-ON prize. In the scoring harness (tools.gsr_v9_w7.score_pair) the flags are applied to whatever submission it is handed, so transforming arm D's on-disk (unvoted) submission and letting score_pair vote afterwards is the same order.",
+  "flag": "eval.gsr_score.DEDUP_ABSORB, default None = OFF. Nothing about any on-record artifact changes while it is None.",
+  "candidate_pairs": "within one sequence, every pair of predicted tracks that shares at least one image_id and whose SHORTER track has >= 25 rows (MIN_TRACK_ROWS, = 1 s at 25 fps; fixed on the FIT split, not swept further).",
+  "features_all_gt_free": [
+   "n_ov: number of shared timesteps with a finite pitch position on both sides",
+   "d_med: median pitch distance (metres) between the two tracks over those timesteps",
+   "cos: cosine between the two tracks' mean CLIP embeddings, from the cached per-detection embedding store joined on (track_id, frame); NaN when either track has no cached detection",
+   "same_team / same_role: agreement of the two tracks' majority attributes -- SOFT evidence, used only as a conjunct where the fit split shows it earns its place (kb v9-w1's hard-gate lesson)"
+  ],
+  "absorb": "accepted pairs are unioned (union-find) into components. Members are ranked a priori by (n_rows desc, mean detection confidence desc, track_id asc); the top-ranked member is the WINNER and every member is relabelled to the winner's track id. Where the relabelled component then carries more than one row in one timestep, the row from the highest-ranked member is kept and the others are DELETED (the official evaluator refuses two rows of one id in a timestep -- W7 amendment 1). A component member's disjoint rows are thereby relinked to the winner in the same pass.",
+  "determinism": "one pass, no iteration to convergence, no randomness, no GT read anywhere in the stage."
+ },
+
+ "arms": {
+  "count": "exactly two",
+  "A_geom": "n_ov >= K_A and d_med <= D_A, optionally conjoined with same_team, chosen by the fit rule below. No appearance term.",
+  "B_geom_app": "n_ov >= K_B and d_med <= D_B and cos >= C_B. GRACEFUL DEGRADATION: when either track has no cached embedding (cos is NaN) the pair falls back to arm A's accepted condition, so a sequence with a broken or absent embedding cache still gets the geometry rule and never gets a free pass."
+ },
+
+ "fit_procedure": {
+  "substrate": "outputs/gsr/v9_assoc/v1 (the v9 factory dataset over the 57 GSR-TRAIN sequences) with its own registered split: the 45 train_slice sequences are the FIT split and the 12 val_slice sequences are the HELD-OUT slice, read ONCE, after the operating points are frozen.",
+  "labels": "TRACK-level, the W7 convention (never row-level -- kb v10-w7-005): a track's identity is its dominant GT id by row vote among rows the nearest-GT-within-5 m labeller audited, TRUSTED only at >= 5 audited rows. A candidate pair is POSITIVE iff both tracks are trusted and their dominant identities agree; NEGATIVE iff both are trusted and they disagree; UNAUDITABLE otherwise (excluded from precision/recall, and its count reported).",
+  "grid": {"D": [0.4, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0], "K": [1, 3, 5, 10, 25], "C": [0.70, 0.75, 0.80], "same_team_conjunct": [false, true]},
+  "selection": "on the FIT split only: the point with the LARGEST recall subject to fit precision >= 0.85 (a 0.05 margin over the held-out bar), ties broken by higher precision then by smaller D. If no grid point of an arm reaches fit precision 0.85 at any recall, that arm's operating point is the highest-precision point with recall >= 0.10 and the arm is declared expected-to-fail before the held-out read.",
+  "never": "no threshold is touched after the held-out read, and no threshold is ever fit on a DEV score."
+ },
+
+ "gates": {
+  "component_gate": "on the 12 HELD-OUT factory sequences, read once: duplicate-pair detection precision >= 0.80 at recall >= 0.30. An arm that fails this gate does NOT get a DEV-20 end-to-end run.",
+  "dev_bars_all_required": [
+   ">= +1.0 GS-HOTA on DEV-20, flags ON (vote role+team+jersey then gk_side_repair(team)), paired against arm D re-derived inside the same run",
+   "GS-DetA not worse than arm D's",
+   "helped > hurt with Wilcoxon p < 0.05 on the per-sequence GS-HOTA deltas",
+   "per-clip damage floor: no DEV sequence worse than -1.0 GS-HOTA (the SNGS-096 vote-flip risk of W7 surprise 5 -- an oracle merge cost that clip -2.41 by flipping its voted jersey)"
+  ],
+  "reproduction_check": "the control side must re-derive arm D's on-record 57.1684 flags ON and 52.6359 flags OFF inside this run; if it does not, no W9 pairing is valid and the session reports that instead."
+ },
+
+ "audit": "eval.gsr_score.dedup_absorb deletes rows, so tools.gsr_calibfill.verify_gtfree's positional base-vs-shipped zip is extended to put its EXPECTATION through the same stage, in the same order as write_arm (flip -> dedup_absorb -> vote -> gk). A no-op while DEDUP_ABSORB is None. The on-record test-49 audit is re-derived flags OFF and must reproduce 0 violations / 467,425 rows / flip set {SNGS-126, -130, -131, -197} identically (kb v9-w5-005). No metric is read on any test sequence.",
+
+ "declared_risks": [
+  "POPULATION MISMATCH: the fit substrate is the v9 factory's PRE-connector EIoU tracklets on v9 geometry (median 0.50 m accuracy, 68 tracklets/clip, positive pairs with a median overlap of 4 frames), while the DEV target is arm D's POST-connector POST-solver tracks on v10 geometry (~45 tracks/clip, far longer). Thresholds in metres and in cosine are transferred across that gap without re-fitting, which is the honest cost of never fitting on DEV.",
+  "LABEL FLOOR: at tight geometry the pair label is dominated by the nearest-GT labeller's inability to decide which of two adjacent players owns a track. The component gate is therefore a gate on agreement with a noisy instrument, not on truth; a precision miss at the tight end may be the instrument.",
+  "The stage DELETES rows. If it fires on two genuinely distinct people standing close together it removes a real person's detections, which is a GS-DetA loss the component gate cannot see. The DEV DetA bar and the per-clip damage floor are what price that."
+ ]
+}

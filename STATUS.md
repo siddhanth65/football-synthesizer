@@ -1,5 +1,29 @@
 # STATUS
 
+## 2026-08-17 — v10 W9: dedup FAILS its component gate — and the +4.50 "duplicate tracks" prize is MISNAMED: overlapping same-identity pairs sit a median 7.44 m APART; the oracle's value is ROW PRUNING (9,202 deletions), and the labeller's flicker contaminates even that
+
+results/gsr_v10_w9_registered.json (pre-declared incl. the fit-split exploratory pass),
+results/gsr_benchmark/gsr_v10_w9.json, kb v10-w9-001..005, eval/gsr_score.py (DEDUP_ABSORB
+stage, default OFF — built, gated, never scored end-to-end per registration), verify_gtfree
+extended + on-record test-49 audit re-derived IDENTICAL. Both arms FAIL the held-out
+component gate on RECALL (A_geom 0.889/0.174; B_geom_app 0.833/0.217 vs 0.80/0.30); DEV
+measure-only shows frozen params capture ~7% of pairs => <= +0.2 predicted — the gate
+correctly withheld a doomed DEV read. **THE PREMISE CORRECTION (qualifies v10-w7-002 without
+retracting its number): of 156 same-identity overlapping pairs, median pitch separation
+DURING the overlap is 7.44 m; only 17% sit within 1 m; in 63% of pairs NEITHER track is on
+the claimed person during the overlap (medians 4.22/3.11 m) — these are whole-track vote
+agreements earned OUTSIDE the window, not two tracks on one body. The oracle's +4.4999 is
+substantially ROW PRUNING (9,202 GT-informed deletions = where its DetA +3.50 lives) plus
+fragment linkage. No coincidence detector can reach it.** Deeper: 88% of tight-geometry
+train "false positives" are the LABELLER'S track-level flicker (claimed identities < 1.5 m
+apart) — the association axis keeps dissolving into GT noise under magnification; thesis-
+grade observation, on record. Also corrected: the DEV embedding cache is NOT broken for arm
+D (889/898 track ids join; the 27.3% row coverage is structural) — but in-domain same-vs-
+diff cosine separation is weak (0.578 vs 0.414), which is what throttled recall. Worker
+self-reported a registered-margin procedure miss (cost one grid step; would not change the
+verdict). **Row-pruning re-registration probe dispatched: price the 9,202-deletion leg
+under a flicker-robust evaluation BEFORE anyone builds a pruner.**
+
 ## 2026-08-17 — v10 W7: connector axis CLOSED (+1.30 < 1.5) and splitter axis CLOSED (the target barely exists) — but the amendment finds THE lever: DUPLICATE CONCURRENT TRACKS, merge+dedup oracle +4.50 flags-ON with DetA +3.50
 
 results/gsr_v10_w7_registered.json (§1 + 3 timestamped amendments), results/gsr_benchmark/

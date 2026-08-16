@@ -330,8 +330,10 @@ def verify_gtfree(arm_dir: Path, base_arm: Path, data_dir: Path, pos_dir: Path,
     where the free map disagrees with the GT one. Any other row is a violation.
     """
     from eval.gsr_score import (  # noqa: PLC0415
+        DEDUP_ABSORB,
         GK_SIDE_REPAIR,
         VOTE_TRACK_ATTRS,
+        dedup_absorb,
         gk_side_repair,
         load_gt_people_by_frame,
         resolve_team_map,
@@ -352,18 +354,20 @@ def verify_gtfree(arm_dir: Path, base_arm: Path, data_dir: Path, pos_dir: Path,
                           .read_text(encoding="utf-8"))["predictions"]
         got = json.loads((arm_dir / "predictions" / "data" / f"{name}.json")
                          .read_text(encoding="utf-8"))["predictions"]
-        if len(base) != len(got):
-            raise SystemExit(f"{name}: {len(base)} base rows vs {len(got)} shipped rows")
         if flip:  # apply the map flip first: the shipped rows are voted under the flipped map
             for b in base:
                 if b["attributes"].get("team") in swap:
                     b["attributes"]["team"] = swap[b["attributes"]["team"]]
-        # The per-track vote and the keeper side repair are pure functions of our own predictions
-        # (no label read), so the expectation is the base row put through the same two steps, in the
-        # same order as ``tools.gsr_deleak.write_arm``. Both are no-ops while their flags are empty
-        # (the shipped default).
+        # The duplicate absorb, the per-track vote and the keeper side repair are pure functions of
+        # our own predictions (no label read), so the expectation is the base row put through the
+        # same three steps, in the same order as ``tools.gsr_deleak.write_arm``. All three are no-ops
+        # while their flags are empty (the shipped default). The absorb DELETES rows, so it must run
+        # before the length check or a shipped absorbed arm would look truncated.
+        dedup_absorb(base, DEDUP_ABSORB, name)
         vote_track_attributes(base, VOTE_TRACK_ATTRS)
         gk_side_repair(base, GK_SIDE_REPAIR)
+        if len(base) != len(got):
+            raise SystemExit(f"{name}: {len(base)} base rows vs {len(got)} shipped rows")
         for b, g in zip(base, got):
             n_rows += 1
             violations += int(g["attributes"].get("team") != b["attributes"].get("team"))

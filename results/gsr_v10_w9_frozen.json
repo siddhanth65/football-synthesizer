@@ -1,0 +1,24 @@
+{
+ "written_utc": "2026-08-16T21:10:16Z",
+ "registration": "results/gsr_v10_w9_registered.json",
+ "arms": {
+  "A_geom": {
+   "n_ov": 1,
+   "d_med": 0.5,
+   "cos": null,
+   "same_team": true,
+   "min_track_rows": 25
+  },
+  "B_geom_app": {
+   "n_ov": 1,
+   "d_med": 1.0,
+   "cos": 0.8,
+   "same_team": false,
+   "min_track_rows": 25
+  }
+ },
+ "gate": {
+  "A_geom": false,
+  "B_geom_app": false
+ }
+}

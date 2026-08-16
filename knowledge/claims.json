@@ -9180,6 +9180,167 @@
     "robustness",
     "planning"
    ]
+  },
+  {
+   "id": "v10-w9-001",
+   "statement": "REGISTERED FAIL: THE GT-FREE DUPLICATE-TRACK ABSORBER MISSES ITS COMPONENT GATE ON RECALL, NOT ON PRECISION. eval.gsr_score.dedup_absorb (default OFF) detects temporally overlapping track pairs from geometry (median pitch separation over the overlap) plus, in arm B, CLIP tracklet-mean cosine, unions them, relabels every member to the strongest track (rows, then mean confidence, then id) and deletes the rows a timestep then carries twice -- the GT-free form of the W7 merge+dedup oracle. Thresholds were fit on the 45 train_slice clips of the v9 factory dataset (25,554 candidate pairs, 25,379 auditable, 180 positive) and the 12 val_slice clips were read once (7,847 / 7,812 / 46). Registered gate: precision >= 0.80 at recall >= 0.30. Arm A (geometry + same-team, d_med <= 0.5 m): held-out precision 0.889 at recall 0.174 -- FAIL. Arm B (d_med <= 1.0 m, cosine >= 0.80): held-out precision 0.833 at recall 0.217 -- FAIL. Both clear the precision half comfortably and miss the recall half, so per the registration neither arm was given a DEV-20 end-to-end run and no DEV GS-HOTA of any W9 arm exists.",
+   "value": 0.217,
+   "unit": "held-out duplicate-pair recall of the best arm at precision 0.833 (bar: 0.30 at 0.80)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w9_registered.json",
+    "results/gsr_benchmark/gsr_v10_w9.json",
+    "results/gsr_v10_w9_frozen.json"
+   ],
+   "method": "tools.gsr_v10_w9 --fit: pair features from eval.gsr_score.pair_features (the SAME function the shipped stage calls), track-level dominant-GT labels at >= 5 audited rows (the W7 convention), registered grid and selection rule.",
+   "n": 12,
+   "caveats": [
+    "The registered selection rule (largest fit recall at fit precision >= 0.85) chose one grid step tighter than the family's best held-out point: the information-only held-out curve contains 4 grid points that clear BOTH bars (best: d_med <= 1.5 m, cosine >= 0.80, same team -- precision 0.889 at recall 0.348). The miss is the 0.05 fit-precision margin registered by this session, not the rule family. Adopting that point now would be selection on the gate slice, so it was not adopted.",
+    "46 positives on the held-out slice: at a true recall of 0.30, observing 10/46 has p ~ 0.20, so the FAIL is inside binomial noise of the bar.",
+    "Fit substrate is the v9 factory's PRE-connector tracklets on v9 geometry; the DEV target is arm D's POST-connector tracks on v10 geometry. That transfer is priced in v10-w9-003."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w7-002"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "dedup",
+    "tracking",
+    "registered-fail"
+   ]
+  },
+  {
+   "id": "v10-w9-002",
+   "statement": "THE 185 'DUPLICATE CONCURRENT TRACKS' ARE MOSTLY NOT TWO TRACKS ON ONE PERSON -- kb v10-w7-002 IS QUALIFIED. Measured on arm D's own DEV-20 submission with the same track-level ownership W7 used: of the 156 same-identity temporally overlapping pairs whose two tracks both hold >= 25 rows, the MEDIAN PITCH SEPARATION DURING THE OVERLAP IS 7.44 m (quartiles 1.36 / 13.22 m). Only 27 pairs (17%) sit within 1 m, and those carry just 6.6% of the overlapping row mass (605 of 9,179 rows); 98 pairs (63%) are more than 3 m apart and during their overlap NEITHER track is on the identity they both claim (median distance to that GT player 4.22 m and 3.11 m). Only 46 of 151 auditable pairs have both tracks within 2 m of the claimed person. The pairs are therefore defined by agreement of a WHOLE-TRACK dominant vote earned outside the overlap window, not by concurrency on one body; the oracle's +4.4999 is substantially a row-pruning effect (9,202 deleted rows) plus fragment linkage, not duplicate removal in the physical sense.",
+   "value": 7.44,
+   "unit": "metres, median pitch separation during the overlap of DEV-20 same-identity overlapping track pairs (arm D)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w9.json",
+    "results/gsr_v10_w9_registered.json"
+   ],
+   "method": "eval.gsr_score.pair_features over arm D's DEV-20 submission rows, labelled by tools.gsr_v10_w7.ownership on tools.gsr_v9_factory.label_rows, with each track's median distance to the claimed GT identity measured on the shared frames only.",
+   "n": 20,
+   "caveats": [
+    "Same nearest-GT-within-5 m instrument as W7, whose flicker is measured in v10-w7-005; this claim is about what the instrument's TRACK-level labels mean, and it uses no other labels.",
+    "156 pairs, not W7's 185, for two reasons: this candidate pool requires both tracks to hold >= 25 rows (222 overlapping same-identity pairs without that filter), and W7's 185/265 are SPANNING-TREE merge counts (k-1 per identity group) rather than all-pairs counts. The two numbers must not be added or differenced.",
+    "It does NOT retract the +4.4999 oracle number, which was scored end to end. It retracts the physical reading of that number (two concurrent tracks on one person)."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w7-002",
+    "v10-w7-005"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "dedup",
+    "tracking",
+    "diagnosis",
+    "oracle"
+   ]
+  },
+  {
+   "id": "v10-w9-003",
+   "statement": "AT MOST ~7% OF THE +4.50 ABSORB ORACLE IS REACHABLE BY A COINCIDENCE DETECTOR, WHICH IS WHY THE GATE CORRECTLY WITHHELD THE DEV RUN. Applied unchanged to DEV-20, the frozen rules accept 14 pairs (arm A) and 12 (arm B) against 156 true same-identity overlapping pairs: recall 0.071 / 0.058 at precision 0.786 / 0.750. The stage touches 177 dropped + 1,846 relabelled rows (arm A) and 393 + 1,325 (arm B) of 219,215, against the oracle's 9,202 deleted rows -- 2-4% of the oracle's footprint, so even a perfectly-priced arm could carry only ~+0.2 GS-HOTA of the +4.4999. The held-out-passing grid point (d_med <= 1.5 m, cosine >= 0.80) does no better on DEV: 13 of 156 at precision 0.684. The binding cause is v10-w9-002 -- the pairs are not spatially coincident -- compounded by a weaker DEV appearance signal (same-identity cosine median 0.578 against 0.775 on the fit substrate), so a train-fit cosine threshold of 0.80 is far off-distribution.",
+   "value": 0.071,
+   "unit": "share of the DEV-20 true same-identity overlapping pairs the frozen arm A detects",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w9_registered.json",
+    "results/gsr_benchmark/gsr_v10_w9.json",
+    "results/gsr_v10_w9_frozen.json"
+   ],
+   "method": "tools.gsr_v10_w9 --dev-pairs --stage: the FROZEN parameters applied to arm D's submission, pair-level GT audit and stage row counters. Measure-only; no GS-HOTA of any W9 arm was computed, per the registered gate.",
+   "n": 20,
+   "caveats": [
+    "The ~+0.2 figure is footprint arithmetic (captured share x the oracle's end-to-end delta), not a scored arm. It is an order-of-magnitude statement used to justify NOT spending a DEV read.",
+    "Precision on DEV (0.79 / 0.75) is below the held-out 0.89 / 0.83, so the transfer costs precision as well as recall.",
+    "DEV-20 only; TEST-38, test-49 and challenge untouched."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w9-001",
+    "v10-w9-002"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "dedup",
+    "tracking",
+    "negative-result"
+   ]
+  },
+  {
+   "id": "v10-w9-004",
+   "statement": "THE ABSORB STAGE SHIPS BEHIND A FLAG AND THE GT-FREE AUDIT SURVIVES IT. eval.gsr_score.DEDUP_ABSORB defaults to None and tools.gsr_deleak.write_arm calls the stage BEFORE vote_track_attributes / gk_side_repair (the placement is load-bearing: the W7 oracle's flags-ON +4.50 came from voting attributes over the already-merged track). Because the stage DELETES rows, tools.gsr_calibfill.verify_gtfree now puts its expectation through the same stage, in the same order, before its positional base-vs-shipped comparison; the row-count check moved after that step. Re-derived on the on-record test-49 package with the flags OFF: 0 violations / 467,425 rows / flip set {SNGS-126, -130, -131, -197} -- identical to results/gsr_benchmark/gsr_v6_legitimacy_audit.json and to the v9-W4 / v9-W5 re-derivations. No metric was read on any test sequence.",
+   "value": 0,
+   "unit": "violations in the re-derived test-49 GT-free audit (467,425 rows, flags OFF)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w9.json",
+    "results/gsr_benchmark/gsr_v6_legitimacy_audit.json"
+   ],
+   "method": "tools.gsr_v10_w9 --audit -> tools.gsr_calibfill.verify_gtfree on outputs/gsr_srvtest/deleak_v6test_v6det_clip_e0.3r1w0.5a0.3 against its GTA base arm and positions_gate_v6det, 49 test sequences.",
+   "n": 49,
+   "caveats": [
+    "A legitimacy check, not a metric read.",
+    "The stage is OFF, so the audit exercises the extended code path as a no-op; an absorbed arm has never been packaged.",
+    "tests/test_gsr_v10_w9.py pins the absorb mechanics, the OFF no-op, the NaN-position guard and the before-the-vote placement; gsr_calibfill's own verify self-check still passes."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w5-005"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "dedup",
+    "tracking",
+    "gt-free",
+    "audit"
+   ]
+  },
+  {
+   "id": "v10-w9-005",
+   "statement": "THE DEV EMBEDDING CACHE IS NOT BROKEN FOR THE ARM-D LINEAGE. kb v9-w5-002's caveat (the CLIP cache joins 790 of 896 tracks and is broken on 11 of 20 sequences) does not hold for the current stack: outputs/gsr/detembed_cache_clip_v6det_eiou joins arm D's DEV-20 submission on 889 of 898 track ids and on 27.3% of its 219,215 rows, on ALL 20 sequences (per-sequence row join 0.08-0.41). The 27.3% is structural, not corruption: the cache is keyed by pre-connector tracklet id and only the component representative's own detections carry that id, so the join is correct by construction. The signal is real but weak in-domain -- same-identity pairs have median cosine 0.578 against 0.414 for different-identity pairs, where the v9 factory train substrate gives 0.775 against 0.423.",
+   "value": 0.273,
+   "unit": "share of arm-D DEV-20 submission rows that join the v6det EIoU CLIP cache on (track_id, frame)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w9.json"
+   ],
+   "method": "Direct (track_id, frame) join of tools.gsr_v10_w7.submission_rows against outputs/gsr/detembed_cache_clip_v6det_eiou, plus the cosine distributions measured while building the DEV pair table.",
+   "n": 20,
+   "caveats": [
+    "It does not retract v9-w5-002's own finding, which was measured on the W4 control (a different lineage); it says the blocker does not apply to arm D.",
+    "A per-row appearance model would still see only 27% of rows; the tracklet MEAN is what this session used."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "v10",
+    "appearance",
+    "clip",
+    "cache"
+   ]
   }
  ]
 }
