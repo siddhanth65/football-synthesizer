@@ -1,5 +1,32 @@
 # STATUS
 
+## 2026-08-16 — v10 W5 PASS: arm D (+2.1024 DEV flags-ON, 19/1, p=5.0e-05) — DEV 55.07 -> 57.17; the prize was the 17 of 18 camera hypotheses per frame we were THROWING AWAY; 33.6% of the geometry oracle captured on CPU alone
+
+results/gsr_v10_w5_registered.json (§1 + a pre-scoring amendment, both timestamped),
+results/gsr_benchmark/gsr_v10_w5.json, kb v10-w5-001..006, tools/gsr_v10_w5.py. Lineage =
+v10-W2 ctrl; zero-drift reproduction to every digit; whole session CPU (cluster unreachable
+from the laptop this session — off-campus — and unneeded). **D1, the redirecting find: the
+calibgate picks the most ACCURATE of PnLCalib's ~16 cached hypotheses on only 25.4% of
+frames (median accuracy rank 4); best-admissible-of-pool = +2.32 predicted GS-HOTA with NO
+new correspondences.** All arms aimed at selection: R (mapping RTS, reproduces W4's E to
+4 dp, +0.5376), B (full-clip batch refinement in mapping space, +1.69), **D = temporal
+re-selection -> batch refinement: accuracy 0.465 -> 0.396 m median with the MEAN collapsing
+1.600 -> 0.590 (it kills catastrophic frames), end-to-end +2.1024 flags-ON (DetA +1.57,
+AssA +2.81, LocA +0.94), 19/1 helped, only SNGS-021 hurt.** Gate-1 screen used a registered
+kernel-loss instrument (the W4 curve says score follows E[1-exp(-d^2/2sigma^2)], not the
+median). Sportlight repo has NO license — nothing vendored; ARM 1 (denser correspondences)
+not built (D1 showed 37% unspent in the existing pool). **Surprises: geometry gains land
+mostly on ASSOCIATION (+2.81 — better camera = better tracking, invisible to the frozen
+oracle); the 2024-winner +-2 m clamp actively HURTS the batch arm (it blocks the rescue of
+bad solves); the per-clip radial k1 term remains real and unmodelled (+1.88 px outer-ring
+residual).**
+
+**Freeze path (blocked on campus network): D needs TEST-38 same-window confirmation, which
+needs candidate-cache extraction for TEST-38/test-49 on the cluster (GPU). Rider inventory:
+D +2.10 (PASS, default OFF) subsumes R; s4 half-cell +0.49 stackability UNMEASURED (needs
+the s4 cache — GPU re-decode); clamp: do NOT apply to batch. If D transfers at the v9 rate,
+board lands ~57.5 from the pending 55.4. Submission #6 (v9 zip) STILL not uploaded by Sid.**
+
 ## 2026-08-16 — v10 W4: THE SENSITIVITY CURVE — geometry axis holds +6.82 GS-HOTA and 92% of it is PER-FRAME ACCURACY (not completeness, not temporal); the 5 m "tolerance" is a Gaussian charging every centimetre; RTS registered arms FAIL, mapping-space candidate +0.54
 
 results/gsr_v10_w4_registered.json (pre-scoring) + results/gsr_benchmark/gsr_v10_w4*.json,

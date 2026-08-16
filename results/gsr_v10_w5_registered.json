@@ -1,0 +1,109 @@
+{
+ "session": "v10-W5",
+ "written_utc": "2026-08-16T15:40Z",
+ "written_before": "any W5 arm existed in code, any W5 positions set was built and any W5 GS-HOTA was read. The only numbers on record at write time are (a) the v10-W4 sensitivity curve and oracles, (b) the v10-W2 accuracy instrument, and (c) this session's D1 candidate-pool diagnostic, which scores no arm: it re-measures the ALREADY CACHED PnLCalib hypotheses against ground truth and is what the arm design below responds to. D1 is declared here in full, with its numbers, so nothing about it is retro-fitted.",
+ "question": "The v10-W4 oracle is +6.25 GS-HOTA for a perfect per-frame camera with association frozen (DEV-20 flags ON, 55.07 -> 61.32). How much of it can we take WITHOUT ground truth and WITHOUT new correspondences, by using the 17 camera hypotheses per frame that PnLCalib already computes and our gate already throws away?",
+
+ "lineage": {
+  "artifact_set": "v10-W2 ctrl (the SHIPPED decode; the half-cell rider s4 stays OFF) -- identical to v10-W4",
+  "candidate_cache": "outputs/gsr/v10_w2_full/ctrl/<SEQ>.npz (18 PnLCalib hypotheses per frame)",
+  "positions": "outputs/gsr/positions_v10w2ctrl_v6det",
+  "control_predictions": "outputs/gsr/deleak_v10w2_ctrl/predictions/data",
+  "control_on_record": {"flags_on": 55.0660, "flags_off": 50.702163718440275},
+  "drift_rule": "kb v9-w7-004. The control chain is re-run in this window as tag v10w5_ctrl before any arm is scored; it must reproduce GS-HOTA 50.702163718440275 (flags OFF) to every digit. If it does not, no pairing in this session is valid and the session reports that instead."
+ },
+
+ "license_verdict": {
+  "repo": "github.com/NikolasEnt/soccernet-calibration-sportlight (MMSports'24 / SoccerNet 2023 calibration winner, arXiv:2410.07401)",
+  "checked": "GitHub API 2026-08-16: \"license\": null; repo root listing has no LICENSE/COPYING file (only CITATION.cff)",
+  "verdict": "NO license grant -> default copyright, all rights reserved. The code may NOT be vendored, copied or adapted. Only the PAPER's geometry may be re-implemented clean-room on our own heatmaps. Nothing from that repo enters this codebase in this session or any other."
+ },
+
+ "instrument": {
+  "name": "GT-anchored homography accuracy (the v10-W2 instrument), on the frames every arm answers",
+  "definition": "each GT player/GK annotation's own image foot point pushed through the arm's homography, against that annotation's own bbox_pitch. No detector, no matcher, no box convention enters.",
+  "two_references": {
+   "gt": "error against the annotation's bbox_pitch (contains the annotation's own non-homography noise; its floor is measured below)",
+   "disp": "displacement from that frame's GT-FITTED homography, on the same points. This is the quantity the W4 curve prices."
+  },
+  "summary_statistic": "kernel loss = mean(1 - exp(-d^2 / (2 * 2.042694913268175^2))), the evaluator's OWN localisation kernel. The raw mean square is NOT usable: a handful of frames whose homography is hundreds of metres out give a pooled MSD of 40278 m^2 while GS-HOTA stopped charging for them past ~5 m. Median / p90 / mean are reported alongside it.",
+  "score_bridge": "predicted dGS-HOTA = 6.254 * (1 - kloss_arm / kloss_ctrl). Rationale: the W4 F1/F2 Gaussian ladder is quadratic in displacement (0.133 / 0.849 / 3.485 GS-HOTA lost at sigma 0.1 / 0.25 / 0.5, i.e. 6.65 / 6.79 / 6.97 GS-HOTA per m^2 of E[d^2]) and saturates past the kernel -- which is the shape of kloss. The instrument's population (every GT person on every solved frame) is NOT the submission's row population, so the ABSOLUTE loss does not transfer; the FRACTION is assumed to. The prediction is exact at both ends by construction (0 -> 0, perfect -> +6.254). It is a PREDICTION, never a result: gate 2 is the only thing that ships anything."
+ },
+
+ "d1_candidate_pool_diagnostic": {
+  "status": "measure-only, already run, no arm scored",
+  "result_disp": {"gate_pick": {"median": 0.4653, "p90": 1.4106, "mean": 1.6000, "kloss": 0.08096},
+                  "best_admissible_of_pool": {"median": 0.3376, "p90": 1.0455, "mean": 1.4017, "kloss": 0.05088},
+                  "best_any_of_pool": {"median": 0.3373, "p90": 1.0399, "mean": 1.3862, "kloss": 0.05042}},
+  "result_gt": {"gate_pick": {"median": 0.4760, "p90": 1.4411, "mean": 1.6090, "kloss": 0.08311},
+                "best_admissible_of_pool": {"median": 0.3550, "p90": 1.0800, "mean": 1.4165, "kloss": 0.05333},
+                "gt_fit_floor": {"median": 0.0820, "p90": 0.2236, "mean": 0.1194, "kloss": 0.00386}},
+  "pool": {"mean_candidates_per_frame": 15.84, "mean_distinct_by_accuracy": 6.53,
+           "gate_pick_is_the_most_accurate": 0.2538, "gate_pick_median_accuracy_rank": 4.0,
+           "frames": 13551},
+  "reading": "the pool an ORACLE could pick from is worth +2.32 predicted GS-HOTA = 37% of the +6.254 oracle, and it needs no new correspondences, no GPU and no re-decode. Our per-frame gate picks the most accurate hypothesis on 25% of frames. This is a selection-biased upper bound (min of ~6.5 distinct noisy options), stated as such; the arms below get a fraction of it.",
+  "consequence_declared_here": "the session's arms are all attempts to spend TEMPORAL evidence on the SELECTION problem, because that is where D1 says the free score is."
+ },
+
+ "arms": {
+  "R": {
+   "name": "mapping-space RTS smoother, solved frames only",
+   "what": "generator.camera_track.smooth_homographies(mode='mapping', err_m=solver residual, clamp_m=2.0) applied to the frames the solver answered; dead frames keep fill_calibration_gaps(10). Byte-identical configuration to v10-W4's post-hoc arm E.",
+   "why_registered_here": "W4 ran it as a post-registration diagnostic (it was added after the camera-space parameterisation turned out degenerate), so its +0.5375 is not a registered read. This session re-runs it under a clean a-priori registration. It is the FLOOR the other arms must beat to matter.",
+   "gate_1": "EXEMPT -- R runs end-to-end unconditionally as the registered floor.",
+   "new_code": "none"
+  },
+  "S": {
+   "name": "temporal hypothesis re-selection",
+   "what": "per frame, replace the gate's greedy pick by the gate-ADMISSIBLE cached hypothesis whose CHECK_GRID mapping is closest (median metres over the 9 grid points) to a temporal reference; the output is always a genuine PnLCalib solve, never a blend.",
+   "reference": "arm R's smoothed mapping for that frame. Two passes, fixed a priori: (1) smooth the gate series -> re-select; (2) smooth the re-selected series -> re-select again. No third pass.",
+   "admissibility": "the shipped gate, unchanged: error_m <= 2.0 m AND generator.postprocess.onpitch_plausible against that frame's OWN detected foot points. A frame with no admissible hypothesis stays dead and goes to the fill, exactly as now.",
+   "constants_fixed_a_priori": {"passes": 2, "clamp_m": 2.0, "distance": "median over the 9 CHECK_GRID points"},
+   "gate_1": "required"
+  },
+  "B": {
+   "name": "full-clip batch refinement in mapping space (multi-hypothesis, IRLS)",
+   "what": "one optimisation per sequence over ALL frames' mappings at once. Each frame's mapping is the pitch coordinates of the fixed CHECK_GRID (18 numbers = the four-point / grid parameterisation; NEVER decomposed camera parameters -- the W3/W4 law). Data term: every gate-admissible cached hypothesis of that frame pulls on its own frame's mapping with a Cauchy weight w = 1 / (1 + (d/s)^2), d = median grid distance in metres from the current estimate. Smoothness: second-difference penalty on each grid coordinate along time. Initialised from the gate picks. Solved by IRLS: 8 iterations of (recompute weights) -> (solve each coordinate's banded normal equations exactly). Applied to solved frames only; dead frames keep the fill.",
+   "weights_fixed_a_priori_not_tuned": "per sequence and per grid coordinate, (measurement sd, acceleration sd) come from generator.camera_track._noise_estimates of the gate-picked series -- the same dial-free estimator W4 used. The smoothness weight is lambda_j = (meas_sd_j / accel_sd_j)^2 (the Kalman-equivalent ratio) and the Cauchy scale is s = median over frames of the grid spread of that frame's admissible hypotheses. Nothing here is fitted to a score.",
+   "iterations": 8,
+   "gate_1": "required"
+  }
+ },
+
+ "not_built_this_session": {
+  "denser_correspondences (conic tangents, line-conic intersections, central-view circle->line)": "requires a fresh GPU decode of both HRNets over 14,919 frames AND a correspondence cache we do not have (the v10-W2 cache stores homographies, not correspondences), then a clean-room re-implementation of arXiv:2410.07401's geometry because that repo carries no license. D1 says the EXISTING pool already holds 37% of the oracle unspent, so denser correspondences are the second call, not the first. Priced, not attempted.",
+  "shared per-clip radial k1": "the v10-W2 radial report shows a real signature on this lineage (median radial residual -0.65 / -0.60 / -1.32 / -1.28 / -0.36 / +1.88 px across radius sextiles), so the term is NOT dead -- but fitting k1 needs the per-frame correspondences the cache does not carry, and a homography-grid parameterisation cannot express it. Registered as blocked on the same GPU re-decode."
+ },
+
+ "bars_a_priori": {
+  "gate_1_accuracy": "on the paired frames (frames the arm and the control both answer, GT annotations present): PASS if median improves >= 10% vs control OR kernel loss improves >= 15% (the latter predicts >= +0.94 GS-HOTA, i.e. the gate-2 bar). Both are reported for every arm whatever the verdict. The task brief named only the median rule; the kernel-loss rule is added here, before any arm exists, because the W4 curve says the score responds to the squared displacement and not to the median, and an arm that fixes the tail while leaving the median alone would be wrongly discarded by a median-only screen. Deviation stated, not hidden.",
+  "gate_2_end_to_end": "DEV-20, flags ON, paired per sequence against the same-lineage control: the SHIPPING candidate (best single arm or the best combined stack) needs mean GS-HOTA >= +1.00 AND GS-DetA not worse (>= 0.00) AND GS-LocA not worse (>= 0.00) AND helped > hurt AND Wilcoxon p < 0.05. Flags OFF reported alongside. An arm below +1.00 that is positive and significant is reported as a measured, non-shipping rider (as R already is).",
+  "capture_fraction": "every end-to-end delta is reported as a fraction of the +6.254 oracle, and against D1's +2.32 pool ceiling."
+ },
+
+ "amendment_1": {
+  "written_utc": "2026-08-16T18:15Z",
+  "written_after": "gate 1 was read for R / S / B",
+  "written_before": "ANY end-to-end GS-HOTA of ANY W5 arm existed. The only score read so far is the control drift check (50.702163718440275 flags OFF, reproduced to every digit).",
+  "gate_1_as_read": {
+   "ctrl": {"median": 0.4653, "p90": 1.4106, "mean": 1.6000, "kloss": 0.08096},
+   "R": {"median": 0.4415, "kloss": 0.07698, "median_gain": 0.0511, "kloss_gain": 0.0491, "verdict": "FAIL (exempt -- runs as the floor)"},
+   "S": {"median": 0.4300, "kloss": 0.07221, "median_gain": 0.0759, "kloss_gain": 0.1081, "verdict": "FAIL -- does NOT run end-to-end alone"},
+   "B": {"median": 0.4053, "kloss": 0.06740, "median_gain": 0.1290, "kloss_gain": 0.1675, "verdict": "PASS on both rules"}
+  },
+  "third_slot": "the task asks for the best COMBINED stack and one end-to-end slot is left (R + B + one). Three compositions of the ALREADY REGISTERED components are declared here, before any of them is measured; all three are put through the SAME gate 1 and AT MOST ONE -- the best by kernel loss -- is promoted to the third end-to-end slot. All three instrument readings are reported whatever happens.",
+  "compositions": {
+   "C": "B then S: batch-refine the clip, then replace each frame's mapping by the gate-admissible cached hypothesis closest to it (one re-selection pass). Output is a genuine PnLCalib solve on every frame -- B's global consistency used purely as a selector.",
+   "D": "S then B: re-select temporally first (2 passes, as registered), then batch-refine from those picks. B's data term is unchanged (all admissible hypotheses); only its initialisation, its noise estimates and its Cauchy scale move.",
+   "K": "B with the W4 clamp: a refined mapping that moves CHECK_GRID more than 2.0 m from that frame's own gate solve is refused and the solve kept. Declared because B as registered carries no clamp and one sequence (SNGS-051) shows the failure mode the clamp exists for."
+  }
+ },
+
+ "guards": [
+  "DEV-20 only. TEST-38, test-49, the challenge split and every submission are untouched.",
+  "CPU only; the local 4 GB GPU is not taken and no cluster job is submitted (the whole session runs off the existing candidate cache).",
+  "One process per work directory; every arm's chain is tagged v10w5_*.",
+  "No STATUS edit, no commit, no push, no METRICS_VERSION change. Nothing in this session is enabled by default anywhere; ship candidates land as default-OFF riders.",
+  "Ground truth is read only to score and to fit the D1/instrument oracle homographies. No arm consumes it -- S and B see only the cached hypotheses, our own detections and time."
+ ]
+}

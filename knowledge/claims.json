@@ -8735,7 +8735,9 @@
    "date": "2026-08-16",
    "supersedes": [],
    "superseded_by": [],
-   "depends_on": ["v10-w3-006"],
+   "depends_on": [
+    "v10-w3-006"
+   ],
    "tags": [
     "gsr",
     "geometry",
@@ -8767,6 +8769,172 @@
     "pre-registered",
     "negative-result",
     "geometry"
+   ]
+  },
+  {
+   "id": "v10-w5-001",
+   "statement": "PnLCalib ALREADY COMPUTES A BETTER CAMERA FOR 75% OF OUR FRAMES AND OUR GATE THROWS IT AWAY. DEV-20, v10-W2 ctrl lineage, 13,551 solved frames carrying 15.84 cached hypotheses each (6.53 distinct by accuracy): the shipped per-frame gate picks the MOST accurate hypothesis on only 25.4% of frames, median accuracy rank 4. An oracle picking the best gate-ADMISSIBLE hypothesis per frame cuts GT-anchored displacement from the frame's GT-fitted homography from median 0.4653 -> 0.3376 m (-27.4%), p90 1.4106 -> 1.0455, and the evaluator-kernel loss 0.08096 -> 0.05088 (-37.2%), i.e. 37% of v10-W4's +6.254 accuracy oracle, needing no new correspondences, no GPU and no re-decode. The instrument's own floor (a homography fitted to that frame's ground truth) is median 0.0820 m / kernel loss 0.00386.",
+   "value": 0.254,
+   "unit": "fraction of solved frames where the shipped gate picks the most accurate of its own cached hypotheses (DEV-20)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w5_registered.json",
+    "results/gsr_benchmark/gsr_v10_w5.json"
+   ],
+   "method": "tools.gsr_v10_w5 --oracle: every cached PnLCalib hypothesis of every solved frame re-projected onto that frame's GT player/GK image foot points, scored against the annotation's own bbox_pitch and against a homography fitted to that frame's GT. Admissibility replays the shipped gate (error_m <= 2 m + onpitch_plausible on OUR detections).",
+   "n": 20,
+   "caveats": [
+    "Selection-biased upper bound: the minimum of ~6.5 noisy options is optimistic by construction. It bounds the arms, it is not a target.",
+    "Measured on frames with >= 6 GT people and a valid GT fit; 207,921 annotation rows."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "pre-registered",
+    "geometry",
+    "calibration"
+   ]
+  },
+  {
+   "id": "v10-w5-002",
+   "statement": "THE CALIBRATION INSTRUMENT MUST BE SCORED WITH THE EVALUATOR'S OWN KERNEL, NOT WITH A MEAN SQUARE. GS-HOTA's loss is quadratic in position error (W4's Gaussian ladder: 0.133 / 0.849 / 3.485 GS-HOTA lost at sigma 0.1 / 0.25 / 0.5 m = 6.65 / 6.79 / 6.97 GS-HOTA per m^2 of E[d^2]) and saturates past the 5 m kernel. The raw mean square is therefore unusable as an instrument: on DEV-20 the pooled MSD of our own calibration error is 40,278 m^2, set by a handful of frames hundreds of metres out that GS-HOTA stopped charging for. Scoring the same errors with the evaluator's kernel, mean(1 - exp(-d^2 / 2 sigma^2)) at sigma = 2.0427 m, gives a bounded statistic (ctrl 0.08096) whose FRACTIONAL reduction predicted this session's three end-to-end arms in rank order and to within 30% in magnitude (predicted +0.31 / +1.05 / +1.54, measured +0.54 / +1.69 / +2.10).",
+   "value": 40278.0,
+   "unit": "pooled mean squared calibration error, m^2 (the number that makes MSD useless)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w5_registered.json",
+    "results/gsr_benchmark/gsr_v10_w5.json"
+   ],
+   "method": "tools.gsr_v10_w5.kernel_loss / predicted_gain; coefficient fitted from the v10-W4 F1/F2 perturbation ladder before any W5 arm existed, prediction bridge = 6.254 * (1 - kloss_arm / kloss_ctrl).",
+   "n": 20,
+   "caveats": [
+    "The bridge UNDER-predicts systematically because it is calibrated on W4's prediction-level perturbation, which freezes association; a real geometry change also feeds EIoU / GTA / the solver upstream. Under-prediction is the safe direction for a screen."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w4-001"
+   ],
+   "tags": [
+    "gsr",
+    "geometry",
+    "methodology"
+   ]
+  },
+  {
+   "id": "v10-w5-003",
+   "statement": "THE MMSPORTS'24 CALIBRATION WINNER'S REPO CARRIES NO LICENSE -- ITS CODE IS OFF LIMITS. github.com/NikolasEnt/soccernet-calibration-sportlight (arXiv:2410.07401, denser correspondence harvest: conic tangent points, line-conic intersections) returns \"license\": null from the GitHub API on 2026-08-16 and has no LICENSE or COPYING file in its root (only CITATION.cff). Default copyright applies: no vendoring, no copying, no adaptation. Only the paper's geometry may be re-implemented clean-room on our own heatmaps. Nothing from that repo entered this codebase.",
+   "value": 0.0,
+   "unit": "lines of that repo used (verified zero)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w5_registered.json",
+    "results/gsr_benchmark/gsr_v10_w5.json"
+   ],
+   "method": "GitHub REST API repo metadata + root contents listing, 2026-08-16.",
+   "n": 1,
+   "caveats": [
+    "Same posture as BroadTrack (EVS, noncommercial): the paper is the clean-room source, the code is instrument-only and in this case not even that."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "licensing",
+    "geometry"
+   ]
+  },
+  {
+   "id": "v10-w5-004",
+   "statement": "THE MAPPING-SPACE RTS SMOOTHER IS CONFIRMED UNDER ITS OWN REGISTRATION AND REPRODUCES TO 4 DECIMALS. Re-run as pre-registered arm R on the same lineage in a fresh window: DEV-20 flags ON 55.0660 -> 55.6036 = +0.5376 combined, paired +0.5274, helped 15 / hurt 5, Wilcoxon p = 0.0296, GS-DetA +0.3317, GS-LocA +0.3240; flags OFF 50.7022 -> 51.2376. v10-W4's post-hoc arm E read 55.6036 / +0.5273 / 15-5 / p = 0.0296 -- identical. The control reproduced 50.702163718440275 to every digit, so control drift on this lineage is again exactly zero. v10-w4-005's post-registration status is cured; the number stands and is below the +1.00 shipping bar.",
+   "value": 0.5274,
+   "unit": "paired GS-HOTA vs same-lineage control, DEV-20 flags ON (arm R)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w5_registered.json",
+    "results/gsr_benchmark/gsr_v10_w5.json"
+   ],
+   "method": "generator.camera_track.smooth_homographies(mode='mapping', clamp 2 m, solved frames only) via tools.gsr_v10_w5 --positions --score; frozen v6 chain, tools.gsr_v9_w7.score_pair.",
+   "n": 20,
+   "caveats": [
+    "Below the +1.00 gate-2 bar: a measured rider, not a ship on its own. It is superseded in practice by arm D, which contains it."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w4-005"
+   ],
+   "tags": [
+    "gsr",
+    "pre-registered",
+    "geometry",
+    "calibration"
+   ]
+  },
+  {
+   "id": "v10-w5-005",
+   "statement": "REGISTERED PASS: FULL-CLIP BATCH REFINEMENT IN MAPPING SPACE IS WORTH +2.10 GS-HOTA -- 34% OF THE PER-FRAME-ACCURACY ORACLE, ON CPU, WITH NO NEW DATA. One robust optimisation per sequence over ALL frames' mappings at once (unknowns = the pitch coordinates of a fixed 3x3 image grid per frame; data term = every gate-admissible cached PnLCalib hypothesis pulling on its own frame under a Cauchy weight; smoothness = second differences along time with per-coordinate weights taken from the series' own noise estimate; 8 IRLS iterations, each an exact banded solve). DEV-20 flags ON vs the same-lineage control 55.0660: arm B (batch alone) 56.7515 = +1.6854 combined, paired +1.8292, 17 helped / 3 hurt, p = 0.0027; arm D (temporal hypothesis re-selection first, then batch) 57.1684 = +2.1024 combined, paired +2.2523, 19 helped / 1 hurt, p = 5.0e-05, GS-DetA +1.5744, GS-AssA +2.8085, GS-LocA +0.9436. Flags OFF: 50.7022 -> 52.6359. Accuracy instrument, arm D: median displacement 0.4653 -> 0.3963 m (-14.8%), p90 1.4106 -> 1.1657, kernel loss -24.7%.",
+   "value": 2.2523,
+   "unit": "paired GS-HOTA vs same-lineage control, DEV-20 flags ON (arm D)",
+   "status": "pending",
+   "evidence": [
+    "results/gsr_v10_w5_registered.json",
+    "results/gsr_benchmark/gsr_v10_w5.json"
+   ],
+   "method": "tools.gsr_v10_w5 (reselect + batch_refine) --accuracy --positions --score; lineage = the v10-W2 ctrl candidate cache, positions_v10w2ctrl_v6det, deleak_v10w5_ctrl; frozen v6 chain (EIoU e0.3/r1/w0.5/a0.30, clip_v6det, percrop _v6_v6det, GTA tau, MILP), tools.gsr_v9_w7.score_pair flags ON and OFF. CPU only.",
+   "n": 20,
+   "caveats": [
+    "DEV-20 only. TEST-38 / test-49 confirmation is NOT done -- this is a candidate, not a ship, and it stays default-OFF.",
+    "One sequence is hurt: SNGS-021, -1.50, the same sequence where mapping-space smoothing alone loses (W4: median 0.504 -> 0.598). The mechanism is shared and not yet diagnosed.",
+    "Three end-to-end arms were run (R, B, D) plus one composed slot chosen among C / D / K on the accuracy instrument BEFORE any end-to-end score: D is the best of three compositions on that screen, so its +2.10 carries a mild selection premium.",
+    "34% of the +6.254 oracle by combined score (36% by paired mean); the oracle itself was measured with association FROZEN, while D also moves association (GS-AssA +2.81), so the two numbers are not strictly commensurable."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w4-006",
+    "v10-w5-001"
+   ],
+   "tags": [
+    "gsr",
+    "pre-registered",
+    "geometry",
+    "calibration"
+   ]
+  },
+  {
+   "id": "v10-w5-006",
+   "statement": "THE 2024-WINNER CLAMP IS THE WRONG GUARD FOR A BATCH SOLVE, AND THE GEOMETRY GAIN LANDS MOSTLY ON ASSOCIATION. Two sub-results of the W5 batch arm. (1) Applying the +-2 m grid clamp to the batch solution (arm K) halves its instrument gain: kernel loss -12.0% against unclamped -16.8%, median -11.2% against -12.9%. The clamp exists to stop a smoother drifting off a good solve; here it blocks exactly the frames where the per-frame solve is catastrophically wrong and the batch rescues it -- the unclamped batch drops the pooled MEAN calibration error from 1.600 to 0.633 m while the median moves only 0.465 -> 0.405. (2) The end-to-end gain is not mostly localisation: arm D's GS-LocA moves +0.94 while GS-AssA moves +2.81 and GS-DetA +1.57. W4's association-frozen oracle could not see this term, which is why the kernel-loss bridge under-predicted D by 36% (+1.54 predicted, +2.10 measured).",
+   "value": 2.8085,
+   "unit": "GS-AssA delta vs control, DEV-20 flags ON (arm D), against +0.94 GS-LocA",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w5_registered.json",
+    "results/gsr_benchmark/gsr_v10_w5.json"
+   ],
+   "method": "tools.gsr_v10_w5 --accuracy --arms ctrl,B,C,D,K (instrument) and --score (end-to-end); clamp implemented as generator.camera_track.grid_shift_m against the frame's own gate solve.",
+   "n": 20,
+   "caveats": [
+    "K was measured on the accuracy instrument only; it was not run end-to-end (the third slot went to the best composition, D)."
+   ],
+   "date": "2026-08-16",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w5-005"
+   ],
+   "tags": [
+    "gsr",
+    "geometry",
+    "calibration"
    ]
   }
  ]
