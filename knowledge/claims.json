@@ -10100,6 +10100,163 @@
     "scoping",
     "forecasting"
    ]
+  },
+  {
+   "id": "v10-w12-001",
+   "statement": "REGISTERED KILL EXPERIMENT: A MODERN, IN-DOMAIN DETR GIVES OUR CHAIN NO DETECTION ADVANTAGE AT OUR OPERATING POINT. RF-DETR-Large fine-tuned on SoccerNet-Tracking 2023 (julianzu9612/RFDETR-Soccernet, Apache-2.0, 1.57 GB, 4 soccer classes) was dumped over DEV-20 in the SAME GPU window as our shipped S4b YOLOv8s. At a matched operating point (the arm threshold whose box count matches S4b's at DETECT_CONF 0.20) its GT-row image-space recall is 0.96877 against S4b's 0.97046 -- 0.17 points WORSE -- and its boxes are LOOSER: median IoU with the GT box 0.802 vs 0.814, foot-point error 0.0399 vs 0.0403 GT-box-heights (a 1% difference, noise). The 'tighter boxes -> better crops' half of the modern-detector premise is REFUTED for this checkpoint. Harness fidelity: the control reproduces kb v9-w7-001's 0.9711 image-space recall to 0.0006.",
+   "value": -0.00169,
+   "unit": "GT-row image-space recall, modern detector minus S4b, matched operating point, DEV-20",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w12_registered.json",
+    "results/gsr_benchmark/gsr_v10_w12_stage1.json",
+    "results/gsr_benchmark/gsr_v10_w12_leakcheck.json"
+   ],
+   "method": "tools/gsr_v10_w12_infer.py (RF-DETR dump; schema-identical to tools/gsr_v9_w7_infer.py) and tools/gsr_v9_w7_infer.py (S4b, md5 2074d8741f97a6892a1322d0f808244c), both over DEV-20 at conf floor 0.01 on a100server1 GPU 1 inside one window (kb v10-frz-003); analysed by tools.gsr_v10_w12 --arms using the scale-free 0.5-box-height foot match of tools.gsr_v9_w7.match_feet.",
+   "n": 235174,
+   "caveats": [
+    "The RF-DETR checkpoint runs at its trained resolution 560 and our S4b at 640, so the modern arm is handicapped on input pixels; the resolution axis is priced separately in v10-w12-003.",
+    "Zero-shot for OUR chain but in-domain for the detector (GSR is SoccerNet-Tracking re-annotated). An S4b-style fine-tune of the family was NOT run -- that is the spend this measurement declines to authorise.",
+    "Contamination of DEV-20 by the checkpoint's unnamed training split could not be ruled out from its card; the empirical check (3 GSR-train sequences) shows the same train/dev gap for both detectors (+2.4 points S4b, +2.8 points RF-DETR), i.e. no evidence of valid-split memorisation.",
+    "DEV-20 only; TEST-38, test-49 and challenge were not read."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w7-001"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "detection",
+    "negative-result",
+    "registered",
+    "license"
+   ]
+  },
+  {
+   "id": "v10-w12-002",
+   "statement": "THE THIRD-PARTY SOCCER DETR IS UNADOPTABLE AS-IS: ITS ROLE HEAD CALLS 33,132 PLAYERS 'REFEREE' (S4b: 7,366). On matched detections at conf 0.20 over DEV-20 its role accuracy is 0.8214 against S4b's 0.9419 -- 12.05 points worse -- and the damage lands exactly on the census's dominant role error, player->referee, at 4.5x the rows. Under GS-HOTA a role mismatch zeroes the similarity, so every one of those rows becomes a miss; the whole role bucket is worth +1.42 GS-DetA isolated / +8.13 marginal, and this checkpoint moves it the wrong way by several times its size. Its only role advantage is goalkeepers (0.8311 vs 0.7828).",
+   "value": -0.1205,
+   "unit": "role accuracy on matched detections, modern detector minus S4b, DEV-20",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w12_registered.json",
+    "results/gsr_benchmark/gsr_v10_w12_roles.json"
+   ],
+   "method": "tools.gsr_v10_w12 --roles-only: per-frame foot match of each dump's >=0.20 person boxes to GT, then the detector's own class name against the GT role attribute.",
+   "n": 227830,
+   "caveats": [
+    "This measures ONE third-party checkpoint (4 epochs on SoccerNet-Tracking, whose role layer is noisier and differently defined than GSR's), not the RF-DETR family's ceiling; an S4b-style fine-tune on GSR roles would plausibly repair it.",
+    "Repairing roles by fine-tune does not repair the recall/box parity of v10-w12-001, which is already measured at this architecture's in-domain best."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w12-001",
+    "v9-w3-002"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "detection",
+    "roles",
+    "negative-result"
+   ]
+  },
+  {
+   "id": "v10-w12-003",
+   "statement": "THE LEVER THE DETECTOR SESSION ACTUALLY FOUND IS A KNOB WE ALREADY OWN: OUR OWN S4b WEIGHTS AT imgsz 1280 DOMINATE THEIR 640 CURVE ON EVERY MEASURED AXIS. Same weights, same frames, same GPU window: GT-row recall 0.98123 vs 0.97046 (+1.077 points) at slightly BETTER precision (0.9218 vs 0.9193); median box IoU 0.826 vs 0.814; foot-point error -7.4% relative; post-ByteTrack recall 0.93003 vs 0.92294 (+0.71); role accuracy 0.9498 vs 0.9419; player->referee confusions 5,702 vs 7,366 (-1,664 rows, -23% of the census's dominant role error). Track count rises only 2% (1,370 vs 1,341) -- none of the fragmentation blow-up that made the v9-W7 A1 arm cost -7.11 GS-DetA. Price: detector inference ~1.5x (14.7 s vs 10.0 s per 750-frame sequence, A100).",
+   "value": 0.01077,
+   "unit": "GT-row image-space recall gain at imgsz 1280 over 640, same weights, DEV-20",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w12_registered.json",
+    "results/gsr_benchmark/gsr_v10_w12_stage1.json",
+    "results/gsr_benchmark/gsr_v10_w12_roles.json"
+   ],
+   "method": "tools/gsr_v9_w7_infer.py --imgsz 1280 vs --imgsz 640 on the same checkpoint in one window; analysed by tools.gsr_v10_w12 (axes A/B/C) and --roles-only (axis D).",
+   "n": 235174,
+   "caveats": [
+    "COMPONENT MEASUREMENT ONLY -- recall/IoU/replay/role are not GS-HOTA. The end-to-end price needs a same-window two-arm DEV-20 re-extraction (~5-6 GPU-h incl. percrop/boxes/embed) under the kb v10-frz-003 drift rule; a detector-side change invalidates every downstream cache.",
+    "The CPU ByteTrack replay ignores the calibration gate and the EIoU re-association that sit downstream of it.",
+    "No flag was wired: generator.extract still runs the ultralytics default 640 and has no imgsz argument today.",
+    "The 1280 arm was registered as a CONTROL (to stop a resolution win being booked as an architecture win); its promotion to candidate is a post-hoc reading of a pre-registered measurement, not a pre-registered hypothesis."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w7-001",
+    "v9-w7-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "detection",
+    "resolution",
+    "candidate"
+   ]
+  },
+  {
+   "id": "v10-w12-004",
+   "statement": "THE ONE AXIS WHERE THE MODERN DETECTOR WINS IS THE ONE THE MISS-ORACLE NEVER PRICED: CONFIDENCE THAT SURVIVES THE TRACKER. Feeding each dump's >=0.20 boxes through the same CPU ByteTrack replay (shipped c0.20 / m3 / buffer 60), the DETR loses 6.94% of its boxes to the Kalman re-match against S4b's 9.08%, and ends with HIGHER post-tracker recall (0.93042 vs 0.92294) from LOWER pre-tracker recall (0.9688 vs 0.9705), on 9% FEWER tracks (1,223 vs 1,341). The two detectors' PR curves CROSS near 0.93 precision: above it the DETR is better (recall 0.9043 vs 0.8787 at ~0.994 precision), below it -- where our chain runs -- S4b is better. Read: the modern-detector prize is calibration and track continuity, not detection, and it prices at roughly +0.1..0.2 GS-DetA under the v9-W7 apportionment (~0.2 DetA per recall point) -- an order of magnitude below the +1.0 GS-HOTA stage-2 bar this session registered.",
+   "value": 0.00748,
+   "unit": "post-ByteTrack GT-row recall, modern detector minus S4b, DEV-20",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w12_registered.json",
+    "results/gsr_benchmark/gsr_v10_w12_stage1.json"
+   ],
+   "method": "tools.gsr_v9_w7.replay_tracker driven per arm by tools.gsr_v10_w12.run_arm; PR curve from the same sweep over 14 confidence thresholds.",
+   "n": 20,
+   "caveats": [
+    "The +0.1..0.2 GS-DetA conversion is a linear apportionment of the v9-W7 oracle, not a measurement.",
+    "Replay is a component instrument: no calibration gate, no EIoU re-association, no identity solver -- and the last of those is where v9-w7-003 showed extra rows do their damage.",
+    "The discard comparison is at equal threshold (0.20), where the DETR feeds 244,401 boxes and S4b 248,265 -- close but not identical."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w7-001",
+    "v9-w7-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "detection",
+    "tracking",
+    "confidence-calibration"
+   ]
+  },
+  {
+   "id": "v10-w12-005",
+   "statement": "PROCESS HAZARD: tmux RESOLVES kill-session TARGETS BY PREFIX, SO KILLING 'v10w12' KILLED THE SIBLING JOB IN 'v10w12b'. A GPU dump running in v10w12b died at 17 of 20 sequences when a kill-session aimed at v10w12 was issued after that exact session had already exited; tmux then prefix-matched the only remaining candidate. Cost here was three sequences of re-dump (~1 min); the same mistake against a multi-hour extraction is a session-killer. Rule: never name a session as a prefix of another, or target with the exact-match form (tmux kill-session -t =name).",
+   "value": 3,
+   "unit": "sequences lost to the mis-targeted kill",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w12_registered.json"
+   ],
+   "method": "Observed directly: ~/w12_s4b.log stops at [17/20] with no DONE line and tmux ls shows the session gone immediately after the kill-session call.",
+   "n": 1,
+   "caveats": [
+    "Reconstructed from job logs and session timestamps, not from a tmux server log."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "v10",
+    "hazard",
+    "process",
+    "cluster"
+   ]
   }
  ]
 }

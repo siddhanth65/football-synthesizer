@@ -1,5 +1,30 @@
 # STATUS
 
+## 2026-08-18 — v10 W12: modern-detector swap KILLED at stage 1 (in-domain RF-DETR loses at our operating point; 33,132 player->referee rows) — and the surprise lever is OUR OWN S4b at imgsz 1280: dominant on every measured axis; end-to-end session dispatched
+
+results/gsr_v10_w12_registered.json, results/gsr_benchmark/gsr_v10_w12_{stage1,roles,
+leakcheck}.json, kb v10-w12-001..005, tools/gsr_v10_w12{,_infer}.py. Licenses fetched (not
+recalled): DEIMv2/D-FINE/RT-DETR/RF-DETR all Apache-2.0 (rfdetr_plus/XL/2XL are PML-1.0 —
+excluded); chose RF-DETR + the Apache soccer checkpoint = a STRONGER kill test than COCO
+zero-shot. **Kill table @ matched operating point: S4b 0.9705 recall / 0.8135 IoU / role
+0.9419 vs RF-DETR-soccer 0.9688 / 0.8025 / role 0.8214 with 33,132 player->referee rows
+(4.5x our dominant census error); PR curves cross at ~0.93 precision — above it the DETR
+wins, below it (where our chain lives) S4b wins. Its one real win — confidence surviving
+ByteTrack's rematch (discard 6.94% vs 9.08%) — prices at ~+0.1-0.2. KILLED; no fine-tune
+run; 0.289 GPU-h.** Fair caveat on record: the role number is this 4-epoch checkpoint's,
+not the family ceiling — but A/B parity is measured at the architecture's in-domain best.
+
+**THE SURPRISE (component-level, end-to-end unpriced): S4b @ imgsz 1280 dominates its own
+640 on every axis — recall +1.077 pts at BETTER precision, IoU +0.012, foot error -7.4%,
+post-tracker recall +0.71, role +0.79, player->referee rows -23% — with tracks +2% only
+(none of A1's fragmentation) at 1.5x inference cost. W13 dispatched: imgsz param in
+generator/extract (default 640 = byte-identical), same-window two-arm DEV re-extraction,
+full stack paired, registered bars — MUST reconcile with the v6-era "imgsz 1280 is not a
+lever (big-box recall -30.8)" claim (different intervention: that was the 5A-era training
+context).** Ops traps banked: rfdetr 1.9.2's RFDETRLarge is a different net (2025 ckpt
+needs RFDETRLargeDeprecated); tmux kill-session matches by PREFIX (killed a sibling at
+17/20 — name sessions unambiguously). Freeze-#2 inventory: arm A + imgsz1280-if-gated.
+
 ## 2026-08-17 — v10 W11: CONIC refuted as a rider — conic enrichment and adaptive stiffness are SUBSTITUTES (r=0.962, same four fast-pan clips; arm A collected the prize first); the geometry book closes: what remains needs a better FRONT-END, not better use of this one
 
 results/gsr_v10_w11_registered.json (premise corrections registered BEFORE measurement),

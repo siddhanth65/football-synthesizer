@@ -1,0 +1,84 @@
+{
+  "session": "v10 W12 -- modern detector on a license-clean path (master doc 5.6 item 3)",
+  "date": "2026-08-17",
+  "scope": "DEV-20 only (the tuning split). TEST-38, test-49 and challenge are not read, extracted or scored. GPU work on a100server1 GPU 1 only, after the W11 tmux job releases it.",
+  "premise_stated_honestly": {
+    "what_is_already_known": [
+      "kb v9-w7-001: on OUR chain the detector's own image-space recall is 0.9711 at DETECT_CONF 0.20; only 9.7% of census misses have no box at any confidence; a PERFECT detector prices at +0.57 GS-DetA on the old substrate.",
+      "kb v9-w7-001: 66.1% of misses are confident boxes the chain discards after the detector.",
+      "kb v9-w7-003: writing those discarded boxes through costs -7.11 GS-DetA (recovered detections carry no attribute yield).",
+      "kb v10-frz-003: extraction drift ~1.1 GS-HOTA between runs -- SAME-WINDOW pairing is mandatory."
+    ],
+    "the_unmeasured_mechanism": "The +0.57 ceiling prices MISSES ONLY. A modern detector changes the whole distribution: box geometry (tighter/steadier boxes -> better foot points -> better projection and crops), confidence calibration (which is what ByteTrack's activation and Kalman re-match consume -- the 66% discard bucket), role-class quality, and NMS behaviour. None of those is priced by the miss oracle. This session measures those axes; it does not assume them."
+  },
+  "stage0_license_recon": {
+    "method": "LICENSE text and GitHub/HF API metadata fetched server-side (a100server1 has egress).",
+    "verdicts": {
+      "Intellindust-AI-Lab/DEIMv2": "LICENSE = verbatim Apache-2.0 text under an Intellindust copyright header ('DEIM is licensed under the Apache License'). GitHub reports NOASSERTION only because of the prepended header. Code: Apache-2.0. 1,982 stars, pushed 2026-08-14.",
+      "Peterande/D-FINE": "Apache-2.0 (clean SPDX). 3,289 stars, pushed 2026-08-08.",
+      "lyuwenyu/RT-DETR": "Apache-2.0 by LICENSE text (API metadata call returned non-JSON once; the raw LICENSE is the Apache-2.0 text verbatim).",
+      "roboflow/rf-detr": "Apache-2.0 (SPDX), 8,977 stars, pushed 2026-08-15. NOTE: rfdetr_plus and RF-DETR-XL/2XL are PML-1.0, NOT Apache -- excluded here.",
+      "julianzu9612/RFDETR-Soccernet": "HF card license apache-2.0; weights checkpoint 1,566,066,207 bytes (1.57 GB); RF-DETR fine-tuned on SoccerNet-Tracking 2023, dataset_size 42,750 images = exactly 57 clips x 750 frames = the TRAIN split's frame count (card does not name the split -- treated as an open contamination question, tested in stage 1c)."
+    },
+    "chosen_family_and_why": "RF-DETR (Apache-2.0, DINOv2 ViT backbone, NMS-free DETR head) with the Apache-2.0 SoccerNet fine-tune as the primary arm. Reasons, in order: (1) it is already wired into this repo (generator.extract._RFDetrDetector, --detector rfdetr), so integration is a pip install, not a vendored repo; (2) the in-domain 4-class checkpoint (ball/player/referee/goalkeeper) matches our role contract exactly and needs ZERO training, which makes stage 1 a strictly stronger kill test than a COCO zero-shot arm -- if an in-domain modern transformer shows no advantage, the axis closes with more force; (3) DEIMv2 / D-FINE are equally license-clean but need a vendored repo + COCO-person-only zero-shot, so they are the FALLBACK, run only if stage 1 leaves the axis open.",
+    "finetune_recipe_if_stage2_licenses": "S4b pattern (role-as-class, single-stage, GSR-train + SoccerNet-v3 server-side) applied to RF-DETR via the rfdetr package's own train API. Two-stage (person detector + role head) is NOT chosen: our chain consumes per-detection role ids directly from the detector, and the census's dominant role error (player->referee, 7,032 rows) is a class-quality problem the 4-class head addresses in one pass."
+  },
+  "stage1_registered_kill_experiment": {
+    "substrate": "DEV-20 frames (20 sequences x 750 frames = 15,000 images), img1 jpgs, GT from Labels-GameState.json.",
+    "arms_all_in_one_gpu_window": {
+      "CTL_s4b_640": "The shipped S4b detector (models/gsr_det/gsr_v3_ft_b_last.pt, md5 2074d8741f97a6892a1322d0f808244c) at the pipeline's imgsz 640, conf floor 0.01, iou 0.7, RGB channel order (what generator.extract feeds).",
+      "CTL_s4b_1280": "The same weights at imgsz 1280 -- the RESOLUTION CONTROL, so an RF-DETR win at its native 1280 cannot be booked as an architecture win when it is a pixel win.",
+      "ARM_rfdetr_soccer": "RF-DETR SoccerNet checkpoint at its native resolution, conf floor 0.01, same frames, same window."
+    },
+    "instrument": "tools/gsr_v9_w7_infer.py's dump schema (frame,image_x,image_y,x1,y1,x2,y2,conf,cls,role) is reused verbatim for the YOLO arms; the RF-DETR arm writes the identical schema. Analysis reuses tools.gsr_v9_w7.match_feet (scale-free 0.5-box-height foot gate) and tools.gsr_v9_w7.replay_tracker (CPU ByteTrack replay at the shipped c0.20/m3).",
+    "axes_and_thresholds": {
+      "A_recall_at_matched_operating_point": "Per arm, choose the confidence threshold at which the arm emits the same number of person boxes as CTL_s4b_640 does at 0.20; report GT-row recall there, plus recall at the fixed 0.20 and the full recall-vs-boxcount curve. ADVANTAGE = recall gain > +0.005 absolute (0.5 recall points; the control sits 2.9 points from perfect and perfect is worth +0.57 GS-DetA, so a smaller gain cannot repay a retrain).",
+      "B_box_quality": "On matched pairs: IoU with the GT bbox_image, and foot-point error in GT-box-height units (the quantity the homography actually consumes). ADVANTAGE = median IoU +0.02 or median foot error -10% relative.",
+      "C_chain_discard_survival": "ByteTrack replay at the shipped settings on each arm's own boxes: post-tracker GT recall and the fraction of >=0.20 boxes the tracker discards. ADVANTAGE = post-tracker recall gain > +0.005 or discard fraction lower by > 2 points at equal input recall.",
+      "leak_check_1c": "The same recall measurement on 3 GSR-TRAIN sequences (SNGS-060, -061, -062) for CTL_s4b_640 and ARM. Both models saw train data, so this is a memorisation reference, not a clean control; a DEV-20 recall that EXCEEDS the arm's own train recall would flag the card's unnamed split as a contamination hazard and void the arm."
+    },
+    "kill_rule": "If ARM_rfdetr_soccer shows NO advantage above threshold on ANY of axes A, B, C against CTL_s4b_640 (with CTL_s4b_1280 used to attribute any advantage to resolution rather than architecture), the modern-detector axis CLOSES WITHOUT TRAINING and no stage 2 is run. An S4b-style fine-tune of the same family could only grow an advantage that already exists in-domain; it cannot create one that is absent at every measured axis.",
+    "fallback_if_axis_stays_open_but_arm_is_ambiguous": "Add a DEIMv2 (Apache-2.0) COCO zero-shot person arm in the same window before any training is scheduled."
+  },
+  "stage2_bars_if_stage1_licenses": {
+    "discipline": "A detector swap invalidates every downstream cache: positions, calibration re-gate, per-crop OCR, box cache, embeddings. Both arms must be extracted in ONE window (kb v10-frz-003) and both re-derived through the full chain.",
+    "bars": [
+      "pooled DEV-20 GS-HOTA >= +1.0 over the same-window control, with the full shipped flag stack + arm D + s4 applied to BOTH sides",
+      "GS-DetA not worse than the control",
+      "per-sequence paired GS-HOTA helped > hurt with Wilcoxon p < 0.05 (n = 20)"
+    ]
+  },
+  "amendment_1_axis_D_role_quality": {
+    "when": "2026-08-17, after axes A/B/C were computed and BEFORE any role number was produced (the role code did not exist when A/B/C were read).",
+    "why": "The premise in section 1 names 'role-class quality' as one of the distribution changes a modern detector brings, and section 1's axis list did not operationalise it. Role errors are the census's second-largest attribute bucket (+1.42 GS-DetA isolated, +8.13 marginal), so leaving the axis unmeasured would have understated BOTH the upside and the risk of a swap.",
+    "axis_D": "On matched detections at conf 0.20, each dump's own class name against the GT role attribute: per-role accuracy and the full confusion. No pass/fail threshold was pre-registered for D; it is reported as a magnitude and used only to qualify the A/B/C verdict, never to manufacture one.",
+    "honesty_note": "D is therefore a post-registration measurement. It is stated as such wherever it is quoted."
+  },
+  "stage1_results_and_verdict": {
+    "gpu_window": "2026-08-17 07:24-07:56 UTC+0530 on a100server1 GPU 1, after W11's harvest job printed HARVEST_DONE rc=0. All three dumps and both control dumps are inside that window.",
+    "axis_A_recall_at_matched_op": {"s4b_640": 0.97046, "s4b_1280": 0.98123, "rfdetr_560": 0.96877,
+      "verdict": "rfdetr FAIL (-0.00169 vs the +0.005 bar); s4b_1280 PASS (+0.01077)"},
+    "axis_B_box_quality": {"iou_median": {"s4b_640": 0.8135, "s4b_1280": 0.8256, "rfdetr_560": 0.8025},
+      "foot_err_median_boxheights": {"s4b_640": 0.04029, "s4b_1280": 0.03732, "rfdetr_560": 0.03991},
+      "verdict": "rfdetr FAIL (IoU -0.011, foot -0.96%); s4b_1280 FAIL ON THE BARS but moves both the right way (IoU +0.012 vs a +0.02 bar, foot -7.4% vs a -10% bar)"},
+    "axis_C_chain_discard_survival": {"replay_recall": {"s4b_640": 0.92294, "s4b_1280": 0.93003, "rfdetr_560": 0.93042},
+      "discard_frac": {"s4b_640": 0.0908, "s4b_1280": 0.0924, "rfdetr_560": 0.0694},
+      "tracks": {"s4b_640": 1341, "s4b_1280": 1370, "rfdetr_560": 1223},
+      "verdict": "rfdetr PASS (+0.00748); s4b_1280 PASS (+0.00709)"},
+    "axis_D_role_quality_post_registration": {"accuracy_all": {"s4b_640": 0.9419, "s4b_1280": 0.9498, "rfdetr_560": 0.8214},
+      "player_to_referee_rows": {"s4b_640": 7366, "s4b_1280": 5702, "rfdetr_560": 33132},
+      "reading": "the modern checkpoint is 12.05 role points worse and multiplies our dominant role error 4.5x"},
+    "leak_check_1c": {"train_recall": {"s4b_640": 0.9947, "rfdetr_560": 0.9970},
+      "dev_recall": {"s4b_640": 0.97046, "rfdetr_560": 0.96877},
+      "reading": "both detectors sit ~2.4-2.8 recall points higher on GSR-train than on DEV-20, the same gap shape; no evidence that the checkpoint's unnamed split contaminates DEV-20"},
+    "decision": "The registered kill rule is formally NOT triggered (axis C passes for the modern detector), but the honest verdict is a KILL FOR THE DETECTOR SWAP: at our operating point the modern in-domain DETR is worse on recall (A), looser on boxes (B) and catastrophically worse on roles (D), and its single advantage (C, +0.0075 post-tracker recall / 2.1 fewer discard points) prices at ~+0.1..0.2 GS-DetA -- an order of magnitude under this session's own +1.0 GS-HOTA stage-2 bar. No stage-2 fine-tune was run and none is recommended for this family. The session hands back ONE candidate instead: the incumbent detector at imgsz 1280, which dominates its own 640 curve on every axis measured, for ~1.5x detector inference. Pricing it end to end is a separate, registered, same-window two-arm re-extraction (~5-6 GPU-h) and an orchestrator call, not a worker's unilateral spend.",
+    "gpu_hours": "0.289 GPU-h of measured inference (S4b 640 over 20 DEV + 3 train sequences, S4b 1280 over 20, RF-DETR 560 over 20 DEV + 3 train = 0.145 + 0.015 + 0.129), plus a few minutes of model loading and two smoke frames. No training, no re-extraction, no GPU scoring. All CPU analysis ran server-side on the 128-core host.",
+    "cluster_footprint_left_behind": "~/work/v10w12 (244 MB of dumps, kept -- they are the substrate for any follow-up), ~/models/rfdetr_soccernet (1.5 GB checkpoint), conda env det12 (7.2 GB clone of gsr + rfdetr 1.9.2). Nothing in the shared gsr env was mutated."
+  },
+  "rules": [
+    "No flag or weight is wired on by default in any code this session ships.",
+    "Versioned output dirs only (kb v9-w1-006): server dumps under ~/work/v10w12/<arm>/, nothing overwritten in place.",
+    "No STATUS edit, no commit, no push.",
+    "claims v10-w12-001+ with the full schema."
+  ]
+}

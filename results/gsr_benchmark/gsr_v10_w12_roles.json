@@ -1,0 +1,110 @@
+{
+ "s4b_640": {
+  "confusion": {
+   "player->player": 191397,
+   "referee->referee": 16553,
+   "player->referee": 7366,
+   "goalkeeper->goalkeeper": 7014,
+   "goalkeeper->player": 1942,
+   "referee->player": 3531,
+   "player->goalkeeper": 344,
+   "other->player": 10,
+   "referee->goalkeeper": 66,
+   "goalkeeper->referee": 4
+  },
+  "accuracy": {
+   "player": {
+    "n": 199107,
+    "correct": 191397,
+    "accuracy": 0.961277102261598
+   },
+   "goalkeeper": {
+    "n": 8960,
+    "correct": 7014,
+    "accuracy": 0.7828125
+   },
+   "referee": {
+    "n": 20150,
+    "correct": 16553,
+    "accuracy": 0.8214888337468983
+   },
+   "all": {
+    "n": 228227,
+    "correct": 214964,
+    "accuracy": 0.9418868056803095
+   }
+  }
+ },
+ "s4b_1280": {
+  "confusion": {
+   "player->player": 195075,
+   "referee->referee": 17315,
+   "player->referee": 5702,
+   "referee->player": 3175,
+   "goalkeeper->goalkeeper": 6787,
+   "goalkeeper->player": 2210,
+   "player->goalkeeper": 251,
+   "other->player": 30,
+   "referee->goalkeeper": 189,
+   "goalkeeper->referee": 26
+  },
+  "accuracy": {
+   "player": {
+    "n": 201028,
+    "correct": 195075,
+    "accuracy": 0.9703872097419265
+   },
+   "goalkeeper": {
+    "n": 9023,
+    "correct": 6787,
+    "accuracy": 0.7521888507148399
+   },
+   "referee": {
+    "n": 20679,
+    "correct": 17315,
+    "accuracy": 0.8373228879539629
+   },
+   "all": {
+    "n": 230760,
+    "correct": 219177,
+    "accuracy": 0.949804992199688
+   }
+  }
+ },
+ "rfdetr_560": {
+  "confusion": {
+   "player->player": 165209,
+   "referee->referee": 14421,
+   "player->referee": 33132,
+   "goalkeeper->goalkeeper": 7499,
+   "player->goalkeeper": 474,
+   "goalkeeper->player": 1334,
+   "referee->player": 5120,
+   "other->player": 116,
+   "goalkeeper->referee": 190,
+   "referee->goalkeeper": 335
+  },
+  "accuracy": {
+   "player": {
+    "n": 198815,
+    "correct": 165209,
+    "accuracy": 0.8309684882931369
+   },
+   "goalkeeper": {
+    "n": 9023,
+    "correct": 7499,
+    "accuracy": 0.8310983043333703
+   },
+   "referee": {
+    "n": 19876,
+    "correct": 14421,
+    "accuracy": 0.7255484000804991
+   },
+   "all": {
+    "n": 227830,
+    "correct": 187129,
+    "accuracy": 0.8213536408725804
+   }
+  }
+ }
+}
