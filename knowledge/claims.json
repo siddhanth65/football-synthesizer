@@ -9341,6 +9341,111 @@
     "clip",
     "cache"
    ]
+  },
+  {
+   "id": "v10-forensic-001",
+   "statement": "SNGS-082's undiagnosed regression is pinned and is entirely a v7-era artefact. The clip lives in TEST-38 (not DEV-20). Its GS-HOTA on the v6 control is 60.7732; the v7 push ARM 1 (edl_fuse94 evidential reader) scores 56.5568 (-4.2164) and ARM 2 (+ appearance weight 0.7) 52.9352 (-7.8380), which reproduces the master doc's '-4 to -8' exactly and is the worst single-sequence regression of that session on both arms. The loss is jersey-only: per-row jersey accuracy 0.6902 -> 0.6236 -> 0.5788, identity accuracy 0.6564 -> 0.5897 -> 0.5437, solver identity slots 18 -> 17 -> 17. Across the 38 clips the GS-HOTA delta tracks the jersey-accuracy delta at a near-constant ~60 points per unit (082 -4.216/-0.067 = 62.9; 029 +9.158/+0.160 = 57.2), so there is no special GS-HOTA amplification on this clip, only a larger jersey error. On the SHIPPED stack it is not a regression at all: v9-W9 off 60.7732 -> vote 61.1610 (+0.388) -> full 63.3429 (+2.570), rank 11 of 38 against a pooled T38 mean of 53.73.",
+   "value": -7.838,
+   "unit": "GS-HOTA on SNGS-082, v7 push ARM 2 minus the v6 control 60.7732 (ARM 1: -4.216)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_forensic_082.json",
+    "results/gsr_benchmark/gsr_v7_push_t38.json",
+    "results/gsr_benchmark/gsr_v9_w9_t38.json",
+    "tools/gsr_vote_delta.py"
+   ],
+   "method": "Per-sequence numbers read verbatim from the on-record arm artifacts (gsr_v7_push_t38.json, gsr_v9_w9_t38.json, gsr_v6det_t38_base/v6det.json, gsr_v4_valid_t38.json, gsr_v5_clip_t38.json, gsr_eiou_t38_clip.json, gsr_calibgate_compare_t38.json, gsr_scores_prtreid_relink/propagate.json) and collected into results/gsr_benchmark/gsr_v10_forensic_082.json. No arm was re-run; CPU only; DEV/valid artifacts only.",
+   "n": 38,
+   "caveats": [
+    "'Worst single-clip regression of the whole campaign' (docs/GSR_PROJECT_MASTER.md 5.6) is NOT verified here; what is verified is that it is the worst of the v7 push session, which is what kb v7-push-002 actually claimed.",
+    "082 was also hurt by two earlier appearance-side changes on the same split -- the CLIP embedder cost it 3.72 against PRTreID (44.4088 -> 40.6913) and the calibration fill cost it 1.47 (40.0716 -> 38.6024, restored to 40.0773 by the gate) -- and it was the single biggest gainer from jersey propagation (+13.879 vs relink-only). It reacts strongly to identity-side changes in both directions.",
+    "SNGS-082 is NOT in the GT side-flip set (gt_audit.json flip_set = 126/130/131/197); its game-mate SNGS-092 is a cross-clip minority suspect."
+   ],
+   "date": "2026-08-17",
+   "tags": [
+    "gsr",
+    "jersey",
+    "identity",
+    "forensic",
+    "v7",
+    "negative-result"
+   ],
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v7-push-002"
+   ]
+  },
+  {
+   "id": "v10-forensic-002",
+   "statement": "The mechanism is a confidence-scale mismatch in the vote rule, not a bad read. The v6 control and the v7e arm share a bit-identical detection/position set on SNGS-082 (13,222 rows, identical bbox_pitch multiset); they differ only downstream, where the jersey-gated connector regroups 1,486 of those rows (11.2%) into 47 tracks instead of 48. Aligning the two vote caches through their crop-frame-set partition (96 of ~100 blocks shared), the EDL fuser LOSES two correct reads carried by long tracklets -- left #4 (410 rows) and left #50 (448 rows), 6.3% of the sequence's rows -- and gains correct reads worth 5.2% of rows: net -1.2% of rows in read coverage but -6.7 points of final jersey accuracy, because the identity solver, deprived of two left-team anchors, misfills them from the residual pool under its per-team mutual-exclusion constraint and drops one slot (18 -> 17). Per-crop gate trace: on left #4 the v6 rule admitted 4 crops (3 x '4', 1 x '14', softmax 0.999-1.000) and read 4, the EDL rule admitted 0 because the fused confidences are 0.036/0.448/0.283/0.329 against a 0.5 floor. On left #50 the v6 rule admitted 4 (3 x '50') and read 50, EDL admitted 1 (0.730) against min_votes 2, the rest killed by p_illegible 0.648/0.797 and u 0.71. The evidential rescaling caps p at ~0.835 and collapses marginal crops to ~0.002, so the nominally LOOSER rule (min_crop_conf 0.9 -> 0.5, min_votes 3 -> 2) is strictly stricter on thin evidence.",
+   "value": 0.063,
+   "unit": "fraction of SNGS-082's 13,567 positions rows whose correct jersey read is lost by the EDL fuser (gained 0.052; the largest loss of the 38 clips)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_forensic_082.json",
+    "results/gsr_benchmark/gsr_v7_push_t38.json",
+    "results/gsr_benchmark/gsr_v9_w9_t38.json",
+    "tools/gsr_vote_delta.py"
+   ],
+   "method": "tools/gsr_vote_delta.py aligns two per-crop caches by the frame set of each track (the association is re-run per arm into the same directory and is stable only up to an id relabelling), attributes each predicted track to the majority GT player within 3 m on the pitch, and weights every read transition by that track's row count in the arm's positions table. Run on outputs/gsr_srv/koshkina_percrop_{v6,v7e}_v6det_eiou against positions_gate_v6det_eiou. Association identity checked by comparing the two arms' final prediction files as multisets of (image_id, bbox_pitch).",
+   "n": 38,
+   "caveats": [
+    "Track-id alignment is partial where the association re-run drifted more: SNGS-082 leaves 6 base tracks unmapped, but SNGS-079 leaves 38 and SNGS-050 39, so the loss column is conservative on those clips and 082's numbers are among the most reliable.",
+    "The solver step was not re-run: attributing the residual jersey-accuracy loss to solver misfill is inference from n_identities 18 -> 17 with n_named holding at 39, not a measured assignment diff. The arm's submission was not retained on disk.",
+    "The number column of the v7e per-crop cache carries the EDL decision (-1 for abstain), not the raw argmax, so the v6 rule cannot be recomputed on it; the v6 lineage cache must be used and mapped. An earlier pass that ignored this reached the opposite (wrong) conclusion.",
+    "Incidental finding: each v7-push arm re-ran the association into the SAME positions directory, so the on-disk positions table is the v7e arm's rebuild (mtime 2026-08-07 23:27:14) and the v6 arm's vote cache no longer aligns with it by raw id. The rebuild is row-identical but not id-identical."
+   ],
+   "date": "2026-08-17",
+   "tags": [
+    "gsr",
+    "jersey",
+    "ocr",
+    "evidential",
+    "forensic",
+    "v7"
+   ],
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-forensic-001"
+   ]
+  },
+  {
+   "id": "v10-forensic-003",
+   "statement": "Why this clip and not another: SNGS-082 has the largest FRAGILE-READ EXPOSURE of the 38 -- 1,876 rows, 13.8% of the sequence, whose correct number rests on <= 4 admissible crops (next SNGS-040 at 12.5%, then a gap to 5.5%) -- combined with the joint-highest number of solver identity slots (18) and 20 of 21 GT players carrying a jersey label. Visually the reason is the kit: one team plays in white-with-green-hoops with navy numbers legible only when the player is large, square-on and unblurred (left #4: 8 of 59 crops legible, 4 admissible; left #50: 7 of 61, 4 admissible), while the other team's white-on-royal-blue numbers read from twice the distance (right #17: 39 of 60 legible). The clip also carries three numbers duplicated across the two teams (10, 15, 27 -- joint top of the split with SNGS-047), which loads the solver's per-team mutual-exclusion constraint. Siblings: this is a whole-game property. Game 5 (SNGS-078..096, the hooped-kit game, 12 of the 38) is the only game with a negative mean arm-1 delta (-0.42, against +1.95 for game 2 and +0.13 for game 3) and supplies 4 of the 6 worst clips (082 -4.22, 095 -3.33, 094 -2.90, 083 -1.53). Across the 38 the fraction of rows whose correct read is lost is the best single predictor of harm (Pearson -0.380 against the arm-1 GS-HOTA delta, -0.351 against the jersey-accuracy delta) and the two clips with the largest losses (082 0.063, 047 0.054) are the two worst clips.",
+   "value": 0.1383,
+   "unit": "fraction of SNGS-082's rows whose correct jersey read rests on <= 4 admissible crops (rank 1 of 38)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_forensic_082.json",
+    "results/gsr_benchmark/gsr_v7_push_t38.json",
+    "results/gsr_benchmark/gsr_v9_w9_t38.json",
+    "tools/gsr_vote_delta.py",
+    "data/soccernet/gamestate-2024/SNGS-082/Labels-GameState.json"
+   ],
+   "method": "Fragile exposure computed per clip from the v6-lineage per-crop cache (admissible = legibility >= 0.5 and softmax p_number >= 0.9), track ids mapped into the arm's numbering by tools/gsr_vote_delta.py and weighted by positions rows. Game grouping from each sequence's Labels-GameState.json info block. Kit description from frames read directly out of data/soccernet/gamestate-2024/SNGS-082/img1 -- a contact strip every 84th frame plus per-track crop montages of the two lost players and two kept controls.",
+   "n": 38,
+   "caveats": [
+    "Exposure is necessary but not sufficient: SNGS-040 has almost the same fragile fraction (0.125) and lost only 0.16 GS-HOTA, because on that clip the fuser did not drop those reads.",
+    "Per-team crop legibility rates on 082 (left 0.222 admissible, right 0.278) are among the HIGHEST of the 38 -- the hooped kit's cost shows up per track, not in the clip aggregate, so 'illegible clip' would be the wrong summary.",
+    "The prescription is process, not code, and is UNMEASURED: any reader swap re-scales the confidence the vote rule thresholds on, so (min_crop_conf, min_votes) must be re-fitted on DEV in the new reader's units before the arm is scored, or the absolute floor replaced by a per-track rank/quantile admission that is invariant to the swap. Nothing is claimed about its value on the shipped v9/v10 stack, whose reader differs and whose TEST-38 vote caches are not on the laptop.",
+    "This closes SNGS-082 as an actionable item: the component that caused it (edl_fuse94) was refuted at its own pre-registered gate and never shipped, and the shipped v9 stack gains +2.570 on this clip."
+   ],
+   "date": "2026-08-17",
+   "tags": [
+    "gsr",
+    "jersey",
+    "ocr",
+    "forensic",
+    "dataset",
+    "v7"
+   ],
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-forensic-002"
+   ]
   }
  ]
 }

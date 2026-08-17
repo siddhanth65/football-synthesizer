@@ -1781,9 +1781,15 @@ league, one season, 30 seconds each.
 3. Modern detector on a licence-clean path (unmeasured mechanism, honestly flagged).
 4. Denser correspondences, clean-room from Falaleev & Chen.
 5. Faithful CAMELTrack.
-6. SNGS-082 — the worst single-clip regression of the whole campaign (−4 to −8), **never
-   diagnosed**. One undiagnosed pathology on a 49-clip board is worth more than it looks, and it
-   costs one afternoon of watching a video.
+6. SNGS-082 — *(diagnosed 2026-08-17, item CLOSED; correction: the −4 to −8 was the worst
+   regression of the v7 PUSH session specifically, and both offending arms failed their gates
+   and never shipped — the shipped stack GAINS +2.57 on this clip.)* Mechanism: a hooped,
+   low-contrast kit makes its numbers rest on ≤4 readable crops per player; the experimental
+   fusion's confidence floor, expressed in the old reader's units, silently became stricter
+   after a reader swap and dropped two anchor reads, cascading through the roster solver.
+   Transferable rule banked: after ANY reader swap, re-fit vote thresholds in the new
+   reader's units (or use rank/quantile admission, which is swap-invariant). See
+   results/gsr_benchmark/gsr_v10_forensic_082.json and kb v10-forensic-001..003.
 
 ---
 

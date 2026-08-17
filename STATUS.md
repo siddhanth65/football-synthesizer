@@ -1,5 +1,26 @@
 # STATUS
 
+## 2026-08-17 — SNGS-082 forensic: CLOSED, no live wound — the "-4 to -8" was the never-shipped v7-push arms; the shipped stack GAINS +2.57 on this clip; the mechanism is a units bug in a refuted component, and its transferable rule is banked
+
+results/gsr_benchmark/gsr_v10_forensic_082.json, kb v10-forensic-001..003,
+tools/gsr_vote_delta.py (content-aligned vote-cache differ — new instrument). SNGS-082 is
+TEST-38 (not DEV); full per-arm history verified: shipped v9 stack 60.77 -> 63.34 (+2.570,
+rank 11/38). The regression: v7-push ARM 1 -4.216 / ARM 2 -7.838, jersey-only — both arms
+FAILED their registered gates and never shipped. Frames (viewed): hooped white/green kit
+with navy numbers = fragile reads (13.8% of rows rest on <=4 admissible crops, top of the
+split); the EDL fuser's min_crop_conf 0.5 floor was expressed in the OLD reader's units —
+after rescaling, the nominally looser rule is STRICTLY STRICTER on thin evidence; two
+anchor reads lost (#4: 4 admitted -> 0; #50: 4 -> 1) -> solver mutex misfills, slot 18->17.
+Whole-game sibling structure: game 5 (hooped kit) is the only game with negative mean
+push delta (-0.42), 4 of the 6 worst clips. **Transferable rule (unmeasured, offered):
+after any reader swap, re-fit vote thresholds in the new reader's units or use rank/
+quantile admission (swap-invariant) — would plausibly have made 34-of-38 into ~37-of-38.**
+Master-doc §5.6 item 6 corrected ("worst of the whole campaign" -> "worst of the v7 push
+session"; item CLOSED). Instrument traps documented: v7-push arms overwrote one positions
+dir in place (id drift — align caches by content, never id); the v7e cache's number column
+is the DECISION (-1=abstain), not raw argmax. 082 is also the campaign's biggest
+propagation GAINER (+13.879) — it is the identity-sensitivity outlier in both directions.
+
 ## 2026-08-17 — v10 W9: dedup FAILS its component gate — and the +4.50 "duplicate tracks" prize is MISNAMED: overlapping same-identity pairs sit a median 7.44 m APART; the oracle's value is ROW PRUNING (9,202 deletions), and the labeller's flicker contaminates even that
 
 results/gsr_v10_w9_registered.json (pre-declared incl. the fit-split exploratory pass),

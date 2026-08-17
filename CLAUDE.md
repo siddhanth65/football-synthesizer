@@ -43,6 +43,11 @@ grounded pundit reports (France focus). Roadmap anchor: `docs/PROJECT_AUDIT_2026
   new substrate. Do NOT propose challenge pivots unless Sid raises them.** (Prior
   amendments — beat-61.48/v9, 2026-07-31 GSR focus — superseded but their discipline rules
   all still apply: registration, gates, GT-free legitimacy, cluster-only GPU.)
+- **Amendment (2026-08-17, per Sid): run the ENTIRE master-doc §5.6 ranked list, INCLUDING
+  items previously deferred as expensive** (learned selection + distortion, learned
+  splitter, modern license-clean detector, denser correspondences, faithful CAMELTrack,
+  the SNGS-082 forensic) — "I'll decide when time is a factor." Cost-based deferral is
+  Sid's call, not the orchestrator's. Gates and registration discipline unchanged.
 - **Scope amendment (2026-07-31, per Sid): primary near-term goal = score well on the SoccerNet
   GSR benchmark (GS-HOTA), using the SoccerNet GSR dataset.** ManU-corpus adaptation deferred.
   College GPU cluster is approved (Sid books slots on request); the 4 GB constraint applies to the
