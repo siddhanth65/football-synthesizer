@@ -1,5 +1,43 @@
 # STATUS
 
+## 2026-08-17 — v10 W10: row-pruning CLOSED (+0.4772 vs 1.5 bar) — and the +4.50 mystery is SOLVED: the deletions are the LEGALITY PRECONDITION of the merges (8,792 illegal duplicate-id timesteps without them); the association axis is now completely measured shut
+
+results/gsr_v10_w10_registered.json (bars pre-fixed), results/gsr_benchmark/gsr_v10_w10.json,
+kb v10-w10-001..004, tools/gsr_v10_w10.py. Instrument validated at both ends (reproduces
+oracle_dedup and oracle_merge_dedup to 4 dp). **Bucket decomposition of the 9,202 deletions
+(near-additive, no masked prize): dup_owner 40.6% (+0.17), wrong_stable 38.7% (+0.26 —
+median disagreement run 104 rows/4.2 s: seconds-long excursions, NOT flicker; flicker is
+only 3.8% of these rows, qualifying v10-w7-005), junk 9.1% (+0.05). Flicker-tolerant
+reachable prize = +0.4772 < 1.5 -> CLOSED.** The brief's premise corrected: DetA +3.50 does
+NOT live in the deletions (standalone +0.77); **the +2.68 interaction prices an ID-
+ASSIGNMENT act — merge-all without deletion is REFUSED by the evaluator (8,792 duplicate-id
+timesteps; restoring ANY single bucket recreates 348-3,693): no bucket is optional; a row
+pruner cannot perform the act. Association residual: connector CLOSED, splitter CLOSED,
+dedup-mechanism CLOSED, row-pruning CLOSED — the +4.50 remains real and remains unreachable
+GT-free at our label quality. Thesis claim: there is no residual to reach.** Signal audit
+banked for the record (a pruner is buildable — junk=low-confidence, dup=crowding,
+wrong=path-deviation — it is just worth nothing). Instrument notes: arm-D bbox_image height
+is a CONSTANT 40 px (information-free feature; box-IoU degrades to proximity); worker
+caught + fixed its own results-writer clobber bug pre-verdict. Live: W11 conic, W12
+detector; CAMELTrack queued (its prior drops given this closure — Sid's green-light keeps
+it queued).
+
+## 2026-08-17 — BOARD CONFIRMED: 56.70, 5TH PLACE (submission #6, exact self-score match — scorer 4-for-4 vs codabench) + INTEL: Baishev is actively sourcing SoccerFactory data (blocked by corrupt tars)
+
+Sid uploaded gsr_testphase_gtfree_v10_1a197073.zip: board 53.09 -> **56.7, rank 5** (above
+KIST-GSR 56.56; Playbox&MIXI 58.06 is 4th). Public arc: 31.88 -> 33.37 -> 35.40 -> 39.02 ->
+53.09 -> 56.70; submissions used 6 of 10. **Intel (Sid-supplied): PogChamper/Baishev filed
+issue #8 on haolinyang-hlyang/SoccerMaster 4h ago — he is downloading soccer_factory_videos
+(the 64.1 group's auto-annotated corpus) and found 1,998/2,000 mp4s packed unfinished (no
+moov atom; his bitstream-recovery attempt documented). Reading: his 68.3 did NOT use this
+data; his NEXT iteration is data-scale training on SoccerFactory; he is currently blocked.
+STANDING WATCH: if repaired tars land with usable terms, the corpus (~100 GB, 7 parts) is a
+candidate for our detector/ReID pretraining under the research-dataset rule (Sid per-fetch
+approval + size plan). SoccerMaster repo itself remains license-null = inspection-only.**
+In flight: W10 (pruning verdict), W11 (conic — last geometry lever), detector session
+dispatched (license-clean DEIMv2 path, §5.6 #3). Rider inventory for freeze #2: arm A
+(+0.40 gated), W11/W10 pending. Next-freeze band ~57.5-58.5 -> 4th.
+
 ## 2026-08-17 — v10 FREEZE COMPLETE: all 4 TEST-38 bars PASS — test-49 self-score 56.7018; submission package READY (expected board ~56.7 = 5th place); drift honesty halves the apparent gain to a real +1.40
 
 results/gsr_v10_frozen.json (declared BEFORE first TEST-38 read, mtime-verifiable),

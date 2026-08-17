@@ -9781,6 +9781,157 @@
     "package",
     "freeze"
    ]
+  },
+  {
+   "id": "v10-w10-001",
+   "statement": "THE ORACLE'S 9,202 DELETIONS ARE NOT LABELLER FLICKER -- THEY ARE STABLE WRONG-IDENTITY AND TRUE-DUPLICATE ROWS. The W7 merge+dedup drop set was re-derived exactly on arm D's own DEV-20 submission (9,202 rows; every per-clip count identical to gsr_v10_w7.json's stacked_rows, e.g. SNGS-042 1,568 and SNGS-021 64) and each deleted row was asked WHY it went. Strict decomposition: dup_owner 3,733 (40.6%) -- the row's nearest GT within 5 m IS the track's owner, a genuine duplicate-match competition; wrong_stable 3,558 (38.7%) -- nearest a DIFFERENT GT inside a disagreement run of >= 25 audited rows (median run 104 rows = 4.2 s, quartiles 29 / 174, max 304); junk 841 (9.1%) -- no GT within 5 m at all; wrong_mid 722 (7.8%); wrong_flicker only 348 (3.8%). 76.9% of all wrong-identity deleted rows sit in runs >= 25 rows. Under the registered 1.5 m labeller-noise-tolerant re-reading (two GT players that close in a frame are interchangeable) only 617 rows (6.7% of the drop set) migrate to dup_owner and 3,173 stable wrong-identity rows survive. This QUALIFIES kb v10-w7-005 instead of extending it: flicker dominates ownership disagreement across the v9 factory substrate at large, but NOT the rows this oracle deletes, which are seconds-long excursions of a track onto another player -- the row-level face of kb v10-w9-002's 7.44 m median pair separation.",
+   "value": 0.038,
+   "unit": "share of the 9,202 oracle deletions that are flicker-length (<= 5 row) wrong-identity rows",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w10_registered.json",
+    "results/gsr_benchmark/gsr_v10_w10.json",
+    "tools/gsr_v10_w10.py",
+    "outputs/gsr/v10_w10/drop_table.parquet"
+   ],
+   "method": "tools.gsr_v10_w10 --decompose. Drop set re-derived with the tools.gsr_v10_w7.apply_merges(mode='merge_dedup') rule (keep the highest-confidence row per (trusted owner identity, frame) group). Row identity = tools.gsr_v9_factory.label_rows (nearest GT player/GK within 5.0 m); track owner = tools.gsr_v10_w7.ownership dominant vote at >= 5 audited rows. Disagreement runs counted over the track's frame-sorted audited rows, the tools.gsr_v10_w7.flicker_anatomy convention. Measure-only; no metric read.",
+   "n": 20,
+   "caveats": [
+    "DEV-20 only, arm-D substrate (outputs/gsr/deleak_v10w5_D). No TEST/challenge sequence was read.",
+    "Bucket boundaries (<= 5 flicker, >= 25 stable) are the registered W7 conventions; the 722 rows between them are reported separately as wrong_mid and are claimed by neither category.",
+    "13 deleted rows have their owner GT absent from the frame, so tolerance cannot be checked for them; they stay strictly wrong."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w7-002",
+    "v10-w7-005",
+    "v10-w9-002"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "dedup",
+    "tracking",
+    "decomposition",
+    "labeller-noise"
+   ]
+  },
+  {
+   "id": "v10-w10-002",
+   "statement": "REGISTERED VERDICT: THE ROW-PRUNING AXIS IS CLOSED AT +0.48 GS-HOTA, LESS THAN A THIRD OF ITS BAR. Each bucket was priced as a standalone prune of arm D -- rows deleted, NO id change, which is all a future GT-free pruner could do -- with the official evaluator over the full flag stack. Flags ON: the registered qualifying union under tolerant bucketing (junk + dup_owner + wrong_stable, 8,364 rows) is worth +0.4772 GS-HOTA (DetA +0.7415, AssA -0.0047, 16 helped / 4 hurt, Wilcoxon p = 8.5e-04); strict bucketing gives +0.4707 over 8,132 rows. Per bucket, strict / tolerant: wrong_stable +0.2586 / +0.2553, dup_owner +0.1690 (p = 0.60, not significant) / +0.1781, wrong_mid +0.0571 / +0.0475, junk +0.0478, wrong_flicker +0.0155 / +0.0185. Deleting ALL 9,202 is worth +0.5261, so the buckets are very nearly additive and NO subset beats the whole -- there is no hidden prize the bad rows were masking. The registered rule (reachable prize < +1.5 -> CLOSED) fires. Discarding flicker costs almost nothing (+0.019 of the +0.53), so flicker is not the thief: there is simply no prize in row deletion alone. Instrument validated at both ends -- deleting all 9,202 with ids untouched reproduces the on-record oracle_dedup exactly (+0.5261 ON / +0.3038 OFF) and merge-all plus the same deletions reproduces oracle_merge_dedup exactly (+4.4999 ON / +0.5838 OFF).",
+   "value": 0.4772,
+   "unit": "GS-HOTA of the flicker-robust reachable prize over arm D, DEV-20 flags ON (registered bar: >= +1.5)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w10_registered.json",
+    "results/gsr_benchmark/gsr_v10_w10.json",
+    "tools/gsr_v10_w10.py",
+    "outputs/gsr/v10_w10/drop_table.parquet",
+    "results/gsr_benchmark/gsr_v10_w7.json"
+   ],
+   "method": "tools.gsr_v10_w10 --price --axis A: for each bucket a submission equal to arm D minus that bucket's rows, scored by tools.gsr_v9_w7.score_pair (official evaluator, flags ON and OFF, 20 clips, paired Wilcoxon) against untouched arm D. The tolerant matcher acts only on bucket membership; the evaluator is never modified.",
+   "n": 20,
+   "caveats": [
+    "DEV-20 only; the bar was fixed in results/gsr_v10_w10_registered.json before any number existed.",
+    "This prices deletion in isolation, which is the reachable axis. It is NOT a decomposition of the +4.4999 -- see v10-w10-003, where that decomposition is shown to be undefined.",
+    "dup_owner alone is not statistically separable from zero (11 helped / 8 hurt, p = 0.60) and is negative flags OFF (-0.0142), so its +0.169 is the weakest part of the prize."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w10-001",
+    "v10-w7-002"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "dedup",
+    "tracking",
+    "negative-result",
+    "registered-verdict",
+    "pruning"
+   ]
+  },
+  {
+   "id": "v10-w10-003",
+   "statement": "PREMISE CORRECTED: THE DetA +3.50 DOES NOT LIVE IN THE 9,202 DELETIONS, AND THE +4.4999 ADMITS NO DELETION-BUCKET DECOMPOSITION AT ALL. The oracle's merge-all step puts two rows of one id in the same timestep 8,792 times on DEV-20, and the official evaluator REFUSES such a submission before computing any metric -- verbatim, 'trackeval.utils.TrackEvalException: Tracker predicts the same ID more than once in a single timestep (seq: SNGS-021, frame: 67, ids: 25)'. The full oracle has 0 such timesteps. Restoring any single bucket on its own re-creates between 348 (wrong_flicker) and 3,693 (dup_owner) illegal timesteps, so NO bucket is optional and the registered axis-B counterfactual (merge-all with one bucket's deletions withheld) does not exist as a scoreable object. The deletions are therefore the LEGALITY PRECONDITION of the merge, not a value bucket: on their own the same 9,202 rows are worth +0.5261 GS-HOTA / DetA +0.7718 (oracle_dedup) against the merge's own +1.2976 / DetA +0.6254, leaving +2.68 GS-HOTA and DetA +2.11 as a pure interaction term that neither leg carries. This is the mechanical cause of kb v10-w7-002's '2.5x the sum of its parts', and it means the +4.4999 prices an ID-ASSIGNMENT act (one merged id per person per frame) that a row pruner cannot perform.",
+   "value": 8792,
+   "unit": "duplicate-id timesteps the oracle's merge-all step creates on DEV-20, which its 9,202 deletions exist to remove",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w10_registered.json",
+    "results/gsr_benchmark/gsr_v10_w10.json",
+    "tools/gsr_v10_w10.py",
+    "outputs/gsr/v10_w10/drop_table.parquet",
+    "results/gsr_benchmark/gsr_v10_w7.json",
+    "outputs/gsr/v10_w10/price_B.log"
+   ],
+   "method": "tools.gsr_v10_w10 --legality (pure count over the drop table, no metric read) plus the captured trackeval failure of the attempted merge-all baseline. The full oracle (merge-all + all 9,202 deletions) was re-scored end to end and reproduces the on-record +4.4999 ON / +0.5838 OFF exactly, confirming the merge map is W7's.",
+   "n": 20,
+   "caveats": [
+    "The interaction arithmetic (+2.68) compares three separately-scored submissions against the same arm-D control; it is a decomposition of measured deltas, not an independently scored quantity.",
+    "The refusal is a property of the official evaluator's unique-id check, so it binds any future stage that merges without resolving concurrency -- it is not an artefact of this instrument."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w7-001",
+    "v10-w7-002"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "dedup",
+    "tracking",
+    "evaluator",
+    "premise-correction",
+    "oracle"
+   ]
+  },
+  {
+   "id": "v10-w10-004",
+   "statement": "THE DELETED ROWS ARE VISIBLY DIFFERENT WITHOUT GT -- WHICH IS EXACTLY WHY THE CLOSED VERDICT IS INFORMATIVE. Rank AUC of each registered GT-free observable, the 8,364 tolerant qualifying-bucket deletions against the 210,013 kept rows: detection confidence 0.215 (i.e. 0.785 for low-confidence-predicts-deletion, median 0.689 deleted against 0.825 kept -- the strongest single feature), nearest other predicted row in the frame 0.304 (0.696 inverted; median 2.28 m against 4.22 m), deviation from the track's own local path 0.638, local track density within 2 m 0.637, max image-box overlap with another track 0.580, own track length 0.365 (0.635 inverted), per-frame calibration residual 0.528 (essentially nothing). The buckets have DIFFERENT signatures: dup_owner is a crowding signal (nearest-neighbour 0.233, density 0.699, box overlap 0.605), junk is a pure confidence signal (0.187) with no crowding at all (nearest-neighbour 0.532, density 0.505), and wrong_stable is a path-deviation signal (0.657) at confidence 0.238. So a pruner is buildable -- a single confidence threshold would find much of this population -- but by v10-w10-002 the whole population is worth only +0.48 GS-HOTA, so buildability is not the binding constraint. Image box height is a DEGENERATE feature on this substrate (AUC exactly 0.500): the arm-D writer emits a constant 40 px box for every row, which also reduces the box-overlap feature to a pixel-proximity proxy.",
+   "value": 0.785,
+   "unit": "best single-feature rank AUC (detection confidence, inverted) separating reachable-bucket deletions from kept rows, DEV-20",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w10_registered.json",
+    "results/gsr_benchmark/gsr_v10_w10.json",
+    "tools/gsr_v10_w10.py",
+    "outputs/gsr/v10_w10/drop_table.parquet",
+    "outputs/gsr/v10_w10/features.parquet"
+   ],
+   "method": "tools.gsr_v10_w10 --signals: rank AUC (Mann-Whitney U / n1 n2) per feature, NO model trained. Features are computed from the submission and the v10-W2 gate cache only; ground truth enters solely through the bucket labels being audited.",
+   "n": 20,
+   "caveats": [
+    "Separability is single-feature and in-sample on DEV-20; no held-out split and no model, so these AUCs bound what one threshold could do rather than a pruner's expected precision.",
+    "Confidence is the strongest separator partly BY CONSTRUCTION: the oracle keeps the highest-confidence row of each colliding group, so the deleted row is the lower-confidence one of a pair by definition. The junk bucket, where no such competition selects the survivor, is the honest read.",
+    "box_h_px is constant (40 px) across the whole arm-D DEV-20 submission and carries no information."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w10-001",
+    "v10-w10-002"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "association",
+    "dedup",
+    "tracking",
+    "signal-audit",
+    "auc",
+    "gt-free"
+   ]
   }
  ]
 }

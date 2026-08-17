@@ -1,0 +1,73 @@
+{
+ "id": "gsr_v10_w10",
+ "title": "Pricing the W7 merge+dedup oracle's 9,202 row deletions: real prize vs labeller flicker",
+ "registered_utc": "2026-08-17",
+ "status": "registered before any W10 number existed",
+ "question": "How much of the oracle_merge_dedup +4.4999 GS-HOTA (kb v10-w7-002), specifically its 9,202 GT-informed row deletions, is REAL reachable value for a future GT-free row-pruning stage, and how much is labeller-flicker artefact (kb v10-w7-005, v10-w9-002)?",
+ "scope": {
+  "split": "DEV-20 only (tools.gsr_v10_w5.DEV20); TEST/challenge untouched, no metric read on any test sequence",
+  "substrate": "outputs/gsr/deleak_v10w5_D/predictions/data (arm D, v10-W5 lineage)",
+  "compute": "CPU only, cached artifacts only; no cluster, no GPU",
+  "builds_nothing": "measure-only. No shipped stage is created or modified. The tolerant matcher is instrument-side (evaluation layer) and never enters a submission."
+ },
+ "premise_under_test": {
+  "from_kb": "v10-w7-002 prices merge+dedup at +4.4999 (DetA +3.5048); the brief attributes DetA +3.50 to the 9,202 deletions.",
+  "already_on_record": "oracle_dedup -- the SAME 9,202 rows removed with ids untouched -- is worth +0.5261 GS-HOTA / +0.7718 DetA (results/gsr_benchmark/gsr_v10_w7.json). This session must state plainly if the decomposition contradicts the brief's premise."
+ },
+ "section_1_decomposition": {
+  "drop_set": "Re-derived exactly as tools.gsr_v10_w7.apply_merges(mode='merge_dedup'): per (owner GT id, frame) group keep the highest-confidence row, delete the rest. Self-check: the re-derived set must total 9,202 rows.",
+  "row_label": "gt_id from tools.gsr_v9_factory.label_rows (nearest GT player/GK within eval.gsr_score.GSR_DIST_TOL_M = 5.0 m; -1 otherwise). Track owner = tools.gsr_v10_w7.ownership dominant vote at >= 5 audited rows.",
+  "buckets": {
+   "junk": "gt_id == -1: the row matches no GT within 5 m",
+   "dup_owner": "gt_id == owner: a genuine duplicate-match competition lost to a better row of the same GT in the same frame",
+   "wrong_stable": "gt_id >= 0 and != owner, inside a disagreement run of >= 25 audited rows (1 s at 25 fps)",
+   "wrong_mid": "same, run of 6..24 rows (reported, claimed by neither category)",
+   "wrong_flicker": "same, run of <= 5 audited rows (the W7 flicker convention, kb v10-w7-005)",
+   "no_owner": "the track carries no trusted dominant identity (residual, expected ~0)"
+  },
+  "run_definition": "Maximal consecutive run, over the track's frame-sorted AUDITED rows, of rows disagreeing with the track owner (the tools.gsr_v10_w7.flicker_anatomy convention). Unaudited rows are transparent."
+ },
+ "section_2_tolerant": {
+  "matcher": "A dropped row whose claimed GT g' differs from the owner is re-read as owner-consistent when the two GT players are within 1.5 m of each other IN THAT FRAME. Disagreement runs are recomputed on the tolerant flags, so a 'stable' wrong-identity run can collapse to flicker or vanish.",
+  "unverifiable": "If the owner GT is absent from the frame the row stays strictly wrong; the count is reported.",
+  "layer": "EVALUATION/instrument side only. Scoring is always the official evaluator, unmodified."
+ },
+ "section_1_2_counterfactuals": {
+  "axis_A_prune_only": "Baseline = arm D untouched. Arm = arm D with exactly one bucket's rows deleted, NO id change. This is what a future GT-free row pruner could actually do, and it is the axis the verdict prices.",
+  "axis_B_in_oracle": "Baseline = arm D with merge-all applied and NO deletion. Arm = merge-all plus exactly one bucket's deletions. This decomposes the oracle's +4.4999 rather than the pruning axis.",
+  "scoring": "tools.gsr_v9_w7.score_pair, official evaluator, full flag stack (flags ON and OFF), 20 clips, paired Wilcoxon.",
+  "self_check": "axis A with ALL 9,202 rows must reproduce the on-record oracle_dedup delta (+0.5261 ON / +0.3038 OFF) to within 0.01."
+ },
+ "section_3_signal_audit": {
+  "population": "rows deleted in the SURVIVING buckets vs all kept arm-D rows",
+  "features": [
+   "confidence",
+   "distance to own track's local path centroid (median position over +/- 12 frames)",
+   "local track density (other tracks within 2 m in the frame)",
+   "nearest other predicted row in the frame (metres)",
+   "max image-box IoU with another track's box in the frame",
+   "per-frame calibration residual (v10-W2 gate cache solver error_m)",
+   "own track length in rows",
+   "image box height in px (scale/depth proxy)"
+  ],
+  "statistic": "rank AUC per feature (Mann-Whitney U / n1 n2). NO model is trained -- separability only."
+ },
+ "section_4_verdict_rule": {
+  "prize": "The flicker-robust REACHABLE prize = axis-A GS-HOTA delta (flags ON) of the UNION of the qualifying buckets under tolerant bucketing. Qualifying = junk, dup_owner, wrong_stable. Flicker (and, being undefined without GT, wrong_mid) does not qualify.",
+  "bar": ">= +1.5 GS-HOTA -> recommend registering a row-pruning session naming the separating signals; < +1.5 -> the axis is CLOSED and the association story ends at 'GT noise dominates the residual', stated as a thesis claim.",
+  "fixed_before_any_number": true
+ },
+ "outputs": {
+  "tool": "tools/gsr_v10_w10.py",
+  "results": "results/gsr_benchmark/gsr_v10_w10.json",
+  "work": "outputs/gsr/v10_w10",
+  "claims": "knowledge/claims.json, ids v10-w10-001+"
+ },
+ "forbidden": [
+  "editing STATUS.md",
+  "git commit / git push / git checkout of shared mutable files",
+  "reading any metric on TEST-38, test-49 or the challenge split",
+  "modifying eval/ or any shipped stage",
+  "GPU or cluster work"
+ ]
+}
