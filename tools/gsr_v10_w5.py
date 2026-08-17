@@ -278,7 +278,8 @@ def reselect(homs: dict[int, np.ndarray], by_frame: dict[int, list], feet: dict[
 def batch_refine(homs: dict[int, np.ndarray], by_frame: dict[int, list],
                  feet: dict[int, np.ndarray], n_frames: int, *, iters: int = 8,
                  clamp_m: float = float("inf"),
-                 clamp_ref: dict[int, np.ndarray] | None = None
+                 clamp_ref: dict[int, np.ndarray] | None = None,
+                 stiffness: np.ndarray | None = None
                  ) -> tuple[dict[int, np.ndarray], dict]:
     """Arm B: one robust batch solve per sequence over every frame's mapping at once.
 
@@ -287,6 +288,10 @@ def batch_refine(homs: dict[int, np.ndarray], by_frame: dict[int, list],
     hypothesis of a frame pulls on that frame with a Cauchy weight; a second-difference penalty
     along time pulls the whole clip straight. Solved by IRLS, each iteration an exact banded solve
     per grid coordinate. Smoothness weights come from the series' own noise estimate -- no dial.
+
+    Args:
+        stiffness: Optional ``(n_frames,)`` per-frame multiplier on the second-difference penalty
+            (v10-W8 arm A). ``None`` -- the default -- is the on-record uniform prior, byte for byte.
     """
     from scipy.sparse import diags, eye  # noqa: PLC0415
     from scipy.sparse.linalg import spsolve  # noqa: PLC0415
@@ -324,7 +329,15 @@ def batch_refine(homs: dict[int, np.ndarray], by_frame: dict[int, list],
                     ** 2 for j in range(2 * ng)])
     st["lambda_median"] = float(np.median(lam))
     d2 = diags([1.0, -2.0, 1.0], [0, 1, 2], shape=(n_frames - 2, n_frames), format="csr")
-    reg = (d2.T @ d2).tocsr()
+    if stiffness is None:
+        reg = (d2.T @ d2).tocsr()
+    else:
+        # row r of d2 is the second difference centred on frame r+1, so it carries that frame's
+        # multiplier; the quadratic form stays symmetric positive semi-definite.
+        w_row = np.clip(np.asarray(stiffness, dtype=float)[1:n_frames - 1], 1e-6, None)
+        reg = (d2.T @ diags(w_row, 0, format="csr") @ d2).tocsr()
+        st["stiffness_median"] = float(np.median(w_row))
+        st["stiffness_min"] = float(w_row.min())
     frames = np.array(sorted(cand))
     for _ in range(iters):
         wsum = np.zeros(n_frames)

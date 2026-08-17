@@ -1,0 +1,50 @@
+{
+ "session": "v10-W8 geometry stack (per-clip distortion, learned hypothesis selection, denser correspondences)",
+ "written_local": "2026-08-17T02:11:06",
+ "written_before": "arm A (adaptive smoothness) exists in code or has any measurement; the K1 forecast and the RANK LOCO selection read were already executed when this file was written (see 'already_measured') and are recorded here verbatim rather than pre-declared",
+ "lineage": "v10-W2 ctrl candidate cache (outputs/gsr/v10_w2_full/ctrl), positions_v10w2ctrl_v6det, DEV-20, flags default OFF; incumbent = v10-W5 arm D (DEV-20 flags-ON 57.17)",
+ "instrument": "W2 GT-anchored accuracy (GT foot points through the mapping) + W5's displacement-from-GT-fit reference; the W4 sensitivity curve (GS-HOTA = 6.254 x fractional kernel-loss reduction) used as a FORECASTING instrument before any GPU or end-to-end spend",
+ "arms_from_dispatch": {
+  "K1": {
+   "claim_under_test": "a per-clip radial distortion term inside the W5 batch refinement recovers accuracy (W2: outer-ring radial residual +1.88 px, called real and unmodelled)",
+   "bars": ["outer-ring radial residual +1.88 px -> <= +0.6 px", "curve-predicted gain >= +0.5 GS-HOTA before any end-to-end run"],
+   "blocker_declared_by_dispatch": "candidate caches store homographies, not correspondences -> GPU re-decode",
+   "resolution": "the blocker is bypassed: the ceiling of ANY out-of-homography-class term is measurable on CPU from GT correspondences alone, so the forecast decides whether the GPU harvest is worth booking"
+  },
+  "RANK": {
+   "claim_under_test": "a gradient-boosted ranker over the ~16 cached hypotheses beats the gate's memoryless pick and arm D's temporal rule",
+   "features": "cache-computable only (rank, err_m, rep_px, n_points, mode, ransac, pool stats, distance to pool median / gate pick / temporal reference, decomposed pose incl. fy/fx, foot-point plausibility, grid span) + optional pixel evidence from the W2b line machinery",
+   "labels": "median displacement from the frame's GT-fitted homography; TRAIN clips only",
+   "bars": ["held-out selection accuracy 25.4% -> >= 50%", "replayed DEV flags-ON >= D + 0.3 with >= 12/20 helped"],
+   "held_out_protocol": "train-split hypothesis caches are absent and their extraction is GPU (blocked, see gpu_state); leave-one-clip-out over DEV-20 is used instead, so no clip is ever scored by a model that trained on it"
+  },
+  "CONIC": {
+   "claim_under_test": "conic tangent points and line-conic intersections enlarge the correspondence set and improve the per-frame fit",
+   "bars": ["pilot on 2-3 clips: mean error >= 0.05 m better, curve-predicted >= +0.4", "then DEV"],
+   "status": "NOT BUILT -- requires per-frame keypoint/line heatmaps (GPU decode); GPU 1 held by the freeze worker for the whole session"
+  }
+ },
+ "amendment_1": {
+  "written_local": "2026-08-17T02:11:06",
+  "trigger": "orchestrator mid-session intel from v10-W7 (results/gsr_benchmark/gsr_v10_w7.json): SNGS-021's arm-D damage is 83% one 50-frame window at the clip's fastest pan; the batch second-difference prior (lambda ~4283 vs data weight ~12) cannot follow camera acceleration; the pool there was tight and correct, so stiffness -- not selection -- was the killer. The orchestrator's message explicitly permits registering an adaptive-lambda arm a priori because this session's registration was not yet frozen.",
+  "arm_A": {
+   "name": "A (adaptive smoothness) / AB (A composed with the ranker's picks)",
+   "rule_stated_a_priori": "W5's batch_refine keeps a per-coordinate lambda from the series' own noise estimate. Arm A multiplies the second-difference penalty of frame f by w_f = clip((cloud_f / median_f cloud_f) * (median_f accel_f / accel_f), 0.02, 1.0), where cloud_f = median distance (m) from each admissible hypothesis's CHECK_GRID image to the frame's pool median (hypothesis-cloud tightness) and accel_f = norm of the second difference of the gate-pick grid series at f (GT-free camera acceleration). Both factors are computed from the candidate cache and our own picks -- no ground truth, no score. The cap at 1.0 makes the arm a pure RELAXATION: never stiffer than the on-record D anywhere.",
+   "bars": ["GT-anchored kernel loss below arm D's 0.06097 with curve-predicted >= D + 0.3", "if that passes: replayed DEV flags-ON >= D + 0.3, >= 12/20 helped, DetA/LocA not worse"],
+   "no_tuning_clause": "the two clips (0.02, 1.0) and the two ratios are fixed here; if the arm needs a constant swept to pass, that is a FAIL, reported as such"
+  }
+ },
+ "composition_rule": "final registered read = the best composed stack of whichever components pass their own bars, vs the D baseline 57.17 on DEV-20 flags-ON, paired: >= +0.75 combined, DetA/LocA not worse, helped > hurt with p < 0.05. If no component passes, there is no composed arm and the session reports the negative.",
+ "already_measured": {
+  "k1_forecast": "executed 2026-08-17 01:15-01:35 local, results/gsr_benchmark/gsr_v10_w8.json:k1",
+  "rank_loco": "executed 2026-08-17 01:40-01:50 local, results/gsr_benchmark/gsr_v10_w8.json:rank; accuracy instrument for arms ctrl/D/P/PB executed 01:44-01:51"
+ },
+ "gpu_state": {
+  "checked_local": "2026-08-17T01:05",
+  "host": "a100server1 (192.168.3.19)",
+  "gpu0": "585 MiB, 0% -- another user's, never touched",
+  "gpu1": "17653 MiB, 100% -- FREEZE worker, tmux session 'v10freeze' (created Sun Aug 16 23:37)",
+  "decision": "no GPU launched this session; every GPU-dependent item (CONIC harvest, train-split ranker caches, any correspondence re-decode) is checkpointed for a follow-up dispatch"
+ },
+ "guards": ["DEV-20 only; TEST-38 and the challenge split untouched", "flags default OFF", "versioned artifacts under outputs/gsr/v10_w8 and positions_v10w8*_v6det; v10_w5 / v10_w7 / freeze directories not written", "no STATUS edit, no commit, no push"]
+}

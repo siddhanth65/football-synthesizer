@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated": "2026-08-16",
+ "generated": "2026-08-17",
  "claims": [
   {
    "id": "proj-001",
@@ -9445,6 +9445,206 @@
    "superseded_by": [],
    "depends_on": [
     "v10-forensic-002"
+   ]
+  },
+  {
+   "id": "v10-w8-001",
+   "statement": "THE PER-CLIP LENS-DISTORTION TERM IS REFUTED ON OUR SUBSTRATE, AND THE '+1.88 px OUTER-RING RADIAL RESIDUAL' IS OUR OWN HOMOGRAPHY'S ERROR WEARING A RADIAL MASK. Discriminating measurement (CPU, no GPU harvest needed): the W2 radial signature reproduces exactly under our gated homography (outer sextile +1.881 px) but collapses to +0.576 px under the GT-FITTED homography of the same frames -- so ~70% of it is estimation error, not lens distortion. Pricing the rest with the W4 curve: the ENTIRE residual a GT-fitted homography still leaves on GT foot points -- every out-of-homography-class effect plus annotation noise -- is worth at most +0.282 GS-HOTA; a per-clip radial term with k1 fitted ON GROUND TRUTH (an oracle no estimator can beat) buys +0.027, and the best single global k1 buys +0.00005 (its optimum is k1 = 0.000 on a grid from -0.06 to +0.06, fine-stepped 0.001 near zero). Registered bar was curve-predicted >= +0.5: FAIL by 19x with an oracle-fitted coefficient. The ~6 GPU-h correspondence harvest the arm needed was therefore never booked. Sanity anchor from the same instrument: arm D's outer-ring radial residual is +2.101 px, WORSE than the control's +1.881 while being far more accurate in metres -- the radial image residual is not an accuracy proxy.",
+   "value": 0.027,
+   "unit": "GS-HOTA, DEV-20, upper bound of a per-clip radial term with the coefficient fitted on ground truth (W4 kernel-loss bridge)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w8_registered.json",
+    "results/gsr_benchmark/gsr_v10_w8.json"
+   ],
+   "method": "tools.gsr_v10_w8 --k1 over DEV-20: per frame with >= 6 GT people, least-squares DLT homography through k1-undistorted GT image points for each k1 on a 49-value grid; kernel loss pooled over 213,479 GT rows; radial residual profiles (tools.gsr_v10_w2_calib.image_residuals) under the gated, GT-fitted and arm-D mappings; forecast = 6.254 x fractional kernel-loss reduction against the control's 0.0831.",
+   "n": 20,
+   "caveats": [
+    "Bounds the distortion prize BEYOND the homography class. It does not exclude that modelling k1 during estimation helps our estimate approach the GT-fitted homography -- that channel lives inside the +6.254 oracle and is attacked by selection/refinement arms instead.",
+    "Theiner et al. (CVPRW 2026) measure their lens-distortion gains as image-space line reprojection (JaC) on SN22-center/SN23 including non-main cameras; ours is metre error at player foot points on SoccerNet-GSR main-camera clips, which is what GS-HOTA charges. Both can hold at once.",
+    "k1 is parameterised on rho = r / 1100 px (half-diagonal) rather than r / f; that is a reparameterisation of the same one-parameter Brown-Conrady family, so the scanned family is theirs.",
+    "GT foot-point annotation noise is inside the 0.282 ceiling, so the true out-of-class prize is smaller still."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w2-004",
+    "v10-w4-002",
+    "v10-w5-006"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "distortion",
+    "negative-result",
+    "forecasting"
+   ]
+  },
+  {
+   "id": "v10-w8-002",
+   "statement": "LEARNED HYPOTHESIS SELECTION FAILS, AND THE DIAGNOSIS IS THAT THE ANSWER IS NOT IN THE FEATURES: a HistGradientBoosting ranker over 198,036 (frame, admissible hypothesis) rows with 22 cache-computable features moves leave-one-clip-out selection accuracy only 26.4% -> 31.3% (registered bar 50%: FAIL), and its IN-SAMPLE accuracy is 37.5% -- so this is an information ceiling, not overfitting. Adding pixel evidence (ridge-field line support + raw ridge-distance quantiles of the projected pitch model, 198,036 rows, ~35 min CPU) changes nothing: 31.30%. The whole learned model is one feature: distance to the temporal reference alone selects at 31.2% / 0.4287 m median, i.e. the ranker rediscovers arm D's rule. End to end the analogue confirms it -- ranker picks + batch refinement (arm PB) reads kernel loss 0.06134 vs arm D's 0.06097 (predicted -0.03 GS-HOTA), and under the adaptive prior arm AB (0.05763) is worse than arm A (0.05639). Selection accuracy improves picked-hypothesis median error 0.473 -> 0.427 m against a pool oracle of 0.328 m, but that gain does not survive the batch solve.",
+   "value": 0.313,
+   "unit": "leave-one-clip-out selection accuracy over 13,551 DEV-20 frames (gate baseline 0.264, bar 0.50)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w8_registered.json",
+    "results/gsr_benchmark/gsr_v10_w8.json"
+   ],
+   "method": "tools.gsr_v10_w8 --dataset/--line/--rank: label = median displacement of each cached hypothesis from the frame's GT-fitted homography; leave-one-clip-out over DEV-20 (train-split caches would need a GPU re-decode, blocked when the work was done); selection read + arms P/PB/AB on the W2 GT-anchored accuracy instrument.",
+   "n": 20,
+   "caveats": [
+    "LOCO over DEV-20 stands in for a train-split fit; a model trained on the 57 train clips could differ, but the in-sample ceiling of 37.5% makes more training data an unlikely rescue.",
+    "Ties: 'accuracy' counts a pick as correct when its label is within 1e-6 of the pool best; the pool holds ~16 hypotheses of which only ~6.5 are distinct by accuracy.",
+    "Only pointwise regression was tried (no pairwise/listwise objective); per-frame centring of the target was tried and changed nothing (29.3%)."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w5-001",
+    "v10-w5-004"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "machine-learning",
+    "negative-result"
+   ]
+  },
+  {
+   "id": "v10-w8-003",
+   "statement": "ADAPTIVE BATCH STIFFNESS IS A REAL RIDER ON ARM D: +0.400 GS-HOTA DEV-20 FLAGS-ON (57.1684 -> 57.5684), 14/20 helped, and the mechanism is the one v10-W7 named. Arm A multiplies the batch solve's second-difference penalty per frame by w_f = clip((cloud_f / median cloud) x (median accel / accel_f), 0.02, 1.0) -- hypothesis-cloud tightness over camera acceleration, both GT-free, capped so the prior is never stiffer than the on-record arm anywhere. GT-anchored kernel loss 0.06097 -> 0.05639 (median displacement 0.3963 -> 0.3927 m, mean 0.5895 -> 0.5564), curve-predicted +0.354 over D. Scored end to end on the frozen v6 chain: paired mean +0.3755 (flags ON; +0.3525 OFF), combined GS-HOTA +0.400, DetA +0.216, AssA +0.675, LocA +0.082 -- nothing worse. The two clips that carry it are SNGS-021 +3.23 (the exact clip and window W7 diagnosed as stiffness damage: 83% of arm D's only DEV loss) and SNGS-096 +2.92; worst losses SNGS-090 -0.53 and SNGS-057 -0.41. Registered arm-A bars (>= D+0.3, >= 12/20 helped, DetA/LocA not worse): PASS. Wilcoxon p = 0.114 across 20 clips -- the effect is concentrated, not broad.",
+   "value": 0.4,
+   "unit": "GS-HOTA over arm D, DEV-20 flags-ON combined (57.1684 -> 57.5684); paired per-clip mean +0.3755",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w8_registered.json",
+    "results/gsr_benchmark/gsr_v10_w8.json"
+   ],
+   "method": "tools.gsr_v10_w8 --accuracy/--positions/--score (arm A); stiffness rule registered a priori in results/gsr_v10_w8_registered.json amendment 1 before the code existed; batch solve = tools.gsr_v10_w5.batch_refine with the new optional per-frame stiffness vector (stiffness=None reproduces the on-record arm byte for byte, asserted in the self-check); paired scorer tools.gsr_v9_w7.score_pair against outputs/gsr/deleak_v10w5_D.",
+   "n": 20,
+   "caveats": [
+    "p = 0.114 (Wilcoxon, 20 clips): passes its registered helped-count bar but not a 0.05 significance test; two clips supply most of the gain.",
+    "No constant was swept: the two clips (0.02, 1.0) and both ratios were fixed in the registration and never touched.",
+    "Frames whose admissible hypotheses are identical have cloud_f = 0 and land on the 0.02 floor -- 21.6% of SNGS-021's frames, 55.4% of SNGS-081's, where the profile degenerates to binary. Left as measured.",
+    "DEV-20 only; TEST-38 same-window confirmation not run (that is the freeze's instrument, untouched here)."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w5-005",
+    "v10-w7-006"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "rider",
+    "candidate"
+   ]
+  },
+  {
+   "id": "v10-w8-004",
+   "statement": "THE KERNEL-LOSS FORECAST IS WELL CALIBRATED FOR DIFFERENCES INSIDE ONE ARM FAMILY AND BIASED LOW ACROSS FAMILIES -- a usable rule for spending compute. The W4 curve predicted arm A at +1.898 and arm D at +1.544 GS-HOTA over the same control, i.e. A - D = +0.354; the scored difference is +0.3755 flags-ON and +0.3525 flags-OFF (error +0.02 / -0.002, under 6%). The same instrument under-predicted arm D against the control by 36% (+1.544 predicted vs +2.1024 realized, kb v10-w5-006), because that comparison crosses arm families: D rescues catastrophic frames and collects association gains the accuracy instrument does not model, while A and D differ only in one prior term. Practical rule adopted for this session: trust the forecast for within-family arm comparisons (it decided not to spend an end-to-end run on arms PB and AB), and treat cross-family forecasts as lower bounds.",
+   "value": 0.06,
+   "unit": "relative error of the within-family curve forecast (predicted A-D +0.354 vs realized +0.3755 GS-HOTA)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w8_registered.json",
+    "results/gsr_benchmark/gsr_v10_w8.json"
+   ],
+   "method": "tools.gsr_v10_w5.predicted_gain applied to the pooled GT-anchored kernel losses of arms ctrl/D/A (207,921 rows, identical population), compared against the v9-W7 paired scorer's realized deltas on the frozen v6 chain.",
+   "n": 20,
+   "caveats": [
+    "One within-family comparison (A vs D) and one cross-family comparison (D vs ctrl); the rule is a working heuristic, not a fitted calibration.",
+    "Both arms end in the same batch solve, which is what 'same family' means here."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w4-002",
+    "v10-w5-006",
+    "v10-w8-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "methodology",
+    "forecasting",
+    "geometry"
+   ]
+  },
+  {
+   "id": "v10-w8-005",
+   "statement": "THE v10-W8 COMPOSED READ FAILS ITS SESSION BAR: the registered composition (>= +0.75 GS-HOTA over arm D, DetA/LocA not worse, helped > hurt at p < 0.05) is not met, because only one of the three dispatched components survived. K1 is refuted on the instrument (v10-w8-001), RANK fails its selection bar and is worse than D end to end in every composition tried (v10-w8-002), CONIC was never built (GPU held by the freeze worker until the session's last check), so the best composed stack IS arm A alone: +0.400 combined, 14/20 helped, p = 0.114. Recorded as a component PASS inside a composed FAIL: arm A is a candidate rider requiring same-window TEST-38 confirmation, not a shipped result. DEV-20 stands at 57.5684 with arm A on top of the D lineage; flags stay default OFF.",
+   "value": 0.4,
+   "unit": "GS-HOTA of the best composed stack over arm D, DEV-20 flags-ON (bar was +0.75 at p < 0.05)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w8_registered.json",
+    "results/gsr_benchmark/gsr_v10_w8.json"
+   ],
+   "method": "tools.gsr_v10_w8 --score, paired against outputs/gsr/deleak_v10w5_D; component gates read off tools.gsr_v10_w8 --k1 / --rank / --accuracy.",
+   "n": 20,
+   "caveats": [
+    "The composed bar assumed three contributing components; two were measured away and one was never buildable this session.",
+    "Arm A's own registered bars pass -- the failure is at the session's composition level, not the arm's."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w8-001",
+    "v10-w8-002",
+    "v10-w8-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "negative-result",
+    "planning"
+   ]
+  },
+  {
+   "id": "v10-w8-006",
+   "statement": "THE CACHED HYPOTHESIS POOL IS NOW ESSENTIALLY EXHAUSTED, SO THE NEXT GEOMETRY POINT MUST COME FROM NEW CORRESPONDENCES, NOT BETTER SELECTION. W5 measured the pool oracle (best admissible hypothesis per frame) at +2.324 predicted GS-HOTA; arm D captured +1.544 and arm A now captures +1.898 -- 82% of the pool prize, with the residue defended by an information ceiling on selection (v10-w8-002: 37.5% in-sample accuracy even with pixel evidence). The homography-class ceiling is +6.254 (W4) and the out-of-class ceiling is +0.282 (v10-w8-001), so ~4.36 predicted GS-HOTA remains and all of it sits in hypotheses PnLCalib never generated. Priority for the next session: the conic/denser-correspondence arm (CONIC, arXiv:2410.07401 + 2504.20052), which is the only dispatched lever aimed there; it stayed unbuilt because GPU 1 was held by the freeze worker (tmux 'v10freeze') for the entire session and the two source PDFs are not in the local corpus. GPU 1 was measured free (4 MiB, 0%, no tmux) at the session's final check.",
+   "value": 1.898,
+   "unit": "predicted GS-HOTA captured by arm A out of the +2.324 cached-pool oracle (DEV-20)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w8_registered.json",
+    "results/gsr_benchmark/gsr_v10_w8.json"
+   ],
+   "method": "Pool oracle from tools.gsr_v10_w5 --oracle (on record); arm captures from tools.gsr_v10_w8 --accuracy through the W4 kernel-loss bridge; GPU/tmux occupancy checked on a100server1 at session start (01:05) and end.",
+   "n": 20,
+   "caveats": [
+    "'Exhausted' is measured on the accuracy instrument; the pool oracle itself is a per-frame argmin fitted with ground truth and therefore an upper bound no estimator reaches.",
+    "The remaining 4.36 assumes the W4 curve's linear kernel-loss bridge holds far from the current operating point, which is untested at that range."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w5-001",
+    "v10-w8-002",
+    "v10-w8-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "planning"
    ]
   }
  ]

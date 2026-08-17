@@ -1,5 +1,28 @@
 # STATUS
 
+## 2026-08-17 — v10 W8: distortion axis REFUTED AT ROOT (the +1.88 px was our own homography misfit in a radial mask), learned ranker hits an information ceiling — and ADAPTIVE STIFFNESS passes: DEV 57.17 -> 57.57; ~4.4 predicted points now sit ONLY in hypotheses PnLCalib never generates
+
+results/gsr_v10_w8_registered.json (§1 + a-priori amendment for arm A), results/
+gsr_benchmark/gsr_v10_w8.json, kb v10-w8-001..006, tools/gsr_v10_w8.py; tools/gsr_v10_w5.py
+gains an optional stiffness arg (None = byte-identical on-record behavior, asserted).
+**K1 REFUTED without spending the GPU harvest: under the GT-FITTED homography the outer-ring
+radial residual is +0.576 px (vs +1.881 under ours) — ~70% of W2's "real and unmodelled
+distortion" was estimation error wearing a radial mask; oracle per-clip k1 = +0.027 vs a
++0.5 bar (19x short). Warning banked: arm D is MORE accurate in metres with a WORSE radial
+residual — image-space residual statistics are not accuracy proxies.** RANK FAILS on an
+information ceiling: in-sample 37.5% (not overfitting — the answer is not in the features;
++pixel ridge evidence changed nothing); the learned ranker converges onto arm D's temporal
+rule. **ARM A (adaptive smoothness, GT-free rule fixed a priori from the W7 intel: cloud
+tightness over camera acceleration, capped as pure relaxation): kernel loss 0.05639 (best),
+DEV flags-ON +0.400 (paired +0.3755, 14/6, p=0.114), DetA/AssA/LocA all up, SNGS-021 +3.23
+(the exact diagnosed window), worst clip -0.53 — arm bars PASS; session composition bar
+FAIL (single component). CANDIDATE RIDER for the next freeze.** Forecast instrument
+validated: within-family prediction error <6% (cross-family = lower bound). **Geometry
+endgame: pool oracle +2.324 predicted, A captures +1.898 (82%); selection residue defended
+by the ceiling; out-of-class residue +0.282 — the remaining ~4.36 predicted GS-HOTA lives
+ONLY in never-generated hypotheses. CONIC (denser correspondences, papers 2410.07401 +
+2504.20052) is the last geometry lever; dispatched with GPU now free.**
+
 ## 2026-08-17 — SNGS-082 forensic: CLOSED, no live wound — the "-4 to -8" was the never-shipped v7-push arms; the shipped stack GAINS +2.57 on this clip; the mechanism is a units bug in a refuted component, and its transferable rule is banked
 
 results/gsr_benchmark/gsr_v10_forensic_082.json, kb v10-forensic-001..003,
