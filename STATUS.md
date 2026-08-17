@@ -1,5 +1,30 @@
 # STATUS
 
+## 2026-08-18 — v10 W13: imgsz-1280 FAILS 4/4 — component dominance converts NEGATIVELY (AssA -1.2..-1.5, the channel no detector oracle priced); arm A REPLICATES independently at +0.63; freeze #2 = bundle + A, pure CPU, expected 57.0-57.4
+
+results/gsr_v10_w13_registered.json, results/gsr_benchmark/gsr_v10_w13{,_heights}.json,
+kb v10-w13-001..007, tools/gsr_v10_w13.py, generator/extract.py IMGSZ attr (default None =
+byte-identical for ANY weights), tests/test_extract.py. **Reconciliation by MEASUREMENT:
+gsr-det-001's "1280 is not a lever" is scoped to the old HF control (trained @800; big-box
+collapse -30.8) — on S4b every height bucket improves (>=110 px: +0.0054); claim NOT
+retracted, not transferable.** One-window two-arm extraction 1.87 GPU-h; per-stage
+interleaving. **Verdict: FAIL all 4 bars in the registered cell (-0.6863 paired, 10/10,
+p=0.73, 9 clips worse than -1.0, worst -9.36). Conversion ledger: the v9-W7 DetA
+apportionment VALIDATED end-to-end (+0.212 predicted vs +0.19/+0.31 realized) — what kills
+the arm is GS-AssA (-1.23..-1.51 every cell), unpriced by every detector oracle in the
+campaign; that omission IS the component-vs-end-to-end gap. Detector arms are 3.1x noisier
+per clip than geometry riders (sd 4.50 vs 1.46) — DEV-20 n=20 cannot resolve +-0.75 for
+detector-side changes.** Mechanism probes negative (no team-flip; fragmentation r=-0.07).
+
+**ARM A REPLICATED on an independent extraction: +0.6308 / +0.6246 paired, 14/6, p=0.0328
+(original +0.400) — not a lineage artifact. Freeze-#2 stack FINAL: v9 chain + vote +
+gk_side + arm D + s4 + arm A; NO imgsz change; NO new GPU extraction needed (CPU replay off
+frozen caches). Expected board 57.0-57.4 (still 5th; Playbox 58.06 is 4th) — slot strategy
+is Sid's call.** Infrastructure defect found + fixed: CRLF in ~/dev20n.txt silently
+produced an EMPTY parquet for SNGS-096 in both arms (caught, repaired 0.17 GPU-h; t38n.txt
+carries the same terminator — cheap audit queued in freeze #2's brief). Drift instance #4,
+first POSITIVE (+0.44/+0.63, confound stated). 1.87 GPU-h of 7.
+
 ## 2026-08-18 — v10 W12: modern-detector swap KILLED at stage 1 (in-domain RF-DETR loses at our operating point; 33,132 player->referee rows) — and the surprise lever is OUR OWN S4b at imgsz 1280: dominant on every measured axis; end-to-end session dispatched
 
 results/gsr_v10_w12_registered.json, results/gsr_benchmark/gsr_v10_w12_{stage1,roles,

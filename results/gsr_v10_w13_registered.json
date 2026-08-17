@@ -1,0 +1,140 @@
+{
+  "session": "v10 W13 -- price the incumbent detector at inference imgsz 1280 END TO END",
+  "date": "2026-08-18",
+  "written_at_utc": "2026-08-17T03:57:00Z",
+  "written_before": "any GS-HOTA of either arm exists. At registration time the only W13 numbers in hand are the section-1 reconciliation (a CPU re-read of the W12 dumps, no new inference, no GS-HOTA) and the extraction has not started.",
+  "scope": "DEV-20 only (the tuning split). TEST-38, test-49 and challenge are not read, extracted or scored. GPU work on a100server1 GPU 1 only.",
+
+  "section_1_mandatory_reconciliation": {
+    "the_contradicting_claim_verbatim": "kb gsr-det-001, caveat 4, dated 2026-08-05: 'Inference-side resolution is not an alternative lever: the control at imgsz 1280 recovers small players (+14.1 points under 40 px) but collapses on large ones (-30.8 at >=110 px) for a net -9.7 recall.' Source table: results/CLUSTER_SESSION5A.md section 3a, whose reading was 'Doubling the input recovers small players and collapses large ones -- the model was trained at 800 and cannot cope with players scaled past that. 640 is the right operating point and every number below is at 640.'",
+    "why_the_interventions_are_not_the_same": [
+      "DIFFERENT WEIGHTS. The 5A number is the SHIPPED HF CONTROL: uisikdag/yolo-v8-football-players-detection, itself trained 25 epochs at imgsz 800 on a Roboflow set, with no GSR/SoccerNet fine-tune. W12/W13 measure S4b: that control after 20 epochs of our own fine-tuning at imgsz 640 on GSR-train (42,750 frames) + SoccerNet-v3 (33,986 stills, 400 games), with mosaic and scale augmentation, both corpora pre-scaled to a 640 long side (kb gsr-det-003/004). The two networks have different scale priors; 5A's own explanation for the collapse ('trained at 800') is a property of the checkpoint it measured, and cannot be carried to a checkpoint trained on a different scale distribution.",
+      "DIFFERENT MEASUREMENT. 5A: GSR valid (58 sequences, frame stride 5, 8,700 frames, 141,512 person GT), greedy IoU>=0.5 matcher, class-agnostic person evaluator. W12/W13: DEV-20 (20 sequences, every frame, 15,000 frames, 235,174 GT rows), scale-free 0.5-box-height foot matcher (tools.gsr_v9_w7.match_feet).",
+      "DIFFERENT ERA. 5A was the detector-fine-tune era: 1280 was a side probe of whether resolution could substitute for retraining. The retrain happened (S4/S4b) and is what ships today; the resolution question was never re-asked on the resulting weights until W12."
+    ],
+    "measured_reconciliation_not_argued": {
+      "what": "The 5A height decomposition replayed verbatim (buckets <40 / 40-70 / 70-110 / >=110 px, conf 0.20) on the W12 same-window S4b dumps. CPU only, no new inference.",
+      "instrument": "scratch script over ~/work/v10w12/{s4b_640,s4b_1280}, tools.gsr_v9_w7.match_feet + tools.gsr_v9_deta.load_gt; output ~/w13_heights.json (server).",
+      "s4b_recall_640_vs_1280": {
+        "<40": [0.7403, 0.8176, "+0.0773"],
+        "40-70": [0.9649, 0.9789, "+0.0140"],
+        "70-110": [0.9784, 0.9891, "+0.0106"],
+        ">=110": [0.9730, 0.9784, "+0.0054"],
+        "ALL": [0.9705, 0.9812, "+0.0108"],
+        "precision": [0.8970, 0.8997, "+0.0027"]
+      },
+      "verdict": "NO CONTRADICTION AND NO BIG-BOX COLLAPSE ON S4b: every height bucket improves at 1280, the >=110 px bucket by +0.54 points against 5A's -30.8 on the pre-fine-tune control. The v6-era claim stands for the weights it measured and does not transfer to S4b. gsr-det-001 is not retracted; its caveat is scoped to the shipped-HF control by v10-w13-001.",
+      "honesty": "This reconciliation is a component re-read of dumps that already existed; it is not evidence about GS-HOTA, which is what the bars below judge."
+    }
+  },
+
+  "premise_being_tested": {
+    "component_evidence_in_hand": "kb v10-w12-003: same weights, same frames, one GPU window -- GT-row recall 0.98123 vs 0.97046 (+1.077 points) at better precision (0.9218 vs 0.9193); median box IoU 0.826 vs 0.814; foot-point error -7.4% relative; post-ByteTrack recall 0.93003 vs 0.92294 (+0.71); role accuracy 0.9498 vs 0.9419; player->referee rows 5,702 vs 7,366 (-23%); tracks +2% (1,370 vs 1,341); detector inference 14.7 s vs 10.0 s per 750-frame sequence.",
+    "why_that_does_not_settle_it": "kb v9-w7-004 measured that a RECOVERED DETECTION IS WORTH ZERO on this chain: arm A2 recovered 3,113 misses and moved fully-correct rows by -10, scoring -0.52 GS-DetA, because the rows the chain loses are the rows the identity machinery cannot name. kb v9-w7-003 measured -7.11 GS-DetA for writing through the tracker's discards. Recall gains on this substrate have twice priced NEGATIVE end to end. The 1280 arm differs from both (its extra rows arrive as detector boxes that the tracker itself accepts, and its BOXES and ROLES improve too, which A1/A2 did not), but the prior from this chain is that recall alone buys nothing -- so this session measures, and the direction is genuinely open.",
+    "conversion_rate_the_campaign_wants": "realised paired GS-HOTA per +1.00 point of detector image-space recall, reported for the ledger whatever the sign."
+  },
+
+  "design": {
+    "arms": {
+      "i640": "S4b (models/gsr_det/gsr_v3_ft_b_last.pt, md5 2074d8741f97a6892a1322d0f808244c) at imgsz 640 -- the shipped operating point (the checkpoint's own stored imgsz is 640), FRESHLY EXTRACTED in this window. It is the control, and it is not the on-record lineage.",
+      "i1280": "The identical weights at imgsz 1280, everything else byte-identical."
+    },
+    "one_window_rule": "kb v10-frz-003 measured ~1.1 GS-HOTA of drift between extraction windows -- 44% of a whole bundle's gain. Both arms are therefore extracted on a100server1 GPU 1 inside ONE window, same conda env (gsr), same torch/ultralytics/supervision, and every reported delta is paired WITHIN that window, per sequence. No comparison is made against the on-record v10 lineage; that number is reported only as drift information.",
+    "what_is_re_derived_per_arm": "positions (detect + ByteTrack + PnLCalib), the calibration re-gate + fill, the v6 PARSeq per-crop OCR evidence, the per-detection box cache and the CLIP per-detection embeddings -- every artifact keyed on (track_id, frame). Versioned per arm (kb v9-w1-006): suffix _w13i640 / _w13i1280; nothing on record is overwritten.",
+    "what_is_shared": "the FROZEN s4 candidate-homography cache (outputs/gsr/v10_w2_full/s4). It is a PnLCalib heatmap product and carries no detection, so both arms ride the identical hypothesis pool; only the gate's foot-point plausibility input and the reprojected rows differ. This is deliberate: it removes calibration nondeterminism from the comparison.",
+    "geometry_riders_scored": {
+      "D": "the v10 freeze bundle as shipped (tools.gsr_v10_w5.arm_homographies('D') on the s4 cache)",
+      "A": "v10-W8 adaptive stiffness (tools.gsr_v10_w8.arm_homographies('A')), the freeze-#2 candidate rider"
+    },
+    "flag_states": "both, via tools.gsr_v9_w7.score_pair: flags ON = VOTE_TRACK_ATTRS (role, team, jersey) + GK_SIDE_REPAIR (team); flags OFF = neither.",
+    "cells": "4 chain runs = {i640, i1280} x {D, A}; 2 pairings = i1280 vs i640 within each geometry arm, each reported flags ON and OFF.",
+    "code": "tools/gsr_v10_w13.py (new); generator/extract.py gains IMGSZ, a process-wide module attribute in the pattern of FOOTBALL_WEIGHTS/BN_STATS. DEFAULT None = the shipped call with no imgsz kwarg at all, so ultralytics keeps using the checkpoint's own stored imgsz (640 for S4b) -- byte-identical, asserted by tests/test_extract.py::test_imgsz_default_passes_no_imgsz_kwarg. No frozen module is edited.",
+    "scoring_host": "the laptop (the on-record scoring host of the v10 freeze; eval/gsr_score.py sha256 faa0f3b0... matches results/gsr_v10_frozen.json). Foreground, serial."
+  },
+
+  "pre_declared_bars": {
+    "judged_on": "the FREEZE-#2 CANDIDATE STACK: flags ON, geometry arm A, i1280 paired against i640 per sequence (n = 20).",
+    "all_must_pass": {
+      "paired_mean_gs_hota": ">= +0.75",
+      "paired_mean_gs_det_a": ">= 0.00 (not worse)",
+      "helped_vs_hurt": "helped > hurt AND Wilcoxon p < 0.05",
+      "worst_sequence": "no sequence worse than -1.00 GS-HOTA"
+    },
+    "also_reported_against_the_same_bars_as_information": [
+      "flags OFF, geometry arm A",
+      "flags ON and OFF, geometry arm D (the bundle as shipped) -- so freeze #2 can choose its exact stack"
+    ],
+    "split_verdict_rule": "if the bars pass on one geometry arm and fail on the other, the verdict is reported as CONDITIONAL (naming the stack it holds for) and NOT as a pass. No bar is moved, no sequence is dropped, no third geometry arm is added after the fact.",
+    "cost_side_note_not_a_bar": "1280 costs ~1.5x detector inference. A pass is a recommendation to the orchestrator, and the TEST-38/test-49 re-extraction it implies (~14 GPU-h at 640 rates, ~1.5x on the detector share) is an orchestrator spend decision, not a worker's."
+  },
+
+  "results": {
+    "extraction_window": {
+      "host": "a100server1 GPU 1 (exclusive; GPU 0 was another user's and was never touched)",
+      "env": "conda 'gsr', py3.11, torch 2.5.1+cu121, ultralytics 8.4.115, supervision 0.30.0",
+      "main_window_utc": ["2026-08-17T03:51:54Z", "2026-08-17T05:34:01Z"],
+      "repair_window_utc": ["2026-08-17T05:37:18Z", "2026-08-17T05:47:22Z"],
+      "gpu_hours": 1.87,
+      "per_stage_utc": {"i640 extract": "03:57-04:14", "i1280 extract": "04:14-04:31",
+                        "gate": "04:31-04:37", "percrop": "04:37-05:18",
+                        "boxes": "05:18-05:22", "embed": "05:22-05:34"},
+      "sharding": "8 workers for extract, 6 for percrop/boxes/embed, 1 for gate; the two arms run back to back inside each stage so neither sits systematically earlier in the window",
+      "repair_reason": "SNGS-096 was silently lost in BOTH arms of the first pass: ~/dev20n.txt terminates its LAST line with CRLF, so the sharded runner passed the sequence name 'SNGS-096\\r'; generator.extract's OpenCV capture then reported 0 frames and extract_positions wrote an EMPTY parquet named 'SNGS-096\\r.parquet' with no error. Both arms were re-run for that one sequence, back to back, same host/GPU/env, 3.3 minutes after the main window closed; the six CR-named artifacts were deleted. tools/gsr_v10_w13.py now fails loudly on an empty extraction.",
+      "scoring": "laptop, foreground, serial, 2026-08-17 11:38-11:55 local; eval/gsr_score.py sha256 faa0f3b0... = the v10 freeze record"
+    },
+    "absolutes_dev20": {
+      "i640/D": {"off": 53.7975, "on": 58.2050, "detA_off": 40.9945, "detA_on": 45.3673},
+      "i1280/D": {"off": 53.1446, "on": 57.6934, "detA_off": 40.4993, "detA_on": 45.1795},
+      "i640/A": {"off": 54.3955, "on": 58.8358, "detA_off": 41.3995, "detA_on": 45.8217},
+      "i1280/A": {"off": 53.4831, "on": 58.0513, "detA_off": 40.5655, "detA_on": 45.2668}
+    },
+    "paired_1280_minus_640": {
+      "A_flags_on_THE_REGISTERED_CELL": {"combined": -0.7845, "paired_mean": -0.6863, "sd": 3.928,
+        "se": 0.878, "ci95": [-2.52, 1.15], "helped": 10, "hurt": 10, "wilcoxon_p": 0.729,
+        "paired_detA": -0.1916, "paired_assA": -1.3565, "worst_seq": ["SNGS-054", -9.362],
+        "best_seq": ["SNGS-024", 4.870]},
+      "A_flags_off": {"combined": -0.9123, "paired_mean": -0.7999, "sd": 4.311, "helped": 11,
+        "hurt": 9, "wilcoxon_p": 0.701, "paired_detA": -0.2564, "paired_assA": -1.5096},
+      "D_flags_on": {"combined": -0.5116, "paired_mean": -0.3529, "sd": 4.110, "helped": 10,
+        "hurt": 10, "wilcoxon_p": 0.956, "paired_detA": 0.3064, "paired_assA": -1.2339},
+      "D_flags_off": {"combined": -0.6529, "paired_mean": -0.4928, "sd": 4.496, "helped": 11,
+        "hurt": 9, "wilcoxon_p": 0.927, "paired_detA": 0.1906, "paired_assA": -1.4001}
+    },
+    "verdict": {
+      "call": "REGISTERED FAIL on all four bars in the registered cell, and negative in all four cells. imgsz 1280 is NOT adopted.",
+      "bar_by_bar": {
+        "paired_mean_gs_hota >= +0.75": "FAIL (-0.6863; missed by 1.44)",
+        "paired_mean_gs_det_a >= 0": "FAIL (-0.1916) in the registered cell; PASS (+0.3064) on geometry arm D",
+        "helped > hurt AND p < 0.05": "FAIL (10/10, p = 0.729)",
+        "no sequence worse than -1.00": "FAIL (9 sequences below it; worst -9.36)"
+      },
+      "not_a_split_verdict": "the split-verdict rule is not invoked: every cell is negative on the combined delta and every cell misses the +0.75 bar. The D cells' positive paired DetA is reported, not promoted.",
+      "what_this_measurement_can_and_cannot_say": "It excludes a large gain: the point estimate is negative in all four cells and the combined (submission-relevant) score is worse by 0.51-0.91 everywhere. It does NOT statistically separate -0.7 from 0 -- with a per-clip sd of 3.9-4.5 the 95% CI is about [-2.5, +1.2]. Both statements are the honest read; the decision follows the point estimate and the bar, not the CI."
+    },
+    "conversion_rate_for_the_forecast_ledger": {
+      "input": "kb v10-w12-003's +1.077 points of detector GT-row image-space recall at a matched operating point",
+      "realised_gs_hota_per_recall_point": {"A_on": -0.637, "A_off": -0.743, "D_on": -0.328,
+                                            "D_off": -0.458},
+      "the_forecast_that_HELD": "the v9-W7 apportionment (a perfect detector = +2.9 recall points = +0.57 GS-DetA, i.e. 0.197 DetA per recall point) predicts +0.212 GS-DetA for this arm. Realised paired GS-DetA on the shipped-bundle stack: +0.1906 (flags off) / +0.3064 (flags on). The DetA half of the forecast instrument is validated end to end for the first time.",
+      "the_channel_NOBODY_priced": "GS-AssA, which loses 1.23-1.51 paired points in every cell and is 2-7x the size of the DetA gain. No detector oracle in this campaign (v9-W7's miss oracle, W12's axes A-D) prices association. That is the whole gap between the component table and the end-to-end result."
+    },
+    "mechanism_probes_negative": {
+      "team_map_flip": "NOT the cause: the predicted left/right player-row share is stable between arms on all 20 sequences (max |delta| 0.038); no side inversion.",
+      "fragmentation": "NOT per-clip explanatory: pooled tracks 1351 -> 1375 (+1.8%) and post-EIoU tracklets 2408 -> 2450 (+1.7%), but the per-clip correlation between the HOTA delta and the tracklet-count delta is r = -0.0735 (n = 20).",
+      "identity": "pooled named-tracklet rate 0.6199 -> 0.6005 (634/932 -> 675/967 on geometry arm A): more tracklets, more names, a lower correct rate.",
+      "reading": "the response of the identity/association chain to a perturbed detection stream is high-variance and, on this split, unexplained by any covariate checked. A detector arm re-rolls every track id, so per-clip deltas are 3.1x noisier than a geometry rider's on the identical window (sd 4.50 vs 1.46)."
+    },
+    "side_findings": {
+      "arm_A_replicated_on_an_independent_extraction": "on the fresh i640 lineage arm A beats arm D by +0.6308 combined / +0.6246 paired flags ON (14 helped / 6 hurt, Wilcoxon p = 0.0328) and +0.5979 / +0.5737 flags OFF (13/7, p = 0.0532) -- against v10-W8's on-record +0.400 flags ON. Freeze-#2 evidence: the rider survives a different extraction window.",
+      "drift_fourth_instance_and_POSITIVE": "the fresh i640/D lineage scores 58.2050 flags ON / 53.7975 OFF against the on-record v10 D+s4 DEV-20 numbers 57.7604 / 53.1714 -- +0.4446 and +0.6261. kb v10-frz-003 recorded ~1.1 of drift with the sign against us and noted nothing said it was systematically negative; this is the first measured instance with the sign in our favour. Confound to state: the on-record lineage rides positions_v10w2ctrl_v6det as its base while this one rides positions_gate_w13i640 -- both are the S4b-at-640 chain, from different extraction windows."
+    }
+  },
+
+  "rules": [
+    "No flag or resolution is wired on by default in any code this session ships: generator.extract.IMGSZ stays None.",
+    "Versioned artifact directories only (kb v9-w1-006); nothing on record is overwritten in place.",
+    "tmux session name 'w13imgszrun' -- no other live session's name is a prefix of it and it is not a prefix of any other (kb v10-w12-005: tmux kill-session matches by PREFIX).",
+    "GPU 1 only, one heavy job at a time; occupancy checked before start.",
+    "No STATUS edit, no commit, no push. claims v10-w13-001+ with the full schema."
+  ]
+}

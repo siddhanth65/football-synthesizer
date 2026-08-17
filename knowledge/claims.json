@@ -10257,6 +10257,225 @@
     "process",
     "cluster"
    ]
+  },
+  {
+   "id": "v10-w13-001",
+   "statement": "RECONCILED, NOT RETRACTED: the v6-era 'imgsz 1280 is not a lever' finding belongs to the PRE-FINE-TUNE detector and does not transfer to S4b. kb gsr-det-001's caveat (2026-08-05, results/CLUSTER_SESSION5A.md section 3a) measured the SHIPPED HF control (uisikdag/yolo-v8-football-players-detection, itself trained 25 epochs at imgsz 800 on a Roboflow set) on GSR valid at stride 5, and found that 1280 recovers small players (+14.1 points under 40 px) while COLLAPSING large ones (-30.8 at >=110 px) for a net -9.7 recall. Replaying that exact height decomposition on the W12 same-window S4b dumps over DEV-20 (235,174 GT rows, every frame, conf 0.20) gives the opposite shape: EVERY bucket improves at 1280 -- <40 px 0.7403 -> 0.8176, 40-70 0.9649 -> 0.9789, 70-110 0.9784 -> 0.9891, >=110 0.9730 -> 0.9784 (+0.54 points, against the control's -30.8), all 0.9705 -> 0.9812, precision 0.8970 -> 0.8997. Two networks, two answers: the 5A collapse is a property of a checkpoint trained at 800 on one Roboflow corpus, and our 20-epoch GSR+SoccerNet-v3 fine-tune at 640 does not share it. gsr-det-001 stands for the weights it measured; its resolution caveat is scoped to those weights.",
+   "value": 0.0054,
+   "unit": "recall change in the >=110 px bucket at imgsz 1280 for S4b on DEV-20, against -0.308 for the pre-fine-tune control on GSR valid",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w13_registered.json#section_1_mandatory_reconciliation",
+    "results/gsr_benchmark/gsr_v10_w13_heights.json",
+    "results/CLUSTER_SESSION5A.md#3a. Resolution alone is not the lever (control at imgsz=1280)"
+   ],
+   "method": "CPU re-read of the existing v10-W12 dumps (~/work/v10w12/{s4b_640,s4b_1280}: one GPU window, same weights, same frames). GT boxes bucketed by bbox_image height with the 5A edges (40/70/110 px) and matched by tools.gsr_v9_w7.match_feet (scale-free 0.5-box-height foot gate) at the shipped DETECT_CONF 0.20. No new inference.",
+   "n": 235174,
+   "caveats": [
+    "The two measurements differ in split, stride and matcher as well as in weights (5A: GSR valid, 58 sequences at stride 5, greedy IoU>=0.5; here: DEV-20, every frame, foot-point matcher), so the comparison is of SHAPE -- which buckets move and in which direction -- not of numbers side by side.",
+    "A component re-read only. It says nothing about GS-HOTA: see v10-w13-002, where the resolution arm fails end to end for reasons unrelated to recall by box height."
+   ],
+   "date": "2026-08-18",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "gsr-det-001",
+    "v10-w12-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "detection",
+    "resolution",
+    "reconciliation"
+   ]
+  },
+  {
+   "id": "v10-w13-002",
+   "statement": "REGISTERED FAIL: THE DETECTOR'S +1.08 RECALL POINTS AT imgsz 1280 DO NOT REACH THE SCORE -- ALL FOUR STACKS LOSE. Both arms (S4b at 640 and at 1280, md5 2074d8741f97a6892a1322d0f808244c, everything else byte-identical) were re-derived through the WHOLE chain -- positions, calibration re-gate, per-crop PARSeq OCR, box cache, CLIP embeddings -- inside ONE 1.87 GPU-h window on a100server1 GPU 1, and scored paired per sequence within it (kb v10-frz-003). On the freeze-#2 candidate stack (flags ON, geometry arm A) 1280 scores 58.0513 against 640's 58.8358: combined -0.7845, paired mean -0.6863, 10 helped / 10 hurt, Wilcoxon p = 0.729, worst clip -9.36 -- against a pre-declared bar of >= +0.75 with DetA not worse, helped > hurt at p < 0.05 and no clip below -1.00. All four bars FAIL. The other three cells are negative too: arm A flags OFF -0.9123 combined / -0.7999 paired; arm D (the bundle as shipped) flags ON -0.5116 / -0.3529 and flags OFF -0.6529 / -0.4928. imgsz 1280 is NOT adopted and is NOT a freeze-#2 rider; generator.extract.IMGSZ ships defaulting to None (the byte-identical shipped call).",
+   "value": -0.6863,
+   "unit": "paired per-sequence mean GS-HOTA, imgsz 1280 minus 640, DEV-20, flags ON + geometry arm A (the registered cell)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w13_registered.json#results",
+    "results/gsr_benchmark/gsr_v10_w13.json"
+   ],
+   "method": "tools/gsr_v10_w13.py: per arm, generator.extract.IMGSZ bound process-wide (default None = the shipped call) while tools.gsr_v6det builds the five chain artifacts under a per-arm suffix (_w13i640 / _w13i1280); the frozen s4 candidate-homography cache plus geometry riders D (tools.gsr_v10_w5) and A (tools.gsr_v10_w8 adaptive stiffness) replayed on each arm's own gated positions; the frozen v6 chain per cell (tools.gsr_eiou.run_point at e0.3/r1/w0.5/a0.30, tau 0.450, v6 arm-4t reader, free team map, self roster); tools.gsr_v9_w7.score_pair for the paired read flags ON and OFF. Scoring on the laptop, foreground, serial; eval/gsr_score.py sha256 faa0f3b0... = the v10 freeze record.",
+   "n": 20,
+   "caveats": [
+    "The experiment excludes a LARGE gain but cannot separate -0.7 from 0: per-clip sd is 3.9-4.5 GS-HOTA, so the 95% CI on the registered cell is about [-2.52, +1.15] (see v10-w13-004). The decision follows the point estimate and the pre-declared bar; the direction is consistent (4 of 4 cells negative on the submission-relevant combined score) but the magnitude is not resolved.",
+    "DEV-20 only; TEST-38, test-49 and challenge were not read.",
+    "One sequence (SNGS-096) was re-extracted for BOTH arms 3.3 minutes after the main window closed, after a CRLF in the runner's sequence list silently produced an empty extraction (v10-w13-006). Same host, GPU, environment and code; the pairing stays within one window by every property kb v10-frz-003 measured, but it is not literally one contiguous 1h42m block.",
+    "Both arms share the frozen s4 candidate cache by design (it is detector-independent), so this prices the detection change alone, not any interaction with a re-decoded calibration."
+   ],
+   "date": "2026-08-18",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w12-003",
+    "v9-w7-004",
+    "v10-frz-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "detection",
+    "resolution",
+    "negative-result",
+    "registered"
+   ]
+  },
+  {
+   "id": "v10-w13-003",
+   "statement": "THE CONVERSION RATE, AND THE HALF OF IT THAT WAS RIGHT: THE DETECTION FORECAST CONVERTED, ASSOCIATION ATE THE RESULT. Realised end-to-end value of the 1280 arm's +1.077 detector recall points is -0.33 to -0.74 GS-HOTA per recall point (paired: arm D flags ON -0.328, D OFF -0.458, A ON -0.637, A OFF -0.743). Decomposed, the campaign's own forecast instrument is HALF vindicated: the v9-W7 apportionment (a perfect detector = +2.9 recall points = +0.57 GS-DetA, i.e. 0.197 DetA per recall point) predicts +0.212 GS-DetA for this arm, and the realised paired GS-DetA on the shipped-bundle stack is +0.1906 flags OFF / +0.3064 flags ON -- the first end-to-end validation of that instrument. What sinks the arm is GS-AssA, which loses 1.23-1.51 paired points in EVERY cell, 2-7x the size of the DetA gain. No detector oracle this campaign has built -- v9-W7's miss oracle, W12's axes A-D -- prices association at all, and that omission is the entire gap between W12's dominant component table and this fail.",
+   "value": -0.637,
+   "unit": "realised paired GS-HOTA per +1.00 point of detector image-space recall, DEV-20, flags ON + arm A",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w13_registered.json#conversion_rate_for_the_forecast_ledger",
+    "results/gsr_benchmark/gsr_v10_w13.json"
+   ],
+   "method": "Paired per-sequence GS-HOTA / GS-DetA / GS-AssA deltas from tools.gsr_v9_w7.score_pair over the two same-window detector arms, divided by the recall gain of kb v10-w12-003 (+0.01077 GT-row image-space recall at a matched operating point).",
+   "n": 20,
+   "caveats": [
+    "The DetA agreement (+0.19/+0.31 realised against +0.212 predicted) is one point on one arm: it validates the instrument's order of magnitude, not its slope.",
+    "The apportionment being tested is itself linear and approximate (kb v9-w7-001's own caveat).",
+    "The AssA loss is measured, not explained: no covariate checked accounts for it per clip (v10-w13-004)."
+   ],
+   "date": "2026-08-18",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w13-002",
+    "v9-w7-001",
+    "v10-w12-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "detection",
+    "forecast",
+    "association"
+   ]
+  },
+  {
+   "id": "v10-w13-004",
+   "statement": "MEASUREMENT-DESIGN LIMIT: A DETECTOR-SIDE ARM IS 3.1x NOISIER PER CLIP THAN A GEOMETRY RIDER, SO DEV-20 CANNOT RESOLVE +-0.75 FOR ONE. On the identical extraction window the per-sequence paired GS-HOTA standard deviation is 4.50 for the detector arm (1280 vs 640, geometry D, flags OFF) against 1.46 for a geometry rider (arm A vs arm D on the SAME detections and the same track ids, flags OFF) -- because a detector change re-rolls every track id and re-runs the identity solver, while a geometry rider only moves the homography. With sd 3.9-4.5 and n = 20 the standard error is 0.88-1.01 and the 95% CI is about +-2, i.e. a +0.75 bar sits inside the noise and this design can only reject LARGE detector effects. Per-clip deltas run from -9.36 (SNGS-054) to +4.87 (SNGS-024) with a median of -0.05, and two candidate mechanisms are ruled OUT: no team-map inversion (predicted left/right player-row share stable on all 20 sequences, max |delta| 0.038) and no per-clip fragmentation relationship (Pearson r between the HOTA delta and the tracklet-count delta = -0.0735), even though pooled tracklets rise 2408 -> 2450 and the named-tracklet rate falls 0.6199 -> 0.6005.",
+   "value": 4.496,
+   "unit": "per-sequence paired GS-HOTA standard deviation of a detector-side arm on DEV-20, against 1.459 for a geometry rider in the same window",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w13_registered.json#mechanism_probes_negative",
+    "results/gsr_benchmark/gsr_v10_w13.json"
+   ],
+   "method": "Per-sequence deltas from tools.gsr_v9_w7.score_pair (detector arm) and from the two geometry cells of the same window (arm A minus arm D on the identical i640 detections); sd with ddof=1, t-interval at 95%. Team-map probe: per-sequence share of player rows labelled 'left' in each arm's submission JSON. Fragmentation probe: distinct submission track_ids per sequence per arm.",
+   "n": 20,
+   "caveats": [
+    "The 1.46 geometry-rider sd is measured on arm A vs arm D specifically; other riders may differ.",
+    "'Ruled out' means these two covariates do not explain the per-clip pattern; the pattern itself remains unexplained, and a third mechanism (e.g. jersey-vote flips inside the solver) was not tested.",
+    "The implication for future detector arms -- more sequences, or a design that holds track ids fixed -- is a recommendation, not a measured result."
+   ],
+   "date": "2026-08-18",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w13-002"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "methodology",
+    "measurement",
+    "variance"
+   ]
+  },
+  {
+   "id": "v10-w13-005",
+   "statement": "ARM A (ADAPTIVE STIFFNESS) REPLICATES ON AN INDEPENDENT EXTRACTION, AND SLIGHTLY STRONGER THAN ON RECORD. On this session's fresh same-window S4b-at-640 lineage -- new positions, new tracks, new OCR, new embeddings, with only the frozen s4 candidate cache shared -- arm A beats the shipped arm D by +0.6308 combined / +0.6246 paired GS-HOTA flags ON (14 helped / 6 hurt, Wilcoxon p = 0.0328) and +0.5979 / +0.5737 flags OFF (13/7, p = 0.0532), against v10-W8's on-record +0.400 combined / +0.3755 paired flags ON (14/6, p = 0.114) on the v10-W2 ctrl lineage. Absolute DEV-20 flags ON: D 58.2050 -> A 58.8358. The rider is not an artifact of the extraction it was tuned on.",
+   "value": 0.6308,
+   "unit": "combined DEV-20 GS-HOTA, arm A minus arm D, flags ON, fresh 2026-08-17 extraction window (on record: +0.400)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w13_registered.json#side_findings",
+    "results/gsr_benchmark/gsr_v10_w13.json"
+   ],
+   "method": "Two cells of this session's four (i640/D and i640/A): same detections, same track ids, differing only in the homography series. Per-sequence paired deltas taken from the two score_pair control arms, flags ON and OFF.",
+   "n": 20,
+   "caveats": [
+    "A replication of the rider's SIZE on a different extraction, not an independent re-derivation of the rule (the stiffness rule is unchanged from v10-W8, where it was fixed a priori).",
+    "Both readings here ride the s4 candidate cache, while v10-W8's on-record number rode the ctrl cache -- the cache differs even though the rider does not."
+   ],
+   "date": "2026-08-18",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w8-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "replication",
+    "freeze"
+   ]
+  },
+  {
+   "id": "v10-w13-006",
+   "statement": "PROCESS HAZARD, TWO-PART AND SILENT: A CRLF IN A SEQUENCE LIST DELETES THE LAST SEQUENCE OF A SHARDED RUN, AND THE PIPELINE DOES NOT COMPLAIN. ~/dev20n.txt on the cluster terminates its final line with CRLF (file(1) reports 'ASCII text, with CRLF, LF line terminators'; ~/t38n.txt is the same), so a runner that shards it passes the sequence name SNGS-096 with a trailing carriage return. generator.extract.extract_positions then opens a non-existent frame directory, OpenCV reports zero frames, _collect_team_crops returns nothing, and the function WRITES AN EMPTY PARQUET and returns 0 rows behind a single INFO line -- named with the carriage return inside it, which every downstream stage happily carries (the gate copies it, boxes and OCR write empty files) until it surfaces as one missing embedding cache out of twenty. It cost this session both arms of SNGS-096 and a 10-minute repair. An older script (~/w12_s4b.sh) already carried a 'tr -d 015' workaround for the same file, so the trap has been hit before and was never fixed. Rule: strip CR from any list a shard runner reads, and assert non-empty extractions before trusting a batch (tools/gsr_v10_w13.py now raises).",
+   "value": 2,
+   "unit": "detector arms that silently lost a DEV-20 sequence to the CRLF before the empty-extraction check existed",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w13_registered.json#extraction_window",
+    "tools/gsr_v10_w13.py"
+   ],
+   "method": "Observed directly: the extract logs record '0 rows, 0 tracks (0s)' for SNGS-096 in both arms; 'ls | cat -A' on the output directory shows the pair SNGS-096.parquet and SNGS-096^M.parquet; file(1) on the sequence lists confirms the mixed terminators.",
+   "n": 1,
+   "caveats": [
+    "Whether earlier sharded sessions lost their final sequence the same way was NOT audited -- only that the two lists carrying CRLF today are dev20n.txt and t38n.txt, and that one older script worked around it for dev20.txt.",
+    "The guard added here lives in tools/gsr_v10_w13.py only: generator.extract still writes an empty parquet on a dead capture, and tools/gsr_v6det.py (frozen by hash in results/gsr_v10_frozen.json) was deliberately not edited."
+   ],
+   "date": "2026-08-18",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [],
+   "tags": [
+    "gsr",
+    "v10",
+    "hazard",
+    "process",
+    "cluster"
+   ]
+  },
+  {
+   "id": "v10-w13-007",
+   "statement": "EXTRACTION DRIFT, FOURTH INSTANCE -- AND THE FIRST ONE IN OUR FAVOUR. A fresh same-stack S4b-at-640 DEV-20 extraction (2026-08-17 window) run through the identical chain and the identical arm D + s4 geometry scores 58.2050 GS-HOTA flags ON and 53.7975 flags OFF, against the on-record v10 numbers 57.7604 and 53.1714 -- +0.4446 and +0.6261. kb v10-frz-003 measured ~1.1 GS-HOTA of run-to-run extraction drift with the sign against us on TEST-38 and noted explicitly that nothing measured said the drift was systematically negative; this is the first instance measured with the sign positive, and it is of the same order. The practical consequence is unchanged and reinforced: a comparison across extraction windows is worth about +-1 GS-HOTA of nothing, and only within-window pairing decides an arm.",
+   "value": 0.4446,
+   "unit": "GS-HOTA, fresh DEV-20 S4b-640 + arm D + s4 flags ON minus the on-record v10 reading of the same configuration",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w13_registered.json#side_findings",
+    "results/gsr_benchmark/gsr_v10_w13.json",
+    "results/gsr_v10_frozen.json#dev_evidence"
+   ],
+   "method": "This session's i640/D cell (scored by tools.gsr_v9_w7.score_pair as the control of the D pairing, flags ON and OFF) against results/gsr_v10_frozen.json's DEV-20 bundle readings for the same arm D + s4 configuration.",
+   "n": 20,
+   "caveats": [
+    "Not a clean single-variable comparison: the on-record lineage uses positions_v10w2ctrl_v6det as its base positions and this one uses positions_gate_w13i640, and the GPU stacks differ (the on-record DEV artifacts predate this window). Both are the S4b chain at 640, which is what makes the gap drift-shaped, but the base-positions difference is a confound and is not isolated.",
+    "One pair of windows: a point estimate of drift, not a variance estimate -- the same caveat kb v10-frz-003 carries."
+   ],
+   "date": "2026-08-18",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-frz-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "drift",
+    "methodology"
+   ]
   }
  ]
 }

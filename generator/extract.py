@@ -52,6 +52,14 @@ FOOTBALL_WEIGHTS: str | None = None
 #: the same adapted detector. Registered arm: ``results/GSR_V8_W4.md``.
 BN_STATS: str | Path | None = None
 
+#: Process-wide inference resolution for the football detector (ultralytics ``imgsz``), or ``None``
+#: = the shipped path: the kwarg is not passed at all, so ultralytics uses the checkpoint's own
+#: training ``imgsz`` (the S4b checkpoint carries 640). Rebound by the caller for the duration of ONE
+#: run, exactly like :data:`FOOTBALL_WEIGHTS`, so extraction, crop recovery, box caching and
+#: embedding all detect at the same resolution -- they key artifacts on boxes that must match.
+#: Registered arm: ``results/gsr_v10_w13_registered.json``.
+IMGSZ: int | None = None
+
 DETECT_CONF = 0.20  # player detection confidence
 BALL_CONF = 0.10  # the ball is small/fast -> a lower threshold recovers more ball frames
 
@@ -63,6 +71,11 @@ ROLE_NAME = {ROLE_PLAYER: "player", ROLE_GOALKEEPER: "goalkeeper", ROLE_REFEREE:
 ROLE_ID = {"player": ROLE_PLAYER, "goalkeeper": ROLE_GOALKEEPER, "referee": ROLE_REFEREE}
 # BoT-SORT config tuned for broadcast football (GMC + ReID + strict track creation); see the yaml.
 _BOTSORT_CFG = str(Path(__file__).with_name("botsort_tuned.yaml"))
+
+
+def _imgsz_kwargs() -> dict:
+    """Ultralytics predict kwargs for the process-wide :data:`IMGSZ` (``{}`` = the shipped path)."""
+    return {} if IMGSZ is None else {"imgsz": int(IMGSZ)}
 
 
 def _norm_role_name(class_name: str) -> str | None:
@@ -335,7 +348,7 @@ class _FootballRoleDetector:
 
     def detect(self, frame_rgb):
         """Return ``(person_xyxy, person_conf, role_ids, ball_xy_or_None)`` with real roles."""
-        r = self.yolo(frame_rgb, verbose=False, conf=BALL_CONF)[0]
+        r = self.yolo(frame_rgb, verbose=False, conf=BALL_CONF, **_imgsz_kwargs())[0]
         if r.boxes is None or len(r.boxes) == 0:
             return np.zeros((0, 4)), np.zeros(0), np.zeros(0, int), None
         xyxy = r.boxes.xyxy.cpu().numpy()
@@ -355,7 +368,7 @@ class _FootballRoleDetector:
     def track(self, frame_rgb):
         """Detect + BoT-SORT (GMC) in one call -> ``(xyxy, conf, role_ids, track_ids, ball_xy)``."""
         r = self.yolo.track(frame_rgb, persist=True, tracker=_BOTSORT_CFG, verbose=False,
-                            conf=BALL_CONF)[0]
+                            conf=BALL_CONF, **_imgsz_kwargs())[0]
         return _split_tracked_yolo(r, lambda c: self._role.get(int(c)))
 
 

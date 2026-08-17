@@ -115,3 +115,56 @@ def test_built_rows_are_postprocessable():
     out = postprocess(pd.DataFrame(rows))
     assert out["pitch_x"].notna().any()  # plausible frame survived the gate
     assert out["is_actor"].sum() == 1 and out["is_keeper"].sum() == 2
+
+
+# === IMGSZ (v10-W13): the default must not change one byte of the shipped call ====================
+class _StubYolo:
+    """Records the kwargs of the last ultralytics call; returns one empty result."""
+
+    class _R:
+        boxes = None
+
+    def __init__(self):
+        self.calls = []
+
+    def __call__(self, _frame, **kw):
+        self.calls.append(kw)
+        return [self._R()]
+
+    def track(self, _frame, **kw):
+        self.calls.append(kw)
+        return [self._R()]
+
+
+def _stub_detector():
+    from generator.extract import _FootballRoleDetector
+
+    det = _FootballRoleDetector.__new__(_FootballRoleDetector)  # no ultralytics import
+    det.yolo = _StubYolo()
+    det._role = {}
+    return det
+
+
+def test_imgsz_default_passes_no_imgsz_kwarg():
+    """Default IMGSZ=None -> the call is byte-identical to the shipped one (no imgsz at all)."""
+    import generator.extract as ex
+
+    assert ex.IMGSZ is None, "the shipped default must stay None"
+    det = _stub_detector()
+    det.detect(np.zeros((4, 4, 3), np.uint8))
+    det.track(np.zeros((4, 4, 3), np.uint8))
+    assert all("imgsz" not in kw for kw in det.yolo.calls), det.yolo.calls
+
+
+def test_imgsz_override_reaches_both_detect_and_track():
+    import generator.extract as ex
+
+    det = _stub_detector()
+    ex.IMGSZ = 1280
+    try:
+        det.detect(np.zeros((4, 4, 3), np.uint8))
+        det.track(np.zeros((4, 4, 3), np.uint8))
+    finally:
+        ex.IMGSZ = None
+    assert [kw.get("imgsz") for kw in det.yolo.calls] == [1280, 1280], det.yolo.calls
+    assert ex._imgsz_kwargs() == {}
