@@ -489,6 +489,11 @@ class PnLCalibCalibrator:
             ln_d = {k: {**v, "x_1": v["x_1"] * s, "y_1": v["y_1"] * s,
                         "x_2": v["x_2"] * s, "y_2": v["y_2"] * s} for k, v in ln_d.items()}
             cw, ch = cw * s, ch * s
+        #: Raw decoder output, before ``complete_keypoints`` and before normalisation, in the
+        #: network-input pixel frame ``(cw, ch)``. Stashed so a caller can re-run the solver half of
+        #: :meth:`candidates` on a modified correspondence set without a second forward pass
+        #: (v10-W11's conic harvest). Overwritten every call; never read by the shipped path.
+        self.last_raw = (kp_d, ln_d, cw, ch)
         kp_dict, lines_dict = complete_keypoints(kp_d, ln_d, w=cw, h=ch, normalize=True)
         return kp_dict, lines_dict, w0, h0
 
@@ -509,59 +514,13 @@ class PnLCalibCalibrator:
             PnLCalib cannot calibrate the frame at all.
         """
         self._load()
-        from utils.utils_calib import FramebyFrameCalib  # noqa: PLC0415
-
         kp_dict, lines_dict, w0, h0 = self._detect(frame_bgr)
-        cam = FramebyFrameCalib(iwidth=w0, iheight=h0, denormalize=True)
-        cam.update(kp_dict, lines_dict)
+        return candidates_from_dicts(kp_dict, lines_dict, w0, h0,
+                                     count_error=self._count_solver_error)
 
-        raw: list[tuple[str, float, float, dict]] = []
-        for mode in _VOTE_MODES:
-            for use_ransac in _VOTE_RANSAC:
-                try:
-                    cam_params, rep = cam.get_cam_params(
-                        mode=mode, use_ransac=use_ransac, refine=False, refine_w_lines=True
-                    )
-                except Exception:  # noqa: BLE001 - one bad subset must not kill the other 17
-                    # PnLCalib hands cv2.calibrateCamera whatever survived RANSAC and can raise on a
-                    # degenerate correspondence set; its own contract for "no camera" is (None, None).
-                    self.n_solver_errors += 1
-                    continue
-                if rep:
-                    raw.append((mode, float(use_ransac), float(rep), cam_params))
-        if not raw:
-            return []
-        order = sorted(range(len(raw)), key=lambda i: (raw[i][2], raw[i][0]))
-        top = next((i for i in order if raw[i][0] == "full" and raw[i][1] == 0
-                    and raw[i][2] <= _VOTE_TH_PX), None)
-        if top is not None:
-            order = [top] + [i for i in order if i != top]
-
-        # Metre reprojection error of the ground keypoints through the derived homography. NB:
-        # ``get_correspondences`` returns PnLCalib's **centred** world coords, while ``h`` outputs the
-        # **uncentred** convention -- shift the obj points to match, else the error reads as the whole
-        # ~62 m centre offset and every frame is (wrongly) rejected.
-        cam.get_per_plane_correspondences(mode="ground_plane", use_ransac=5.0)
-        obj_uncentred = img_pts = None
-        n_pts = 0
-        if cam.obj_pts:
-            obj_pts, img = cam.get_correspondences("ground_plane")
-            n_pts = len(obj_pts)
-            if n_pts >= MIN_CORRESPONDENCES:
-                obj_uncentred = obj_pts[:, :2] + np.array([PITCH_LENGTH_M / 2, PITCH_WIDTH_M / 2])
-                img_pts = img[:, :2]
-
-        out: list[CalibCandidate] = []
-        for i in order:
-            mode, use_ransac, rep_px, cam_params = raw[i]
-            h = ground_homography_from_cam_params(cam_params)
-            if h is None or not np.isfinite(h).all():
-                continue
-            err = (float("inf") if obj_uncentred is None
-                   else reprojection_error_m(img_pts, obj_uncentred, h))
-            out.append(CalibCandidate(homography=h, error_m=err, n_points=n_pts, mode=mode,
-                                      use_ransac=use_ransac, rep_err_px=rep_px))
-        return out
+    def _count_solver_error(self) -> None:
+        """Tally one ``get_cam_params`` failure (a degenerate subset, skipped not fatal)."""
+        self.n_solver_errors += 1
 
     def calibrate_frame(
         self, frame_bgr: np.ndarray, foot_points: np.ndarray | None = None
@@ -582,3 +541,86 @@ class PnLCalibCalibrator:
         return select_calibration(
             self.candidates(frame_bgr), foot_points=foot_points, max_error_m=self.max_error_m
         )
+
+
+def candidates_from_dicts(kp_dict: dict, lines_dict: dict, w0: int, h0: int,
+                          count_error=None) -> list[CalibCandidate]:
+    """Every camera hypothesis PnLCalib computes from one **already-decoded** correspondence set.
+
+        This is ``utils_calib.heuristic_voting`` with the last line removed: the same 3 keypoint
+        subsets x 6 RANSAC thresholds (points + lines + PnL refinement, the method's real strength),
+        the same ``(rep_err, mode)`` sort and the same "prefer ``full`` at RANSAC 0 under 5 px" rule
+        -- but *all* survivors are returned rather than only the winner, so the gate can reject a
+        hypothesis and take the next one at no extra compute. Each is reduced to an image->pitch
+        ground homography, and each is scored by the **metre** reprojection error of the frame's
+        ground-plane correspondences (the same fixed correspondence set for every candidate, exactly
+        as before).
+
+    Split out of :meth:`PnLCalibCalibrator.candidates` so a caller holding a *modified* keypoint set
+    (v10-W11's conic constructions) can mint hypotheses from it without a second forward pass. The
+    shipped path routes through here unchanged.
+
+    Args:
+        kp_dict: ``complete_keypoints`` output, normalised.
+        lines_dict: The matching line dict.
+        w0: Native frame width, for ``FramebyFrameCalib``'s denormalisation.
+        h0: Native frame height.
+        count_error: Optional zero-argument callback invoked once per solver exception.
+
+    Returns:
+        Candidates best-first; ``[0]`` is what the stock voting would have returned. Empty when
+        PnLCalib cannot calibrate the frame at all.
+    """
+    from utils.utils_calib import FramebyFrameCalib  # noqa: PLC0415
+
+    cam = FramebyFrameCalib(iwidth=w0, iheight=h0, denormalize=True)
+    cam.update(kp_dict, lines_dict)
+
+    raw: list[tuple[str, float, float, dict]] = []
+    for mode in _VOTE_MODES:
+        for use_ransac in _VOTE_RANSAC:
+            try:
+                cam_params, rep = cam.get_cam_params(
+                    mode=mode, use_ransac=use_ransac, refine=False, refine_w_lines=True
+                )
+            except Exception:  # noqa: BLE001 - one bad subset must not kill the other 17
+                # PnLCalib hands cv2.calibrateCamera whatever survived RANSAC and can raise on a
+                # degenerate correspondence set; its own contract for "no camera" is (None, None).
+                if count_error is not None:
+                    count_error()
+                continue
+            if rep:
+                raw.append((mode, float(use_ransac), float(rep), cam_params))
+    if not raw:
+        return []
+    order = sorted(range(len(raw)), key=lambda i: (raw[i][2], raw[i][0]))
+    top = next((i for i in order if raw[i][0] == "full" and raw[i][1] == 0
+                and raw[i][2] <= _VOTE_TH_PX), None)
+    if top is not None:
+        order = [top] + [i for i in order if i != top]
+
+    # Metre reprojection error of the ground keypoints through the derived homography. NB:
+    # ``get_correspondences`` returns PnLCalib's **centred** world coords, while ``h`` outputs the
+    # **uncentred** convention -- shift the obj points to match, else the error reads as the whole
+    # ~62 m centre offset and every frame is (wrongly) rejected.
+    cam.get_per_plane_correspondences(mode="ground_plane", use_ransac=5.0)
+    obj_uncentred = img_pts = None
+    n_pts = 0
+    if cam.obj_pts:
+        obj_pts, img = cam.get_correspondences("ground_plane")
+        n_pts = len(obj_pts)
+        if n_pts >= MIN_CORRESPONDENCES:
+            obj_uncentred = obj_pts[:, :2] + np.array([PITCH_LENGTH_M / 2, PITCH_WIDTH_M / 2])
+            img_pts = img[:, :2]
+
+    out: list[CalibCandidate] = []
+    for i in order:
+        mode, use_ransac, rep_px, cam_params = raw[i]
+        h = ground_homography_from_cam_params(cam_params)
+        if h is None or not np.isfinite(h).all():
+            continue
+        err = (float("inf") if obj_uncentred is None
+               else reprojection_error_m(img_pts, obj_uncentred, h))
+        out.append(CalibCandidate(homography=h, error_m=err, n_points=n_pts, mode=mode,
+                                  use_ransac=use_ransac, rep_err_px=rep_px))
+    return out

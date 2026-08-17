@@ -1,0 +1,862 @@
+{
+ "scope": {
+  "frames": 13551,
+  "n_points": {
+   "median": 9.0,
+   "p10": 6.0,
+   "p90": 12.0,
+   "max": 21
+  },
+  "disp_ctrl_m": {
+   "spearman_rho": -0.09513153695362185,
+   "p": 1.2785312955574536e-28
+  },
+  "disp_A_m": {
+   "spearman_rho": -0.07984666774662857,
+   "p": 1.2921259564107578e-20
+  },
+  "quintiles": [
+   {
+    "n_points_lo": 3.999,
+    "n_points_hi": 7.0,
+    "frames": 3188,
+    "median_disp_ctrl_m": 0.5169120177058011,
+    "median_disp_A_m": 0.4198946488984713
+   },
+   {
+    "n_points_lo": 7.0,
+    "n_points_hi": 9.0,
+    "frames": 4012,
+    "median_disp_ctrl_m": 0.4703705155787699,
+    "median_disp_A_m": 0.38278338109926124
+   },
+   {
+    "n_points_lo": 9.0,
+    "n_points_hi": 10.0,
+    "frames": 1978,
+    "median_disp_ctrl_m": 0.5096918323956487,
+    "median_disp_A_m": 0.42075826751762674
+   },
+   {
+    "n_points_lo": 10.0,
+    "n_points_hi": 11.0,
+    "frames": 1768,
+    "median_disp_ctrl_m": 0.4732309594349349,
+    "median_disp_A_m": 0.4057040413145351
+   },
+   {
+    "n_points_lo": 11.0,
+    "n_points_hi": 21.0,
+    "frames": 2605,
+    "median_disp_ctrl_m": 0.40783940319327716,
+    "median_disp_A_m": 0.3459382715143102
+   }
+  ],
+  "result": "accuracy DOES respond to correspondence count, weakly: Spearman rho -0.095 (p 1.3e-28) under the ctrl gate and -0.080 under arm A, sparsest quintile median 0.5169 m vs densest 0.4078 m. Correctly signed, so the full DEV-20 harvest was authorised. The relation is CONFOUNDED -- frames with more visible correspondences are wider shots with easier geometry -- so it sizes the spend and is not evidence of causation."
+ },
+ "harvest": [
+  {
+   "seq": "SNGS-021",
+   "frames": 750,
+   "keypoints": 11945,
+   "lines": 338,
+   "seconds": 88.5
+  },
+  {
+   "seq": "SNGS-024",
+   "frames": 750,
+   "keypoints": 7478,
+   "lines": 377,
+   "seconds": 87.2
+  },
+  {
+   "seq": "SNGS-027",
+   "frames": 750,
+   "keypoints": 9075,
+   "lines": 1769,
+   "seconds": 87.1
+  },
+  {
+   "seq": "SNGS-030",
+   "frames": 750,
+   "keypoints": 12523,
+   "lines": 1157,
+   "seconds": 88.9
+  },
+  {
+   "seq": "SNGS-033",
+   "frames": 750,
+   "keypoints": 13119,
+   "lines": 114,
+   "seconds": 87.7
+  },
+  {
+   "seq": "SNGS-036",
+   "frames": 750,
+   "keypoints": 11965,
+   "lines": 534,
+   "seconds": 87.4
+  },
+  {
+   "seq": "SNGS-039",
+   "frames": 750,
+   "keypoints": 11906,
+   "lines": 1755,
+   "seconds": 87.6
+  },
+  {
+   "seq": "SNGS-042",
+   "frames": 750,
+   "keypoints": 14206,
+   "lines": 2806,
+   "seconds": 88.8
+  },
+  {
+   "seq": "SNGS-045",
+   "frames": 750,
+   "keypoints": 13055,
+   "lines": 658,
+   "seconds": 86.5
+  },
+  {
+   "seq": "SNGS-048",
+   "frames": 750,
+   "keypoints": 12980,
+   "lines": 63,
+   "seconds": 87.3
+  },
+  {
+   "seq": "SNGS-051",
+   "frames": 750,
+   "keypoints": 10233,
+   "lines": 585,
+   "seconds": 87.4
+  },
+  {
+   "seq": "SNGS-054",
+   "frames": 750,
+   "keypoints": 9287,
+   "lines": 1118,
+   "seconds": 88.0
+  },
+  {
+   "seq": "SNGS-057",
+   "frames": 750,
+   "keypoints": 9324,
+   "lines": 1579,
+   "seconds": 87.5
+  },
+  {
+   "seq": "SNGS-078",
+   "frames": 750,
+   "keypoints": 10332,
+   "lines": 391,
+   "seconds": 87.2
+  },
+  {
+   "seq": "SNGS-081",
+   "frames": 750,
+   "keypoints": 8761,
+   "lines": 303,
+   "seconds": 87.1
+  },
+  {
+   "seq": "SNGS-084",
+   "frames": 750,
+   "keypoints": 12461,
+   "lines": 611,
+   "seconds": 88.5
+  },
+  {
+   "seq": "SNGS-087",
+   "frames": 750,
+   "keypoints": 7721,
+   "lines": 833,
+   "seconds": 88.8
+  },
+  {
+   "seq": "SNGS-090",
+   "frames": 750,
+   "keypoints": 11951,
+   "lines": 661,
+   "seconds": 87.9
+  },
+  {
+   "seq": "SNGS-093",
+   "frames": 750,
+   "keypoints": 10719,
+   "lines": 1076,
+   "seconds": 88.2
+  },
+  {
+   "seq": "SNGS-096",
+   "frames": 750,
+   "keypoints": 11627,
+   "lines": 147,
+   "seconds": 88.5
+  }
+ ],
+ "enrich": [
+  {
+   "seq": "SNGS-021",
+   "frames": 750,
+   "frames_with_new": 675,
+   "new_hypotheses": 10116,
+   "constructions": {
+    "conics": 675,
+    "denoised": 4899,
+    "line_conic": 0,
+    "tangent": 91,
+    "magera": 2
+   },
+   "new_per_frame": 13.488,
+   "seconds": 53.5
+  },
+  {
+   "seq": "SNGS-024",
+   "frames": 640,
+   "frames_with_new": 260,
+   "new_hypotheses": 3522,
+   "constructions": {
+    "conics": 260,
+    "denoised": 1763,
+    "line_conic": 0,
+    "tangent": 49,
+    "magera": 0
+   },
+   "new_per_frame": 5.503,
+   "seconds": 15.8
+  },
+  {
+   "seq": "SNGS-027",
+   "frames": 749,
+   "frames_with_new": 161,
+   "new_hypotheses": 2898,
+   "constructions": {
+    "conics": 161,
+    "denoised": 805,
+    "line_conic": 0,
+    "tangent": 0,
+    "magera": 0
+   },
+   "new_per_frame": 3.869,
+   "seconds": 16.0
+  },
+  {
+   "seq": "SNGS-030",
+   "frames": 750,
+   "frames_with_new": 474,
+   "new_hypotheses": 8532,
+   "constructions": {
+    "conics": 474,
+    "denoised": 2370,
+    "line_conic": 0,
+    "tangent": 0,
+    "magera": 0
+   },
+   "new_per_frame": 11.376,
+   "seconds": 60.2
+  },
+  {
+   "seq": "SNGS-033",
+   "frames": 720,
+   "frames_with_new": 642,
+   "new_hypotheses": 10944,
+   "constructions": {
+    "conics": 653,
+    "denoised": 4481,
+    "line_conic": 0,
+    "tangent": 95,
+    "magera": 0
+   },
+   "new_per_frame": 15.2,
+   "seconds": 52.1
+  },
+  {
+   "seq": "SNGS-036",
+   "frames": 750,
+   "frames_with_new": 719,
+   "new_hypotheses": 10392,
+   "constructions": {
+    "conics": 719,
+    "denoised": 5474,
+    "line_conic": 0,
+    "tangent": 577,
+    "magera": 6
+   },
+   "new_per_frame": 13.856,
+   "seconds": 45.6
+  },
+  {
+   "seq": "SNGS-039",
+   "frames": 749,
+   "frames_with_new": 375,
+   "new_hypotheses": 6750,
+   "constructions": {
+    "conics": 375,
+    "denoised": 1875,
+    "line_conic": 0,
+    "tangent": 0,
+    "magera": 0
+   },
+   "new_per_frame": 9.012,
+   "seconds": 79.4
+  },
+  {
+   "seq": "SNGS-042",
+   "frames": 750,
+   "frames_with_new": 750,
+   "new_hypotheses": 13116,
+   "constructions": {
+    "conics": 771,
+    "denoised": 4166,
+    "line_conic": 0,
+    "tangent": 60,
+    "magera": 26
+   },
+   "new_per_frame": 17.488,
+   "seconds": 156.0
+  },
+  {
+   "seq": "SNGS-045",
+   "frames": 737,
+   "frames_with_new": 570,
+   "new_hypotheses": 9006,
+   "constructions": {
+    "conics": 570,
+    "denoised": 4421,
+    "line_conic": 0,
+    "tangent": 248,
+    "magera": 29
+   },
+   "new_per_frame": 12.22,
+   "seconds": 60.9
+  },
+  {
+   "seq": "SNGS-048",
+   "frames": 748,
+   "frames_with_new": 692,
+   "new_hypotheses": 10350,
+   "constructions": {
+    "conics": 695,
+    "denoised": 5363,
+    "line_conic": 0,
+    "tangent": 828,
+    "magera": 12
+   },
+   "new_per_frame": 13.837,
+   "seconds": 50.3
+  },
+  {
+   "seq": "SNGS-051",
+   "frames": 728,
+   "frames_with_new": 696,
+   "new_hypotheses": 9624,
+   "constructions": {
+    "conics": 698,
+    "denoised": 5154,
+    "line_conic": 0,
+    "tangent": 56,
+    "magera": 23
+   },
+   "new_per_frame": 13.22,
+   "seconds": 55.1
+  },
+  {
+   "seq": "SNGS-054",
+   "frames": 725,
+   "frames_with_new": 419,
+   "new_hypotheses": 5976,
+   "constructions": {
+    "conics": 419,
+    "denoised": 2593,
+    "line_conic": 0,
+    "tangent": 135,
+    "magera": 81
+   },
+   "new_per_frame": 8.243,
+   "seconds": 44.3
+  },
+  {
+   "seq": "SNGS-057",
+   "frames": 683,
+   "frames_with_new": 636,
+   "new_hypotheses": 9108,
+   "constructions": {
+    "conics": 636,
+    "denoised": 4245,
+    "line_conic": 0,
+    "tangent": 129,
+    "magera": 7
+   },
+   "new_per_frame": 13.335,
+   "seconds": 58.9
+  },
+  {
+   "seq": "SNGS-078",
+   "frames": 720,
+   "frames_with_new": 521,
+   "new_hypotheses": 8268,
+   "constructions": {
+    "conics": 521,
+    "denoised": 2956,
+    "line_conic": 0,
+    "tangent": 134,
+    "magera": 19
+   },
+   "new_per_frame": 11.483,
+   "seconds": 46.7
+  },
+  {
+   "seq": "SNGS-081",
+   "frames": 728,
+   "frames_with_new": 526,
+   "new_hypotheses": 7074,
+   "constructions": {
+    "conics": 526,
+    "denoised": 3617,
+    "line_conic": 0,
+    "tangent": 164,
+    "magera": 83
+   },
+   "new_per_frame": 9.717,
+   "seconds": 35.6
+  },
+  {
+   "seq": "SNGS-084",
+   "frames": 695,
+   "frames_with_new": 620,
+   "new_hypotheses": 10014,
+   "constructions": {
+    "conics": 620,
+    "denoised": 4832,
+    "line_conic": 0,
+    "tangent": 277,
+    "magera": 3
+   },
+   "new_per_frame": 14.409,
+   "seconds": 70.9
+  },
+  {
+   "seq": "SNGS-087",
+   "frames": 715,
+   "frames_with_new": 186,
+   "new_hypotheses": 2676,
+   "constructions": {
+    "conics": 186,
+    "denoised": 1200,
+    "line_conic": 0,
+    "tangent": 33,
+    "magera": 7
+   },
+   "new_per_frame": 3.743,
+   "seconds": 16.6
+  },
+  {
+   "seq": "SNGS-090",
+   "frames": 720,
+   "frames_with_new": 465,
+   "new_hypotheses": 7950,
+   "constructions": {
+    "conics": 465,
+    "denoised": 2390,
+    "line_conic": 0,
+    "tangent": 66,
+    "magera": 6
+   },
+   "new_per_frame": 11.042,
+   "seconds": 53.7
+  },
+  {
+   "seq": "SNGS-093",
+   "frames": 730,
+   "frames_with_new": 527,
+   "new_hypotheses": 8304,
+   "constructions": {
+    "conics": 529,
+    "denoised": 3975,
+    "line_conic": 0,
+    "tangent": 51,
+    "magera": 2
+   },
+   "new_per_frame": 11.375,
+   "seconds": 36.3
+  },
+  {
+   "seq": "SNGS-096",
+   "frames": 739,
+   "frames_with_new": 735,
+   "new_hypotheses": 11346,
+   "constructions": {
+    "conics": 741,
+    "denoised": 5788,
+    "line_conic": 0,
+    "tangent": 1226,
+    "magera": 34
+   },
+   "new_per_frame": 15.353,
+   "seconds": 68.0
+  }
+ ],
+ "enrich_pooled": {
+  "frames": 14526,
+  "constructions": {
+   "conics": 10694,
+   "denoised": 72367,
+   "line_conic": 0,
+   "tangent": 4219,
+   "magera": 340
+  },
+  "new_hypotheses": 165966,
+  "frames_with_new": 10649,
+  "derived_per_frame": 0.314,
+  "denoised_per_frame": 4.982
+ },
+ "gates": {
+  "G0_pool_oracle": {
+   "bar": "the enlarged pool best-admissible oracle must beat the on-record cached-pool oracle",
+   "original": {
+    "n": 207921,
+    "median": 0.33759045532422993,
+    "p90": 1.0454578222167497,
+    "mean": 1.4016997036449144,
+    "kloss": 0.05087759447972974,
+    "predicted_gs_hota": 2.3239
+   },
+   "enlarged": {
+    "n": 207921,
+    "median": 0.3241768360169805,
+    "p90": 1.024870402385011,
+    "mean": 1.3782914011614364,
+    "kloss": 0.04902840336581504,
+    "predicted_gs_hota": 2.4668
+   },
+   "ceiling_moved_gs_hota": 0.1428,
+   "pool_size": {
+    "original": {
+     "mean_candidates": 15.842889823629253,
+     "mean_distinct_by_accuracy": 6.533687550734263,
+     "gate_pick_is_best_frac": 0.25378200870784445,
+     "gate_pick_rank_median": 4.0,
+     "frames": 13551
+    },
+    "enlarged": {
+     "mean_candidates": 27.198214153936977,
+     "mean_distinct_by_accuracy": 10.699505571544535,
+     "gate_pick_is_best_frac": 0.17068851007305733,
+     "gate_pick_rank_median": 8.0,
+     "frames": 13551
+    }
+   },
+   "headroom_above_arm_A_gs_hota": 0.5782,
+   "result": "PASS -- the new hypotheses are real: 15.84 -> 27.20 candidates per frame, 6.53 -> 10.70 distinct by accuracy, ceiling +0.143 predicted GS-HOTA"
+  },
+  "G1_component": {
+   "bar": "W11 arm (the arm-A rule over the enlarged pool) kloss <= 0.0535675, i.e. 5% below arm A 0.0563865, AND pooled median displacement below 0.392686 m",
+   "arms": {
+    "ctrl_original": {
+     "n": 207921,
+     "median": 0.4653056668080344,
+     "p90": 1.4106253078583924,
+     "mean": 1.6000402974037748,
+     "kloss": 0.08096225956801138,
+     "predicted_gs_hota": 0.0
+    },
+    "D_original": {
+     "n": 207921,
+     "median": 0.39630060742976564,
+     "p90": 1.1657163233314822,
+     "mean": 0.5894973761051746,
+     "kloss": 0.060973934003165614,
+     "predicted_gs_hota": 1.544
+    },
+    "A_original": {
+     "n": 207921,
+     "median": 0.3926864351938269,
+     "p90": 1.1351447103224834,
+     "mean": 0.5564033971755988,
+     "kloss": 0.0563865065230653,
+     "predicted_gs_hota": 1.8984
+    },
+    "ctrl_enlarged": {
+     "n": 207921,
+     "median": 0.4653056668080344,
+     "p90": 1.4106253078583924,
+     "mean": 1.6000402974037753,
+     "kloss": 0.08096225956801138,
+     "predicted_gs_hota": 0.0
+    },
+    "D_enlarged": {
+     "n": 207921,
+     "median": 0.38944199665752144,
+     "p90": 1.154730510177998,
+     "mean": 0.5667224733193148,
+     "kloss": 0.05818771539684039,
+     "predicted_gs_hota": 1.7592
+    },
+    "A_enlarged": {
+     "n": 207921,
+     "median": 0.38953273764122687,
+     "p90": 1.1430113162216173,
+     "mean": 0.5555366278019371,
+     "kloss": 0.05651401691800498,
+     "predicted_gs_hota": 1.8885
+    }
+   },
+   "control_validity": {
+    "ctrl_kloss_original": 0.08096225956801138,
+    "ctrl_kloss_enlarged": 0.08096225956801138,
+    "identical": true,
+    "note": "the superset pool rule holds exactly -- the first-admissible pick of the shipped gate is byte identical, so every movement below is attributable to the new hypotheses alone"
+   },
+   "read": {
+    "kloss": 0.05651401691800498,
+    "kloss_vs_A_pct": 0.226,
+    "median_m": 0.38953273764122687,
+    "median_vs_A_pct": -0.803
+   },
+   "result": "FAIL -- kernel loss +0.23% against a -5% bar. Median improves 0.80%, but the kernel loss is the quantity the score responds to and it does not move."
+  },
+  "G2_forecast": {
+   "bar": "at least +0.5 GS-HOTA over arm A, within-family (kb v10-w8-004: good to ~6%)",
+   "forecast_W11A_vs_A": -0.0098,
+   "forecast_W11D_vs_D": 0.2152,
+   "result": "FAIL -- -0.010 GS-HOTA, a measured zero, far inside the instrument band"
+  },
+  "G3_end_to_end": {
+   "bar": "at least +0.5 GS-HOTA paired vs arm A on DEV-20 flags-ON",
+   "result": "NOT RUN -- the registration stop rule (a forecast below +0.5 GS-HOTA stops the session before any end-to-end spend) fired at G2. No positions set, no submission and no score was produced for any W11 arm."
+  }
+ },
+ "substitution": {
+  "finding": "conic enrichment and the arm-A adaptive stiffness are substitutes, not complements",
+  "conic_over_D": {
+   "mean_per_clip_gs_hota": 0.2548,
+   "helped": 16,
+   "hurt": 4,
+   "wilcoxon_p": 0.0073,
+   "pooled_forecast": 0.2152
+  },
+  "conic_over_A": {
+   "mean_per_clip_gs_hota": -0.0161,
+   "helped": 9,
+   "hurt": 11,
+   "wilcoxon_p": 0.62151,
+   "pooled_forecast": -0.0098
+  },
+  "correlation_of_the_two_rescues": {
+   "pearson_r": 0.9616,
+   "p": 1.5132163614762875e-11,
+   "n_clips": 20
+  },
+  "top4_clips": {
+   "SNGS-033": {
+    "stiffness_over_D": 3.627,
+    "conic_over_D": 1.65
+   },
+   "SNGS-021": {
+    "stiffness_over_D": 2.558,
+    "conic_over_D": 1.478
+   },
+   "SNGS-078": {
+    "stiffness_over_D": 1.067,
+    "conic_over_D": 0.483
+   },
+   "SNGS-096": {
+    "stiffness_over_D": 0.962,
+    "conic_over_D": 0.612
+   }
+  },
+  "concentration": {
+   "share_of_arm_A_gain_in_those_4": 0.95,
+   "share_of_conic_gain_in_those_4": 0.829
+  },
+  "per_clip": {
+   "SNGS-021": {
+    "kloss_D": 0.13634742584030718,
+    "kloss_D_conic": 0.11721529591421234,
+    "kloss_A": 0.10323493124466755,
+    "kloss_A_conic": 0.10424048733619007,
+    "conic_over_D": 1.4779,
+    "conic_over_A": -0.0777
+   },
+   "SNGS-024": {
+    "kloss_D": 0.10423676159223247,
+    "kloss_D_conic": 0.10339231690137887,
+    "kloss_A": 0.10614427565581006,
+    "kloss_A_conic": 0.10541620761041946,
+    "conic_over_D": 0.0652,
+    "conic_over_A": 0.0562
+   },
+   "SNGS-027": {
+    "kloss_D": 0.03870224684668285,
+    "kloss_D_conic": 0.036070116351045706,
+    "kloss_A": 0.03471823006247882,
+    "kloss_A_conic": 0.034823145813139667,
+    "conic_over_D": 0.2033,
+    "conic_over_A": -0.0081
+   },
+   "SNGS-030": {
+    "kloss_D": 0.03613970631842199,
+    "kloss_D_conic": 0.03570006252851746,
+    "kloss_A": 0.03611645208547005,
+    "kloss_A_conic": 0.03595638207815076,
+    "conic_over_D": 0.034,
+    "conic_over_A": 0.0124
+   },
+   "SNGS-033": {
+    "kloss_D": 0.13407601381047546,
+    "kloss_D_conic": 0.11271021302840488,
+    "kloss_A": 0.08712448110366897,
+    "kloss_A_conic": 0.08874856733910005,
+    "conic_over_D": 1.6504,
+    "conic_over_A": -0.1255
+   },
+   "SNGS-036": {
+    "kloss_D": 0.07112295396437766,
+    "kloss_D_conic": 0.07351474634331197,
+    "kloss_A": 0.07335138736410197,
+    "kloss_A_conic": 0.07451383894334093,
+    "conic_over_D": -0.1848,
+    "conic_over_A": -0.0898
+   },
+   "SNGS-039": {
+    "kloss_D": 0.028621072751537375,
+    "kloss_D_conic": 0.0282527728335059,
+    "kloss_A": 0.02850502796409679,
+    "kloss_A_conic": 0.028374741077956164,
+    "conic_over_D": 0.0284,
+    "conic_over_A": 0.0101
+   },
+   "SNGS-042": {
+    "kloss_D": 0.03917414521856288,
+    "kloss_D_conic": 0.039859849631741565,
+    "kloss_A": 0.03975977522135656,
+    "kloss_A_conic": 0.039995198771598385,
+    "conic_over_D": -0.053,
+    "conic_over_A": -0.0182
+   },
+   "SNGS-045": {
+    "kloss_D": 0.020949970209490354,
+    "kloss_D_conic": 0.020238695694549017,
+    "kloss_A": 0.021139740364877417,
+    "kloss_A_conic": 0.02040719815937588,
+    "conic_over_D": 0.0549,
+    "conic_over_A": 0.0566
+   },
+   "SNGS-048": {
+    "kloss_D": 0.09530179037174931,
+    "kloss_D_conic": 0.09769479535794535,
+    "kloss_A": 0.09552988499483078,
+    "kloss_A_conic": 0.09783977645570517,
+    "conic_over_D": -0.1848,
+    "conic_over_A": -0.1784
+   },
+   "SNGS-051": {
+    "kloss_D": 0.042296251649858604,
+    "kloss_D_conic": 0.04142881026138993,
+    "kloss_A": 0.040980460695874306,
+    "kloss_A_conic": 0.04123746249848123,
+    "conic_over_D": 0.067,
+    "conic_over_A": -0.0199
+   },
+   "SNGS-054": {
+    "kloss_D": 0.05647892443238094,
+    "kloss_D_conic": 0.05416560914511308,
+    "kloss_A": 0.05435776634603125,
+    "kloss_A_conic": 0.05485750520550496,
+    "conic_over_D": 0.1787,
+    "conic_over_A": -0.0386
+   },
+   "SNGS-057": {
+    "kloss_D": 0.0627673240370413,
+    "kloss_D_conic": 0.06261936219565835,
+    "kloss_A": 0.06081903983945014,
+    "kloss_A_conic": 0.06256336422261458,
+    "conic_over_D": 0.0114,
+    "conic_over_A": -0.1347
+   },
+   "SNGS-078": {
+    "kloss_D": 0.056891557410243904,
+    "kloss_D_conic": 0.05063351780012417,
+    "kloss_A": 0.04308206561944162,
+    "kloss_A_conic": 0.05077925191056624,
+    "conic_over_D": 0.4834,
+    "conic_over_A": -0.5946
+   },
+   "SNGS-081": {
+    "kloss_D": 0.03290138626840173,
+    "kloss_D_conic": 0.028210189923869658,
+    "kloss_A": 0.034363778092174044,
+    "kloss_A_conic": 0.030746376915234484,
+    "conic_over_D": 0.3624,
+    "conic_over_A": 0.2794
+   },
+   "SNGS-084": {
+    "kloss_D": 0.08887597631294263,
+    "kloss_D_conic": 0.08911968459960072,
+    "kloss_A": 0.08866315801800166,
+    "kloss_A_conic": 0.08260191397617676,
+    "conic_over_D": -0.0188,
+    "conic_over_A": 0.4682
+   },
+   "SNGS-087": {
+    "kloss_D": 0.0957949494258947,
+    "kloss_D_conic": 0.09400918607883149,
+    "kloss_A": 0.09087011167221935,
+    "kloss_A_conic": 0.09344157329508995,
+    "conic_over_D": 0.1379,
+    "conic_over_A": -0.1986
+   },
+   "SNGS-090": {
+    "kloss_D": 0.031160845581019114,
+    "kloss_D_conic": 0.030820130833372834,
+    "kloss_A": 0.0337965497203241,
+    "kloss_A_conic": 0.03327797182752848,
+    "conic_over_D": 0.0263,
+    "conic_over_A": 0.0401
+   },
+   "SNGS-093": {
+    "kloss_D": 0.04225173881643456,
+    "kloss_D_conic": 0.04039578383277926,
+    "kloss_A": 0.04201326919865195,
+    "kloss_A_conic": 0.041190334144281485,
+    "conic_over_D": 0.1434,
+    "conic_over_A": 0.0636
+   },
+   "SNGS-096": {
+    "kloss_D": 0.061478729251096084,
+    "kloss_D_conic": 0.053557479807427005,
+    "kloss_A": 0.049028879535460666,
+    "kloss_A_conic": 0.04676612780288166,
+    "conic_over_D": 0.6119,
+    "conic_over_A": 0.1748
+   }
+  }
+ },
+ "session": {
+  "id": "v10-W11",
+  "date": "2026-08-17",
+  "registration": "results/gsr_v10_w11_registered.json, written before any W11 number existed; it declares the premise correction up front",
+  "gpu": "a100server1 GPU 1 only, checked free (4 MiB, 0%, no tmux) before launch and released after. ~0.49 GPU-h of a 2 GPU-h budget (20 clips x ~88 s). GPU 0 never touched.",
+  "artifacts": [
+   "outputs/gsr/v10_w11/harvest (raw keypoint/line dicts, DEV-20)",
+   "outputs/gsr/v10_w11/pool (enlarged candidate cache, v10-W2 npz schema)",
+   "outputs/gsr/v10_w11/scope.parquet"
+  ],
+  "code": [
+   "generator/conic_calib.py (new)",
+   "generator/calibrate.py: candidates_from_dicts split out of PnLCalibCalibrator.candidates, plus a last_raw stash. Shipped path unchanged.",
+   "tools/gsr_v10_w11.py (new)"
+  ],
+  "guards": "DEV-20 only; TEST-38 / test-49 / challenge untouched; flags default OFF; no existing cache, positions set or submission overwritten; no STATUS edit, no commit, no push."
+ },
+ "verdict": {
+  "CONIC": {
+   "bars": "G0 ceiling moves; G1 kloss -5% and median better; G2 forecast >= +0.5; G3 DEV-20 >= +0.5 paired vs arm A",
+   "result": "G0 PASS, G1 FAIL, G2 FAIL, G3 not run -- REFUTED as a rider on the current stack"
+  },
+  "premise": "The dispatch premise (the remaining ~4.36 lives ONLY in hypotheses PnLCalib never generates, reachable via conic constructions) survives its first half and fails its second. New hypotheses were minted and they are genuinely new (+11.4 candidates per frame, +4.17 distinct by accuracy), but they buy +0.143 of ceiling and +0.000 of realized gain on top of arm A. Of the ~4.36, this session captured 0.0.",
+  "positive_result": "Conic enrichment is a real +0.255 predicted GS-HOTA rider on arm D (16/20 helped, p = 0.0073) that is entirely absorbed by the arm-A adaptive stiffness (r = 0.962 between the two per-clip rescues). Two independent fixes for one defect: the fast-pan frames of kb v10-w7-006."
+ }
+}

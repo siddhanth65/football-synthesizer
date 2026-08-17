@@ -9932,6 +9932,174 @@
     "auc",
     "gt-free"
    ]
+  },
+  {
+   "id": "v10-w11-001",
+   "statement": "THE CONIC-CORRESPONDENCE ARM'S PREMISE IS HALF WRONG AT SOURCE: FALALEEV & CHEN'S 57-KEYPOINT CONSTRUCTION *IS* PnLCALIB'S KEYPOINT VOCABULARY, AND THE ONE PAPER THAT MEASURED THE SUBSTITUTION IN OUR DOMAIN MEASURED IT AT ZERO. PnLCalib's utils/utils_calib.py keypoint_world_coords_2D holds exactly Falaleev's four subsets (arXiv:2410.07401 sec. 3.1): 30 line-line intersections (ids 1-30), 6 line-conic intersections (31-36), 8 conic tangent points (37-44) and 13 further structural points (45-57 = 9 on the longitudinal axis + 4 quarter-turns on the centre circle), and its label generator utils/utils_keypoints.py builds those targets with LsqEllipse + ellipse_intersection + find_tangent_points -- i.e. it runs Falaleev's constructions at TRAINING time and trains one HRNet channel per derived point. Magera et al. (arXiv:2504.20052) Tab. 1 then replaced PnLCalib's learned circle keypoints with geometrically derived ones on in-domain SoccerNet: JaC5 22.4 -> 22.4, MRE 12.8 -> 12.9 px, CR 79.5 -> 79.5. Their gains are confined to an out-of-domain set (empty smaller stadiums, low viewpoints) that SoccerNet-GSR is not. What IS absent is the inference-time conic layer: PnLCalib emits all 57 keypoints from independent heatmap channels and never enforces that 21 of them lie on three circles of known radius whose centres (ids 45/51/57) it separately predicts. That gap, not the keypoint vocabulary, is what v10-W11 built.",
+   "value": 57,
+   "unit": "PnLCalib keypoints that are Falaleev's construction, item for item",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w11_registered.json",
+    "results/gsr_benchmark/gsr_v10_w11.json"
+   ],
+   "method": "Source audit of ~/PnLCalib utils/utils_calib.py, utils/utils_keypoints.py and utils/utils_heatmap.py against arXiv:2410.07401 sec. 3.1 and arXiv:2504.20052 secs. 3.1-3.3 (both PDFs fetched from arXiv this session; neither repository was fetched, read or run -- geometry only). Circle membership re-derived numerically: 21 of the 57 world points lie within 0.03 m of one of the three radius-9.15 m circles, and the 8 tangent ids resolve to unique external keypoints (5/25 left, 2/29 centre, 6/26 right) within 0.03 m.",
+   "n": 57,
+   "caveats": [
+    "PnLCalib's table puts keypoint 52 at [61.5, 34], 0.15 m inside the true circle point [61.65, 34]; generator/conic_calib.py excludes id 52 from every derivation rather than file a geometrically exact point under a known-wrong world coordinate.",
+    "Magera's Tab. 1 is JaC/MRE on SoccerNet calibration+gamestate CENTRAL views (circle visible, fewer than 3 lines), not GS-HOTA on GSR clips. The read transfers as a prior, not as a measurement on our substrate; v10-w11-003 is the measurement on our substrate."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w2-001",
+    "v10-w8-006"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "conic",
+    "source-audit",
+    "premise-correction"
+   ]
+  },
+  {
+   "id": "v10-w11-002",
+   "statement": "THE CONIC LAYER YIELDS DENOISING, NOT DENSIFICATION -- BY A FACTOR OF 16. Over DEV-20 (14,526 frames, the first correspondence harvest this project has ever persisted: 15,000 GPU forward passes caching raw keypoint and line dicts), an ellipse fits on 0.736 circles per frame (73.1% of frames carry at least one fittable conic; the centre circle fits on 39.9%, the penalty arcs on 13.9% and 19.6%). That yields 72,367 keypoints pulled onto their conic (4.98 per frame) but only 4,559 NEW correspondences (0.314 per frame): 4,219 from tangency, 340 from the Magera vanishing-line construction, and EXACTLY ZERO from line-conic intersection. Two structural reasons, both measured: (a) PnLCalib's line head is sparse on GSR clips (0.15-3.7 detected lines per frame), so every construction needing a line almost never fires; (b) the penalty arcs carry only 5 keypoint ids each, so a fit needs all 5 and there is nothing left to derive -- and with 5 points on 5 conic degrees of freedom the fit interpolates exactly, so arc denoising is a mathematical no-op. Only the centre circle, which carries 11 ids and is detected with 8 or more on 63% of its fits, does real work.",
+   "value": 0.314,
+   "unit": "new correspondences derived per DEV-20 frame (against 4.98 denoised per frame)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w11_registered.json",
+    "results/gsr_benchmark/gsr_v10_w11.json"
+   ],
+   "method": "tools.gsr_v10_w11 --harvest (a100server1 GPU 1, shipped ctrl decode: subpix_decode False, derived_kp_scale 1, half_cell_offset False per kb v10-w2-002/003) then --enrich (CPU). Constructions in generator/conic_calib.py: Halir-Flusser direct least-squares ellipse fit, Newton projection onto the conic, line-conic intersection, tangent points via the polar of an external keypoint, and Magera's vanishing-line derivation of the axis extremes and quarter turns.",
+   "n": 14526,
+   "caveats": [
+    "Discrete correspondence ambiguity (which end of a diameter is which id) is resolved by a rectangular Hungarian assignment against where the frame's EXISTING on-record homography puts each model keypoint. Only the assignment uses it; every derived position is pure conic geometry. Magera et al. resolve the same ambiguity with camera-position priors.",
+    "The conic projection is Newton on the zero level set, not the exact quartic nearest point; the two agree well under 0.01 px for points within ~30 px of the conic, which is the whole detection-noise regime.",
+    "Counts are for the shipped decode's thresholds (keypoint 0.3434, line 0.7867). A lower line threshold would fire the line constructions more often and was not tried."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w11-001"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "conic",
+    "harvest"
+   ]
+  },
+  {
+   "id": "v10-w11-003",
+   "statement": "DENSER CORRESPONDENCES MOVE THE HYPOTHESIS-POOL CEILING BUT BUY NOTHING ON TOP OF ARM A: THE CONIC ARM IS REFUTED. Feeding the conic-denoised correspondence set back through PnLCalib's own solver mints 165,966 extra hypotheses on DEV-20 and the pool genuinely grows -- 15.84 -> 27.20 candidates per frame and, decisively, 6.53 -> 10.70 DISTINCT by accuracy, so these are not duplicates. The GT-anchored pool oracle improves 0.33759 -> 0.32418 m median / kloss 0.05088 -> 0.04903, i.e. the ceiling moves +0.143 predicted GS-HOTA (gate G0: PASS). Every gate after that fails. Running arm A's rule over the enlarged pool gives kloss 0.056514 against arm A's on-record 0.056387 -- +0.23% WORSE, against a registered bar of 5% better (G1: FAIL) -- while pooled median displacement improves 0.8% (0.39269 -> 0.38953 m). The within-family W4 forecast is -0.010 GS-HOTA against a +0.5 bar (G2: FAIL), so the registered stop rule fired and no end-to-end score was ever produced. Validity is exact: the enlarged pool is a strict superset with the on-record hypotheses first, so the ctrl gate's kernel loss reproduces to 1e-12 (0.08096225956801138 both times) and every movement is attributable to the new hypotheses alone. Of the ~4.36 predicted GS-HOTA that kb v10-w8-006 left in un-generated hypotheses, this session captured 0.0.",
+   "value": -0.0098,
+   "unit": "predicted GS-HOTA of the conic-enlarged pool over arm A, DEV-20, within-family W4 forecast (bar +0.5)",
+   "status": "refuted",
+   "evidence": [
+    "results/gsr_v10_w11_registered.json",
+    "results/gsr_benchmark/gsr_v10_w11.json"
+   ],
+   "method": "tools.gsr_v10_w11 --enrich builds outputs/gsr/v10_w11/pool in the v10-W2 npz schema; tools.gsr_v10_w5 --oracle and tools.gsr_v10_w8 --accuracy --arms ctrl,D,A are then run unchanged against it via --cache-dir. Identical population to v10-W8: 207,921 GT rows over 13,551 frames. Forecast = tools.gsr_v10_w5.predicted_gain, the W4 curve (6.254 x fractional kernel-loss reduction), applied within one arm family per kb v10-w8-004.",
+   "n": 207921,
+   "caveats": [
+    "-0.010 GS-HOTA is a measured ZERO, not a regression: it sits far inside the forecast instrument's ~6% band (kb v10-w8-004).",
+    "G3 was never run, so there is no end-to-end GS-HOTA for any W11 arm. The refutation is on the component instrument plus the registered stop rule, exactly as registered.",
+    "The +0.578 GS-HOTA of headroom still between arm A and the ENLARGED pool oracle is a GT-fitted per-frame argmin, an upper bound no estimator reaches; kb v10-w8-002's information ceiling on selection applies to it too.",
+    "Only PnLCalib's own 3-modes x 6-RANSAC vote was used to mint hypotheses from the enriched set. A different solver, or a lower line-detection threshold (v10-w11-002), was not tried."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w11-002",
+    "v10-w8-003",
+    "v10-w8-004",
+    "v10-w8-006",
+    "v10-w5-001"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "conic",
+    "negative-result"
+   ]
+  },
+  {
+   "id": "v10-w11-004",
+   "statement": "CONIC ENRICHMENT AND ADAPTIVE STIFFNESS ARE SUBSTITUTES, NOT COMPLEMENTS -- TWO INDEPENDENT FIXES FOR ONE DEFECT. The conic-enlarged pool is a REAL rider on arm D: +0.255 predicted GS-HOTA mean per clip, 16/20 helped, Wilcoxon p = 0.0073, pooled kloss 0.060974 -> 0.058190 (+0.215 pooled forecast). On arm A the same enrichment is worth -0.016 mean per clip, 9/20 helped, p = 0.62. The absorption is total and its mechanism is directly measured: across the 20 clips the per-clip gain from conic enrichment correlates with the per-clip gain from arm A's adaptive stiffness at Pearson r = 0.962, and the same four clips carry 95% of arm A's total gain and 83% of the conic total (SNGS-033 stiffness +3.627 / conic +1.650; SNGS-021 +2.558 / +1.478; SNGS-078 +1.067 / +0.483; SNGS-096 +0.962 / +0.612). These are the fast-pan clips kb v10-w7-006 and v10-w8-003 named. Cleaner hypotheses and a relaxed temporal prior rescue the same frames, so whichever ships first collects the whole prize.",
+   "value": 0.962,
+   "unit": "Pearson r between per-clip conic gain over arm D and per-clip adaptive-stiffness gain over arm D, DEV-20",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w11_registered.json",
+    "results/gsr_benchmark/gsr_v10_w11.json"
+   ],
+   "method": "Per-clip GT-anchored kernel losses of arms D and A on the original pool (results/gsr_benchmark/gsr_v10_w8.json accuracy_adaptive) and on the conic-enlarged pool (results/gsr_benchmark/gsr_v10_w11_arms.json), each converted to predicted GS-HOTA by the W4 curve against the shared control 0.0809623, then paired across the 20 clips (scipy pearsonr / wilcoxon).",
+   "n": 20,
+   "caveats": [
+    "20 clips, and 4 of them carry most of both effects, so r = 0.962 is driven by that shared tail; the rank correlation over all 20 is a weaker rho = 0.716 (p = 0.0004).",
+    "Substitution is measured on the kernel-loss instrument, not end to end; no W11 arm was scored.",
+    "This does not say conic enrichment would be worthless on a stack WITHOUT adaptive stiffness -- it is worth +0.255 on arm D. It says it adds nothing to the incumbent."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w11-003",
+    "v10-w8-003",
+    "v10-w7-006"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "conic",
+    "mechanism",
+    "planning"
+   ]
+  },
+  {
+   "id": "v10-w11-005",
+   "statement": "PER-FRAME ACCURACY BARELY RESPONDS TO CORRESPONDENCE COUNT, WHICH IS WHY THE CONIC ARM WAS ALWAYS GOING TO BE SMALL. PnLCalib calibrates a median DEV-20 frame from just 9 ground-plane correspondences (p10 6, p90 12, max 21). Over 13,551 frames the Spearman correlation between that count and the frame's GT-anchored median displacement is -0.095 under the ctrl gate (p = 1.3e-28) and -0.080 under arm A (p = 1.3e-20): correctly signed, overwhelmingly significant, and tiny. By quintile the median displacement runs 0.5169 m (4-7 correspondences) to 0.4078 m (11-21) -- a 21% spread across the whole observed range of the variable the conic arm was built to move, and non-monotonic in the middle. Read BEFORE the GPU harvest was launched, as the registered scoping gate; it authorised the harvest on sign while sizing the expectation correctly, since the arm went on to deliver +0.143 of ceiling and 0.0 of realized gain (v10-w11-003).",
+   "value": -0.0951,
+   "unit": "Spearman rho, per-frame ground-plane correspondence count vs GT-anchored median displacement, DEV-20 ctrl gate",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w11_registered.json",
+    "results/gsr_benchmark/gsr_v10_w11.json"
+   ],
+   "method": "tools.gsr_v10_w11 --scope, CPU, cached artifacts only. Per frame: n_points from the v10-W2 ctrl candidate cache (PnLCalib's own ground-plane correspondence count, identical across a frame's hypotheses) against the median displacement of that frame's GT people from the frame's GT-fitted homography, under the ctrl gate and under arm A. 13,551 frames with at least 6 GT people.",
+   "n": 13551,
+   "caveats": [
+    "CONFOUNDED, and stated as such in the registration: frames with more visible correspondences are wider shots with easier geometry, so this is an association, not a causal estimate of what adding a correspondence buys.",
+    "It bounds the COUNT channel only. The conic layer's actual contribution turned out to be denoising rather than densification (v10-w11-002), which this read cannot see."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w5-001"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "scoping",
+    "forecasting"
+   ]
   }
  ]
 }

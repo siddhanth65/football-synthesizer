@@ -1,5 +1,27 @@
 # STATUS
 
+## 2026-08-17 — v10 W11: CONIC refuted as a rider — conic enrichment and adaptive stiffness are SUBSTITUTES (r=0.962, same four fast-pan clips; arm A collected the prize first); the geometry book closes: what remains needs a better FRONT-END, not better use of this one
+
+results/gsr_v10_w11_registered.json (premise corrections registered BEFORE measurement),
+results/gsr_benchmark/gsr_v10_w11{,_pool,_arms}.json, kb v10-w11-001..005,
+generator/conic_calib.py (Halir-Flusser fits, Newton denoise, tangent-via-polar, Magera
+vanishing-line constructions — the first persisted correspondence harvest), calibrate.py
+refactor (candidates_from_dicts split; shipped path unchanged, 18/18). **Premise
+corrections: Falaleev's 57-keypoint construction IS PnLCalib's trained vocabulary item for
+item (the constructions run at training time); Magera et al. already measured the derived-
+vs-learned substitution at ZERO in-domain (their gains are OOD-only). What was genuinely
+absent — the inference-time conic-consistency layer — was built: 165,966 new hypotheses
+(pool 15.84 -> 27.20/frame), denoising-not-densification by 16x (line head too sparse:
+line-conic yielded literally 0 across 14,526 frames; arcs carry exactly 5 ids = interpolating
+fit = no-op). Gates: G0 PASS (ceiling +0.143 — the hypotheses are real), G1 FAIL (kloss
++0.23% vs -5% bar), G2 FAIL (forecast -0.010 vs +0.5), G3 not run per stop rule. THE
+FINDING: conic-over-D = +0.255 (16/20, p=0.0073) but conic-over-A = -0.016 — per-clip
+correlation with A's gains r=0.962; SNGS-033/021/078/096 carry both. Substitutes.**
+Geometry endgame final: arm A (+0.40) is the last capture on this substrate; the residual
+~4 points of the accuracy oracle require better heatmap front-ends (training) or the drift
+mystery. **Freeze-#2 inventory: arm A confirmed as the sole geometry rider; W12 (detector)
+is the last open verdict.** 0.49 GPU-h.
+
 ## 2026-08-17 — v10 W10: row-pruning CLOSED (+0.4772 vs 1.5 bar) — and the +4.50 mystery is SOLVED: the deletions are the LEGALITY PRECONDITION of the merges (8,792 illegal duplicate-id timesteps without them); the association axis is now completely measured shut
 
 results/gsr_v10_w10_registered.json (bars pre-fixed), results/gsr_benchmark/gsr_v10_w10.json,

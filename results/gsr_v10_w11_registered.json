@@ -1,0 +1,68 @@
+{
+ "session": "v10-W11 denser correspondences: conic constructions as a source of NEW camera hypotheses",
+ "written_local": "2026-08-17T07:05",
+ "written_before": "any W11 number of any kind exists; no GPU launched, no cache written, no arm built",
+ "lineage": "v10-W2 ctrl candidate cache (outputs/gsr/v10_w2_full/ctrl), positions_v10w2ctrl_v6det, DEV-20, flags default OFF",
+ "instrument": "the W2 GT-anchored accuracy instrument + W5's displacement-from-GT-fit reference, with the W4 sensitivity curve (GS-HOTA = 6.254 x fractional kernel-loss reduction) as a FORECASTER. Working rule from kb v10-w8-004: within-arm-family kernel-loss forecasts are trustworthy to ~6%; cross-family forecasts are biased LOW.",
+
+ "control_choice": {
+  "decision": "arm A is the control for the end-to-end read, not arm D.",
+  "reason": "This session's arm ends in the SAME batch solve as A (kb v10-w8-003's adaptive stiffness is switched ON per dispatch), so A-vs-W11 is a within-family comparison and the kernel-loss forecast is trustworthy at ~6% (kb v10-w8-004). D-vs-W11 would cross families and the forecast would be biased low, exactly the failure mode W8 documented. A's rider status does not weaken it as a control: its DEV-20 flags-ON 57.5684 is a measured, on-record submission (outputs/gsr/deleak_v10w8_A), which is all a paired control needs. Arm D's 57.1684 is reported alongside for continuity."
+ },
+
+ "premise_correction_declared_up_front": {
+  "dispatch_premise": "the remaining ~4.36 predicted GS-HOTA lives ONLY in camera hypotheses PnLCalib never generates, and the CONIC arm (arXiv 2410.07401 Falaleev+Chen, arXiv 2504.20052 Magera et al.) is the lever aimed there",
+  "what_source_reading_established_before_any_measurement": "Falaleev & Chen's 57-keypoint vocabulary IS PnLCalib's keypoint vocabulary, item for item. utils/utils_calib.py::keypoint_world_coords_2D holds 30 line-line intersections (ids 1-30), 6 line-conic intersections (31-36), 8 conic tangent points (37-44) and 13 additional structural points (45-57: 9 on the longitudinal axis, 4 quarter-turns on the centre circle) -- Falaleev's four subsets exactly. PnLCalib's own label generator (utils/utils_keypoints.py) builds those targets with LsqEllipse + ellipse_intersection + find_tangent_points, i.e. it runs Falaleev's constructions at TRAINING time and trains an HRNet channel per derived point. Magera et al. then measured the substitution we were dispatched to make: their Tab. 1 replaces PnLCalib's learned circle keypoints with geometrically derived ones on in-domain SoccerNet central views and reports JaC5 22.4 -> 22.4, MRE 12.8 -> 12.9 px, CR 79.5 -> 79.5 -- no change. Their gains are on an out-of-domain set (empty smaller stadiums, low viewpoints) that SoccerNet-GSR is not.",
+  "consequence": "The dispatched arm as literally stated ('constructions PnLCalib never generates') is largely already inside PnLCalib and is measured at zero in our domain by one of the two source papers. This is stated here, before any W11 number, so the session cannot be read as having discovered it after a failure.",
+  "what_is_genuinely_absent_and_is_therefore_the_arm": "PnLCalib's INFERENCE pipeline treats all 57 keypoints as independent point predictions. It never enforces, at inference, that 21 of them lie on three known circles (centre circle: ids 32,35,38,39,42,43,48,49,50,52,53,54; left penalty arc: 31,34,37,41,47; right: 33,36,40,44,55) whose centres it separately predicts (45,51,57). No ellipse is fitted at inference; no conic constraint, no pole-polar relation, no tangency is used. That is the only untouched surface, and it is what this session builds."
+ },
+
+ "section_0_scoping_read_before_any_gpu": {
+  "status": "NOT YET RUN at write time; declared here so its result is on record whichever way it falls",
+  "question": "Does our per-frame accuracy respond to correspondence COUNT at all? If frames PnLCalib solved from many ground-plane correspondences are no more accurate than frames it solved from few, then denser correspondences cannot be the lever and the GPU harvest is not worth booking -- the same logic that let W8 price K1 on CPU.",
+  "measurement": "Spearman rank correlation and decile table of the cached per-frame n_points (generator.calibrate.CalibCandidate.n_points, the ground-plane correspondence count PnLCalib actually calibrated on) against the frame's GT-anchored displacement median under the ctrl gate and under arm A, over DEV-20. CPU, cached artifacts only.",
+  "decision_rule": "This read does NOT gate the build (the arm's mechanism is denoising as much as densification, and denoising is invisible to a count). It sizes the GPU spend: a flat or positive-count-worse relation caps the harvest at a 3-clip pilot; a clear negative relation authorises the full DEV-20 harvest."
+ },
+
+ "section_1_harvest": {
+  "what": "One GPU forward pass per DEV-20 frame through the SHIPPED decode (generator.calibrate.PnLCalibCalibrator with subpix_decode=False, derived_kp_scale=1, half_cell_offset=False -- the ctrl arm, byte for byte, kb v10-w2-002's harmful-subpixel lesson respected: PnLCalib trains on integer cells and sub-cell decoding is refuted), caching the raw kp_dict and lines_dict per frame.",
+  "why_gpu_is_needed": "The v10-W2 caches store homographies only (8 arrays: homography/frame/rank/err_m/n_pts/rep_px/mode/ransac). No correspondence, keypoint or line has ever been persisted by this project.",
+  "budget": "~2 GPU-h on a100server1 GPU 1, checked free (4 MiB, 0%, no tmux) at 2026-08-17T06:40 local before this file was written. GPU 0 never touched.",
+  "artifact": "outputs/gsr/v10_w11/harvest/<SEQ>.npz -- new directory, nothing existing overwritten (kb v9-w1-006)."
+ },
+
+ "section_2_constructions": {
+  "implemented_from": "arXiv 2410.07401 sec. 3.1 (geometry only; their repository is unlicensed and was never fetched, read or run) and arXiv 2504.20052 secs. 3.1-3.3.",
+  "list": [
+   "C1 ELLIPSE FIT: direct least-squares conic fit (Halir-Flusser numerically stable form of Fitzgibbon) to the detected image keypoints of each of the three pitch circles, when >= 5 are present. Pure numpy.",
+   "C2 CONIC DENOISE: replace each detected on-circle keypoint by its nearest point on the fitted conic. This is Falaleev's 'use computed keypoints instead of relying directly on annotation data' applied at INFERENCE, where PnLCalib does not apply it. It projects out the component of detection noise orthogonal to the conic and cannot move a point along it.",
+   "C3 LINE-CONIC INTERSECTION: analytic intersection of the fitted conic with a DETECTED pitch line whose world-space intersection with that circle is known (middle line x centre circle -> world ids 32/35; big-rect-main x penalty arc -> 31/34 left, 33/36 right). Recovers those correspondences on frames where the keypoint head missed them.",
+   "C4 TANGENT POINTS: tangent points from a detected external image point to the fitted conic, matched to the model tangent points (ids 37-44) whose world coordinates are already in PnLCalib's table. Tangency is projective-invariant (Falaleev sec. 3.1).",
+   "C5 MAGERA CASE 1: from the fitted conic E and the detected projected circle centre c (ids 45/51/57), the vanishing line is l_v = E c; for a detected line l1 the vanishing point is v = l1 x l_v, the parallel diameter is l2 = v x c, and l2 meets E in the two axis-extreme circle points; the polar l3 = E v meets E in the perpendicular pair. For the centre circle these are world ids 32/35/50/52, and the diagonals of the tangent trapezoid give the quarter-turn ids 48/49/53/54. Exact, GT-free, and it fires on frames with ONE visible line."
+  ],
+  "guard": "Every derived correspondence is discarded unless the fitted conic is a real, non-degenerate ellipse and the derived image point falls within a generous frame margin. No construction consumes ground truth."
+ },
+
+ "section_3_new_hypotheses": {
+  "what": "The enlarged/denoised keypoint dict is pushed back through PnLCalib's own solver (utils.utils_calib.FramebyFrameCalib) over the same 3 modes x 6 RANSAC thresholds, minting additional CalibCandidates per frame.",
+  "pool_rule": "The new cache is a strict SUPERSET: the frame's original 18 hypotheses first, in their on-record order, then the new ones appended. This makes the ctrl gate's pick byte-identical (generator.calibrate.select_calibration takes the first admissible), so ctrl is an exact control and any movement is attributable to the new hypotheses alone.",
+  "artifact": "outputs/gsr/v10_w11/pool/<SEQ>.npz, in the v10-W2 npz schema so it is drop-in for tools.gsr_v10_w5/w8 --cache-dir. v10_w2_full/ctrl, v10_w5*, v10_w7*, v10_w8* and the freeze directories are never written."
+ },
+
+ "section_4_gates_a_priori": {
+  "G0 pool oracle": "The enlarged pool's oracle (per frame, the best of its own hypotheses under the GT-anchored displacement instrument -- tools.gsr_v10_w5 --oracle) must beat the on-record cached-pool oracle. On record: pool oracle median 0.32831 m, predicted +2.324 GS-HOTA over ctrl; arm A already captures +1.898 of it. If the enlarged pool's oracle does NOT move, the arm is refuted at the ceiling and no selection or refinement can rescue it -- report and stop.",
+  "G1 component": "GT-anchored pooled kernel loss of the W11 arm (arm A's rule -- reselect then batch_refine with the adaptive stiffness profile ON -- run over the ENLARGED pool) must beat arm A's on-record 0.05639 by >= 5% (i.e. <= 0.053571) AND improve pooled median displacement below A's 0.39269 m. Population: the same 207,921 GT rows / 13,551 frames W8 used.",
+  "G2 forecast": "tools.gsr_v10_w5.predicted_gain over arm A's kernel loss, read through the W4 curve. Within-family (both arms end in the same batch solve), so kb v10-w8-004's ~6% rule applies. A forecast below +0.5 GS-HOTA stops the session before any end-to-end spend.",
+  "G3 end-to-end": "DEV-20 flags-ON, frozen v6 chain, paired against arm A (outputs/gsr/deleak_v10w8_A) with tools.gsr_v9_w7.score_pair: >= +0.5 GS-HOTA combined, GS-DetA and GS-LocA not worse, helped > hurt with Wilcoxon p < 0.05, and no single clip worse than -1.0 GS-HOTA.",
+  "no_tuning_clause": "Ellipse-fit minimum point count (5), the conic-denoise rule (nearest point on the conic, unconditional), and the frame margin are fixed here. If the arm needs any of them swept to pass, that is a FAIL and is reported as such."
+ },
+
+ "guards": [
+  "DEV-20 only (tools.gsr_v10_w5.DEV20). TEST-38, test-49 and the challenge split untouched; no metric read on any test sequence.",
+  "Flags default OFF in code; the end-to-end read is flags-ON as on record.",
+  "GPU: a100server1 GPU 1 only, after an occupancy + tmux check. GPU 0 is another user's and is never touched.",
+  "Versioned artifacts under outputs/gsr/v10_w11/**; no existing cache, positions set or submission is overwritten.",
+  "No STATUS edit, no commit, no push."
+ ],
+ "claims": "v10-w11-001 onward, full schema, date 2026-08-17"
+}
