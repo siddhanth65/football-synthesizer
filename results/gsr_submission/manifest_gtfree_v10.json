@@ -1,0 +1,1433 @@
+{
+  "zip": "results\\gsr_submission\\gsr_testphase_gtfree_v10_1a197073.zip",
+  "bytes": 39042015,
+  "n_sequences": 49,
+  "zip_layout": "tracklab/<SEQ>.json",
+  "recipe_hash": "1a197073512ce1307fab6e20eacdec5ca42369a8fcc36e4228110b540e39b0f7",
+  "competition": "codabench 4365 (2025 SoccerNet GSR -- Test Phase)",
+  "source_arm": "outputs\\gsr_srvtest\\v10_w6_pkg_D_t49s4\\predictions\\data",
+  "predictions_per_sequence": {
+    "SNGS-116": 9262,
+    "SNGS-117": 6556,
+    "SNGS-118": 9682,
+    "SNGS-119": 7131,
+    "SNGS-120": 9832,
+    "SNGS-121": 7604,
+    "SNGS-122": 9159,
+    "SNGS-123": 11226,
+    "SNGS-124": 7828,
+    "SNGS-125": 7422,
+    "SNGS-126": 8775,
+    "SNGS-127": 13077,
+    "SNGS-128": 11667,
+    "SNGS-129": 11224,
+    "SNGS-130": 10494,
+    "SNGS-131": 12515,
+    "SNGS-132": 9671,
+    "SNGS-133": 10509,
+    "SNGS-134": 7502,
+    "SNGS-135": 10105,
+    "SNGS-136": 7289,
+    "SNGS-137": 6927,
+    "SNGS-138": 7973,
+    "SNGS-139": 8744,
+    "SNGS-140": 11668,
+    "SNGS-141": 8770,
+    "SNGS-142": 8248,
+    "SNGS-143": 3355,
+    "SNGS-144": 7314,
+    "SNGS-145": 6054,
+    "SNGS-146": 6412,
+    "SNGS-147": 3669,
+    "SNGS-148": 6068,
+    "SNGS-149": 8500,
+    "SNGS-150": 8423,
+    "SNGS-187": 13409,
+    "SNGS-188": 16369,
+    "SNGS-189": 11697,
+    "SNGS-190": 9414,
+    "SNGS-191": 10941,
+    "SNGS-192": 10021,
+    "SNGS-193": 11016,
+    "SNGS-194": 14138,
+    "SNGS-195": 12471,
+    "SNGS-196": 9084,
+    "SNGS-197": 12823,
+    "SNGS-198": 13066,
+    "SNGS-199": 12152,
+    "SNGS-200": 11242
+  },
+  "n_predictions_total": 468498,
+  "built_at_utc": "2026-08-17T01:24:34+00:00",
+  "gt_free": {
+    "declared_at": "2026-08-16T20:58:48+00:00",
+    "version": "v10-1.0",
+    "session": "v10 W6 (freeze / gate / package)",
+    "parent": {
+      "file": "results/gsr_v9_frozen.json",
+      "declared_at": "2026-08-15T16:12:49+00:00",
+      "sha256": "bb7b33e3a11d5e4292684e3b55e9030330dad581ec82677f49c4fb86572a61cd"
+    },
+    "bundle": {
+      "v9_chain": "the frozen v6 chain, unchanged: S4b detector -> ByteTrack -> PnLCalib -> calibration gate + fill -> EIoU re-association -> PARSeq arm-4t reader (0.80 floor) -> GTA connector tau 0.450 + jersey-compatible merge -> frozen MILP solver, free team map, self roster",
+      "v9_flags": {
+        "VOTE_TRACK_ATTRS": [
+          "role",
+          "team",
+          "jersey"
+        ],
+        "GK_SIDE_REPAIR": [
+          "team"
+        ],
+        "call_site": "tools.gsr_deleak.write_arm (vote first, keeper repair second)"
+      },
+      "weights": {
+        "detector": {
+          "weights": "models\\gsr_det\\gsr_v3_ft_b_last.pt",
+          "md5": "2074d8741f97a6892a1322d0f808244c",
+          "parked_md5": "2074d8741f97a6892a1322d0f808244c"
+        },
+        "jersey_reader": {
+          "ckpt": "C:\\Users\\siddh_ygv5bws\\jersey-number-pipeline\\models\\parseq_v6_arm4t.ckpt",
+          "md5": "39c0c15defafda072ca0cefd0a4b8e18",
+          "parked_md5": "39c0c15defafda072ca0cefd0a4b8e18"
+        }
+      },
+      "new_in_v10": {
+        "arm_D": {
+          "name": "temporal hypothesis re-selection -> mapping-space batch refinement",
+          "registered_in": "results/gsr_v10_w5_registered.json (arms S and B) + amendment_1 (composition D = S then B), both written before any W5 end-to-end read",
+          "implementation": "tools.gsr_v10_w5.arm_homographies('D')",
+          "hyperparameters_verbatim_from_w5": {
+            "reselect_passes": 2,
+            "reselect_distance": "median over the 9 generator.camera_track.CHECK_GRID points, in metres",
+            "reselect_reference": "arm R's mapping-space RTS smoothing of the current series (generator.camera_track.smooth_homographies mode='mapping')",
+            "admissibility": "the shipped gate, unchanged: error_m <= 2.0 AND generator.postprocess.onpitch_plausible against that frame's own detected foot points",
+            "batch_iters": 8,
+            "batch_parameterisation": "pitch coordinates of the fixed CHECK_GRID per frame (18 unknowns/frame); never decomposed camera parameters",
+            "batch_robust_weight": "Cauchy w = 1/(1+(d/s)^2), s = max(median over frames of the grid spread of that frame's admissible hypotheses, 0.05) m",
+            "batch_smoothness": "second-difference penalty, lambda_j = (meas_sd_j/accel_sd_j)^2 from generator.camera_track._noise_estimates of the picked series -- dial-free, not fitted to any score",
+            "clamp_m": "INFINITE (no clamp). W5 measured the 2024-winner +-2 m clamp as HARMFUL to the batch arm: it blocks the rescue of catastrophically bad solves.",
+            "fill_gap": 10,
+            "applies_to": "solved frames only; dead frames keep fill_calibration_gaps"
+          },
+          "dev20_evidence": {
+            "flags_on": {
+              "ctrl": 55.066,
+              "arm": 57.1684,
+              "combined_delta": 2.1024,
+              "paired_mean": 2.2523,
+              "helped": 19,
+              "hurt": 1,
+              "wilcoxon_p": 4.76837158203125e-05
+            },
+            "flags_off": {
+              "ctrl": 50.702163718440275,
+              "arm": 52.6359,
+              "combined_delta": 1.9337,
+              "paired_mean": 2.0859,
+              "helped": 19,
+              "hurt": 1,
+              "wilcoxon_p": 4.76837158203125e-05
+            },
+            "reproduced_in_this_session": "yes -- rebuilt from the DEV candidate cache through a fresh positions set (tag 'F') and a fresh chain run: 52.6359 / DetA 39.9432 / AssA 69.3672 / LocA 94.0007, identical to W5 to every digit (kb v9-w7-004)"
+          }
+        },
+        "s4_half_cell_decode": {
+          "name": "half-cell decode shift on the PnLCalib heatmap peaks",
+          "registered_in": "results/gsr_v10_w2_registered.json (defect + derived fix); it FAILED its own W2 DetA bar of +1.0 and has been a default-OFF rider since",
+          "sub_gate": "results/gsr_v10_w6_subgate_registered.json",
+          "sub_gate_bar": "D on the s4 cache >= D on the ctrl cache + 0.25 GS-HOTA, DEV-20 flags ON",
+          "sub_gate_read": {
+            "d_on_ctrl_cache_flags_on": 57.1684,
+            "d_on_s4_cache_flags_on": 57.7604,
+            "increment_combined": 0.592,
+            "increment_paired_mean": 0.5627,
+            "helped": 18,
+            "hurt": 2,
+            "wilcoxon_p": 8.20159912109375e-05,
+            "increment_flags_off": 0.5355,
+            "verdict": "PASS (2.4x the bar)"
+          },
+          "corroboration": "results/gsr_benchmark/gsr_v10_w6_subgate.json, written by the cancelled run, reports 53.17139864584958 flags OFF for the same arm; this session's fresh read is 53.1714 -- identical to every digit printed. Cited as corroboration only; the registered read is the fresh one.",
+          "in_bundle": true
+        },
+        "riders_still_off": {
+          "arm_R": "mapping-space RTS smoothing alone, +0.5376 DEV flags ON -- subsumed by D",
+          "arm_B": "batch refinement alone, +1.6854 DEV flags ON -- subsumed by D",
+          "arm_K": "B under the 2.0 m clamp -- measured HARMFUL, never ships",
+          "per_clip_radial_k1": "real (+1.88 px outer-ring residual) but unmodelled; a homography grid cannot express it and fitting it needs correspondences the cache does not carry"
+        }
+      },
+      "chain_delta_vs_v9": "nothing upstream of the camera changes. The detector, tracker, EIoU association, PARSeq reader, GTA connector, MILP solver and both v9 post-processing flags are byte-identical to the v9 freeze. v10 replaces ONLY the per-frame homography that reprojects boxes to the pitch."
+    },
+    "code_sha256": {
+      "eval\\gsr_score.py": "faa0f3b04c8f8a62ab946f9626e949fd8729030ba069abf0e101b0ec5abc22f1",
+      "tools\\gsr_deleak.py": "65020064dfcef78f71552cc6d321f623250ef995636936a7a965418e65cf9e8c",
+      "tools\\gsr_eiou.py": "a8e12204a621944024727d7a449846f8d80b9e99f30c5422300ea22eb6ef599a",
+      "tools\\gsr_v6det.py": "42f2da4e3d49104528da73294f606f2fc93a4d1663977328fb1e9098878b6a25",
+      "tools\\gsr_v10_w2_calib.py": "d050db54a9287cbd82cb342f9cecd2906afe34d7986817eae9d4e6e90bbba764",
+      "tools\\gsr_v10_w5.py": "1a06bb7916bda5717d833636ca2d0d19e82f72fc371ad7f25c0e07a1cc6b8549",
+      "tools\\gsr_v10_w6.py": "e6ed5dfc3d23382738cb0245b14671fa4c759e7107975180308c2008e4665721",
+      "generator\\camera_track.py": "34c5ddd0e9196064a9b3214c8feef4b3c8f4ef9cf8b411cad492360063f4ef35",
+      "generator\\calibrate.py": "1928c30c4f3138a4505ddd193494988329ffb3b8c6f1332e815081eadae40df8"
+    },
+    "environment": {
+      "scoring_host": "Siddhanth",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.14.0",
+      "numpy": "2.4.0",
+      "scipy": "1.17.0",
+      "pandas": "3.0.0",
+      "trackeval": "C:\\Users\\siddh_ygv5bws\\AppData\\Roaming\\Python\\Python314\\site-packages\\trackeval\\__init__.py (sn-trackeval 0.4.0 @ 9c25232, byte-audited)"
+    },
+    "lineage": {
+      "candidate_caches": {
+        "freeze_t38_test49": {
+          "freeze_ctrl": {
+            "dir": "outputs\\gsr_srv\\v10_freeze_cand\\ctrl",
+            "n": 87,
+            "missing": [],
+            "per_seq": {
+              "SNGS-022": {
+                "bytes": 316880,
+                "md5": "7349c1331f486dc5cf0a6f7d652f5dfb",
+                "mtime_utc": "2026-08-16T18:16:06+00:00"
+              },
+              "SNGS-023": {
+                "bytes": 353602,
+                "md5": "496c71d30f9e864405988a47b93bbf24",
+                "mtime_utc": "2026-08-16T18:17:04+00:00"
+              },
+              "SNGS-025": {
+                "bytes": 516629,
+                "md5": "f40ccc4e35450a4663bd452d46547bb0",
+                "mtime_utc": "2026-08-16T18:17:56+00:00"
+              },
+              "SNGS-026": {
+                "bytes": 446730,
+                "md5": "d3b3f9eb1cd8dbc202aba7ea1467ddd7",
+                "mtime_utc": "2026-08-16T18:17:46+00:00"
+              },
+              "SNGS-028": {
+                "bytes": 480606,
+                "md5": "ddc975911a4d79414027a0528007e0f9",
+                "mtime_utc": "2026-08-16T18:16:54+00:00"
+              },
+              "SNGS-029": {
+                "bytes": 451154,
+                "md5": "557cc9eb3b9203717438b12ccc20f5d9",
+                "mtime_utc": "2026-08-16T18:16:59+00:00"
+              },
+              "SNGS-031": {
+                "bytes": 500072,
+                "md5": "d7cbc7457b620a1c5b062aed7dc4c6ce",
+                "mtime_utc": "2026-08-16T18:26:20+00:00"
+              },
+              "SNGS-032": {
+                "bytes": 511032,
+                "md5": "52356cd0fe991b1c1754492d083cae19",
+                "mtime_utc": "2026-08-16T18:26:20+00:00"
+              },
+              "SNGS-034": {
+                "bytes": 712202,
+                "md5": "0f9e734a7184f1a1bef16fb6cb5cc625",
+                "mtime_utc": "2026-08-16T18:28:02+00:00"
+              },
+              "SNGS-035": {
+                "bytes": 399001,
+                "md5": "a93d482b64f74a7e038dc1d993a89721",
+                "mtime_utc": "2026-08-16T18:26:26+00:00"
+              },
+              "SNGS-037": {
+                "bytes": 501273,
+                "md5": "cdbfda60c179a5c2b04ab55eada19861",
+                "mtime_utc": "2026-08-16T18:25:58+00:00"
+              },
+              "SNGS-038": {
+                "bytes": 546112,
+                "md5": "5b86776ba759806eca5ee32938ddf0b7",
+                "mtime_utc": "2026-08-16T18:26:09+00:00"
+              },
+              "SNGS-040": {
+                "bytes": 427318,
+                "md5": "5cab59669c237ca3170c95621a1082f9",
+                "mtime_utc": "2026-08-16T18:35:41+00:00"
+              },
+              "SNGS-041": {
+                "bytes": 331086,
+                "md5": "e050ae5275a64e989e65b13037b5fa41",
+                "mtime_utc": "2026-08-16T18:35:23+00:00"
+              },
+              "SNGS-043": {
+                "bytes": 441624,
+                "md5": "fea637470c6f045ae274989232ed2074",
+                "mtime_utc": "2026-08-16T18:37:34+00:00"
+              },
+              "SNGS-044": {
+                "bytes": 295323,
+                "md5": "65a23f57f980dcf3cc03dcff6e82d958",
+                "mtime_utc": "2026-08-16T18:34:54+00:00"
+              },
+              "SNGS-046": {
+                "bytes": 453537,
+                "md5": "5791cd5a5778e1e212ed8e2683cc2fbb",
+                "mtime_utc": "2026-08-16T18:35:59+00:00"
+              },
+              "SNGS-047": {
+                "bytes": 328521,
+                "md5": "244160b4c84886d719ba20ac7ad81a99",
+                "mtime_utc": "2026-08-16T18:35:48+00:00"
+              },
+              "SNGS-049": {
+                "bytes": 336889,
+                "md5": "a982cd9327c358d9624c4bfaa47c47e5",
+                "mtime_utc": "2026-08-16T18:44:46+00:00"
+              },
+              "SNGS-050": {
+                "bytes": 380914,
+                "md5": "d5d349a5e239548578a26fcdb0631caa",
+                "mtime_utc": "2026-08-16T18:45:13+00:00"
+              },
+              "SNGS-052": {
+                "bytes": 484151,
+                "md5": "e35c29cb3a769f7b2f227f436cfdec2e",
+                "mtime_utc": "2026-08-16T18:47:13+00:00"
+              },
+              "SNGS-053": {
+                "bytes": 603073,
+                "md5": "aac273c6f89b29aa3dad5c6211cb473a",
+                "mtime_utc": "2026-08-16T18:45:17+00:00"
+              },
+              "SNGS-055": {
+                "bytes": 88784,
+                "md5": "be2e83ebab1b6c47657e44bb1cb27f4e",
+                "mtime_utc": "2026-08-16T18:43:10+00:00"
+              },
+              "SNGS-056": {
+                "bytes": 527181,
+                "md5": "bca41760a1c2aeb7925cb0bba366e6fb",
+                "mtime_utc": "2026-08-16T18:46:49+00:00"
+              },
+              "SNGS-058": {
+                "bytes": 354485,
+                "md5": "f2fbce3bfaad66729111cff326cbc350",
+                "mtime_utc": "2026-08-16T18:55:03+00:00"
+              },
+              "SNGS-059": {
+                "bytes": 533859,
+                "md5": "e85bb6d58fa2edac741f4cc908f180fe",
+                "mtime_utc": "2026-08-16T18:54:01+00:00"
+              },
+              "SNGS-079": {
+                "bytes": 437207,
+                "md5": "2a2fdd6e811cb9822255d7296a8e2c01",
+                "mtime_utc": "2026-08-16T18:56:01+00:00"
+              },
+              "SNGS-080": {
+                "bytes": 338009,
+                "md5": "773964cc5a89dfe84be9a04634686717",
+                "mtime_utc": "2026-08-16T18:53:59+00:00"
+              },
+              "SNGS-082": {
+                "bytes": 418571,
+                "md5": "73a560a73e938d8459ef8a854b2c3242",
+                "mtime_utc": "2026-08-16T18:52:38+00:00"
+              },
+              "SNGS-083": {
+                "bytes": 546855,
+                "md5": "ce86f44f968c15be5a8047638aeba71e",
+                "mtime_utc": "2026-08-16T18:55:53+00:00"
+              },
+              "SNGS-085": {
+                "bytes": 226775,
+                "md5": "571f125c5db0a3ea21fc576906f9af4f",
+                "mtime_utc": "2026-08-16T19:03:14+00:00"
+              },
+              "SNGS-086": {
+                "bytes": 648505,
+                "md5": "6023fbfee447aa837ba80ea0a1f3b526",
+                "mtime_utc": "2026-08-16T19:04:47+00:00"
+              },
+              "SNGS-088": {
+                "bytes": 504707,
+                "md5": "717d470cf99d0d50222423bff03be10a",
+                "mtime_utc": "2026-08-16T19:05:36+00:00"
+              },
+              "SNGS-089": {
+                "bytes": 327054,
+                "md5": "e0fcb1eb9dc9fded13cd7ed699caa40f",
+                "mtime_utc": "2026-08-16T19:02:42+00:00"
+              },
+              "SNGS-091": {
+                "bytes": 638383,
+                "md5": "df0e8997c59e9abafefe8318ccdaa2c4",
+                "mtime_utc": "2026-08-16T19:03:08+00:00"
+              },
+              "SNGS-092": {
+                "bytes": 394824,
+                "md5": "be965d2077fa1f69698e88e215615e9c",
+                "mtime_utc": "2026-08-16T19:04:34+00:00"
+              },
+              "SNGS-094": {
+                "bytes": 353903,
+                "md5": "2f77e1e4a95235c07a3a659f9901b0f3",
+                "mtime_utc": "2026-08-16T19:12:27+00:00"
+              },
+              "SNGS-095": {
+                "bytes": 484159,
+                "md5": "5cbbc055d7a80447aec5cc02eeb65b79",
+                "mtime_utc": "2026-08-16T19:13:53+00:00"
+              },
+              "SNGS-116": {
+                "bytes": 530602,
+                "md5": "86011c306acbab04ffcb57108b2eb65b",
+                "mtime_utc": "2026-08-16T19:15:19+00:00"
+              },
+              "SNGS-117": {
+                "bytes": 266916,
+                "md5": "9777fc939af56d8cf3461b2efd89700b",
+                "mtime_utc": "2026-08-16T19:10:48+00:00"
+              },
+              "SNGS-118": {
+                "bytes": 572050,
+                "md5": "8d5d9fb98bc382e6a96392da016ec80a",
+                "mtime_utc": "2026-08-16T19:12:57+00:00"
+              },
+              "SNGS-119": {
+                "bytes": 370014,
+                "md5": "e29ce143b650607c53daf094973315bc",
+                "mtime_utc": "2026-08-16T19:13:01+00:00"
+              },
+              "SNGS-120": {
+                "bytes": 368325,
+                "md5": "a176a7b769c0fc2c8f79c07d2c7de0b4",
+                "mtime_utc": "2026-08-16T19:21:23+00:00"
+              },
+              "SNGS-121": {
+                "bytes": 394547,
+                "md5": "8c64adec13d03136721683fd23a3138c",
+                "mtime_utc": "2026-08-16T19:22:11+00:00"
+              },
+              "SNGS-122": {
+                "bytes": 327406,
+                "md5": "de5a4e4a5691b4ca68683ae569cedefc",
+                "mtime_utc": "2026-08-16T19:24:22+00:00"
+              },
+              "SNGS-123": {
+                "bytes": 488529,
+                "md5": "1458347644d69560b4d9211434fd1ec0",
+                "mtime_utc": "2026-08-16T19:20:18+00:00"
+              },
+              "SNGS-124": {
+                "bytes": 368654,
+                "md5": "d0f777257ec44b12a989e120d0205f85",
+                "mtime_utc": "2026-08-16T19:21:45+00:00"
+              },
+              "SNGS-125": {
+                "bytes": 541490,
+                "md5": "4adb0a439f3dbcdb773ce042013269c7",
+                "mtime_utc": "2026-08-16T19:22:53+00:00"
+              },
+              "SNGS-126": {
+                "bytes": 617786,
+                "md5": "395ea0c0991df1c45f3b8e88fdb50d8b",
+                "mtime_utc": "2026-08-16T19:31:53+00:00"
+              },
+              "SNGS-127": {
+                "bytes": 195777,
+                "md5": "5b26cd07efac280cfdf1963798ab703c",
+                "mtime_utc": "2026-08-16T19:29:48+00:00"
+              },
+              "SNGS-128": {
+                "bytes": 164490,
+                "md5": "0f5a4ddcba5085ffb5f8ea8ca107d729",
+                "mtime_utc": "2026-08-16T19:31:48+00:00"
+              },
+              "SNGS-129": {
+                "bytes": 438579,
+                "md5": "6857da8139310d6aef353bf0b13192a0",
+                "mtime_utc": "2026-08-16T19:30:29+00:00"
+              },
+              "SNGS-130": {
+                "bytes": 624239,
+                "md5": "b74307ba5722dd16f908926b3b98b768",
+                "mtime_utc": "2026-08-16T19:31:40+00:00"
+              },
+              "SNGS-131": {
+                "bytes": 649284,
+                "md5": "cbb2cd75ed286fabf649c56b5fb0d638",
+                "mtime_utc": "2026-08-16T19:33:26+00:00"
+              },
+              "SNGS-132": {
+                "bytes": 332841,
+                "md5": "55662dc6b0b9f41d83d0e20c86ec0c0a",
+                "mtime_utc": "2026-08-16T19:40:38+00:00"
+              },
+              "SNGS-133": {
+                "bytes": 256875,
+                "md5": "8e45a8b8493276db9a6ee3e2d88b3df2",
+                "mtime_utc": "2026-08-16T19:38:27+00:00"
+              },
+              "SNGS-134": {
+                "bytes": 290903,
+                "md5": "2f2c0591b331ae94a8af3ccfe2655382",
+                "mtime_utc": "2026-08-16T19:40:38+00:00"
+              },
+              "SNGS-135": {
+                "bytes": 408437,
+                "md5": "c5e9159ee1f2a55af1608db98a8405ba",
+                "mtime_utc": "2026-08-16T19:40:16+00:00"
+              },
+              "SNGS-136": {
+                "bytes": 426788,
+                "md5": "48c8e993c37e897ad122497670043b5f",
+                "mtime_utc": "2026-08-16T19:41:37+00:00"
+              },
+              "SNGS-137": {
+                "bytes": 399225,
+                "md5": "6421c318fe48bcd031af685399ceb4c7",
+                "mtime_utc": "2026-08-16T19:42:28+00:00"
+              },
+              "SNGS-138": {
+                "bytes": 130813,
+                "md5": "9efded33219561f07f9fa712209c4ed0",
+                "mtime_utc": "2026-08-16T19:47:54+00:00"
+              },
+              "SNGS-139": {
+                "bytes": 486241,
+                "md5": "3e81d7526d415808ef10bf997d8e4895",
+                "mtime_utc": "2026-08-16T19:48:00+00:00"
+              },
+              "SNGS-140": {
+                "bytes": 604963,
+                "md5": "a326b581d0de9a4dea06c5b0894f5de3",
+                "mtime_utc": "2026-08-16T19:52:31+00:00"
+              },
+              "SNGS-141": {
+                "bytes": 407985,
+                "md5": "9408dadd1488ae5da1729160509da6f2",
+                "mtime_utc": "2026-08-16T19:49:08+00:00"
+              },
+              "SNGS-142": {
+                "bytes": 476713,
+                "md5": "65e98fbff657de8c9937b1cd82af91fd",
+                "mtime_utc": "2026-08-16T19:51:31+00:00"
+              },
+              "SNGS-143": {
+                "bytes": 299798,
+                "md5": "abd75c1fb7d9933db8fada8564ad1683",
+                "mtime_utc": "2026-08-16T19:50:19+00:00"
+              },
+              "SNGS-144": {
+                "bytes": 301756,
+                "md5": "1a3ed8c489a3de39b5e63390e53d9e4a",
+                "mtime_utc": "2026-08-16T19:57:00+00:00"
+              },
+              "SNGS-145": {
+                "bytes": 420635,
+                "md5": "a705ce65127bf5912ae15742a8c7fd90",
+                "mtime_utc": "2026-08-16T19:57:33+00:00"
+              },
+              "SNGS-146": {
+                "bytes": 414646,
+                "md5": "8a079409455f4ca9d09e4e8e9c576689",
+                "mtime_utc": "2026-08-16T20:03:02+00:00"
+              },
+              "SNGS-147": {
+                "bytes": 436271,
+                "md5": "e406f12136bd89c8ffd1caca7e62578c",
+                "mtime_utc": "2026-08-16T19:58:57+00:00"
+              },
+              "SNGS-148": {
+                "bytes": 183041,
+                "md5": "25cb00c5f8b3ac3eb1f7b9878994c6f4",
+                "mtime_utc": "2026-08-16T20:00:12+00:00"
+              },
+              "SNGS-149": {
+                "bytes": 248362,
+                "md5": "a0dbe52f29a3843c78591d475d9b7d33",
+                "mtime_utc": "2026-08-16T19:58:49+00:00"
+              },
+              "SNGS-150": {
+                "bytes": 483218,
+                "md5": "e7acdb47334a8b33dde938db878d3772",
+                "mtime_utc": "2026-08-16T20:07:46+00:00"
+              },
+              "SNGS-187": {
+                "bytes": 509915,
+                "md5": "4899f3264abaaffbc65c1744a498e253",
+                "mtime_utc": "2026-08-16T20:07:09+00:00"
+              },
+              "SNGS-188": {
+                "bytes": 359280,
+                "md5": "01a56ef7d1ce76f7e434603b6cced44b",
+                "mtime_utc": "2026-08-16T20:11:49+00:00"
+              },
+              "SNGS-189": {
+                "bytes": 498513,
+                "md5": "3ba6e19ee0ee95e8f372241f8a7a4d54",
+                "mtime_utc": "2026-08-16T20:09:25+00:00"
+              },
+              "SNGS-190": {
+                "bytes": 462711,
+                "md5": "de30ec46611245f8af945739033742f2",
+                "mtime_utc": "2026-08-16T20:09:51+00:00"
+              },
+              "SNGS-191": {
+                "bytes": 258078,
+                "md5": "013b45e10f0e5b7875002a73c9c5f684",
+                "mtime_utc": "2026-08-16T20:07:01+00:00"
+              },
+              "SNGS-192": {
+                "bytes": 405874,
+                "md5": "b8ad347223a960d7d4804b369d964af3",
+                "mtime_utc": "2026-08-16T20:17:31+00:00"
+              },
+              "SNGS-193": {
+                "bytes": 509565,
+                "md5": "201cdc0399f409a86479814c14db45fa",
+                "mtime_utc": "2026-08-16T20:16:47+00:00"
+              },
+              "SNGS-194": {
+                "bytes": 361405,
+                "md5": "43ad28ba809a2b086bf83ae2d8fea84a",
+                "mtime_utc": "2026-08-16T20:19:47+00:00"
+              },
+              "SNGS-195": {
+                "bytes": 524646,
+                "md5": "ce58442e43cb5fb17c92a15652a267ae",
+                "mtime_utc": "2026-08-16T20:19:10+00:00"
+              },
+              "SNGS-196": {
+                "bytes": 333814,
+                "md5": "88ee1e79e186682ceded5b2aa53e8b66",
+                "mtime_utc": "2026-08-16T20:18:31+00:00"
+              },
+              "SNGS-197": {
+                "bytes": 409274,
+                "md5": "5f5370565aeebcbf9a2e40ae959f0940",
+                "mtime_utc": "2026-08-16T20:15:38+00:00"
+              },
+              "SNGS-198": {
+                "bytes": 637288,
+                "md5": "235cd5bfb4da3659642e852eb028016f",
+                "mtime_utc": "2026-08-16T20:25:54+00:00"
+              },
+              "SNGS-199": {
+                "bytes": 576852,
+                "md5": "64b84c849426dc2cdcafb546ffc28f50",
+                "mtime_utc": "2026-08-16T20:24:24+00:00"
+              },
+              "SNGS-200": {
+                "bytes": 489245,
+                "md5": "64faccc1136c1c1b4111c8646ac61208",
+                "mtime_utc": "2026-08-16T20:27:26+00:00"
+              }
+            }
+          },
+          "freeze_s4": {
+            "dir": "outputs\\gsr_srv\\v10_freeze_cand\\s4",
+            "n": 87,
+            "missing": [],
+            "per_seq": {
+              "SNGS-022": {
+                "bytes": 316710,
+                "md5": "a7cbb4f9c6c13560da698d2a26f7e162",
+                "mtime_utc": "2026-08-16T18:16:06+00:00"
+              },
+              "SNGS-023": {
+                "bytes": 353663,
+                "md5": "bae045077e6479057176773a877453e4",
+                "mtime_utc": "2026-08-16T18:17:04+00:00"
+              },
+              "SNGS-025": {
+                "bytes": 516670,
+                "md5": "6d651dc871f212cd486d75356510252f",
+                "mtime_utc": "2026-08-16T18:17:56+00:00"
+              },
+              "SNGS-026": {
+                "bytes": 447068,
+                "md5": "6d7142db6b57e401862b4729f5c4891e",
+                "mtime_utc": "2026-08-16T18:17:46+00:00"
+              },
+              "SNGS-028": {
+                "bytes": 480512,
+                "md5": "17b6d7d8d363c4d52e469a049196bb54",
+                "mtime_utc": "2026-08-16T18:16:54+00:00"
+              },
+              "SNGS-029": {
+                "bytes": 451144,
+                "md5": "479951c62b1fcedb4a9655c7698f11f9",
+                "mtime_utc": "2026-08-16T18:16:59+00:00"
+              },
+              "SNGS-031": {
+                "bytes": 500157,
+                "md5": "8833d4d8c0af913fecf54683462b1b62",
+                "mtime_utc": "2026-08-16T18:26:20+00:00"
+              },
+              "SNGS-032": {
+                "bytes": 511042,
+                "md5": "6862483eea9db123f97d846e652a969a",
+                "mtime_utc": "2026-08-16T18:26:20+00:00"
+              },
+              "SNGS-034": {
+                "bytes": 712233,
+                "md5": "bf34ff66c7af6c96ce2685ec0231df94",
+                "mtime_utc": "2026-08-16T18:28:03+00:00"
+              },
+              "SNGS-035": {
+                "bytes": 398540,
+                "md5": "cc86a010aaab99288c6c28aa32525342",
+                "mtime_utc": "2026-08-16T18:26:26+00:00"
+              },
+              "SNGS-037": {
+                "bytes": 501045,
+                "md5": "8ad21f5d2a7490cf542e9d6090091f13",
+                "mtime_utc": "2026-08-16T18:25:58+00:00"
+              },
+              "SNGS-038": {
+                "bytes": 546233,
+                "md5": "93d55ce434b8a263e4d1b1cf15f0c7d5",
+                "mtime_utc": "2026-08-16T18:26:09+00:00"
+              },
+              "SNGS-040": {
+                "bytes": 427009,
+                "md5": "a85c45e1f7e0ed4a1d217a87591dffe6",
+                "mtime_utc": "2026-08-16T18:35:41+00:00"
+              },
+              "SNGS-041": {
+                "bytes": 331098,
+                "md5": "7b1f2694bffe68088b5f609a455ae26b",
+                "mtime_utc": "2026-08-16T18:35:23+00:00"
+              },
+              "SNGS-043": {
+                "bytes": 441890,
+                "md5": "3eb833bd64ac8ccf4e1effd9dedac43d",
+                "mtime_utc": "2026-08-16T18:37:34+00:00"
+              },
+              "SNGS-044": {
+                "bytes": 295492,
+                "md5": "8a2ee58096dff2061ca64ced7663e017",
+                "mtime_utc": "2026-08-16T18:34:54+00:00"
+              },
+              "SNGS-046": {
+                "bytes": 453368,
+                "md5": "cd48094d75b919556d6a573de35a9afe",
+                "mtime_utc": "2026-08-16T18:35:59+00:00"
+              },
+              "SNGS-047": {
+                "bytes": 328273,
+                "md5": "b2b1a087c19457aeba2adce4ebd73e8b",
+                "mtime_utc": "2026-08-16T18:35:48+00:00"
+              },
+              "SNGS-049": {
+                "bytes": 336870,
+                "md5": "d78579a60ae9b730020ada8a182f6e8a",
+                "mtime_utc": "2026-08-16T18:44:46+00:00"
+              },
+              "SNGS-050": {
+                "bytes": 381024,
+                "md5": "cb77416a8fdcf170b3346b0fb18a918b",
+                "mtime_utc": "2026-08-16T18:45:13+00:00"
+              },
+              "SNGS-052": {
+                "bytes": 483742,
+                "md5": "83128e7f987cbcd405a7911cc7b72891",
+                "mtime_utc": "2026-08-16T18:47:13+00:00"
+              },
+              "SNGS-053": {
+                "bytes": 603301,
+                "md5": "eec3dc9dbbaabb730df8a5df489f3018",
+                "mtime_utc": "2026-08-16T18:45:17+00:00"
+              },
+              "SNGS-055": {
+                "bytes": 88786,
+                "md5": "bae15eae6eda8a2a91428950f23a88d3",
+                "mtime_utc": "2026-08-16T18:43:10+00:00"
+              },
+              "SNGS-056": {
+                "bytes": 527316,
+                "md5": "9480dda6bd374022f9d53bcf5163c313",
+                "mtime_utc": "2026-08-16T18:46:49+00:00"
+              },
+              "SNGS-058": {
+                "bytes": 354613,
+                "md5": "9dc72cce9fb2083e025982171c10012d",
+                "mtime_utc": "2026-08-16T18:55:04+00:00"
+              },
+              "SNGS-059": {
+                "bytes": 533519,
+                "md5": "42d4293f929f18f5bca353bc688cb388",
+                "mtime_utc": "2026-08-16T18:54:01+00:00"
+              },
+              "SNGS-079": {
+                "bytes": 437470,
+                "md5": "1c156010145e8e6e2821df0237778a09",
+                "mtime_utc": "2026-08-16T18:56:01+00:00"
+              },
+              "SNGS-080": {
+                "bytes": 337822,
+                "md5": "c9c1d9c2472f4da34f9575cca03a1214",
+                "mtime_utc": "2026-08-16T18:53:59+00:00"
+              },
+              "SNGS-082": {
+                "bytes": 418520,
+                "md5": "2ed39dadcb13a25f3fa19bb949409e01",
+                "mtime_utc": "2026-08-16T18:52:38+00:00"
+              },
+              "SNGS-083": {
+                "bytes": 546333,
+                "md5": "2370890b45f9eaad55f483af2ee73fda",
+                "mtime_utc": "2026-08-16T18:55:53+00:00"
+              },
+              "SNGS-085": {
+                "bytes": 226889,
+                "md5": "76ad8beb18eb83177c27a871c94a92c4",
+                "mtime_utc": "2026-08-16T19:03:14+00:00"
+              },
+              "SNGS-086": {
+                "bytes": 649037,
+                "md5": "0e2de7416504ec52672c5822cbdb0b32",
+                "mtime_utc": "2026-08-16T19:04:47+00:00"
+              },
+              "SNGS-088": {
+                "bytes": 504481,
+                "md5": "d00d891239b6a7cf0e01c84025c894b3",
+                "mtime_utc": "2026-08-16T19:05:36+00:00"
+              },
+              "SNGS-089": {
+                "bytes": 327263,
+                "md5": "d44a1abaaeadf820e9c9ca5fd637baaf",
+                "mtime_utc": "2026-08-16T19:02:42+00:00"
+              },
+              "SNGS-091": {
+                "bytes": 638404,
+                "md5": "fb6101e25c6a8ef77b328d2771aa8ed3",
+                "mtime_utc": "2026-08-16T19:03:08+00:00"
+              },
+              "SNGS-092": {
+                "bytes": 394644,
+                "md5": "01bcb29dcd4ed982931d15585b938500",
+                "mtime_utc": "2026-08-16T19:04:34+00:00"
+              },
+              "SNGS-094": {
+                "bytes": 353673,
+                "md5": "a763e82deadd4fbb401217af001061bb",
+                "mtime_utc": "2026-08-16T19:12:27+00:00"
+              },
+              "SNGS-095": {
+                "bytes": 484127,
+                "md5": "777ce8f852503a4393de53c3f304617a",
+                "mtime_utc": "2026-08-16T19:13:53+00:00"
+              },
+              "SNGS-116": {
+                "bytes": 530607,
+                "md5": "ab32945a0101cf5277d2829dd29b16fd",
+                "mtime_utc": "2026-08-16T19:15:19+00:00"
+              },
+              "SNGS-117": {
+                "bytes": 266937,
+                "md5": "310b15b3e93d0637e35fb3bb1184a8ea",
+                "mtime_utc": "2026-08-16T19:10:48+00:00"
+              },
+              "SNGS-118": {
+                "bytes": 572079,
+                "md5": "d102900efe344cf2660973b65ea0d59b",
+                "mtime_utc": "2026-08-16T19:12:57+00:00"
+              },
+              "SNGS-119": {
+                "bytes": 369768,
+                "md5": "5317ea7563049028971450e799ed20a5",
+                "mtime_utc": "2026-08-16T19:13:02+00:00"
+              },
+              "SNGS-120": {
+                "bytes": 368324,
+                "md5": "466e08d1dea36189754a30352aaf6b0a",
+                "mtime_utc": "2026-08-16T19:21:23+00:00"
+              },
+              "SNGS-121": {
+                "bytes": 394427,
+                "md5": "9a457995bac54180e476aa153b09f514",
+                "mtime_utc": "2026-08-16T19:22:11+00:00"
+              },
+              "SNGS-122": {
+                "bytes": 327466,
+                "md5": "52ec0a85290088bd414c7e14e424da83",
+                "mtime_utc": "2026-08-16T19:24:22+00:00"
+              },
+              "SNGS-123": {
+                "bytes": 488431,
+                "md5": "ea296ff3846c1142dd5a38c1d603d460",
+                "mtime_utc": "2026-08-16T19:20:18+00:00"
+              },
+              "SNGS-124": {
+                "bytes": 368639,
+                "md5": "7e4334db459aee4951fc94b0aac6fb8d",
+                "mtime_utc": "2026-08-16T19:21:45+00:00"
+              },
+              "SNGS-125": {
+                "bytes": 542069,
+                "md5": "459d7307579d95b212b9674080f3f6c8",
+                "mtime_utc": "2026-08-16T19:22:54+00:00"
+              },
+              "SNGS-126": {
+                "bytes": 618219,
+                "md5": "6e3ed7a5132ebfde714a059116c3dfd2",
+                "mtime_utc": "2026-08-16T19:31:53+00:00"
+              },
+              "SNGS-127": {
+                "bytes": 195834,
+                "md5": "1f904adcfc90726908b09c1f09bce4c2",
+                "mtime_utc": "2026-08-16T19:29:48+00:00"
+              },
+              "SNGS-128": {
+                "bytes": 164478,
+                "md5": "afadd4219b25ebbd21873570a55039a7",
+                "mtime_utc": "2026-08-16T19:31:48+00:00"
+              },
+              "SNGS-129": {
+                "bytes": 438811,
+                "md5": "8da99db436f9fde898c50b1ee864b1b4",
+                "mtime_utc": "2026-08-16T19:30:29+00:00"
+              },
+              "SNGS-130": {
+                "bytes": 624083,
+                "md5": "a3655e81952ce7ca8767a1e3919f7d49",
+                "mtime_utc": "2026-08-16T19:31:40+00:00"
+              },
+              "SNGS-131": {
+                "bytes": 649506,
+                "md5": "055566c7a937f95ca2573a2f58561c19",
+                "mtime_utc": "2026-08-16T19:33:26+00:00"
+              },
+              "SNGS-132": {
+                "bytes": 332576,
+                "md5": "d21013c1a99bfebe4dacd76b4232fc95",
+                "mtime_utc": "2026-08-16T19:40:38+00:00"
+              },
+              "SNGS-133": {
+                "bytes": 256938,
+                "md5": "464ad41184048d01582af5be80aa1277",
+                "mtime_utc": "2026-08-16T19:38:27+00:00"
+              },
+              "SNGS-134": {
+                "bytes": 290810,
+                "md5": "d1737641797fa61dd3fae83f322beeee",
+                "mtime_utc": "2026-08-16T19:40:38+00:00"
+              },
+              "SNGS-135": {
+                "bytes": 408337,
+                "md5": "23ac1414690322084ad91d9b6559f455",
+                "mtime_utc": "2026-08-16T19:40:16+00:00"
+              },
+              "SNGS-136": {
+                "bytes": 427050,
+                "md5": "86c1627e4157f37fb6cfed974f951a29",
+                "mtime_utc": "2026-08-16T19:41:37+00:00"
+              },
+              "SNGS-137": {
+                "bytes": 399854,
+                "md5": "ef12ee47be748993f8eedc4f06b19006",
+                "mtime_utc": "2026-08-16T19:42:28+00:00"
+              },
+              "SNGS-138": {
+                "bytes": 130819,
+                "md5": "a8150bf662aa533c4d52469ca02ba325",
+                "mtime_utc": "2026-08-16T19:47:54+00:00"
+              },
+              "SNGS-139": {
+                "bytes": 485906,
+                "md5": "1ad5f2b62a6a77f3481630bbef4756e7",
+                "mtime_utc": "2026-08-16T19:48:00+00:00"
+              },
+              "SNGS-140": {
+                "bytes": 604554,
+                "md5": "9d60e4d7c0dcc11dab72d034d6d89af3",
+                "mtime_utc": "2026-08-16T19:52:31+00:00"
+              },
+              "SNGS-141": {
+                "bytes": 408390,
+                "md5": "ae498be4ae5b6793d480ca3dc3971ea2",
+                "mtime_utc": "2026-08-16T19:49:08+00:00"
+              },
+              "SNGS-142": {
+                "bytes": 476899,
+                "md5": "045faed3f2cb6666f0e126f55bd3ef81",
+                "mtime_utc": "2026-08-16T19:51:31+00:00"
+              },
+              "SNGS-143": {
+                "bytes": 299725,
+                "md5": "565e077ec01d417b4e4ab3595be46043",
+                "mtime_utc": "2026-08-16T19:50:19+00:00"
+              },
+              "SNGS-144": {
+                "bytes": 301850,
+                "md5": "49c86160a36ba86f5cf151b44b784677",
+                "mtime_utc": "2026-08-16T19:57:00+00:00"
+              },
+              "SNGS-145": {
+                "bytes": 420540,
+                "md5": "d01ae4df498fabd376d7ed2b44be5391",
+                "mtime_utc": "2026-08-16T19:57:33+00:00"
+              },
+              "SNGS-146": {
+                "bytes": 414906,
+                "md5": "fba771c8fecfb39be60d925b34f23d7d",
+                "mtime_utc": "2026-08-16T20:03:02+00:00"
+              },
+              "SNGS-147": {
+                "bytes": 435855,
+                "md5": "29df9df97c1e72d9ce4b5b28cf3a89ed",
+                "mtime_utc": "2026-08-16T19:58:57+00:00"
+              },
+              "SNGS-148": {
+                "bytes": 183057,
+                "md5": "622f4e2cae0b66e9c4b06ff7b8a3dd64",
+                "mtime_utc": "2026-08-16T20:00:12+00:00"
+              },
+              "SNGS-149": {
+                "bytes": 248603,
+                "md5": "0e3cfc0298d9053a9128d43ab20c7035",
+                "mtime_utc": "2026-08-16T19:58:49+00:00"
+              },
+              "SNGS-150": {
+                "bytes": 482949,
+                "md5": "e7407f1e40f1a851b71fd25ee797539d",
+                "mtime_utc": "2026-08-16T20:07:46+00:00"
+              },
+              "SNGS-187": {
+                "bytes": 510278,
+                "md5": "9058d3b6c1b2fd03e32815d0efc3f0f4",
+                "mtime_utc": "2026-08-16T20:07:10+00:00"
+              },
+              "SNGS-188": {
+                "bytes": 359291,
+                "md5": "afce9a1b07893f55cc90b362689d0c5f",
+                "mtime_utc": "2026-08-16T20:11:49+00:00"
+              },
+              "SNGS-189": {
+                "bytes": 500011,
+                "md5": "7fca39c021b847ab9d7bf7dca81f2888",
+                "mtime_utc": "2026-08-16T20:09:25+00:00"
+              },
+              "SNGS-190": {
+                "bytes": 462873,
+                "md5": "de4ef81d5790cee28dac9966f582d3b8",
+                "mtime_utc": "2026-08-16T20:09:51+00:00"
+              },
+              "SNGS-191": {
+                "bytes": 258015,
+                "md5": "e237f9db2fc373dcf14268d328fbe264",
+                "mtime_utc": "2026-08-16T20:07:01+00:00"
+              },
+              "SNGS-192": {
+                "bytes": 405818,
+                "md5": "b7b5e1bd0e04ea0838bc806392195bab",
+                "mtime_utc": "2026-08-16T20:17:31+00:00"
+              },
+              "SNGS-193": {
+                "bytes": 509828,
+                "md5": "c4585b3578631a94f58add1ced61c847",
+                "mtime_utc": "2026-08-16T20:16:47+00:00"
+              },
+              "SNGS-194": {
+                "bytes": 361544,
+                "md5": "5a8b1629affaed0e00041aeaa77caae1",
+                "mtime_utc": "2026-08-16T20:19:47+00:00"
+              },
+              "SNGS-195": {
+                "bytes": 524473,
+                "md5": "a704d9f018bf2ad47c04203d10c9b1b7",
+                "mtime_utc": "2026-08-16T20:19:10+00:00"
+              },
+              "SNGS-196": {
+                "bytes": 334130,
+                "md5": "da9a274c1f990cb60f7b061572ea63a5",
+                "mtime_utc": "2026-08-16T20:18:31+00:00"
+              },
+              "SNGS-197": {
+                "bytes": 409656,
+                "md5": "af3f9507b9bc76e21ae7fd439ba6313c",
+                "mtime_utc": "2026-08-16T20:15:38+00:00"
+              },
+              "SNGS-198": {
+                "bytes": 637346,
+                "md5": "fbe4e9038cb0ebc65b4e1644e8857b61",
+                "mtime_utc": "2026-08-16T20:25:54+00:00"
+              },
+              "SNGS-199": {
+                "bytes": 577568,
+                "md5": "47e7f82a6436e058d065de0873b5b287",
+                "mtime_utc": "2026-08-16T20:24:25+00:00"
+              },
+              "SNGS-200": {
+                "bytes": 490035,
+                "md5": "167d708b31f9b280224193a1e4ae2335",
+                "mtime_utc": "2026-08-16T20:27:26+00:00"
+              }
+            }
+          }
+        },
+        "dev20": {
+          "dev_ctrl": {
+            "dir": "outputs\\gsr\\v10_w2_full\\ctrl",
+            "n": 20,
+            "missing": [],
+            "per_seq": {
+              "SNGS-021": {
+                "bytes": 454938,
+                "md5": "715e3afc349e5e30b0d04ba88f698130",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-024": {
+                "bytes": 293831,
+                "md5": "e1537c6d04901705e4f5ef160b603771",
+                "mtime_utc": "2026-08-16T06:25:03+00:00"
+              },
+              "SNGS-027": {
+                "bytes": 589069,
+                "md5": "cf439e8d6593df5c5bf8593e0f7202d8",
+                "mtime_utc": "2026-08-16T06:25:03+00:00"
+              },
+              "SNGS-030": {
+                "bytes": 713372,
+                "md5": "87914857b2f9a61f67a3c48f0a8333ac",
+                "mtime_utc": "2026-08-16T06:25:03+00:00"
+              },
+              "SNGS-033": {
+                "bytes": 535573,
+                "md5": "0e3c99abf4ea12c8a539cfc9c46354b1",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-036": {
+                "bytes": 440765,
+                "md5": "153883612cd270ea521ba38c7968faf7",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-039": {
+                "bytes": 537728,
+                "md5": "d80938003a846103c106999498e1073d",
+                "mtime_utc": "2026-08-16T06:25:03+00:00"
+              },
+              "SNGS-042": {
+                "bytes": 665861,
+                "md5": "96b48fb653e721a3529331f4024230a4",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-045": {
+                "bytes": 441244,
+                "md5": "11d6d48357589389b264062490773393",
+                "mtime_utc": "2026-08-16T06:25:03+00:00"
+              },
+              "SNGS-048": {
+                "bytes": 363841,
+                "md5": "1a6114220ca3687c2e273fa0b97612fc",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-051": {
+                "bytes": 286696,
+                "md5": "50a455ab84b75128c7428a941d30e7ac",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-054": {
+                "bytes": 404392,
+                "md5": "c51c6333512ed79ce4e6f194924a46d9",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-057": {
+                "bytes": 313352,
+                "md5": "e425e40920003d4e7e2bfaa00dde3352",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-078": {
+                "bytes": 437609,
+                "md5": "64f3bea67def624d8915239095453ac5",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-081": {
+                "bytes": 281931,
+                "md5": "8a0c8ffacca2a133e2f1d3115407a8e4",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-084": {
+                "bytes": 437156,
+                "md5": "6fb518c95947c7a99caabd6be17da0c4",
+                "mtime_utc": "2026-08-16T06:25:03+00:00"
+              },
+              "SNGS-087": {
+                "bytes": 358779,
+                "md5": "5f9a201b69bc6759cfa2bf598c919bf1",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-090": {
+                "bytes": 554384,
+                "md5": "3ab2909c350c0fbc714448d26d280b95",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              },
+              "SNGS-093": {
+                "bytes": 388167,
+                "md5": "b613b200e1d331e423e5d2a12d055ee2",
+                "mtime_utc": "2026-08-16T06:25:03+00:00"
+              },
+              "SNGS-096": {
+                "bytes": 376102,
+                "md5": "98e4792e676c5b2ad07b2a28e5ca2b86",
+                "mtime_utc": "2026-08-16T06:25:02+00:00"
+              }
+            }
+          },
+          "dev_s4": {
+            "dir": "outputs\\gsr\\v10_w2_full\\s4",
+            "n": 20,
+            "missing": [],
+            "per_seq": {
+              "SNGS-021": {
+                "bytes": 455033,
+                "md5": "4ae5934607079bc5b9034b507e9cfd7c",
+                "mtime_utc": "2026-08-16T18:16:25+00:00"
+              },
+              "SNGS-024": {
+                "bytes": 293601,
+                "md5": "ca962fe1a9f7df4d2b323d3c71ce4811",
+                "mtime_utc": "2026-08-16T18:16:25+00:00"
+              },
+              "SNGS-027": {
+                "bytes": 589200,
+                "md5": "a0c69cde350e664d0e2164afa0e64a07",
+                "mtime_utc": "2026-08-16T18:16:25+00:00"
+              },
+              "SNGS-030": {
+                "bytes": 712989,
+                "md5": "52bd534366b2be24dde88574c77d5ea3",
+                "mtime_utc": "2026-08-16T18:16:25+00:00"
+              },
+              "SNGS-033": {
+                "bytes": 535309,
+                "md5": "b7d6bf44e53bf656d355631c48760889",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-036": {
+                "bytes": 440751,
+                "md5": "7e9053cb123597ab902354464dbdec92",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-039": {
+                "bytes": 537792,
+                "md5": "66a6ed3504498ff214543bb2d3663c2a",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-042": {
+                "bytes": 665833,
+                "md5": "dfd08496217852b3cd95bb29c14c8071",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-045": {
+                "bytes": 441510,
+                "md5": "e099a18bfb1cc99d3821e6ff5d77f029",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-048": {
+                "bytes": 363780,
+                "md5": "3fca87755686495ad4e6a175e383789c",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-051": {
+                "bytes": 286726,
+                "md5": "d7ef1fa6e33ac0fdf3a0bf78166910f6",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-054": {
+                "bytes": 404079,
+                "md5": "7bb8066fca3aba365f2767ee8da3395e",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-057": {
+                "bytes": 313219,
+                "md5": "ab6c03e098d8e9a389abacbc4c7fc720",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-078": {
+                "bytes": 437772,
+                "md5": "6996e6d82fd65a6ac9354041ad418c54",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-081": {
+                "bytes": 281947,
+                "md5": "13e7e5cf02b8c7752938d553d83f6353",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-084": {
+                "bytes": 437062,
+                "md5": "74262b4030c947c59021e2b961a1dbb9",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-087": {
+                "bytes": 359159,
+                "md5": "58c3c73ed83f55528ada39387fc21b12",
+                "mtime_utc": "2026-08-16T18:16:26+00:00"
+              },
+              "SNGS-090": {
+                "bytes": 555246,
+                "md5": "8405946e3da574a4a956fb9988ec60a6",
+                "mtime_utc": "2026-08-16T18:16:27+00:00"
+              },
+              "SNGS-093": {
+                "bytes": 388419,
+                "md5": "326df498b771b374f341495a7b0b02d5",
+                "mtime_utc": "2026-08-16T18:16:27+00:00"
+              },
+              "SNGS-096": {
+                "bytes": 376090,
+                "md5": "8e62bf68c89f023d1fe3783f4e6b8c52",
+                "mtime_utc": "2026-08-16T18:16:27+00:00"
+              }
+            }
+          }
+        }
+      },
+      "extraction_windows": {
+        "freeze_t38_test49": {
+          "host": "a100server1 (192.168.3.19), GPU 1 only, 6 shards, one tmux window 'v10freeze'",
+          "command": "python -m tools.gsr_v10_w2_calib --cache --arms ctrl,s4 --seqs <38+49> --shard i/6 --cache-dir outputs/gsr/v10_freeze_cand",
+          "window_start_utc": "2026-08-16T18:07:42Z",
+          "window_end_utc": "2026-08-16T20:27:28Z",
+          "wall_hours": 2.33,
+          "resumed": "started by a freeze run the user cancelled; the server-side tmux job survived the cancellation and ran to completion. 66 of 87 sequences were already extracted when this worker attached at 2026-08-16T19:51Z; the remaining 21 finished under this worker. Nothing was re-extracted.",
+          "solver_errors": 0,
+          "gpu_stack": "py3.11 conda 'gsr', torch 2.5.1+cu121"
+        },
+        "dev20": {
+          "host": "a100server1 GPU 1 (v10-W2 session, 2026-08-16)",
+          "note": "the on-record v10-W2 full candidate cache; both arms from one extraction window"
+        }
+      },
+      "integrity_check": {
+        "sequences": 87,
+        "arms": 2,
+        "files": 174,
+        "missing": 0,
+        "unreadable": 0,
+        "nonfinite_homographies": 0,
+        "frames_with_candidates_per_sequence": {
+          "min": 430,
+          "median": 749,
+          "max": 750,
+          "at_full_750": 86
+        },
+        "reference": "the on-record DEV-20 cache runs 689..750 by the same measure -- frames the solver does not answer simply carry no row; they are handled by the gate and fill_calibration_gaps(10) exactly as on the shipped chain.",
+        "candidate_rows": {
+          "ctrl": 988760,
+          "s4": 988761
+        },
+        "mean_candidates_per_frame": 15.15
+      },
+      "pairing_validity": "Per sequence, the TEST-38 control and the TEST-38 arms are built from the SAME cache files: the control and arm D read outputs/gsr_srv/v10_freeze_cand/ctrl/<SEQ>.npz bit for bit, and the s4 arm reads .../s4/<SEQ>.npz produced in the same process, the same forward pass and the same frame for that same sequence. Different sequences were extracted at different clock times (6 parallel shards across one 2h20m window) but no comparison ever crosses sequences: every delta is within-sequence, so the per-sequence paired deltas are valid. The per-sequence md5 table above is the proof of the shared lineage.",
+      "base_positions": {
+        "t38": "outputs/gsr_srv/positions_gate_v6det (38 sequences, the on-record v6det extraction; supplies detections, boxes and foot points -- its pitch columns are fully replaced)",
+        "test49": "outputs/gsr_srvtest/positions_gate_v6det (49 sequences, same)",
+        "dev20": "outputs/gsr/positions_v10w2ctrl_v6det"
+      },
+      "chain_artifacts": {
+        "detections": "detbox_cache_v6det",
+        "embeddings": "detembed_cache_clip_v6det(_eiou)",
+        "ocr_evidence": "koshkina_percrop_v6_v6det(_eiou)",
+        "note": "identical to the v9 / v6det lineage; nothing upstream of the camera is changed by v10"
+      }
+    },
+    "dev_evidence": {
+      "chosen_on": "DEV-20, the tuning split, flags ON, paired per sequence against the same-lineage control (outputs/gsr/deleak_v10w5_ctrl, GS-HOTA 55.066 ON / 50.702163718440275 OFF)",
+      "bundle_dev20": {
+        "flags_on": {
+          "ctrl": 55.066,
+          "bundle": 57.7604,
+          "combined_delta": 2.6944,
+          "paired_mean": 2.8151,
+          "helped": 19,
+          "hurt": 1,
+          "wilcoxon_p": 3.814697265625e-06
+        },
+        "flags_off": {
+          "ctrl": 50.702163718440275,
+          "bundle": 53.1714,
+          "combined_delta": 2.4692,
+          "paired_mean": 2.5999,
+          "helped": 19,
+          "hurt": 1,
+          "wilcoxon_p": 9.5367431640625e-06
+        }
+      },
+      "oracle_context": "the v10-W4 sensitivity curve prices a PERFECT per-frame camera at +6.2537 GS-HOTA on DEV-20 with association frozen; W5's D1 diagnostic prices the existing candidate pool's oracle at +2.32 predicted. The bundle takes +2.69 DEV, i.e. 43% of the full geometry oracle -- above the pool's kernel-loss prediction, because that prediction priced ACCURACY alone and most of the realised gain is ASSOCIATION.",
+      "session_records": [
+        "results/gsr_v10_w5_registered.json",
+        "results/gsr_benchmark/gsr_v10_w5.json",
+        "results/gsr_v10_w6_subgate_registered.json",
+        "results/gsr_benchmark/gsr_v10_w6.json"
+      ]
+    },
+    "pre_declared_gate": {
+      "split": "valid TEST-38 (the 38 sequences held out of DEV-20 in the local 58-sequence split)",
+      "sequences": [
+        "SNGS-022",
+        "SNGS-023",
+        "SNGS-025",
+        "SNGS-026",
+        "SNGS-028",
+        "SNGS-029",
+        "SNGS-031",
+        "SNGS-032",
+        "SNGS-034",
+        "SNGS-035",
+        "SNGS-037",
+        "SNGS-038",
+        "SNGS-040",
+        "SNGS-041",
+        "SNGS-043",
+        "SNGS-044",
+        "SNGS-046",
+        "SNGS-047",
+        "SNGS-049",
+        "SNGS-050",
+        "SNGS-052",
+        "SNGS-053",
+        "SNGS-055",
+        "SNGS-056",
+        "SNGS-058",
+        "SNGS-059",
+        "SNGS-079",
+        "SNGS-080",
+        "SNGS-082",
+        "SNGS-083",
+        "SNGS-085",
+        "SNGS-086",
+        "SNGS-088",
+        "SNGS-089",
+        "SNGS-091",
+        "SNGS-092",
+        "SNGS-094",
+        "SNGS-095"
+      ],
+      "comparison": "the v10 bundle (v9 chain + arm D on the s4 candidate cache) against the WITHIN-CACHE control (the same freeze cache's own gate pick, run through the identical chain), paired per sequence, flags ON.",
+      "why_within_cache": "the on-record TEST-38 lineage was extracted on 2026-08-06 from a different run of the same stack. Pairing against it would confound the arm with extraction drift. The within-cache control removes that; its drift versus the on-record number is reported separately as information, not as a bar.",
+      "bars_all_must_pass": {
+        "mean_gs_hota_delta": ">= +1.00",
+        "helped": ">= 24 of 38",
+        "wilcoxon_p": "< 0.01",
+        "gs_det_a_delta": ">= 0.00 (not worse)"
+      },
+      "on_record_reference_not_a_bar": {
+        "t38_flags_off": 49.497,
+        "t38_flags_on": 53.1978,
+        "source": "results/gsr_benchmark/gsr_v9_w9_t38.json"
+      },
+      "pre_declared_failure_path": [
+        "1. If the bundle FAILS, drop s4 and re-gate arm D alone against the same within-cache control -- ONCE. Arm D alone is built on TEST-38 in the same window, so this costs no new decision freedom.",
+        "2. If arm D alone also fails, NOTHING SHIPS: no test-49 run, no package, and the v10 geometry axis is reported as DEV-only.",
+        "3. No third re-gate, no bar is moved, no sequence is dropped."
+      ],
+      "test49": "ONE chain run of whatever passes, then package. test-49 is untouched until the TEST-38 gate returns PASS."
+    },
+    "note": "declared BEFORE any TEST-38 GS-HOTA of the v10 bundle existed; test-49 is untouched at declaration time."
+  },
+  "label_reads": "none. The cluster -> side map comes from resolve_team_map_free (geometry only) and the solver's roster from the sequence's own OCR reads. No Labels-GameState.json is opened anywhere in the prediction chain."
+}

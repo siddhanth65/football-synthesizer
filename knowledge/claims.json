@@ -9646,6 +9646,141 @@
     "geometry",
     "planning"
    ]
+  },
+  {
+   "id": "v10-frz-001",
+   "statement": "THE v10 BUNDLE PASSES ITS REGISTERED TEST-38 GATE ON ALL FOUR BARS AND IS THE FIRST GEOMETRY CHANGE TO SHIP. Bundle = the frozen v9 chain (VOTE_TRACK_ATTRS + GK_SIDE_REPAIR) + arm D (temporal hypothesis re-selection -> mapping-space batch refinement, no clamp) + the s4 half-cell decode. Against the within-cache control on TEST-38, flags ON: 52.1011 -> 54.6013, paired mean +2.6179, 38 of 38 sequences helped, Wilcoxon p=7.28e-12, GS-DetA +1.8919, GS-AssA +3.8076, GS-LocA +1.35. Registered bars were mean >= +1.00, >= 24/38 helped, p < 0.01, DetA not worse; the freeze record was written at 2026-08-16T20:58:48Z, before any TEST-38 number of the bundle existed. Nothing upstream of the camera changed -- v10 replaces ONLY the per-frame homography.",
+   "value": 2.6179,
+   "unit": "GS-HOTA, paired mean over 38 TEST-38 sequences vs the within-cache control, flags ON",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_frozen.json",
+    "results/gsr_benchmark/gsr_v10_w6_t38.json",
+    "results/gsr_benchmark/gsr_v10_w6_gate_verdict.json"
+   ],
+   "method": "tools.gsr_v10_w6 --positions/--chain/--pair on TEST-38: arm D (tools.gsr_v10_w5.arm_homographies) over the freeze candidate cache, the frozen v6 chain via tools.gsr_eiou.run_point, then tools.gsr_v9_w7.score_pair flags ON and OFF. Control and arm read the SAME per-sequence cache lineage.",
+   "n": 38,
+   "caveats": [
+    "The paired number is measured against the within-cache control, not the shipped v9 lineage; see v10-frz-003 -- the board-relevant gain is +1.40, not +2.62.",
+    "Flags OFF reads +2.4738 on the same pairing.",
+    "One extraction window; the drift of v10-frz-003 shows the extraction itself carries about a point of run-to-run variation, which is NOT captured in the Wilcoxon p."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w5-001",
+    "v10-w2-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "geometry",
+    "freeze",
+    "gate",
+    "submission"
+   ]
+  },
+  {
+   "id": "v10-frz-002",
+   "statement": "THE s4 HALF-CELL DECODE RIDER STACKS ON ARM D AND EARNS ITS PLACE IN THE BUNDLE -- CONFIRMED TWICE, ON TWO SPLITS, AT THE SAME SIZE. Registered sub-gate (bar: D+s4 >= D + 0.25 GS-HOTA, DEV-20 flags ON, written before the read): D on the ctrl cache 57.1684, D on the s4 cache 57.7604, increment +0.5920 combined / +0.5627 paired mean, 18 helped 2 hurt, p=8.2e-05 -- PASS at 2.4x the bar. It then transferred to TEST-38 at almost exactly the same size: bundle +2.6179 vs arm D alone +2.0298, an s4 increment of +0.588. The two mechanisms are NOT redundant: D fixes WHICH hypothesis is chosen, s4 fixes WHERE every hypothesis's heatmap peak sits, and correcting the pool helps even after the selector has done its work.",
+   "value": 0.588,
+   "unit": "GS-HOTA added by s4 on top of arm D, TEST-38 flags ON (DEV-20 read: +0.592)",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_v10_w6_subgate_registered.json",
+    "results/gsr_benchmark/gsr_v10_w6.json",
+    "results/gsr_benchmark/gsr_v10_w6_t38.json"
+   ],
+   "method": "Arm D built twice per split from two candidate caches extracted in one window (ctrl decode and half-cell decode), identical base positions, detections, embeddings and OCR; scored through the identical chain and paired per sequence.",
+   "n": 20,
+   "caveats": [
+    "s4 FAILED its own v10-W2 registered DetA bar of +1.0 as a standalone rider; it ships only as a stacked component under this sub-gate, never on its own evidence.",
+    "The DEV sub-gate's bar was set by the orchestrator before this worker read any artifact, but a cancelled prior run's numbers were visible at registration time; the deciding read was re-derived fresh (53.1714, identical to the leftover's 53.17139864584958) and the leftover is cited as corroboration only."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-w2-003",
+    "v10-frz-001"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "freeze",
+    "gate",
+    "riders"
+   ]
+  },
+  {
+   "id": "v10-frz-003",
+   "statement": "CANDIDATE-CACHE EXTRACTION CARRIES ~1.1 GS-HOTA OF RUN-TO-RUN DRIFT, AND IT EATS 44% OF THE BUNDLE'S PAIRED GAIN. The freeze-window extraction (2026-08-16, cluster GPU 1) yields a gate pick 1.1096 GS-HOTA WORSE on TEST-38 flags ON than the 2026-08-06 extraction the v9 package rode (52.1011 vs 53.1978), broadly distributed: 37 of 38 sequences worse, median -0.93, worst -3.73 (SNGS-023), only 6 sequences worse by more than 2. This is NOT a reconstruction artifact -- rebuilding the DEV control from its own candidate cache reproduces the on-record 50.7022 / DetA 38.4980 / AssA 66.7775 / LocA 93.0258 to every digit, so the cache -> gate -> positions path is lossless. CONSEQUENCE: the bundle's registered paired gain of +2.6179 understates its own baseline; the net observable improvement over the shipped v9 lineage is +1.4035 on TEST-38 and +1.2956 on test-49. Quote the absolute, not the paired.",
+   "value": -1.1096,
+   "unit": "GS-HOTA, within-cache control minus on-record v9 lineage, TEST-38 flags ON, per-sequence mean",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_w6_t38.json",
+    "results/gsr_benchmark/gsr_v10_w6.json",
+    "results/gsr_benchmark/gsr_v9_w9_t38.json"
+   ],
+   "method": "Within-cache control = the freeze cache's own gate pick through the identical chain, compared per sequence to gsr_v9_w9_t38.json state 'full'. Losslessness of the rebuild path checked separately on DEV-20 (tag Fc) against the on-record 50.702163718440275.",
+   "n": 38,
+   "caveats": [
+    "Root cause NOT isolated: it would need a single-arm TEST-38 re-extraction on the cluster, which was outside this session's budget. Candidate explanations still open are GPU/library nondeterminism in the heatmap decode and RANSAC seeding.",
+    "Measured on one pair of extraction windows -- the 1.1 is a point estimate of drift, not a variance estimate.",
+    "The sign happened to be against us here; nothing measured says the drift is systematically negative."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v9-w7-004"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "calibration",
+    "reproducibility",
+    "drift",
+    "methodology",
+    "negative-result"
+   ]
+  },
+  {
+   "id": "v10-frz-004",
+   "statement": "SUBMISSION #7 IS PACKAGED, AUDITED AND SELF-SCORED AT 56.7018 GS-HOTA -- THE BEST PACKAGE THE CAMPAIGN HAS PRODUCED. gsr_testphase_gtfree_v10_1a197073.zip: 49 sequences, 468,498 predictions, 39,042,015 bytes, sha256 b1a2cc8e974651516fa0e48c86d0c59b7e0c0d7131d6dfbf19d6bf9d503d83bd, recipe hash 1a197073 = sha256 of results/gsr_v10_frozen.json. Zip self-score GS-HOTA 56.7018 / DetA 42.2298 / AssA 76.1414 / LocA 94.6448 / IDF1 59.2508, against the v9 package's 55.4062 (+1.2956). verify_gtfree run on the PACKAGED rows with both v9 flags on: 468,498 rows, 0 violations, the same 4 correctly-flipped sequences as v9. Expected board ~56.7 band +-0.2 (the pinned scorer matched codabench to 0.0015 on submission #4); the public board still reads 39.02 because #5 and #6 were never uploaded. NOT UPLOADED -- upload is Sid's action.",
+   "value": 56.7018,
+   "unit": "GS-HOTA, zip self-score on the 49 official test sequences, flags ON",
+   "status": "confirmed",
+   "evidence": [
+    "results/gsr_benchmark/gsr_v10_testsplit_package.json",
+    "results/gsr_submission/manifest_gtfree_v10.json",
+    "results/gsr_submission/PACKAGE_NOTES_v10.md"
+   ],
+   "method": "ONE test-49 chain run of the frozen bundle, then tools.gsr_v10_w6.package: flags applied by tools.gsr_v9_w7._prepare, tools.gsr_calibfill.verify_gtfree on the flagged rows, tools.gsr_deleak.package_free, tools.gsr_calibgate.zip_selfscore (extract the archive and score IT).",
+   "n": 49,
+   "caveats": [
+    "Self-scored with the pinned local sn-trackeval 0.4.0 @ 9c25232; the board is the only authority and this recipe has never been uploaded.",
+    "The improvement over v9 is +1.30, not the +2.62 the TEST-38 pairing shows -- see v10-frz-003.",
+    "Row count rose 467,425 -> 468,498 (+0.23%): better calibration puts marginally more detections inside the pitch polygon."
+   ],
+   "date": "2026-08-17",
+   "supersedes": [],
+   "superseded_by": [],
+   "depends_on": [
+    "v10-frz-001",
+    "v10-frz-003"
+   ],
+   "tags": [
+    "gsr",
+    "v10",
+    "submission",
+    "package",
+    "freeze"
+   ]
   }
  ]
 }

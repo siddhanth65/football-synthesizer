@@ -1,5 +1,32 @@
 # STATUS
 
+## 2026-08-17 — v10 FREEZE COMPLETE: all 4 TEST-38 bars PASS — test-49 self-score 56.7018; submission package READY (expected board ~56.7 = 5th place); drift honesty halves the apparent gain to a real +1.40
+
+results/gsr_v10_frozen.json (declared BEFORE first TEST-38 read, mtime-verifiable),
+results/gsr_v10_w6_subgate_registered.json, tools/gsr_v10_w6.py, kb v10-frz-001..004,
+package results/gsr_submission/gsr_testphase_gtfree_v10_1a197073.zip (39.0 MB, 468,498 rows,
+sha256 b1a2cc8e..., recipe hash = freeze-record sha256, zip self-score 56.7018/42.2298/
+76.1414/94.6448, verify_gtfree 0 violations, flip set unchanged). Resume efficiency: the
+cancelled run's tmux job SURVIVED and banked 74% of extraction (total 2.33 GPU-h of 8;
+lesson: killing a client does not kill a tmux job — by design this time). **s4 sub-gate:
+registered PASS, D+s4 = D + 0.5920 DEV (18/2, p=8.2e-05, 2.4x bar) — s4 IS in the bundle;
+the orphaned subgate artifact was CONFIRMED by fresh derivation, not trusted. TEST-38 gate:
++2.6179 within-cache, 38/38, p=7.3e-12, DetA +1.8919 — PASS 4/4 (52.10 -> 54.60).**
+
+**DRIFT, THIRD INSTANCE AND NOW DECISIVE (kb v10-frz-003): the fresh extraction is ~1.1
+WORSE than the 2026-08-06 lineage on 37/38 sequences (median -0.93, broad) — the rebuild
+path is proven lossless, so this is genuine extraction nondeterminism. The bundle's honest
+NET over the shipped v9 lineage is +1.4035 TEST-38 (37/38) — the within-cache +2.62 was the
+correct GATING comparison but flatters the shipped delta. A dedicated drift session is now
+warranted.** test-49 one run: flags-OFF 54.3569 (v9: 53.0846); packaged flags-ON 56.7018.
+TEST-38 predicted test-49 transfer within 0.11. Expected board ~56.7 +-0.2 -> **5th place
+(above KIST-GSR 56.56); correction to the worker's aside: the board reads 53.09 (the v6
+upload), NOT 39.02 — the move is 53.09 -> ~56.7. The v9 zip (55.41) is now OBSOLETE —
+Sid should upload the v10 package instead (submission #6 of 10).** Riders NOT in this
+freeze (next-freeze inventory): arm A adaptive stiffness (+0.40 DEV), W11 conic (pending).
+Worker process notes: hand-typed registration timestamp caught + corrected from mtime
+(tooling should stamp); the brief's "a100server1" hostname is a doc label, not DNS.
+
 ## 2026-08-17 — v10 W8: distortion axis REFUTED AT ROOT (the +1.88 px was our own homography misfit in a radial mask), learned ranker hits an information ceiling — and ADAPTIVE STIFFNESS passes: DEV 57.17 -> 57.57; ~4.4 predicted points now sit ONLY in hypotheses PnLCalib never generates
 
 results/gsr_v10_w8_registered.json (§1 + a-priori amendment for arm A), results/

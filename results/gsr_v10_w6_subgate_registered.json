@@ -1,0 +1,37 @@
+{
+ "session": "v10-W6 (freeze / gate / package) -- s4 sub-gate registration",
+ "written_utc": "2026-08-16T19:58:57Z",
+ "written_utc_provenance": "the file's own mtime, corrected at the end of the session: the field was first hand-typed as 2026-08-17T00:05Z, which was wrong. Nothing else in this record changed. Ordering that matters is unaffected and independently checkable from mtimes -- registration 19:58:57Z, first fresh DEV sub-gate score ~20:05Z, freeze record 20:58:48Z, first TEST-38 GS-HOTA 21:23Z.",
+ "question": "Does the v10-W2 half-cell decode rider (s4) STACK on arm D? D is a re-selection plus batch refinement over a candidate pool; s4 changes the pool itself (it shifts every PnLCalib heatmap peak by the derived half-cell offset). The two could be redundant -- D may already rescue the frames s4 fixes -- so s4 enters the v10 freeze bundle only if it adds measurably on top of D.",
+ "bar": {
+  "rule": "include s4 in the frozen bundle IFF  GS-HOTA(D on the s4 candidate cache)  >=  GS-HOTA(D on the ctrl candidate cache)  +  0.25,  on DEV-20, flags ON, both paired against the SAME on-record control lineage (deleak_v10w5_ctrl, GS-HOTA 50.702163718440275 flags OFF / 55.066 flags ON).",
+  "threshold_provenance": "+0.25 was set by the orchestrator in this worker's task brief, before this worker read any artifact of the cancelled freeze run. It is not fitted to any number in this session.",
+  "secondary_reported_not_gating": [
+   "the same comparison flags OFF",
+   "per-sequence helped/hurt over the 20 DEV sequences",
+   "GS-DetA / GS-AssA / GS-LocA deltas",
+   "Wilcoxon p of the per-sequence D+s4 minus D differences"
+  ],
+  "if_it_fails": "s4 stays OFF, exactly as it has since v10-W2 (its own registered DetA bar of +1.0 was missed there). The freeze bundle is then v9 chain + arm D alone."
+ },
+ "honesty_note": {
+  "prior_artifact": "results/gsr_benchmark/gsr_v10_w6_subgate.json, written 2026-08-16T23:56 local by a freeze run the user cancelled. This worker READ that file before writing this registration -- it had to, to inventory what was reusable -- so its numbers were visible at write time. They are therefore cited in this session as CORROBORATION ONLY.",
+  "what_makes_this_read_registered": "the bar above is the orchestrator's, unchanged from the brief; the number that decides the gate is re-derived in this session from the candidate caches through a freshly built positions set and a freshly run chain, into artifact names that cannot overwrite the leftover (tag 'F' for the ctrl-cache arm, 'Fs4' for the s4-cache arm). If the fresh read disagrees with the leftover, the FRESH read governs and the disagreement is reported.",
+  "drift_check": "the fresh D-on-ctrl-cache read must reproduce the W5 on-record 52.6359 (flags OFF) / +2.1024 (flags ON delta) to every digit. kb v9-w7-004: if it does not, no pairing here is valid and the session reports that instead of a verdict."
+ },
+ "method": {
+  "cache_ctrl": "outputs/gsr/v10_w2_full/ctrl (20 DEV sequences, 18 PnLCalib hypotheses per frame, v10-W2 shipped decode)",
+  "cache_s4": "outputs/gsr/v10_w2_full/s4 (same 20 sequences, same extraction window, half-cell-shifted decode)",
+  "base_positions": "outputs/gsr/positions_v10w2ctrl_v6det -- supplies detections and foot points; its pitch columns are fully replaced by the arm's homographies",
+  "arm": "D exactly as registered in results/gsr_v10_w5_registered.json amendment_1 (S then B): reselect passes=2 -> batch_refine iters=8, no clamp, admissibility error_m<=2.0 + onpitch_plausible, fill_calibration_gaps(max_gap=10)",
+  "chain": "tools.gsr_eiou.run_point, EiouParams(e=0.3, rounds=1, w_app=0.5, app_max=0.30), embedder clip_v6det, tau = tools.gsr_v6det.TAU, percrop _v6_v6det",
+  "scorer": "tools.gsr_v9_w7.score_pair -- flags OFF ({}) and flags ON ({vote: role/team/jersey, gk: team}), eval.gsr_score.EVAL_CONFIGS['gs_hota_full']",
+  "pairing_validity": "D-on-ctrl-cache and D-on-s4-cache ride the same base positions parquet, the same detections, the same embeddings and the same per-crop OCR for every sequence. They differ ONLY in which candidate cache supplies the camera hypotheses. Both are paired against one shared control, so the shared control cancels in the difference of deltas."
+ },
+ "guards": [
+  "DEV-20 only. This sub-gate is written and read BEFORE the freeze record and BEFORE any TEST-38 number of this session exists.",
+  "Fresh artifacts use tags 'F' and 'Fs4'; nothing on record (positions_v10w5D_v6det, positions_v10w5Ds4_v6det, deleak_v10w5_*) is overwritten.",
+  "Laptop CPU only. The cluster GPU is busy with the TEST-38/test-49 candidate extraction; no second heavy job is started against it.",
+  "No STATUS edit, no commit, no push, no METRICS_VERSION change."
+ ]
+}

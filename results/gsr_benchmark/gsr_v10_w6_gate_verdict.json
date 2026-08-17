@@ -1,0 +1,54 @@
+{
+ "t38_gate_bundle": {
+  "checks": {
+   "mean_gs_hota": {
+    "value": 2.617906526919987,
+    "bar": 1.0,
+    "pass": true
+   },
+   "helped": {
+    "value": 38,
+    "bar": 24,
+    "n": 38,
+    "pass": true
+   },
+   "wilcoxon_p": {
+    "value": 7.275957614183426e-12,
+    "bar": 0.01,
+    "pass": true
+   },
+   "det_a_not_worse": {
+    "value": 1.891924195511443,
+    "bar": 0.0,
+    "pass": true
+   }
+  },
+  "pass": true
+ },
+ "t38_gate_Donly": {
+  "checks": {
+   "mean_gs_hota": {
+    "value": 2.0298469612850987,
+    "bar": 1.0,
+    "pass": true
+   },
+   "helped": {
+    "value": 35,
+    "bar": 24,
+    "n": 38,
+    "pass": true
+   },
+   "wilcoxon_p": {
+    "value": 6.402842700481415e-10,
+    "bar": 0.01,
+    "pass": true
+   },
+   "det_a_not_worse": {
+    "value": 1.3987017418202836,
+    "bar": 0.0,
+    "pass": true
+   }
+  },
+  "pass": true
+ }
+}

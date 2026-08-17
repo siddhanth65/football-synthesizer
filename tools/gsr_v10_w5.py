@@ -458,8 +458,13 @@ def run_accuracy(data_dir: Path, out_dir: Path, cache_dir: Path, seqs: list[str]
 
 
 # === positions and scoring ========================================================================
-def build_positions(out_dir: Path, cache_dir: Path, seqs: list[str], arms: list[str]) -> dict:
-    """One positions parquet set per arm: arm homographies -> reproject -> ``fill_calibration_gaps``."""
+def build_positions(out_dir: Path, cache_dir: Path, seqs: list[str], arms: list[str],
+                    tag: str = "") -> dict:
+    """One positions parquet set per arm: arm homographies -> reproject -> ``fill_calibration_gaps``.
+
+    ``tag`` suffixes the arm name in every artifact path, so a run off a different candidate cache
+    (e.g. the s4 decode) can never overwrite an on-record arm's parquets.
+    """
     from generator.postprocess import fill_calibration_gaps  # noqa: PLC0415
     from tools.gsr_w2_calibswap import swap_positions  # noqa: PLC0415
 
@@ -470,7 +475,7 @@ def build_positions(out_dir: Path, cache_dir: Path, seqs: list[str], arms: list[
             homs, st = arm_homographies(a, seq, out_dir, cache_dir)
             tab, sw = swap_positions(df, homs, origin=(0.0, 0.0), mode="t1")
             tab = fill_calibration_gaps(tab, max_gap=FILL_GAP)
-            sub = out_dir / f"positions_v10w5{a}_v6det"
+            sub = out_dir / f"positions_v10w5{a}{tag}_v6det"
             sub.mkdir(parents=True, exist_ok=True)
             tab.to_parquet(sub / f"{seq}.parquet", index=False)
             st.update({k: sw[k] for k in ("pitch_rows_control", "pitch_rows_final")})
@@ -480,8 +485,13 @@ def build_positions(out_dir: Path, cache_dir: Path, seqs: list[str], arms: list[
     return stats
 
 
-def score_arms(data_dir: Path, out_dir: Path, seqs: list[str], arms: list[str]) -> dict:
-    """The frozen v6 chain per arm, then the v9-W7 paired scorer against the same-lineage control."""
+def score_arms(data_dir: Path, out_dir: Path, seqs: list[str], arms: list[str],
+               tag: str = "") -> dict:
+    """The frozen v6 chain per arm, then the v9-W7 paired scorer against the same-lineage control.
+
+    ``tag`` suffixes the arm name (see :func:`build_positions`); the control is always the untagged
+    ``deleak_v10w5_ctrl``, which is the on-record lineage every arm pairs against.
+    """
     import tools.gsr_eiou as eiou  # noqa: PLC0415
 
     from tools.gsr_v6det import TAU  # noqa: PLC0415
@@ -490,18 +500,18 @@ def score_arms(data_dir: Path, out_dir: Path, seqs: list[str], arms: list[str]) 
     eiou.BOX_SUBDIR = "detbox_cache_v6det"
     raw: dict[str, dict] = {}
     for a in arms:
-        sub = POSITIONS_SUBDIR if a == "ctrl" else f"positions_v10w5{a}_v6det"
+        sub = POSITIONS_SUBDIR if a == "ctrl" else f"positions_v10w5{a}{tag}_v6det"
         res = eiou.run_point(data_dir, out_dir, seqs,
                              eiou.EiouParams(e=0.3, rounds=1, w_app=0.5, app_max=0.30),
-                             embedder="clip_v6det", tau=TAU, tag=f"v10w5_{a}",
+                             embedder="clip_v6det", tau=TAU, tag=f"v10w5_{a}{tag}",
                              percrop_variant="_v6_v6det", positions_subdir=sub)
         h = res["gs_hota"]
         raw[a] = {"positions_subdir": sub, "gs_hota": h, "gs_hota_per_seq": res["gs_hota_per_seq"]}
         print(f"{a:<6} GS-HOTA {h['GS-HOTA']:7.4f} DetA {h['GS-DetA']:7.4f} "
               f"AssA {h['GS-AssA']:7.4f} LocA {h['GS-LocA']:7.4f}", flush=True)
-    ctrl = out_dir / "deleak_v10w5_ctrl" / "predictions" / "data"
-    paired = {a: score_pair(ctrl, out_dir / f"deleak_v10w5_{a}" / "predictions" / "data",
-                            data_dir, out_dir / "v10_w5" / "pair" / a, seqs)
+    ctrl = out_dir / f"deleak_v10w5_ctrl{tag}" / "predictions" / "data"
+    paired = {a: score_pair(ctrl, out_dir / f"deleak_v10w5_{a}{tag}" / "predictions" / "data",
+                            data_dir, out_dir / "v10_w5" / "pair" / f"{a}{tag}", seqs)
               for a in arms if a != "ctrl"}
     return {"arms": raw, "paired_vs_ctrl": paired}
 
@@ -550,6 +560,7 @@ def _demo() -> None:
 
 def main() -> None:
     """CLI entry point."""
+    global POSITIONS_SUBDIR  # noqa: PLW0603 -- one dial, read by load_seq/build_positions/score
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--data-dir", type=Path, default=Path("data/soccernet/gamestate-2024"))
@@ -558,6 +569,10 @@ def main() -> None:
     ap.add_argument("--results", type=Path, default=Path("results/gsr_benchmark/gsr_v10_w5.json"))
     ap.add_argument("--seqs", default=None)
     ap.add_argument("--arms", default=",".join(ARMS))
+    ap.add_argument("--tag", default="", help="artifact suffix, e.g. 's4' for a run off the s4 cache")
+    ap.add_argument("--positions-subdir", default=POSITIONS_SUBDIR,
+                    help="base positions set (supplies detections/foot points; its pitch columns "
+                         "are fully replaced). TEST-38/test-49 ride positions_gate_v6det.")
     ap.add_argument("--oracle", action="store_true")
     ap.add_argument("--accuracy", action="store_true")
     ap.add_argument("--positions", action="store_true")
@@ -569,6 +584,7 @@ def main() -> None:
         return
     seqs = args.seqs.split(",") if args.seqs else DEV20
     arms = [a for a in args.arms.split(",") if a in ARMS]
+    POSITIONS_SUBDIR = args.positions_subdir
     payload: dict = {}
     t0 = time.time()
     if args.accuracy:
@@ -579,9 +595,9 @@ def main() -> None:
                   f"mean {v['mean']:.4f} kloss {v['kloss']:.5f}")
         print(json.dumps(payload["accuracy"]["verdict"], indent=1))
     if args.positions:
-        payload["positions"] = build_positions(args.out_dir, args.cache_dir, seqs, arms)
+        payload["positions"] = build_positions(args.out_dir, args.cache_dir, seqs, arms, args.tag)
     if args.score:
-        payload["score"] = score_arms(args.data_dir, args.out_dir, seqs, arms)
+        payload["score"] = score_arms(args.data_dir, args.out_dir, seqs, arms, args.tag)
     if args.oracle:
         payload["oracle"] = run_oracle(args.data_dir, args.out_dir, args.cache_dir, seqs)
         p = payload["oracle"]["pooled"]["disp"]
